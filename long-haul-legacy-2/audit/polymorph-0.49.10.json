@@ -1,0 +1,50 @@
+{
+  "game_versions": [
+    "1.20",
+    "1.20.1"
+  ],
+  "loaders": [
+    "forge"
+  ],
+  "environment": "client_and_server",
+  "id": "UZBKtFyR",
+  "project_id": "tagwiZkJ",
+  "author_id": "zbpHS3ry",
+  "featured": false,
+  "name": "polymorph-forge-0.49.10+1.20.1",
+  "version_number": "0.49.10+1.20.1",
+  "changelog": "The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).\n\nThis is a copy of the changelog for the most recent version. For the full version history, go [here](https://github.com/illusivesoulworks/polymorph/blob/1.20.x/CHANGELOG.md).\n\n## [0.49.10+1.20.1] - 2025.04.22\n### Fixed\n- Fixed potential concurrency crashes [#310](https://github.com/illusivesoulworks/polymorph/issues/310)\n",
+  "changelog_url": null,
+  "date_published": "2025-04-22T07:43:42.563404Z",
+  "downloads": 6737784,
+  "version_type": "beta",
+  "status": "listed",
+  "requested_status": null,
+  "files": [
+    {
+      "id": "QCONh8RA",
+      "hashes": {
+        "sha512": "c36b4c3b893fa01619cf03750878913f37b59854282cd25ff61a8a81da59f0d8f0cb42da8da1e2ab20d0d86f8e0ad6e9bdf69925d1336a03fd23dbf9b232fe87",
+        "sha1": "e4afd6f512cc06311320357ed974cee586e031c3"
+      },
+      "url": "https://cdn.modrinth.com/data/tagwiZkJ/versions/UZBKtFyR/polymorph-forge-0.49.10%2B1.20.1.jar",
+      "filename": "polymorph-forge-0.49.10+1.20.1.jar",
+      "primary": true,
+      "size": 299601,
+      "file_type": null
+    },
+    {
+      "id": "DGuoa74j",
+      "hashes": {
+        "sha1": "50a33a0281338660b6c442880e7ac58c1895d9d7",
+        "sha512": "e6761e3d622364797130b2fbd927ba613b2c4c83e29bbe897ce48c1782548899eb0afc277f1c8f868ac28a17056a27f622ba370fe4f49c717fc5de02c88c3d83"
+      },
+      "url": "https://cdn.modrinth.com/data/tagwiZkJ/versions/UZBKtFyR/polymorph-forge-0.49.10%2B1.20.1-sources.jar",
+      "filename": "polymorph-forge-0.49.10+1.20.1-sources.jar",
+      "primary": false,
+      "size": 49975,
+      "file_type": null
+    }
+  ],
+  "dependencies": []
+}

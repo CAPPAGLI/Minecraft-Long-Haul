@@ -50,6 +50,9 @@ def resolve_profile(profile_path: pathlib.Path):
             # 0.5.7 removed bundled Kelvin without exposing an obtainable API dependency.
             # 0.5.6 contains Kelvin 0.5.0 as a proper Forge JarJar dependency.
             v = json.loads((R / 'audit/clockwork-0.5.6.json').read_text())
+        if slug == 'polymorph':
+            # 0.49.11 requires beta JEI >= 15.57.0.207; 0.49.10 matches release JEI 15.56.0.205.
+            v = json.loads((R / 'audit/polymorph-0.49.10.json').read_text())
         pid = v['project_id']
         if pid in known:
             continue
