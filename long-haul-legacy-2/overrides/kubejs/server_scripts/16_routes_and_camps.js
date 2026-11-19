@@ -1,5 +1,6 @@
 // Long Haul Legacy 2.0: expedition camps, route checkpoint trials, and tracked cargo manifests.
 var LHCampPos = Java.loadClass('net.minecraft.core.BlockPos');
+var LHRouteStringArg = Java.loadClass('com.mojang.brigadier.arguments.StringArgumentType');
 var LHLogisticsState = null;
 
 function lhLogRead(server) {
@@ -201,11 +202,11 @@ function lhCargoDeliver(server, player) {
 }
 
 ServerEvents.commandRegistry(function (event) {
-  var C = event.commands, A = event.arguments, root = C.literal('lh');
+  var C = event.commands, root = C.literal('lh');
   var camp = C.literal('camp');
   camp.then(C.literal('deploy').executes(function (ctx) { return lhCampDeploy(ctx.source.server, ctx.source.playerOrException); }));
-  camp.then(C.literal('pack').then(A.STRING.create('campId').executes(function (ctx) {
-    return lhCampPack(ctx.source.server, ctx.source.playerOrException, A.STRING.getResult(ctx, 'campId'));
+  camp.then(C.literal('pack').then(C.argument('campId', LHRouteStringArg.word()).executes(function (ctx) {
+    return lhCampPack(ctx.source.server, ctx.source.playerOrException, LHRouteStringArg.getString(ctx, 'campId'));
   })));
   camp.then(C.literal('list').executes(function (ctx) {
     var db = lhLogRead(ctx.source.server), p = ctx.source.playerOrException;
@@ -216,13 +217,13 @@ ServerEvents.commandRegistry(function (event) {
   root.then(camp);
 
   var route = C.literal('route');
-  route.then(C.literal('begin').then(A.STRING.create('routeId').executes(function (ctx) {
-    return lhRouteBegin(ctx.source.server, ctx.source.playerOrException, A.STRING.getResult(ctx, 'routeId'));
+  route.then(C.literal('begin').then(C.argument('routeId', LHRouteStringArg.word()).executes(function (ctx) {
+    return lhRouteBegin(ctx.source.server, ctx.source.playerOrException, LHRouteStringArg.getString(ctx, 'routeId'));
   })));
   route.then(C.literal('gate').executes(function (ctx) { return lhRouteGate(ctx.source.server, ctx.source.playerOrException); }));
   route.then(C.literal('finish').executes(function (ctx) { return lhRouteFinish(ctx.source.server, ctx.source.playerOrException); }));
-  route.then(C.literal('start').then(A.STRING.create('routeId').executes(function (ctx) {
-    return lhRouteStart(ctx.source.server, ctx.source.playerOrException, A.STRING.getResult(ctx, 'routeId'));
+  route.then(C.literal('start').then(C.argument('routeId', LHRouteStringArg.word()).executes(function (ctx) {
+    return lhRouteStart(ctx.source.server, ctx.source.playerOrException, LHRouteStringArg.getString(ctx, 'routeId'));
   })));
   route.then(C.literal('list').executes(function (ctx) {
     var db = lhLogRead(ctx.source.server), p = ctx.source.playerOrException;

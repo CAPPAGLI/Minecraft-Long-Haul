@@ -63,11 +63,13 @@ jobs:
 
       - name: Inspect JAR mod IDs & version ranges
         run: |
+          set -o pipefail
           mkdir -p /tmp/ci-logs
           python3 long-haul-legacy-2/tools/inspect_alpha.py | tee /tmp/ci-logs/inspect.txt
 
       - name: Re-sync runtime jar & run Forge headless void integration test
         run: |
+          set -o pipefail
           mkdir -p /tmp/ci-logs
           python3 long-haul-legacy-2/tools/prepare_server.py --mode void --skip-forge-install
           python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 360 --world-label "alpha2 void integration test" | tee /tmp/ci-logs/smoke-void.txt
@@ -75,13 +77,16 @@ jobs:
 
       - name: Run Forge headless normal Overworld generation test (Terralith + Tectonic + BOP + YUNG + Towns)
         run: |
+          set -o pipefail
           mkdir -p /tmp/ci-logs
           python3 long-haul-legacy-2/tools/prepare_server.py --mode normal --skip-forge-install
           python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 420 --world-label "alpha2 normal overworld test" | tee /tmp/ci-logs/smoke-normal.txt
           cp long-haul-legacy-2/server-test/smoke-result.json /tmp/ci-logs/smoke-normal-result.json
 
       - name: Package .mrpack and source bundle
-        run: python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.2 | tee /tmp/ci-logs/package.txt
+        run: |
+          set -o pipefail
+          python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.2 | tee /tmp/ci-logs/package.txt
 
       - name: Post diagnostic report to commit comment
         if: always()
@@ -101,7 +106,7 @@ jobs:
           ]:
               fp = pathlib.Path(p)
               if fp.exists():
-                  txt = fp.read_text(errors='replace')[-4000:]
+                  txt = fp.read_text(errors='replace')[:4000]
                   lines.append(f'<details><summary>{label}</summary>\n\n```\n{txt}\n```\n</details>\n')
           sc = pathlib.Path('long-haul-legacy-2/server-test/smoke-console.log')
           if sc.exists():

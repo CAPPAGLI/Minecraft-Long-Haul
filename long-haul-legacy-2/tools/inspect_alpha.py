@@ -32,7 +32,7 @@ def fits(v, r):
         return compare(v, r.strip('[]')) == 0
     if r.count(',') != 1:
         return None
-    low, hi = r[1:-1].split(',')
+    low, hi = [x.strip() for x in r[1:-1].split(',')]
     ok_low = not low or compare(v, low) > 0 or (r[0] == '[' and compare(v, low) == 0)
     ok_hi = not hi or compare(v, hi) < 0 or (r[-1] == ']' and compare(v, hi) == 0)
     return ok_low and ok_hi

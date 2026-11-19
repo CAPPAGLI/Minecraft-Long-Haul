@@ -1,6 +1,7 @@
 // Long Haul Legacy 2.0 server contract adapter (intake verification + consortium teams).
 // A barrel accepts and CONSUMES contract goods. Verified intake, not full provenance proof.
 var LHPos = Java.loadClass('net.minecraft.core.BlockPos');
+var LHStringArg = Java.loadClass('com.mojang.brigadier.arguments.StringArgumentType');
 var LHState = null;
 var LHClock = 0;
 
@@ -118,7 +119,7 @@ function lhTeamLeave(server, player) {
 }
 
 ServerEvents.commandRegistry(function (event) {
-  var C = event.commands, A = event.arguments, root = C.literal('lh');
+  var C = event.commands, root = C.literal('lh');
   root.then(C.literal('help').executes(function (ctx) {
     var p = ctx.source.playerOrException;
     lhMsg(p, 'Контракты: /lh terminal, /lh accept <заказ>, /lh status, /lh abort, /lh team <join|leave> [имя]. Заказы: ' + Object.keys(global.LHContracts).join(', '));
@@ -142,8 +143,8 @@ ServerEvents.commandRegistry(function (event) {
   root.then(accept);
 
   var team = C.literal('team');
-  team.then(C.literal('join').then(A.STRING.create('name').executes(function (ctx) {
-    return lhTeamJoin(ctx.source.server, ctx.source.playerOrException, A.STRING.getResult(ctx, 'name'));
+  team.then(C.literal('join').then(C.argument('name', LHStringArg.word()).executes(function (ctx) {
+    return lhTeamJoin(ctx.source.server, ctx.source.playerOrException, LHStringArg.getString(ctx, 'name'));
   })));
   team.then(C.literal('leave').executes(function (ctx) { return lhTeamLeave(ctx.source.server, ctx.source.playerOrException); }));
   root.then(team);
