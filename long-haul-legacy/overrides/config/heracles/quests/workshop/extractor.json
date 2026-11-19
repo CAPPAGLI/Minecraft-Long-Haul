@@ -1,0 +1,50 @@
+{
+  "dependencies": [
+    "drilling_machine"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "createoreexcavation:extractor",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 100
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Экстрактор\"}",
+    "subtitle": "{\"text\": \"Жидкости из недр\"}",
+    "description": [
+      "Соберите экстрактор — он добывает жидкости (например, воду) из подземных резервуаров."
+    ],
+    "groups": {
+      "02 · Мастерская": {
+        "position": [
+          -64,
+          56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "createoreexcavation:extractor",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

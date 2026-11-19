@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "tropical_journey"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "createoreexcavation:raw_diamond",
+      "amount": 8,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 200
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Алмазная жила\"}",
+    "subtitle": "{\"text\": \"Тропические недра\"}",
+    "description": [
+      "Добудьте 8 сырого алмаза с тропических буровых жил.",
+      "Алмазы нужны для энергетического ядра Мегапроекта и алмазного бура."
+    ],
+    "groups": {
+      "05 · Дальние экспедиции": {
+        "position": [
+          -32,
+          -84
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "createoreexcavation:raw_diamond",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

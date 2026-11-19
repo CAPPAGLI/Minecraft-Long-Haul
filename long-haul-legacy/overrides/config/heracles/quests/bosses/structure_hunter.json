@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "first_iron"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "create:precision_mechanism",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 100
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Охотник за структурами\"}",
+    "subtitle": "{\"text\": \"Редкие, но богатые\"}",
+    "description": [
+      "Найдите структуру и добудьте прецизионный механизм из сундука.",
+      "Структуры разбросаны в 3 раза реже обычного (Structurify), но лут в них усилен: прецизионные механизмы, рельсы, золото."
+    ],
+    "groups": {
+      "06 · Боссы и структуры": {
+        "position": [
+          -96,
+          -112
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:chest",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

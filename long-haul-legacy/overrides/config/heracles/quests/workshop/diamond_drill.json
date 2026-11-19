@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "drilling_machine"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "createoreexcavation:diamond_drill",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 200
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Алмазный бур\"}",
+    "subtitle": "{\"text\": \"Для алмазных жил\"}",
+    "description": [
+      "Соберите алмазный бур для алмазных жил тропиков и полярного пояса.",
+      "Без экспедиции на 30 000+ блоков алмазные жилы не найти — это и есть смысл дальних путешествий."
+    ],
+    "groups": {
+      "02 · Мастерская": {
+        "position": [
+          0,
+          56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "createoreexcavation:diamond_drill",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "mechanical_press"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "create:brass_hand",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 100
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Латунный век\"}",
+    "subtitle": "{\"text\": \"Латунь открывает продвинутый Create\"}",
+    "description": [
+      "Сделайте латунную руку. Латунь крафтится в миксере из меди и цинка.",
+      "Латунные компоненты нужны для прецизионных механизмов и поездов."
+    ],
+    "groups": {
+      "02 · Мастерская": {
+        "position": [
+          64,
+          -56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:brass_hand",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

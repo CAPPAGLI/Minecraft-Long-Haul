@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "first_cart"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "create:track",
+      "amount": 16,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 50
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Первые рельсы\"}",
+    "subtitle": "{\"text\": \"Железная дорога\"}",
+    "description": [
+      "Соберите 16 рельсов Create. Железная дорога — главный инструмент трансконтинентальной логистики.",
+      "Поезда Create едут до 50 м/с: 50 000 блоков — около 17 минут пути."
+    ],
+    "groups": {
+      "03 · Транспорт": {
+        "position": [
+          -64,
+          -56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:track",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "polar_journey"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "farmersdelight:cabbages",
+      "amount": 8,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 100
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Капустная ферма\"}",
+    "subtitle": "{\"text\": \"Холодные культуры\"}",
+    "description": [
+      "Вырастите 8 капусты в холодном поясе на севере.",
+      "Капуста — единственная культура холодного пояса."
+    ],
+    "groups": {
+      "05 · Дальние экспедиции": {
+        "position": [
+          -32,
+          28
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "farmersdelight:cabbages",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

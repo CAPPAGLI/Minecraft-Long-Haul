@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "launch_catalyst"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "megaproject:orbital_module",
+      "amount": 2,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 400
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Орбитальный модуль\"}",
+    "subtitle": "{\"text\": \"Мегапроект: шаг 5\"}",
+    "description": [
+      "Соберите 2 орбитальных модуля: катализаторы + стальные пластины Ad Astra.",
+      "Стальные пластины крафтятся из стали — см. главу «Космическая программа»."
+    ],
+    "groups": {
+      "07 · Мегапроект": {
+        "position": [
+          32,
+          28
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "megaproject:orbital_module",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "dependencies": [
+    "energy_core",
+    "burning_ashes"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "megaproject:launch_catalyst",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 500
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Катализатор запуска\"}",
+    "subtitle": "{\"text\": \"Мегапроект: шаг 4\"}",
+    "description": [
+      "Соберите катализатор запуска: ядра + незерит + горящий пепел с боссов.",
+      "Катализатор открывает космическую программу: без него не собрать обтекатель ракеты."
+    ],
+    "groups": {
+      "07 · Мегапроект": {
+        "position": [
+          96,
+          -28
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "megaproject:launch_catalyst",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

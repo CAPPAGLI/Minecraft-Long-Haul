@@ -1,0 +1,3986 @@
+{
+  "status": "JAR_IDS_CHECK_ONLY",
+  "registry": {
+    "create": [
+      {
+        "id": "create",
+        "version": "6.0.8",
+        "source": "create-1.20.1-6.0.8.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.3,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "flywheel",
+            "mandatory": true,
+            "versionRange": "[1.0.0,2.0)",
+            "ordering": "AFTER",
+            "side": "CLIENT"
+          },
+          {
+            "modId": "ponder",
+            "mandatory": true,
+            "versionRange": "[0.8,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          },
+          {
+            "modId": "jei",
+            "mandatory": false,
+            "versionRange": "[15.19.0,)",
+            "ordering": "NONE",
+            "side": "CLIENT"
+          }
+        ]
+      }
+    ],
+    "flywheel": [
+      {
+        "id": "flywheel",
+        "version": "1.0.5",
+        "source": "create-1.20.1-6.0.8.jar!META-INF/jarjar/flywheel-forge-1.20.1-1.0.5.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.20.2)",
+            "side": "CLIENT"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.0.0,)",
+            "side": "CLIENT"
+          },
+          {
+            "modId": "embeddium",
+            "mandatory": false,
+            "versionRange": "[0.3.25,)",
+            "side": "CLIENT"
+          },
+          {
+            "modId": "sodium",
+            "mandatory": false,
+            "versionRange": "[0.6.0-beta.2,)",
+            "side": "CLIENT"
+          }
+        ]
+      }
+    ],
+    "mixinextras": [
+      {
+        "id": "mixinextras",
+        "version": "0.4.1",
+        "source": "create-1.20.1-6.0.8.jar!META-INF/jarjar/mixinextras-forge-0.4.1.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.4.1",
+        "source": "create_connected-1.2.3-mc1.20.1-all.jar!META-INF/jarjar/mixinextras-forge-0.4.1.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.4.1",
+        "source": "sliceanddice-forge-3.6.0.jar!META-INF/jarjar/mixinextras-forge-0.4.1.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.4.1",
+        "source": "valkyrienskies-120-2.4.11.jar!META-INF/jars/mixinextras-forge-0.4.1.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.4.1",
+        "source": "clockwork-0.5.6.jar!META-INF/jars/mixinextras-forge-0.4.1.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.2.0",
+        "source": "eureka-1201-1.6.4.jar!META-INF/jars/mixinextras-forge-0.2.0.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.4.1",
+        "source": "exposure-forge-1.20.1-1.9.24.jar!META-INF/jars/mixinextras-forge-0.4.1.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.2.1",
+        "source": "Heracles-forge-1.20.1-1.1.13.jar!META-INF/jars/mixinextras-forge-0.2.1.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.2.0-rc.2",
+        "source": "kubejs-forge-2001.6.5-build.26.jar!META-INF/jars/mixinextras-forge-0.2.0-rc.2.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.4.1",
+        "source": "create-new-age-1.2.0+forge-mc1.20.1.jar!META-INF/jars/mixinextras-forge-0.4.1.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.4.1",
+        "source": "copycats-3.0.10+mc.1.20.1-forge.jar!META-INF/jars/mixinextras-forge-0.4.1.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.3.6",
+        "source": "FarmersDelight-1.20.1-1.3.4.jar!META-INF/jarjar/mixinextras-forge-0.3.6.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.3.6",
+        "source": "BrewinAndChewin-1.20.1-3.2.1.jar!META-INF/jarjar/mixinextras-forge-0.3.6.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.4.1",
+        "source": "smallships-2.0.2-forge-1.20.1.jar!META-INF/jars/mixinextras-forge-0.4.1.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.4.1",
+        "source": "modernfix-forge-5.27.93+mc1.20.1.jar!META-INF/jarjar/mixinextras-forge-0.4.1.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.4.1",
+        "source": "environmental-1.20.1-4.1.2.jar!META-INF/jarjar/mixinextras-forge-0.4.1.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.3.6",
+        "source": "supplementaries-1.20-3.1.44-forge.jar!META-INF/jars/mixinextras-forge-0.3.6.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.4.1",
+        "source": "amendments-1.20-2.2.6.jar!META-INF/jars/mixinextras-forge-0.4.1.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.2.0-rc.4",
+        "source": "FramedBlocks-9.4.3.jar!META-INF/jarjar/mixinextras-forge-0.2.0-rc.4.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.3.6",
+        "source": "another_furniture-forge-1.20.1-3.0.4.jar!META-INF/jars/mixinextras-forge-0.3.6.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.3.5",
+        "source": "Architects-Palette-1.20.1-1.3.6.1.jar!META-INF/jarjar/mixinextras-forge-0.3.5.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.3.5",
+        "source": "embeddium-0.3.31+mc1.20.1.jar!META-INF/jarjar/mixinextras-forge-0.3.5.jar",
+        "client_only": true,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.3.6",
+        "source": "ImmediatelyFast-Forge-1.5.5+1.20.4.jar!META-INF/jars/mixinextras-forge-0.3.6.jar",
+        "client_only": true,
+        "deps": []
+      },
+      {
+        "id": "mixinextras",
+        "version": "0.3.6",
+        "source": "moonlight-1.20-2.16.39-forge.jar!META-INF/jars/mixinextras-forge-0.3.6.jar",
+        "client_only": false,
+        "deps": []
+      }
+    ],
+    "ponder": [
+      {
+        "id": "ponder",
+        "version": "1.0.91",
+        "source": "create-1.20.1-6.0.8.jar!META-INF/jarjar/Ponder-Forge-1.20.1-1.0.91.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1, 1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "flywheel",
+            "mandatory": true,
+            "versionRange": "[1.0.0,2.0)",
+            "ordering": "AFTER",
+            "side": "CLIENT"
+          }
+        ]
+      }
+    ],
+    "railways": [
+      {
+        "id": "railways",
+        "version": "1.7.3+forge-mc1.20.1",
+        "source": "Steam_Rails-1.7.3+forge-mc1.20.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": true,
+            "versionRange": "[6.0.7,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "hexcasting",
+            "mandatory": false,
+            "versionRange": ",",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          },
+          {
+            "modId": "voicechat",
+            "mandatory": false,
+            "versionRange": "[1.20.1-2.4.11,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "createaddition": [
+      {
+        "id": "createaddition",
+        "version": "${file.jarVersion}",
+        "source": "createaddition-1.20.1-1.3.3.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[40,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": true,
+            "versionRange": "[6.0.3,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "jei",
+            "mandatory": false,
+            "versionRange": "[15.0.0.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "computercraft",
+            "mandatory": false,
+            "versionRange": "[0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "create_enchantment_industry": [
+      {
+        "id": "create_enchantment_industry",
+        "version": "${file.jarVersion}",
+        "source": "create_enchantment_industry-1.4.1-for-create-6.0.8.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": true,
+            "versionRange": "[6.0.8,6.0.9)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "create_connected": [
+      {
+        "id": "create_connected",
+        "version": "1.2.3-mc1.20.1",
+        "source": "create_connected-1.2.3-mc1.20.1-all.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": true,
+            "versionRange": "[6.0.8,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "createdeco": [
+      {
+        "id": "createdeco",
+        "version": "2.0.3-1.20.1-forge",
+        "source": "createdeco-2.0.3-1.20.1-forge.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "1.20.1",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": true,
+            "versionRange": "6.0.2",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "sliceanddice": [
+      {
+        "id": "sliceanddice",
+        "version": "3.6.0",
+        "source": "sliceanddice-forge-3.6.0.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": true,
+            "versionRange": "[6.0.7,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create_enchantment_industry",
+            "mandatory": false,
+            "versionRange": "[1.3.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "kotlinforforge",
+            "mandatory": true,
+            "versionRange": "[4.3.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "create_central_kitchen": [
+      {
+        "id": "create_central_kitchen",
+        "version": "${file.jarVersion}",
+        "source": "create_central_kitchen-1.20.1-for-create-6.0.8-1.5.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.4.10,48)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.20.2)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": true,
+            "versionRange": "[6.0.8,6.1.0)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          },
+          {
+            "modId": "ends_delight",
+            "mandatory": false,
+            "versionRange": "[2.6.1,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "valkyrienskies": [
+      {
+        "id": "valkyrienskies",
+        "version": "2.4.11",
+        "source": "valkyrienskies-120-2.4.11.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.2.0,),[47.1.21,47.1.47]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": false,
+            "versionRange": "[6.0.6, )",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "computercraft",
+            "mandatory": false,
+            "versionRange": "[1.115.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "cloth_config": [
+      {
+        "id": "cloth_config",
+        "version": "11.1.106",
+        "source": "valkyrienskies-120-2.4.11.jar!META-INF/jars/cloth-config-forge-11.1.106.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[45,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "vs_clockwork": [
+      {
+        "id": "vs_clockwork",
+        "version": "0.5.6",
+        "source": "clockwork-0.5.6.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "1.20.1",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "valkyrienskies",
+            "mandatory": true,
+            "versionRange": "[2.4.6,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          },
+          {
+            "modId": "kelvin",
+            "mandatory": true,
+            "versionRange": "[0.4.0,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": true,
+            "versionRange": "[6.0.7,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          },
+          {
+            "modId": "architectury",
+            "mandatory": true,
+            "versionRange": "[9.1.12,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "architectury": [
+      {
+        "id": "architectury",
+        "version": "9.1.12",
+        "source": "clockwork-0.5.6.jar!META-INF/jars/architectury-forge-9.1.12.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      },
+      {
+        "id": "architectury",
+        "version": "9.1.12",
+        "source": "clockwork-0.5.6.jar!META-INF/jars/kelvin-forge-1.20.1-0.5.0+5c1c62c654.jar!META-INF/jars/architectury-forge-9.1.12.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      },
+      {
+        "id": "architectury",
+        "version": "9.2.14",
+        "source": "architectury-9.2.14-forge.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      },
+      {
+        "id": "architectury",
+        "version": "9.1.12",
+        "source": "dragonlib-3.0.29+mc1.20.1-forge.jar!META-INF/jars/architectury-forge-9.1.12.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "kelvin": [
+      {
+        "id": "kelvin",
+        "version": "1.20.1-0.5.0+5c1c62c654",
+        "source": "clockwork-0.5.6.jar!META-INF/jars/kelvin-forge-1.20.1-0.5.0+5c1c62c654.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[20.1-47.2.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "architectury",
+            "mandatory": true,
+            "versionRange": "[9.1.12,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "vs_eureka": [
+      {
+        "id": "vs_eureka",
+        "version": "1.6.4",
+        "source": "eureka-1201-1.6.4.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.0.18,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "valkyrienskies",
+            "mandatory": true,
+            "versionRange": "[2.4.10,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "trackwork": [
+      {
+        "id": "trackwork",
+        "version": "1.2.3",
+        "source": "trackwork-1.20.1-1.2.3.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "1.20.1",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "valkyrienskies",
+            "mandatory": true,
+            "versionRange": "[2.4,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": true,
+            "versionRange": "[6.0.0,6.1.0)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "computercraft": [
+      {
+        "id": "computercraft",
+        "version": "1.121.0",
+        "source": "cc-tweaked-1.20.1-forge-1.121.0.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.0,48)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "advancedperipherals": [
+      {
+        "id": "advancedperipherals",
+        "version": "0.7.48r",
+        "source": "AdvancedPeripherals-1.20.1-0.7.48r.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.106,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "computercraft",
+            "mandatory": true,
+            "versionRange": "[1.116.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "curios",
+            "mandatory": false,
+            "versionRange": "[5.2.0+1.20.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "ae2",
+            "mandatory": false,
+            "versionRange": "[15.0.9-beta,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "refinedstorage",
+            "mandatory": false,
+            "versionRange": "[1.12.4,)",
+            "ordnering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecolonies",
+            "mandatory": false,
+            "versionRange": "[1.20.1-1.1.1186-snapshot,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "patchouli",
+            "mandatory": false,
+            "versionRange": "[1.20.1-84,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": false,
+            "versionRange": "[0.5.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "botania",
+            "mandatory": false,
+            "versionRange": "[1.20.1-443-FORGE,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "mekanism",
+            "mandatory": false,
+            "versionRange": "[1.20.1-10.4.2.16,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "exposure": [
+      {
+        "id": "exposure",
+        "version": "1.9.24",
+        "source": "exposure-forge-1.20.1-1.9.24.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.20.2)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "voicechat": [
+      {
+        "id": "voicechat",
+        "version": "1.20.1-2.6.22",
+        "source": "voicechat-forge-1.20.1-2.6.22.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.0.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "cloth_config",
+            "mandatory": false,
+            "versionRange": "[11.0.99,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "voicechat_api": [
+      {
+        "id": "voicechat_api",
+        "version": "2.6.20",
+        "source": "voicechat-forge-1.20.1-2.6.22.jar",
+        "client_only": false,
+        "deps": []
+      }
+    ],
+    "zume": [
+      {
+        "id": "zume",
+        "version": "1.2.2",
+        "source": "zume-1.2.2.jar",
+        "client_only": true,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "type": "required",
+            "mandatory": true,
+            "versionRange": "[1.14,1.20.5)",
+            "ordering": "NONE",
+            "side": "CLIENT"
+          },
+          {
+            "modId": "embeddiumplus",
+            "type": "optional",
+            "mandatory": false,
+            "versionRange": "[1.2.6,)",
+            "ordering": "BEFORE",
+            "side": "CLIENT"
+          }
+        ]
+      }
+    ],
+    "heracles": [
+      {
+        "id": "heracles",
+        "version": "1.1.13",
+        "source": "Heracles-forge-1.20.1-1.1.13.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "resourcefullib",
+            "mandatory": true,
+            "versionRange": "[2.1.17,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "hermes": [
+      {
+        "id": "hermes",
+        "version": "1.6.0",
+        "source": "Heracles-forge-1.20.1-1.1.13.jar!META-INF/jars/hermes-forge-1.20-1.6.0.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "kubejs": [
+      {
+        "id": "kubejs",
+        "version": "2001.6.5-build.26",
+        "source": "kubejs-forge-2001.6.5-build.26.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "rhino",
+            "mandatory": true,
+            "versionRange": "[2001.2.2-build.1,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          },
+          {
+            "modId": "architectury",
+            "mandatory": true,
+            "versionRange": "[9.1.12,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          },
+          {
+            "modId": "jei",
+            "mandatory": false,
+            "versionRange": "[1.0.0,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          },
+          {
+            "modId": "roughlyenoughitems",
+            "mandatory": false,
+            "versionRange": "[9.1.572,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "lootjs": [
+      {
+        "id": "lootjs",
+        "version": "1.20.1-2.13.1",
+        "source": "lootjs-forge-1.20.1-2.13.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "kubejs",
+            "mandatory": true,
+            "versionRange": "[2001.6.4-build.120,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "almostunified": [
+      {
+        "id": "almostunified",
+        "version": "1.20.1-0.11.0",
+        "source": "almostunified-forge-1.20.1-0.11.0.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.0.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "jei",
+            "mandatory": false,
+            "versionRange": "[15.1.0.18,)",
+            "ordering": "BEFORE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "roughlyenoughitems",
+            "mandatory": false,
+            "versionRange": "[12.0.625,)",
+            "ordering": "BEFORE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "emi",
+            "mandatory": false,
+            "versionRange": "[1.1.2,)",
+            "ordering": "BEFORE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "createdieselgenerators": [
+      {
+        "id": "createdieselgenerators",
+        "version": "1.20.1-1.3.12",
+        "source": "createdieselgenerators-1.20.1-1.3.12.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[40.2.4,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": true,
+            "versionRange": "[6.0.7,6.1.0)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "createoreexcavation": [
+      {
+        "id": "createoreexcavation",
+        "version": "${file.jarVersion}",
+        "source": "createoreexcavation-1.20-1.6.6.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": true,
+            "versionRange": "[6.0.2,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "journeymap",
+            "mandatory": false,
+            "versionRange": "[1.20.1-6.0.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "create_new_age": [
+      {
+        "id": "create_new_age",
+        "version": "1.2.0+mc1.20.1",
+        "source": "create-new-age-1.2.0+forge-mc1.20.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "esl",
+            "mandatory": true,
+            "versionRange": "[1.1.3]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": true,
+            "versionRange": "[6.0.8,6.1.0)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "esl": [
+      {
+        "id": "esl",
+        "version": "1.1.3",
+        "source": "create-new-age-1.2.0+forge-mc1.20.1.jar!META-INF/jars/esl-forge-1.20.1-1.1.3+forge-mc1.20.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "createrailwaysnavigator": [
+      {
+        "id": "createrailwaysnavigator",
+        "version": "1.20.1-beta-0.10.0-C6",
+        "source": "createrailwaysnavigator-forge-1.20.1-beta-0.10.0-C6.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "dragonlib",
+            "mandatory": true,
+            "versionRange": "[1.20.1-beta-3.0.28,)",
+            "ordering": "BEFORE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": true,
+            "versionRange": "[6.0.8,)",
+            "ordering": "BEFORE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "create_power_loader": [
+      {
+        "id": "create_power_loader",
+        "version": "2.0.3-mc1.20.1",
+        "source": "create_power_loader-2.0.3-mc1.20.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": true,
+            "versionRange": "[6.0.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "copycats": [
+      {
+        "id": "copycats",
+        "version": "3.0.10+mc.1.20.1-forge",
+        "source": "copycats-3.0.10+mc.1.20.1-forge.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": true,
+            "versionRange": "[6.0.7,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "bellsandwhistles": [
+      {
+        "id": "bellsandwhistles",
+        "version": "0.4.3-1.20.x",
+        "source": "bellsandwhistles-0.4.5-1.20.x-Create6.0+.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.22)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": true,
+            "versionRange": "[6.0.2,6.1.0)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "interiors": [
+      {
+        "id": "interiors",
+        "version": "0.6.0",
+        "source": "interiors-1.20.1-forge-0.6.0.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "create",
+            "mandatory": true,
+            "versionRange": "[6,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "farmersdelight": [
+      {
+        "id": "farmersdelight",
+        "version": "1.20.1-1.3.4",
+        "source": "FarmersDelight-1.20.1-1.3.4.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "crafttweaker",
+            "mandatory": false,
+            "versionRange": "[14.0.6,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "brewinandchewin": [
+      {
+        "id": "brewinandchewin",
+        "version": "1.20.1-3.2.1",
+        "source": "BrewinAndChewin-1.20.1-3.2.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.20.2)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "farmersdelight",
+            "mandatory": true,
+            "versionRange": "[1.2.5,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "comforts": [
+      {
+        "id": "comforts",
+        "version": "6.4.0+1.20.1",
+        "source": "comforts-forge-6.4.0+1.20.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.20.2)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "spectrelib": [
+      {
+        "id": "spectrelib",
+        "version": "0.13.15+1.20.1",
+        "source": "comforts-forge-6.4.0+1.20.1.jar!META-INF/jarjar/spectrelib-forge-0.13.15+1.20.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      },
+      {
+        "id": "spectrelib",
+        "version": "0.13.17+1.20.1",
+        "source": "polymorph-forge-0.49.11+1.20.1.jar!META-INF/jarjar/spectrelib-forge-0.13.17+1.20.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "immersive_aircraft": [
+      {
+        "id": "immersive_aircraft",
+        "version": "1.5.0+1.20.1",
+        "source": "immersive_aircraft-1.5.0+1.20.1-forge.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "ad_astra",
+            "mandatory": false,
+            "versionRange": "[1.15.6,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "man_of_many_planes": [
+      {
+        "id": "man_of_many_planes",
+        "version": "0.2.1+1.20.1",
+        "source": "man_of_many_planes-0.2.1+1.20.1-forge.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "immersive_aircraft",
+            "mandatory": true,
+            "versionRange": "[1.1.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "smallships": [
+      {
+        "id": "smallships",
+        "version": "2.0.2",
+        "source": "smallships-2.0.2-forge-1.20.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "storagedrawers": [
+      {
+        "id": "storagedrawers",
+        "version": "12.15.1",
+        "source": "StorageDrawers-forge-1.20.1-12.15.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.20.2)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "tectonic": [
+      {
+        "id": "tectonic",
+        "version": "3.0.17",
+        "source": "tectonic-3.0.17-forge-1.20.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "type": "required",
+            "mandatory": true,
+            "versionRange": "[47,)"
+          },
+          {
+            "modId": "lithostitched",
+            "mandatory": true,
+            "type": "required",
+            "versionRange": "[1.4.11,)"
+          }
+        ]
+      }
+    ],
+    "terralith": [
+      {
+        "id": "terralith",
+        "version": "2.5.4",
+        "source": "Terralith_1.20.x_v2.5.4.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": false,
+            "versionRange": "[46,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "neoforge",
+            "mandatory": false,
+            "versionRange": "[20.2,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "lithostitched": [
+      {
+        "id": "lithostitched",
+        "version": "1.4.12",
+        "source": "lithostitched-forge-1.20.1-1.4.12.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.20.2)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "t_and_t": [
+      {
+        "id": "t_and_t",
+        "version": "${file.jarVersion}",
+        "source": "Towns-and-Towers-1.12-Fabric+Forge.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[43,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.19.3,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "cristellib",
+            "mandatory": true,
+            "versionRange": "[1.0.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "yungsbridges": [
+      {
+        "id": "yungsbridges",
+        "version": "1.20-Forge-4.0.3",
+        "source": "YungsBridges-1.20-Forge-4.0.3.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46.0.2,)"
+          },
+          {
+            "modId": "yungsapi",
+            "versionRange": "[1.20-Forge-4.0.1,)",
+            "mandatory": true,
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "jei": [
+      {
+        "id": "jei",
+        "version": "15.56.0.205",
+        "source": "jei-1.20.1-forge-15.56.0.205.jar",
+        "client_only": true,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1, 1.20.2)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "emi": [
+      {
+        "id": "emi",
+        "version": "1.1.24+1.20.1+forge",
+        "source": "emi-1.1.24+1.20.1+forge.jar",
+        "client_only": true,
+        "deps": [
+          {
+            "modId": "jei",
+            "mandatory": false,
+            "versionRange": "[15.20.0.0,)",
+            "ordering": "BEFORE",
+            "side": "CLIENT"
+          }
+        ]
+      }
+    ],
+    "jade": [
+      {
+        "id": "jade",
+        "version": "${file.jarVersion}",
+        "source": "Jade-1.20.1-Forge-11.13.3.jar",
+        "client_only": true,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46, )",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "jadeaddons": [
+      {
+        "id": "jadeaddons",
+        "version": "${file.jarVersion}",
+        "source": "JadeAddons-1.20.1-Forge-5.5.1.jar",
+        "client_only": true,
+        "deps": [
+          {
+            "modId": "jade",
+            "mandatory": true,
+            "versionRange": "[11.13.1, )",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": false,
+            "versionRange": "[6.0.2, )",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "appleskin": [
+      {
+        "id": "appleskin",
+        "version": "${file.jarVersion}",
+        "source": "appleskin-forge-mc1.20.1-2.5.1.jar",
+        "client_only": true,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.0.12,)",
+            "ordering": "AFTER",
+            "side": "CLIENT"
+          }
+        ]
+      }
+    ],
+    "mousetweaks": [
+      {
+        "id": "mousetweaks",
+        "version": "${file.jarVersion}",
+        "source": "MouseTweaks-forge-mc1.20.1-2.25.1.jar",
+        "client_only": true,
+        "deps": []
+      }
+    ],
+    "controlling": [
+      {
+        "id": "controlling",
+        "version": "${file.jarVersion}",
+        "source": "Controlling-forge-1.20.1-12.0.2.jar",
+        "client_only": true,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[41,)",
+            "ordering": "NONE",
+            "side": "CLIENT"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,)",
+            "ordering": "NONE",
+            "side": "CLIENT"
+          },
+          {
+            "modId": "searchables",
+            "mandatory": true,
+            "versionRange": "[1.0,)",
+            "ordering": "NONE",
+            "side": "CLIENT"
+          }
+        ]
+      }
+    ],
+    "ferritecore": [
+      {
+        "id": "ferritecore",
+        "version": "${file.jarVersion}",
+        "source": "ferritecore-6.0.1-forge.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46.0.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "modernfix": [
+      {
+        "id": "modernfix",
+        "version": "5.27.93+mc1.20.1",
+        "source": "modernfix-forge-5.27.93+mc1.20.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46.0.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20, 1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "jei",
+            "mandatory": false,
+            "versionRange": "[15.8.0.11,)",
+            "ordering": "NONE",
+            "side": "CLIENT"
+          }
+        ]
+      }
+    ],
+    "spark": [
+      {
+        "id": "spark",
+        "version": "1.10.53",
+        "source": "spark-1.10.53-forge.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[34,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "chunky": [
+      {
+        "id": "chunky",
+        "version": "1.3.146",
+        "source": "Chunky-1.3.146.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "xaerominimap": [
+      {
+        "id": "xaerominimap",
+        "version": "26.6.0",
+        "source": "xaerominimap-forge-1.20.1-26.6.0.jar",
+        "client_only": true,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46, 48)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20, 1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "openpartiesandclaims",
+            "mandatory": false,
+            "versionRange": "[0.32.4,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "xaeroworldmap",
+            "mandatory": false,
+            "versionRange": "[1.44.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "xaerolib": [
+      {
+        "id": "xaerolib",
+        "version": "1.7.3",
+        "source": "xaerominimap-forge-1.20.1-26.6.0.jar!META-INF/jarjar/xaerolib-forge-1.20.1-1.7.3.jar",
+        "client_only": true,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46, 48)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20, 1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      },
+      {
+        "id": "xaerolib",
+        "version": "1.7.3",
+        "source": "xaeroworldmap-forge-1.20.1-1.47.0.jar!META-INF/jarjar/xaerolib-forge-1.20.1-1.7.3.jar",
+        "client_only": true,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46, 48)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20, 1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "xaeroworldmap": [
+      {
+        "id": "xaeroworldmap",
+        "version": "1.47.0",
+        "source": "xaeroworldmap-forge-1.20.1-1.47.0.jar",
+        "client_only": true,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46, 48)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20, 1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "openpartiesandclaims",
+            "mandatory": false,
+            "versionRange": "[0.32.4,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "xaerominimap",
+            "mandatory": false,
+            "versionRange": "[26.4.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "xaerobetterpvp",
+            "mandatory": false,
+            "versionRange": "[26.4.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "xaerolib",
+            "mandatory": true,
+            "versionRange": "[1.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "immersiveengineering": [
+      {
+        "id": "immersiveengineering",
+        "version": "1.20.1-10.2.0-183",
+        "source": "ImmersiveEngineering-1.20.1-10.2.0-183.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.3.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "jei",
+            "mandatory": false,
+            "versionRange": "[15.2.0.23,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "immersivepetroleum": [
+      {
+        "id": "immersivepetroleum",
+        "version": "4.3.0-36",
+        "source": "ImmersivePetroleum-1.20.1-4.3.1-36b.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "immersiveengineering",
+            "mandatory": true,
+            "versionRange": "[1.20.1-10.1.0-171,)",
+            "ordering": "BEFORE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.4.6,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "littlelogistics": [
+      {
+        "id": "littlelogistics",
+        "version": "1.20.1.1",
+        "source": "littlelogistics-mc1.20.1-v1.20.1.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "patchouli",
+            "mandatory": false,
+            "versionRange": "[1.20,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "automobility": [
+      {
+        "id": "automobility",
+        "version": "0.4.2+1.20.1-forge",
+        "source": "automobility-0.4.2+1.20.1-forge.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "astikorcartsredux": [
+      {
+        "id": "astikorcartsredux",
+        "version": "1.2.5",
+        "source": "astikorcartsredux-1.2.5.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.3,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1, 1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "biomesoplenty": [
+      {
+        "id": "biomesoplenty",
+        "version": "${file.jarVersion}",
+        "source": "BiomesOPlenty-1.20.1-18.0.0.592.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[45.0.9,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "terrablender",
+            "mandatory": true,
+            "versionRange": "[2.2.0.154,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "atmospheric": [
+      {
+        "id": "atmospheric",
+        "version": "${file.jarVersion}",
+        "source": "atmospheric-1.20.1-6.1.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.20.2)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.3,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          },
+          {
+            "modId": "blueprint",
+            "mandatory": true,
+            "versionRange": "[7.1.0,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "autumnity": [
+      {
+        "id": "autumnity",
+        "version": "${file.jarVersion}",
+        "source": "autumnity-1.20.1-5.0.2.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.20.2)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.3,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "blueprint",
+            "mandatory": true,
+            "versionRange": "[7.1.0,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "environmental": [
+      {
+        "id": "environmental",
+        "version": "${file.jarVersion}",
+        "source": "environmental-1.20.1-4.1.2.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.20.2)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.3,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "blueprint",
+            "mandatory": true,
+            "versionRange": "[7.1.3,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "ecologics": [
+      {
+        "id": "ecologics",
+        "version": "2.2.7",
+        "source": "ecologics-forge-1.20.1-2.2.7.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.3,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.20.3)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "upgrade_aquatic": [
+      {
+        "id": "upgrade_aquatic",
+        "version": "${file.jarVersion}",
+        "source": "upgrade_aquatic-1.20.1-6.0.3.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.20.2)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.3,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "blueprint",
+            "mandatory": true,
+            "versionRange": "[7.1.0,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "bettermineshafts": [
+      {
+        "id": "bettermineshafts",
+        "version": "1.20-Forge-4.0.4",
+        "source": "YungsBetterMineshafts-1.20-Forge-4.0.4.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46.0.2,)"
+          },
+          {
+            "modId": "yungsapi",
+            "versionRange": "[1.20-Forge-4.0.1,)",
+            "mandatory": true,
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "betterdungeons": [
+      {
+        "id": "betterdungeons",
+        "version": "1.20-Forge-4.0.4",
+        "source": "YungsBetterDungeons-1.20-Forge-4.0.4.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46.0.2,)"
+          },
+          {
+            "modId": "yungsapi",
+            "versionRange": "[1.20-Forge-4.0.1,)",
+            "mandatory": true,
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "betterdeserttemples": [
+      {
+        "id": "betterdeserttemples",
+        "version": "1.20-Forge-3.0.3",
+        "source": "YungsBetterDesertTemples-1.20-Forge-3.0.3.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46.0.2,)"
+          },
+          {
+            "modId": "yungsapi",
+            "versionRange": "[1.20-Forge-4.0.1,)",
+            "mandatory": true,
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "betterjungletemples": [
+      {
+        "id": "betterjungletemples",
+        "version": "1.20-Forge-2.0.5",
+        "source": "YungsBetterJungleTemples-1.20-Forge-2.0.5.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46.0.2,)"
+          },
+          {
+            "modId": "yungsapi",
+            "versionRange": "[1.20-Forge-4.0.1,)",
+            "mandatory": true,
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "betterstrongholds": [
+      {
+        "id": "betterstrongholds",
+        "version": "1.20-Forge-4.0.3",
+        "source": "YungsBetterStrongholds-1.20-Forge-4.0.3.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46.0.2,)"
+          },
+          {
+            "modId": "yungsapi",
+            "versionRange": "[1.20-Forge-4.0.1,)",
+            "mandatory": true,
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "betteroceanmonuments": [
+      {
+        "id": "betteroceanmonuments",
+        "version": "1.20-Forge-3.0.4",
+        "source": "YungsBetterOceanMonuments-1.20-Forge-3.0.4.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46.0.2,)"
+          },
+          {
+            "modId": "yungsapi",
+            "versionRange": "[1.20-Forge-4.0.1,)",
+            "mandatory": true,
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "betterwitchhuts": [
+      {
+        "id": "betterwitchhuts",
+        "version": "1.20-Forge-3.0.3",
+        "source": "YungsBetterWitchHuts-1.20-Forge-3.0.3.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46.0.2,)"
+          },
+          {
+            "modId": "yungsapi",
+            "versionRange": "[1.20-Forge-4.0.1,)",
+            "mandatory": true,
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "betterfortresses": [
+      {
+        "id": "betterfortresses",
+        "version": "1.20-Forge-2.0.6",
+        "source": "YungsBetterNetherFortresses-1.20-Forge-2.0.6.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46.0.2,)"
+          },
+          {
+            "modId": "yungsapi",
+            "versionRange": "[1.20-Forge-4.0.1,)",
+            "mandatory": true,
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "yungsextras": [
+      {
+        "id": "yungsextras",
+        "version": "1.20-Forge-4.0.3",
+        "source": "YungsExtras-1.20-Forge-4.0.3.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46.0.2,)"
+          },
+          {
+            "modId": "yungsapi",
+            "versionRange": "[1.20-Forge-4.0.1,)",
+            "mandatory": true,
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "explorify": [
+      {
+        "id": "explorify",
+        "version": "1.6.6",
+        "source": "Explorify v1.6.6.mod.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "supplementaries": [
+      {
+        "id": "supplementaries",
+        "version": "1.20-3.1.44",
+        "source": "supplementaries-1.20-3.1.44-forge.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.20.2)",
+            "ordering": "NONE",
+            "side": "CLIENT"
+          },
+          {
+            "modId": "moonlight",
+            "mandatory": true,
+            "versionRange": "[1.20-2.16.26,]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "quark",
+            "mandatory": false,
+            "versionRange": "[1.19-3.4-404,]",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": false,
+            "versionRange": "[6.0.0,]",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "mixinsquared": [
+      {
+        "id": "mixinsquared",
+        "version": "0.1.1",
+        "source": "supplementaries-1.20-3.1.44-forge.jar!META-INF/jars/mixinsquared-forge-0.1.1.jar",
+        "client_only": false,
+        "deps": []
+      },
+      {
+        "id": "mixinsquared",
+        "version": "0.1.1",
+        "source": "moonlight-1.20-2.16.39-forge.jar!META-INF/jars/mixinsquared-forge-0.1.1.jar",
+        "client_only": false,
+        "deps": []
+      }
+    ],
+    "amendments": [
+      {
+        "id": "amendments",
+        "version": "1.20-2.2.6",
+        "source": "amendments-1.20-2.2.6.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "moonlight",
+            "mandatory": true,
+            "versionRange": "1.20-2.16.0",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "supplementaries",
+            "mandatory": false,
+            "versionRange": "[1.20-2.8.0,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          },
+          {
+            "modId": "flywheel",
+            "mandatory": false,
+            "versionRange": "(0,)",
+            "ordering": "NONE"
+          }
+        ]
+      }
+    ],
+    "framedblocks": [
+      {
+        "id": "framedblocks",
+        "version": "9.4.3",
+        "source": "FramedBlocks-9.4.3.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.3,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "buildinggadgets",
+            "mandatory": false,
+            "versionRange": "[3.14.0,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          },
+          {
+            "modId": "ctm",
+            "mandatory": false,
+            "versionRange": "[1.20.1-1.1.8,)",
+            "ordering": "BEFORE",
+            "side": "CLIENT"
+          },
+          {
+            "modId": "diagonalfences",
+            "mandatory": false,
+            "versionRange": "[8.0.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "diagonalwindows",
+            "mandatory": false,
+            "versionRange": "[8.0.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "nocubes",
+            "mandatory": false,
+            "versionRange": "[1.19.1-0.5.0,)",
+            "ordering": "NONE",
+            "side": "CLIENT"
+          },
+          {
+            "modId": "jei",
+            "mandatory": false,
+            "versionRange": "[15.0.0.15,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "rei",
+            "mandatory": false,
+            "versionRange": "[12.0.634,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "emi",
+            "mandatory": false,
+            "versionRange": "[1.0.17,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "atlasviewer",
+            "mandatory": false,
+            "versionRange": "[5.1.1,)",
+            "ordering": "NONE",
+            "side": "CLIENT"
+          },
+          {
+            "modId": "flywheel",
+            "mandatory": false,
+            "versionRange": "[1.0.1,)",
+            "ordering": "AFTER",
+            "side": "CLIENT"
+          },
+          {
+            "modId": "create",
+            "mandatory": false,
+            "versionRange": "[6.0.2,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "decorative_blocks": [
+      {
+        "id": "decorative_blocks",
+        "version": "4.1.3",
+        "source": "decorative_blocks-forge-1.20.1-4.1.3.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "soulfired",
+            "mandatory": false,
+            "versionRange": "[3.2.1.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "another_furniture": [
+      {
+        "id": "another_furniture",
+        "version": "1.20.1-3.0.4",
+        "source": "another_furniture-forge-1.20.1-3.0.4.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "create",
+            "mandatory": false,
+            "versionRange": "[6.0.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "architects_palette": [
+      {
+        "id": "architects_palette",
+        "version": "1.3.6.1",
+        "source": "Architects-Palette-1.20.1-1.3.6.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE"
+          }
+        ]
+      }
+    ],
+    "mcwbridges": [
+      {
+        "id": "mcwbridges",
+        "version": "3.1.2",
+        "source": "mcw-bridges-3.1.2-mc1.20.1forge.jar",
+        "client_only": false,
+        "deps": []
+      }
+    ],
+    "mcwdoors": [
+      {
+        "id": "mcwdoors",
+        "version": "1.1.5",
+        "source": "mcw-doors-1.1.5-mc1.20.1forge.jar",
+        "client_only": false,
+        "deps": []
+      }
+    ],
+    "mcwroofs": [
+      {
+        "id": "mcwroofs",
+        "version": "2.3.2",
+        "source": "mcw-roofs-2.3.2-mc1.20.1forge.jar",
+        "client_only": false,
+        "deps": []
+      }
+    ],
+    "mcwwindows": [
+      {
+        "id": "mcwwindows",
+        "version": "2.4.2",
+        "source": "mcw-mcwwindows-2.4.2-mc1.20.1forge.jar",
+        "client_only": false,
+        "deps": []
+      }
+    ],
+    "mcwpaths": [
+      {
+        "id": "mcwpaths",
+        "version": "1.1.1",
+        "source": "mcw-mcwpaths-1.1.1-mc1.20.1forge.jar",
+        "client_only": false,
+        "deps": []
+      }
+    ],
+    "diagonalfences": [
+      {
+        "id": "diagonalfences",
+        "version": "8.1.5",
+        "source": "DiagonalFences-v8.1.5-1.20.1-Forge.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "puzzleslib",
+            "mandatory": true,
+            "versionRange": "[8.1.13,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "diagonalblocks",
+            "mandatory": true,
+            "versionRange": "*",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "diagonalblocks": [
+      {
+        "id": "diagonalblocks",
+        "version": "8.0.6",
+        "source": "DiagonalFences-v8.1.5-1.20.1-Forge.jar!META-INF/jarjar/diagonalblocks-forge-8.0.6.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.3,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "puzzleslib",
+            "mandatory": true,
+            "versionRange": "[8.1.5,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      },
+      {
+        "id": "diagonalblocks",
+        "version": "8.0.6",
+        "source": "DiagonalWalls-v8.0.4-1.20.1-Forge.jar!META-INF/jarjar/diagonalblocks-forge-8.0.6.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.3,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "puzzleslib",
+            "mandatory": true,
+            "versionRange": "[8.1.5,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "diagonalwalls": [
+      {
+        "id": "diagonalwalls",
+        "version": "8.0.4",
+        "source": "DiagonalWalls-v8.0.4-1.20.1-Forge.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "puzzleslib",
+            "mandatory": true,
+            "versionRange": "[8.1.13,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "diagonalblocks",
+            "mandatory": true,
+            "versionRange": "*",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "farmersrespite": [
+      {
+        "id": "farmersrespite",
+        "version": "1.20.1-2.1",
+        "source": "farmersrespite-1.20.1-2.1.2.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "farmersdelight",
+            "mandatory": true,
+            "versionRange": "[1.2.3,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "culturaldelights": [
+      {
+        "id": "culturaldelights",
+        "version": "0.16.6",
+        "source": "culturaldelights-0.16.7.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "farmersdelight",
+            "mandatory": true,
+            "versionRange": "[1.20.1-1.2.3,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "miners_delight": [
+      {
+        "id": "miners_delight",
+        "version": "${file.jarVersion}",
+        "source": "miners_delight-1.20.1-1.4.5-backport.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[40,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "farmersdelight",
+            "mandatory": true,
+            "versionRange": "[1.18.2-1.2.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "rusticdelight": [
+      {
+        "id": "rusticdelight",
+        "version": "1.7.0",
+        "source": "rusticdelight-forge-1.20.1-1.7.0.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "farmersdelight",
+            "mandatory": true,
+            "versionRange": "[1.20.1-1.3.1,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          },
+          {
+            "modId": "thirst",
+            "mandatory": false,
+            "versionRange": "[1.20.1-1.3.0,)",
+            "ordering": "AFTER",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "embeddium": [
+      {
+        "id": "embeddium",
+        "version": "0.3.31+mc1.20.1",
+        "source": "embeddium-0.3.31+mc1.20.1.jar",
+        "client_only": true,
+        "deps": [
+          {
+            "modId": "oculus",
+            "mandatory": false,
+            "versionRange": "(1.6.15,)",
+            "ordering": "BEFORE",
+            "side": "CLIENT"
+          },
+          {
+            "modId": "textrues_embeddium_options",
+            "mandatory": false,
+            "versionRange": "[0.0.0-NOT-COMPATIBLE]",
+            "ordering": "BEFORE",
+            "side": "CLIENT"
+          }
+        ]
+      }
+    ],
+    "rubidium": [
+      {
+        "id": "rubidium",
+        "version": "0.7.1",
+        "source": "embeddium-0.3.31+mc1.20.1.jar",
+        "client_only": true,
+        "deps": []
+      }
+    ],
+    "entityculling": [
+      {
+        "id": "entityculling",
+        "version": "1.12.1",
+        "source": "entityculling-forge-1.12.1-mc1.20.1.jar",
+        "client_only": true,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "1.20.1",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "transition": [
+      {
+        "id": "transition",
+        "version": "1.0.28",
+        "source": "entityculling-forge-1.12.1-mc1.20.1.jar!META-INF/jars/TRansition-1.0.28-1.20.1-forge-SNAPSHOT.jar",
+        "client_only": true,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "1.20.1",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "trender": [
+      {
+        "id": "trender",
+        "version": "1.0.17",
+        "source": "entityculling-forge-1.12.1-mc1.20.1.jar!META-INF/jars/TRender-1.0.17-1.20.1-forge-SNAPSHOT.jar",
+        "client_only": true,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "1.20.1",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "immediatelyfast": [
+      {
+        "id": "immediatelyfast",
+        "version": "1.5.5+1.20.4",
+        "source": "ImmediatelyFast-Forge-1.5.5+1.20.4.jar",
+        "client_only": true,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.20.4]",
+            "side": "CLIENT"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46,)",
+            "side": "CLIENT"
+          }
+        ]
+      }
+    ],
+    "clumps": [
+      {
+        "id": "clumps",
+        "version": "${file.jarVersion}",
+        "source": "Clumps-forge-1.20.1-12.0.0.4.jar",
+        "client_only": false,
+        "deps": []
+      }
+    ],
+    "alternate_current": [
+      {
+        "id": "alternate_current",
+        "version": "1.7.0",
+        "source": "alternate_current-mc1.20-1.7.0.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "aiimprovements": [
+      {
+        "id": "aiimprovements",
+        "version": "${file.jarVersion}",
+        "source": "AI-Improvements-1.20-0.5.2.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "fastsuite": [
+      {
+        "id": "fastsuite",
+        "version": "5.1.2",
+        "source": "FastSuite-1.20.1-5.1.2.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "placebo",
+            "mandatory": true,
+            "versionRange": "[8.2.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "fastfurnace": [
+      {
+        "id": "fastfurnace",
+        "version": "8.0.2",
+        "source": "FastFurnace-1.20.1-8.0.2.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "placebo",
+            "mandatory": true,
+            "versionRange": "[8.2.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "polymorph": [
+      {
+        "id": "polymorph",
+        "version": "0.49.11+1.20.1",
+        "source": "polymorph-forge-0.49.11+1.20.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "jei",
+            "mandatory": false,
+            "versionRange": "[15.57.0.207,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "constructionwand": [
+      {
+        "id": "constructionwand",
+        "version": "${file.jarVersion}",
+        "source": "constructionwand-1.20.1-2.11.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20, 1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "kotlinforforge": [
+      {
+        "id": "kotlinforforge",
+        "version": "4.12.0",
+        "source": "kotlinforforge-4.12.0-all.jar!META-INF/jarjar/kffmod-4.12.0.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "type": "required",
+            "versionRange": "[1.19.3,1.21)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "resourcefullib": [
+      {
+        "id": "resourcefullib",
+        "version": "2.1.29",
+        "source": "resourcefullib-forge-1.20.1-2.1.29.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "rhino": [
+      {
+        "id": "rhino",
+        "version": "2001.2.3-build.10",
+        "source": "rhino-forge-2001.2.3-build.10.jar",
+        "client_only": false,
+        "deps": []
+      }
+    ],
+    "dragonlib": [
+      {
+        "id": "dragonlib",
+        "version": "3.0.29",
+        "source": "dragonlib-3.0.29+mc1.20.1-forge.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.20.2)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "architectury",
+            "mandatory": true,
+            "versionRange": "[9.1.12,)",
+            "ordering": "BEFORE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "cristellib": [
+      {
+        "id": "cristellib",
+        "version": "1.1.6",
+        "source": "cristellib-1.1.6-forge.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.20.2)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "yungsapi": [
+      {
+        "id": "yungsapi",
+        "version": "1.20-Forge-4.0.6",
+        "source": "YungsApi-1.20-Forge-4.0.6.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.21)"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[46.0.2,)"
+          }
+        ]
+      }
+    ],
+    "searchables": [
+      {
+        "id": "searchables",
+        "version": "${file.jarVersion}",
+        "source": "Searchables-forge-1.20.1-1.0.3.jar",
+        "client_only": true,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[41,)",
+            "ordering": "NONE"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,)",
+            "ordering": "NONE"
+          }
+        ]
+      }
+    ],
+    "terrablender": [
+      {
+        "id": "terrablender",
+        "version": "${file.jarVersion}",
+        "source": "TerraBlender-forge-1.20.1-3.0.1.11.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "blueprint": [
+      {
+        "id": "blueprint",
+        "version": "7.1.5",
+        "source": "blueprint-1.20.1-7.1.5.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,1.20.2)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.3,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "moonlight": [
+      {
+        "id": "moonlight",
+        "version": "1.20-2.16.39",
+        "source": "moonlight-1.20-2.16.39-forge.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[43.0.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20,1.20.2)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "puzzleslib": [
+      {
+        "id": "puzzleslib",
+        "version": "8.1.36",
+        "source": "PuzzlesLib-v8.1.36-1.20.1-Forge.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.1.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "puzzlesaccessapi",
+            "mandatory": true,
+            "versionRange": "*",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "puzzlesaccessapi": [
+      {
+        "id": "puzzlesaccessapi",
+        "version": "20.1.1",
+        "source": "PuzzlesLib-v8.1.36-1.20.1-Forge.jar!META-INF/jarjar/puzzlesaccessapi-forge-20.1.1.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "type": "required",
+            "versionRange": "[47.1.0,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "type": "required",
+            "versionRange": "[1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "placebo": [
+      {
+        "id": "placebo",
+        "version": "8.6.3",
+        "source": "Placebo-1.20.1-8.6.3.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1,)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ],
+    "longhaul_runtime": [
+      {
+        "id": "longhaul_runtime",
+        "version": "0.1.0",
+        "source": "overrides/mods/longhaul-runtime-1.20.1-0.1.0.jar",
+        "client_only": false,
+        "deps": [
+          {
+            "modId": "minecraft",
+            "mandatory": true,
+            "versionRange": "[1.20.1]",
+            "ordering": "NONE",
+            "side": "BOTH"
+          },
+          {
+            "modId": "forge",
+            "mandatory": true,
+            "versionRange": "[47.4.10,47.4.11)",
+            "ordering": "NONE",
+            "side": "BOTH"
+          }
+        ]
+      }
+    ]
+  },
+  "missing_required_ids": [],
+  "note": "Duplicate embedded libs are left to Forge jar-in-jar selection. Version ranges and runtime need additional validation."
+}

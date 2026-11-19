@@ -1,0 +1,50 @@
+{
+  "dependencies": [
+    "ancient_remnant"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:kill_entity",
+      "entity": "cataclysm:netherite_monstrosity",
+      "amount": 1
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 300
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Незеритовый голем\"}",
+    "subtitle": "{\"text\": \"L_Ender's Cataclysm\"}",
+    "description": [
+      "Победите незеритового голема в Незере.",
+      "Голем даёт незеритовый лом и горящий пепел для Мегапроекта."
+    ],
+    "groups": {
+      "06 · Боссы и структуры": {
+        "position": [
+          32,
+          56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "cataclysm:netherite_monstrosity_spawn_egg",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

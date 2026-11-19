@@ -1,0 +1,381 @@
+{
+  "create": [
+    {
+      "version": "mc1.20.1-6.0.8",
+      "id": "8amzvn9x",
+      "deps": []
+    },
+    {
+      "version": "mc1.20.1-6.0.7",
+      "id": "4GKDLVkw",
+      "deps": []
+    }
+  ],
+  "create-steam-n-rails": [
+    {
+      "version": "1.7.3+forge-mc1.20.1",
+      "id": "7Uk6lWkU",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    },
+    {
+      "version": "1.7.3-beta+forge-mc1.20.1",
+      "id": "x7xYkvNE",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    }
+  ],
+  "valkyrien-skies": [
+    {
+      "version": "1.20.1-forge-2.4.11",
+      "id": "pOkdwuUh",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "9s6osm5g",
+          "file_name": null,
+          "dependency_type": "embedded"
+        },
+        {
+          "version_id": null,
+          "project_id": "ordsPcFz",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    },
+    {
+      "version": "1.20.1-forge-2.4.10",
+      "id": "DiPIynfN",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "ordsPcFz",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "9s6osm5g",
+          "file_name": null,
+          "dependency_type": "embedded"
+        }
+      ]
+    }
+  ],
+  "create-clockwork": [
+    {
+      "version": "1.20.1-forge-0.5.7.1",
+      "id": "PPCx7dxb",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "V5ujR2yw",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    },
+    {
+      "version": "1.20.1-forge-0.5.7",
+      "id": "a9JnVNQz",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "V5ujR2yw",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    }
+  ],
+  "eureka": [
+    {
+      "version": "1.20.1-forge-1.6.4",
+      "id": "J1B6BA08",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "V5ujR2yw",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    },
+    {
+      "version": "1.20.1-forge-1.6.3",
+      "id": "w2tkVjFR",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "V5ujR2yw",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    }
+  ],
+  "trackwork": [
+    {
+      "version": "1.20.1-1.2.3",
+      "id": "i5GpwEF8",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "V5ujR2yw",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    },
+    {
+      "version": "1.20.1-1.2.2",
+      "id": "Jut91y7U",
+      "deps": []
+    }
+  ],
+  "create-enchantment-industry": [
+    {
+      "version": "2.5.4b",
+      "id": "fs3kihCQ",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "dzb1a5WV",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    },
+    {
+      "version": "2.5.4",
+      "id": "HM5htsU7",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "dzb1a5WV",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    }
+  ],
+  "create-connected": [
+    {
+      "version": "1.2.3-mc1.20.1",
+      "id": "6gnvaVkN",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "u6dRKJwZ",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    },
+    {
+      "version": "1.2.2-mc1.20.1",
+      "id": "k4GXYL2a",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "u6dRKJwZ",
+          "file_name": null,
+          "dependency_type": "optional"
+        }
+      ]
+    }
+  ],
+  "create-central-kitchen": [
+    {
+      "version": "1.5.1",
+      "id": "jMB94kRJ",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    },
+    {
+      "version": "1.5.0",
+      "id": "Z4kwyYKV",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    }
+  ],
+  "slice-and-dice": [
+    {
+      "version": "3.6.0",
+      "id": "KWLI8Ng7",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "R2OftAxM",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "bCxmmxKN",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "JWGBpFUP",
+          "file_name": null,
+          "dependency_type": "optional"
+        }
+      ]
+    },
+    {
+      "version": "3.5.2",
+      "id": "qa7eMq5Z",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "JWGBpFUP",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "R2OftAxM",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "ordsPcFz",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    }
+  ],
+  "createaddition": [
+    {
+      "version": "forge-1.20.1-1.3.3",
+      "id": "9LgyB6Yb",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "u6dRKJwZ",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "gu7yAYhd",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    },
+    {
+      "version": "1.20.1-1.3.1",
+      "id": "SecVSw22",
+      "deps": [
+        {
+          "version_id": null,
+          "project_id": "gu7yAYhd",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "u6dRKJwZ",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    }
+  ]
+}

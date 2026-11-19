@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "tier3_rocket"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "ad_astra:calorite_ingot",
+      "amount": 8,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 500
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Венера и Меркурий\"}",
+    "subtitle": "{\"text\": \"Калорит — руда дальних планет\"}",
+    "description": [
+      "Добудьте 8 слитков калорита на Венере или Меркурии.",
+      "Калорит — главный материал ракет 4 тира."
+    ],
+    "groups": {
+      "08 · Космическая программа": {
+        "position": [
+          32,
+          56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "ad_astra:calorite_ingot",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

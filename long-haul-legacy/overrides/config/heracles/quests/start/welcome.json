@@ -1,0 +1,47 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "task1": {
+      "type": "heracles:dummy"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 50
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Добро пожаловать!\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy\"}",
+    "description": [
+      "Вы спавнились в умеренном поясе. До экватора — 50 000 блоков на юг, до полярного пояса — на север.",
+      "Квесты открываются через вкладку в инвентаре. Выполняйте задания по порядку — каждая глава ведёт дальше.",
+      "Нажмите, чтобы начать путь."
+    ],
+    "groups": {
+      "01 · Начало": {
+        "position": [
+          -96,
+          -28
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:compass",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

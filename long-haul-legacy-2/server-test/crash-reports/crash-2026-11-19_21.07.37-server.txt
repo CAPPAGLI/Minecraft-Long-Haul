@@ -1,0 +1,152 @@
+---- Minecraft Crash Report ----
+// Hi. I'm Minecraft, and I'm a crashaholic.
+
+Time: 2026-11-19 21:07:37
+Description: Exception in server tick loop
+
+java.lang.NoSuchMethodError: 'void kotlinx.coroutines.internal.LockFreeLinkedListHead.addLast(kotlinx.coroutines.internal.LockFreeLinkedListNode)'
+	at io.ktor.events.Events.subscribe(Events.kt:24) ~[create-track-map-1.4+mc1.20.1-neoforge.jar%23165!/:1.4] {re:classloading}
+	at io.ktor.server.engine.BaseApplicationEngine.<init>(BaseApplicationEngine.kt:49) ~[create-track-map-1.4+mc1.20.1-neoforge.jar%23165!/:1.4] {re:classloading}
+	at io.ktor.server.engine.BaseApplicationEngine.<init>(BaseApplicationEngine.kt:30) ~[create-track-map-1.4+mc1.20.1-neoforge.jar%23165!/:1.4] {re:classloading}
+	at io.ktor.server.cio.CIOApplicationEngine.<init>(CIOApplicationEngine.kt:27) ~[create-track-map-1.4+mc1.20.1-neoforge.jar%23165!/:1.4] {re:classloading}
+	at io.ktor.server.cio.CIO.create(CIO.kt:16) ~[create-track-map-1.4+mc1.20.1-neoforge.jar%23165!/:1.4] {re:classloading}
+	at io.ktor.server.cio.CIO.create(CIO.kt:12) ~[create-track-map-1.4+mc1.20.1-neoforge.jar%23165!/:1.4] {re:classloading}
+	at io.ktor.server.engine.EmbeddedServerKt.embeddedServer(EmbeddedServer.kt:109) ~[create-track-map-1.4+mc1.20.1-neoforge.jar%23165!/:1.4] {re:classloading}
+	at io.ktor.server.engine.EmbeddedServerKt.embeddedServer(EmbeddedServer.kt:98) ~[create-track-map-1.4+mc1.20.1-neoforge.jar%23165!/:1.4] {re:classloading}
+	at io.ktor.server.engine.EmbeddedServerKt.embeddedServer(EmbeddedServer.kt:63) ~[create-track-map-1.4+mc1.20.1-neoforge.jar%23165!/:1.4] {re:classloading}
+	at io.ktor.server.engine.EmbeddedServerKt.embeddedServer(EmbeddedServer.kt:38) ~[create-track-map-1.4+mc1.20.1-neoforge.jar%23165!/:1.4] {re:classloading}
+	at io.ktor.server.engine.EmbeddedServerKt.embeddedServer$default(EmbeddedServer.kt:30) ~[create-track-map-1.4+mc1.20.1-neoforge.jar%23165!/:1.4] {re:classloading}
+	at littlechasiu.ctm.Server.start(Server.kt:58) ~[create-track-map-1.4+mc1.20.1-neoforge.jar%23165!/:1.4] {re:classloading}
+	at littlechasiu.ctm.TrackMap.serverStarted(TrackMap.kt:113) ~[create-track-map-1.4+mc1.20.1-neoforge.jar%23165!/:1.4] {re:classloading}
+	at net.minecraftforge.eventbus.EventBus.doCastFilter(EventBus.java:260) ~[eventbus-6.0.5.jar%2352!/:?] {}
+	at net.minecraftforge.eventbus.EventBus.lambda$addListener$11(EventBus.java:252) ~[eventbus-6.0.5.jar%2352!/:?] {}
+	at net.minecraftforge.eventbus.EventBus.post(EventBus.java:315) ~[eventbus-6.0.5.jar%2352!/:?] {}
+	at net.minecraftforge.eventbus.EventBus.post(EventBus.java:296) ~[eventbus-6.0.5.jar%2352!/:?] {}
+	at net.minecraftforge.server.ServerLifecycleHooks.handleServerStarted(ServerLifecycleHooks.java:115) ~[forge-1.20.1-47.4.10-universal.jar%23212!/:?] {re:mixin,re:classloading,pl:mixin:APP:lithostitched.forge.mixins.json:common.ServerLifecycleHooksMixin,pl:mixin:A}
+	at net.minecraft.server.MinecraftServer.m_130011_(MinecraftServer.java:638) ~[server-1.20.1-20230612.114412-srg.jar%23207!/:?] {re:mixin,pl:accesstransformer:B,re:classloading,pl:accesstransformer:B,pl:mixin:A}
+	at net.minecraft.server.MinecraftServer.m_206580_(MinecraftServer.java:251) ~[server-1.20.1-20230612.114412-srg.jar%23207!/:?] {re:mixin,pl:accesstransformer:B,re:classloading,pl:accesstransformer:B,pl:mixin:A}
+	at java.lang.Thread.run(Unknown Source) ~[?:?] {re:mixin}
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- System Details --
+Details:
+	Minecraft Version: 1.20.1
+	Minecraft Version ID: 1.20.1
+	Operating System: Linux (amd64) version 6.1.189+
+	Java Version: 17.0.21.1, Azul Systems, Inc.
+	Java VM Version: OpenJDK 64-Bit Server VM (mixed mode, sharing), Azul Systems, Inc.
+	Memory: 147260000 bytes (140 MiB) / 805306368 bytes (768 MiB) up to 805306368 bytes (768 MiB)
+	CPUs: 2
+	Processor Vendor: GenuineIntel
+	Processor Name: Intel(R) Xeon(R) Processor @ 2.60GHz
+	Identifier: Intel64 Family 6 Model 106 Stepping 6
+	Microarchitecture: Ice Lake (Server)
+	Frequency (GHz): 2.60
+	Number of physical packages: 1
+	Number of physical CPUs: 1
+	Number of logical CPUs: 2
+	Graphics card #0 name: unknown
+	Graphics card #0 vendor: unknown
+	Graphics card #0 VRAM (MB): 0.00
+	Graphics card #0 deviceId: unknown
+	Graphics card #0 versionInfo: unknown
+	Virtual memory max (MB): 991.41
+	Virtual memory used (MB): 1798.03
+	Swap memory total (MB): 0.00
+	Swap memory used (MB): 0.00
+	JVM Flags: 6 total; -Xms256m -Xmx768m -XX:MaxMetaspaceSize=256m -XX:ReservedCodeCacheSize=64m -XX:MaxDirectMemorySize=96m -XX:ActiveProcessorCount=2
+	Server Running: true
+	Player Count: 0 / 2; []
+	Data Packs: vanilla, mod:man_of_many_planes (incompatible), mod:advancedperipherals (incompatible), mod:immersive_aircraft (incompatible), mod:modernfix (incompatible), mod:yungsapi, mod:createdieselgenerators, mod:create_new_age, mod:exposure, mod:cloth_config (incompatible), mod:create_connected, mod:farmersdelight, mod:chunky (incompatible), mod:yungsbridges, mod:spark (incompatible), mod:resourcefullib (incompatible), mod:lootjs, mod:createrailwaysnavigator, mod:computercraft, mod:smallships (incompatible), mod:t_and_t (incompatible), mod:esl, mod:bellsandwhistles, mod:rhino (incompatible), mod:copycats (incompatible), mod:lithostitched, mod:hermes (incompatible), mod:heracles (incompatible), mod:comforts (incompatible), mod:terralith, mod:forge, mod:tectonic, mod:dragonlib, mod:architectury (incompatible), mod:kubejs (incompatible), mod:voicechat (incompatible), mod:railways, mod:createoreexcavation (incompatible), mod:spectrelib (incompatible), mod:kelvin (incompatible), mod:kotlinforforge (incompatible), mod:brewinandchewin, mod:flywheel, mod:ponder (incompatible), mod:create, mod:createdeco (incompatible), mod:create_central_kitchen, mod:interiors (incompatible), mod:sliceanddice (incompatible), mod:storagedrawers (incompatible), mod:almostunified (incompatible), mod:ferritecore (incompatible), mod:create_power_loader, mod:createtrackmap (incompatible), mod:valkyrienskies (incompatible), mod:vs_eureka (incompatible), mod:vs_clockwork (incompatible), mod:trackwork (incompatible), mod:create_enchantment_industry (incompatible), mod:createaddition (incompatible), mod:cristellib (incompatible), tectonic/tectonic, tectonic/tectonic/overlay.mod, tectonic/tectonic/overlay.terratonic, lithostitched/breaks_seed_parity, create:dynamic_data, create_central_kitchen:farmersdelight
+	Enabled Feature Flags: minecraft:vanilla
+	World Generation: Experimental
+	Is Modded: Definitely; Server brand changed to 'forge'
+	Type: Dedicated Server (map_server.txt)
+	ModLauncher: 10.0.9+10.0.9+main.dcd20f30
+	ModLauncher launch target: forgeserver
+	ModLauncher naming: srg
+	ModLauncher services: 
+		mixin-0.8.5.jar mixin PLUGINSERVICE 
+		eventbus-6.0.5.jar eventbus PLUGINSERVICE 
+		fmlloader-1.20.1-47.4.10.jar slf4jfixer PLUGINSERVICE 
+		fmlloader-1.20.1-47.4.10.jar object_holder_definalize PLUGINSERVICE 
+		fmlloader-1.20.1-47.4.10.jar runtime_enum_extender PLUGINSERVICE 
+		fmlloader-1.20.1-47.4.10.jar capability_token_subclass PLUGINSERVICE 
+		accesstransformers-8.0.4.jar accesstransformer PLUGINSERVICE 
+		fmlloader-1.20.1-47.4.10.jar runtimedistcleaner PLUGINSERVICE 
+		modlauncher-10.0.9.jar mixin TRANSFORMATIONSERVICE 
+		modlauncher-10.0.9.jar fml TRANSFORMATIONSERVICE 
+	FML Language Providers: 
+		minecraft@1.0
+		kotlinforforge@4.12.0
+		javafml@null
+		lowcodefml@null
+	Mod List: 
+		man_of_many_planes-0.2.1+1.20.1-forge.jar         |Man of Many Planes            |man_of_many_planes            |0.2.1+1.20.1        |DONE      |Manifest: NOSIGNATURE
+		AdvancedPeripherals-1.20.1-0.7.48r.jar            |Advanced Peripherals          |advancedperipherals           |0.7.48r             |DONE      |Manifest: NOSIGNATURE
+		immersive_aircraft-1.5.0+1.20.1-forge.jar         |Immersive Aircraft            |immersive_aircraft            |1.5.0+1.20.1        |DONE      |Manifest: NOSIGNATURE
+		modernfix-forge-5.27.93+mc1.20.1.jar              |ModernFix                     |modernfix                     |5.27.93+mc1.20.1    |DONE      |Manifest: NOSIGNATURE
+		YungsApi-1.20-Forge-4.0.6.jar                     |YUNG's API                    |yungsapi                      |1.20-Forge-4.0.6    |DONE      |Manifest: NOSIGNATURE
+		createdieselgenerators-1.20.1-1.3.12.jar          |Create: Diesel Generators     |createdieselgenerators        |1.20.1-1.3.12       |DONE      |Manifest: NOSIGNATURE
+		create-new-age-1.2.0+forge-mc1.20.1.jar           |Create: New Age               |create_new_age                |1.2.0+mc1.20.1      |DONE      |Manifest: NOSIGNATURE
+		exposure-forge-1.20.1-1.9.24.jar                  |Exposure                      |exposure                      |1.9.24              |DONE      |Manifest: NOSIGNATURE
+		cloth-config-forge-11.1.106.jar                   |Cloth Config v10 API          |cloth_config                  |11.1.106            |DONE      |Manifest: NOSIGNATURE
+		create_connected-1.2.3-mc1.20.1-all.jar           |Create: Connected             |create_connected              |1.2.3-mc1.20.1      |DONE      |Manifest: NOSIGNATURE
+		FarmersDelight-1.20.1-1.3.4.jar                   |Farmer's Delight              |farmersdelight                |1.20.1-1.3.4        |DONE      |Manifest: NOSIGNATURE
+		Chunky-1.3.146.jar                                |Chunky                        |chunky                        |1.3.146             |DONE      |Manifest: NOSIGNATURE
+		YungsBridges-1.20-Forge-4.0.3.jar                 |YUNG's Bridges                |yungsbridges                  |1.20-Forge-4.0.3    |DONE      |Manifest: NOSIGNATURE
+		spark-1.10.53-forge.jar                           |spark                         |spark                         |1.10.53             |DONE      |Manifest: NOSIGNATURE
+		resourcefullib-forge-1.20.1-2.1.29.jar            |Resourceful Lib               |resourcefullib                |2.1.29              |DONE      |Manifest: NOSIGNATURE
+		lootjs-forge-1.20.1-2.13.1.jar                    |LootJS                        |lootjs                        |1.20.1-2.13.1       |DONE      |Manifest: NOSIGNATURE
+		createrailwaysnavigator-forge-1.20.1-beta-0.10.0-C|Create Railways Navigator     |createrailwaysnavigator       |1.20.1-beta-0.10.0-C|DONE      |Manifest: NOSIGNATURE
+		cc-tweaked-1.20.1-forge-1.121.0.jar               |CC: Tweaked                   |computercraft                 |1.121.0             |DONE      |Manifest: NOSIGNATURE
+		smallships-2.0.2-forge-1.20.1.jar                 |Small Ships                   |smallships                    |2.0.2               |DONE      |Manifest: NOSIGNATURE
+		Towns-and-Towers-1.12-Fabric+Forge.jar            |Towns and Towers              |t_and_t                       |0.0NONE             |DONE      |Manifest: NOSIGNATURE
+		esl-forge-1.20.1-1.1.3+forge-mc1.20.1.jar         |ESL                           |esl                           |1.1.3               |DONE      |Manifest: NOSIGNATURE
+		bellsandwhistles-0.4.5-1.20.x-Create6.0+.jar      |Create: Bells & Whistles      |bellsandwhistles              |0.4.3-1.20.x        |DONE      |Manifest: NOSIGNATURE
+		rhino-forge-2001.2.3-build.10.jar                 |Rhino                         |rhino                         |2001.2.3-build.10   |DONE      |Manifest: NOSIGNATURE
+		copycats-3.0.10+mc.1.20.1-forge.jar               |Create: Copycats+             |copycats                      |3.0.10+mc.1.20.1-for|DONE      |Manifest: NOSIGNATURE
+		lithostitched-forge-1.20.1-1.4.12.jar             |Lithostitched                 |lithostitched                 |1.4.12              |DONE      |Manifest: NOSIGNATURE
+		longhaul-runtime-1.20.1-0.1.0.jar                 |Long Haul Runtime             |longhaul_runtime              |0.1.0               |DONE      |Manifest: NOSIGNATURE
+		hermes-forge-1.20-1.6.0.jar                       |hermes                        |hermes                        |1.6.0               |DONE      |Manifest: NOSIGNATURE
+		Heracles-forge-1.20.1-1.1.13.jar                  |Heracles                      |heracles                      |1.1.13              |DONE      |Manifest: NOSIGNATURE
+		comforts-forge-6.4.0+1.20.1.jar                   |Comforts                      |comforts                      |6.4.0+1.20.1        |DONE      |Manifest: NOSIGNATURE
+		Terralith_1.20.x_v2.5.4.jar                       |Terralith                     |terralith                     |2.5.4               |DONE      |Manifest: NOSIGNATURE
+		forge-1.20.1-47.4.10-universal.jar                |Forge                         |forge                         |47.4.10             |DONE      |Manifest: 84:ce:76:e8:45:35:e4:0e:63:86:df:47:59:80:0f:67:6c:c1:5f:6e:5f:4d:b3:54:47:1a:9f:7f:ed:5e:f2:90
+		tectonic-3.0.17-forge-1.20.1.jar                  |Tectonic                      |tectonic                      |3.0.17              |DONE      |Manifest: NOSIGNATURE
+		server-1.20.1-20230612.114412-srg.jar             |Minecraft                     |minecraft                     |1.20.1              |DONE      |Manifest: NOSIGNATURE
+		dragonlib-3.0.29+mc1.20.1-forge.jar               |DragonLib                     |dragonlib                     |3.0.29              |DONE      |Manifest: NOSIGNATURE
+		architectury-9.2.14-forge.jar                     |Architectury                  |architectury                  |9.2.14              |DONE      |Manifest: NOSIGNATURE
+		kubejs-forge-2001.6.5-build.26.jar                |KubeJS                        |kubejs                        |2001.6.5-build.26   |DONE      |Manifest: NOSIGNATURE
+		voicechat-forge-1.20.1-2.6.22.jar                 |Simple Voice Chat             |voicechat                     |1.20.1-2.6.22       |DONE      |Manifest: NOSIGNATURE
+		Steam_Rails-1.7.3+forge-mc1.20.1.jar              |Create: Steam 'n' Rails       |railways                      |1.7.3+forge-mc1.20.1|DONE      |Manifest: NOSIGNATURE
+		createoreexcavation-1.20-1.6.6.jar                |Create Ore Excavation         |createoreexcavation           |1.6.6               |DONE      |Manifest: NOSIGNATURE
+		spectrelib-forge-0.13.15+1.20.1.jar               |SpectreLib                    |spectrelib                    |0.13.15+1.20.1      |DONE      |Manifest: NOSIGNATURE
+		kelvin-forge-1.20.1-0.5.0+5c1c62c654.jar          |Kelvin                        |kelvin                        |1.20.1-0.5.0+5c1c62c|DONE      |Manifest: NOSIGNATURE
+		kffmod-4.12.0.jar                                 |Kotlin For Forge              |kotlinforforge                |4.12.0              |DONE      |Manifest: NOSIGNATURE
+		BrewinAndChewin-1.20.1-3.2.1.jar                  |Brewin' And Chewin'           |brewinandchewin               |1.20.1-3.2.1        |DONE      |Manifest: NOSIGNATURE
+		flywheel-forge-1.20.1-1.0.5.jar                   |Flywheel                      |flywheel                      |1.0.5               |DONE      |Manifest: NOSIGNATURE
+		Ponder-Forge-1.20.1-1.0.91.jar                    |Ponder                        |ponder                        |1.0.91              |DONE      |Manifest: NOSIGNATURE
+		create-1.20.1-6.0.8.jar                           |Create                        |create                        |6.0.8               |DONE      |Manifest: NOSIGNATURE
+		createdeco-2.0.3-1.20.1-forge.jar                 |Create Deco                   |createdeco                    |2.0.3-1.20.1-forge  |DONE      |Manifest: NOSIGNATURE
+		create_central_kitchen-1.20.1-for-create-6.0.8-1.5|Create: Central Kitchen       |create_central_kitchen        |1.5.1               |DONE      |Manifest: NOSIGNATURE
+		interiors-1.20.1-forge-0.6.0.jar                  |Create: Interiors             |interiors                     |0.6.0               |DONE      |Manifest: NOSIGNATURE
+		sliceanddice-forge-3.6.0.jar                      |Create Slice & Dice           |sliceanddice                  |3.6.0               |DONE      |Manifest: NOSIGNATURE
+		StorageDrawers-forge-1.20.1-12.15.1.jar           |Storage Drawers               |storagedrawers                |12.15.1             |DONE      |Manifest: NOSIGNATURE
+		almostunified-forge-1.20.1-0.11.0.jar             |AlmostUnified                 |almostunified                 |1.20.1-0.11.0       |DONE      |Manifest: NOSIGNATURE
+		ferritecore-6.0.1-forge.jar                       |Ferrite Core                  |ferritecore                   |6.0.1               |DONE      |Manifest: 41:ce:50:66:d1:a0:05:ce:a1:0e:02:85:9b:46:64:e0:bf:2e:cf:60:30:9a:fe:0c:27:e0:63:66:9a:84:ce:8a
+		create_power_loader-2.0.3-mc1.20.1.jar            |Create: Power Loader          |create_power_loader           |2.0.3-mc1.20.1      |DONE      |Manifest: NOSIGNATURE
+		create-track-map-1.4+mc1.20.1-neoforge.jar        |Create Track Map              |createtrackmap                |1.4                 |DONE      |Manifest: NOSIGNATURE
+		valkyrienskies-120-2.4.11.jar                     |Valkyrien Skies 2             |valkyrienskies                |2.4.11              |DONE      |Manifest: NOSIGNATURE
+		eureka-1201-1.6.4.jar                             |VS Eureka Mod                 |vs_eureka                     |1.6.4               |DONE      |Manifest: NOSIGNATURE
+		clockwork-0.5.6.jar                               |Clockwork                     |vs_clockwork                  |0.5.6               |DONE      |Manifest: NOSIGNATURE
+		trackwork-1.20.1-1.2.3.jar                        |Trackwork Mod                 |trackwork                     |1.2.3               |DONE      |Manifest: NOSIGNATURE
+		create_enchantment_industry-1.4.1-for-create-6.0.8|Create Enchantment Industry   |create_enchantment_industry   |1.4.1-for-create-6.0|DONE      |Manifest: NOSIGNATURE
+		createaddition-1.20.1-1.3.3.jar                   |Create Crafts & Additions     |createaddition                |1.20.1-1.3.3        |DONE      |Manifest: NOSIGNATURE
+		cristellib-1.1.6-forge.jar                        |Cristel Lib                   |cristellib                    |1.1.6               |DONE      |Manifest: NOSIGNATURE
+	Crash Report UUID: 7f2669de-97a3-4eee-8f9c-34033e96f405
+	FML: 47.4
+	Forge: net.minecraftforge:47.4.10

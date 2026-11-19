@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "precision"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "createaddition:electric_motor",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 150
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Электромотор\"}",
+    "subtitle": "{\"text\": \"Электричество + кинетика\"}",
+    "description": [
+      "Соберите электромотор Create Crafts & Additions — мост между электричеством и кинетической энергией.",
+      "Электричество понадобится для дизельных генераторов и космической программы."
+    ],
+    "groups": {
+      "02 · Мастерская": {
+        "position": [
+          128,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "createaddition:electric_motor",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

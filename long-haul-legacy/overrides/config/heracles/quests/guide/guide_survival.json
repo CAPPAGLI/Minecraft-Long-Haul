@@ -1,0 +1,47 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "task1": {
+      "type": "heracles:dummy"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 10
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Выживание в пути\"}",
+    "subtitle": "{\"text\": \"Comforts + рюкзаки + ящики\"}",
+    "description": [
+      "Comforts: спальные мешки и гамаки для ночёвок в экспедициях.",
+      "Traveler's Backpack: рюкзак для дальних вылазок.",
+      "Storage Drawers: ящики с сортировкой для баз и поездов."
+    ],
+    "groups": {
+      "09 · Справочник": {
+        "position": [
+          -64,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "comforts:sleeping_bag_white",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

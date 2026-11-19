@@ -1,0 +1,18 @@
+{
+  "type": "createoreexcavation:vein",
+  "amountMultiplierMax": 40.0,
+  "amountMultiplierMin": 15.0,
+  "biomeWhitelist": "longhaul:temperate",
+  "finite": "default",
+  "icon": {
+    "count": 1,
+    "id": "create:zinc_ingot"
+  },
+  "name": "{\"translate\": \"item.create.zinc_ingot\"}",
+  "placement": {
+    "salt": 441279,
+    "separation": 8,
+    "spacing": 128
+  },
+  "priority": 0
+}

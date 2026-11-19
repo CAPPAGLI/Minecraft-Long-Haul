@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "ancient_remnant"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "cataclysm:burning_ashes",
+      "amount": 2,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 200
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Горящий пепел\"}",
+    "subtitle": "{\"text\": \"Дроп босса\"}",
+    "description": [
+      "Добудьте 2 горящего пепла с боссов Cataclysm.",
+      "Пепел нужен для катализатора запуска Мегапроекта."
+    ],
+    "groups": {
+      "06 · Боссы и структуры": {
+        "position": [
+          -96,
+          56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "cataclysm:burning_ashes",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "tropical_journey"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "farmersdelight:rice",
+      "amount": 16,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 100
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Рисовая ферма\"}",
+    "subtitle": "{\"text\": \"Тропические культуры\"}",
+    "description": [
+      "Вырастите 16 риса. Рис растёт только в тропическом поясе — постройте ферму на южной базе.",
+      "EverCrops позволяет фермам расти, даже когда чанки не загружены."
+    ],
+    "groups": {
+      "05 · Дальние экспедиции": {
+        "position": [
+          32,
+          -84
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "farmersdelight:rice",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

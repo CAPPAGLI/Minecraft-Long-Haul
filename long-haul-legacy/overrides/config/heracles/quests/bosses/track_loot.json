@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "structure_hunter"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "create:track",
+      "amount": 32,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 100
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Рельсовые наборы\"}",
+    "subtitle": "{\"text\": \"Лут структур\"}",
+    "description": [
+      "Соберите 32 рельса из сундуков структур — готовые наборы для железных дорог.",
+      "Шахты и аванпосты разбойников дают рельсы в большом количестве."
+    ],
+    "groups": {
+      "06 · Боссы и структуры": {
+        "position": [
+          -96,
+          -56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:track",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

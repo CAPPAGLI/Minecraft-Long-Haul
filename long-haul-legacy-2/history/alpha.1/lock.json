@@ -1,0 +1,2727 @@
+{
+  "status": "SERVER_SMOKE_PASS_CLIENT_UNTESTED",
+  "minecraft": "1.20.1",
+  "forge": "47.4.10",
+  "roots": [
+    "create",
+    "create-steam-n-rails",
+    "createaddition",
+    "create-enchantment-industry",
+    "create-connected",
+    "create-deco",
+    "slice-and-dice",
+    "create-central-kitchen",
+    "valkyrien-skies",
+    "create-clockwork",
+    "eureka",
+    "trackwork",
+    "cc-tweaked",
+    "advancedperipherals",
+    "exposure",
+    "simple-voice-chat",
+    "zume",
+    "odyssey-quests",
+    "kubejs",
+    "lootjs",
+    "almostunified",
+    "create-diesel-generators",
+    "create-ore-excavation",
+    "create-new-age",
+    "create-railways-navigator",
+    "create-power-loader",
+    "copycats",
+    "bellsandwhistles",
+    "interiors",
+    "farmers-delight",
+    "brewin-and-chewin",
+    "comforts",
+    "immersive-aircraft",
+    "man-of-many-planes",
+    "small-ships",
+    "storagedrawers",
+    "tectonic",
+    "terralith",
+    "lithostitched",
+    "towns-and-towers",
+    "yungs-bridges",
+    "jei",
+    "emi",
+    "jade",
+    "jade-addons-forge",
+    "appleskin",
+    "mouse-tweaks",
+    "controlling",
+    "ferrite-core",
+    "modernfix",
+    "spark",
+    "chunky",
+    "xaeros-minimap",
+    "xaeros-world-map"
+  ],
+  "mods": [
+    {
+      "slug": "create",
+      "title": "Create",
+      "project_id": "LNytGWDc",
+      "version_id": "8amzvn9x",
+      "version": "mc1.20.1-6.0.8",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "WyoEI6Wi",
+          "hashes": {
+            "sha512": "5b51f5d31437d9bfbf221b67459abd87260d284874e1e23b7ed1d522b23a48059a3b1d2c1c541428da35dc6be15561b4f3c7f36aac6df3a0e8db6a278f6b0316",
+            "sha1": "b13d912b9247a38d66d11598c121442585a1c1e9"
+          },
+          "url": "https://cdn.modrinth.com/data/LNytGWDc/versions/8amzvn9x/create-1.20.1-6.0.8.jar",
+          "filename": "create-1.20.1-6.0.8.jar",
+          "primary": true,
+          "size": 19170905,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "WyoEI6Wi",
+        "hashes": {
+          "sha512": "5b51f5d31437d9bfbf221b67459abd87260d284874e1e23b7ed1d522b23a48059a3b1d2c1c541428da35dc6be15561b4f3c7f36aac6df3a0e8db6a278f6b0316",
+          "sha1": "b13d912b9247a38d66d11598c121442585a1c1e9"
+        },
+        "url": "https://cdn.modrinth.com/data/LNytGWDc/versions/8amzvn9x/create-1.20.1-6.0.8.jar",
+        "filename": "create-1.20.1-6.0.8.jar",
+        "primary": true,
+        "size": 19170905,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "create-steam-n-rails",
+      "title": "Create: Steam 'n' Rails",
+      "project_id": "ZzjhlDgM",
+      "version_id": "7Uk6lWkU",
+      "version": "1.7.3+forge-mc1.20.1",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "wuzLrgzc",
+          "hashes": {
+            "sha512": "c46bd5e48e64914433157e8cb92f5679d3407fc6e3e3b40a1a41b043efa6f32a2eb9c486313358e92f9e4cf169710ab161bbfa86a2763afcadff3b6e92021175",
+            "sha1": "5f904126d942cdbd272a5254ec6145851e5e1e7a"
+          },
+          "url": "https://cdn.modrinth.com/data/ZzjhlDgM/versions/7Uk6lWkU/Steam_Rails-1.7.3%2Bforge-mc1.20.1.jar",
+          "filename": "Steam_Rails-1.7.3+forge-mc1.20.1.jar",
+          "primary": true,
+          "size": 17042037,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "wuzLrgzc",
+        "hashes": {
+          "sha512": "c46bd5e48e64914433157e8cb92f5679d3407fc6e3e3b40a1a41b043efa6f32a2eb9c486313358e92f9e4cf169710ab161bbfa86a2763afcadff3b6e92021175",
+          "sha1": "5f904126d942cdbd272a5254ec6145851e5e1e7a"
+        },
+        "url": "https://cdn.modrinth.com/data/ZzjhlDgM/versions/7Uk6lWkU/Steam_Rails-1.7.3%2Bforge-mc1.20.1.jar",
+        "filename": "Steam_Rails-1.7.3+forge-mc1.20.1.jar",
+        "primary": true,
+        "size": 17042037,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "createaddition",
+      "title": "Create Crafts & Additions",
+      "project_id": "kU1G12Nn",
+      "version_id": "9LgyB6Yb",
+      "version": "forge-1.20.1-1.3.3",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "u6dRKJwZ",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "gu7yAYhd",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "5c6NOgaC",
+          "hashes": {
+            "sha512": "a34f5c3b0226069d2882a3e23ba0e364a78bc5d26983b0cecea8d998718f454d3238ab7c5b4b3ef1749b6f2b26a4e427839c7c32468558fa7a8edb0edc727d10",
+            "sha1": "c7d464c451fdc2979bc29a67d7eec2a30858af12"
+          },
+          "url": "https://cdn.modrinth.com/data/kU1G12Nn/versions/9LgyB6Yb/createaddition-1.20.1-1.3.3.jar",
+          "filename": "createaddition-1.20.1-1.3.3.jar",
+          "primary": true,
+          "size": 1577313,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "5c6NOgaC",
+        "hashes": {
+          "sha512": "a34f5c3b0226069d2882a3e23ba0e364a78bc5d26983b0cecea8d998718f454d3238ab7c5b4b3ef1749b6f2b26a4e427839c7c32468558fa7a8edb0edc727d10",
+          "sha1": "c7d464c451fdc2979bc29a67d7eec2a30858af12"
+        },
+        "url": "https://cdn.modrinth.com/data/kU1G12Nn/versions/9LgyB6Yb/createaddition-1.20.1-1.3.3.jar",
+        "filename": "createaddition-1.20.1-1.3.3.jar",
+        "primary": true,
+        "size": 1577313,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "create-enchantment-industry",
+      "title": "Create: Enchantment Industry",
+      "project_id": "JWGBpFUP",
+      "version_id": "caLmFTZ1",
+      "version": "1.4.1",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "t31KazDJ",
+          "hashes": {
+            "sha512": "df13070cad7b477d9eab24fdee9af4fddf8b7183a103e5b00efc7def0107ad075159abf1ca551e4270724197070f78f11bd6da3bb630a84341f9c85dcc0207b3",
+            "sha1": "253b76be7c97bd658d709c0a7418b8bca43c1221"
+          },
+          "url": "https://cdn.modrinth.com/data/JWGBpFUP/versions/caLmFTZ1/create_enchantment_industry-1.4.1-for-create-6.0.8.jar",
+          "filename": "create_enchantment_industry-1.4.1-for-create-6.0.8.jar",
+          "primary": true,
+          "size": 503399,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "t31KazDJ",
+        "hashes": {
+          "sha512": "df13070cad7b477d9eab24fdee9af4fddf8b7183a103e5b00efc7def0107ad075159abf1ca551e4270724197070f78f11bd6da3bb630a84341f9c85dcc0207b3",
+          "sha1": "253b76be7c97bd658d709c0a7418b8bca43c1221"
+        },
+        "url": "https://cdn.modrinth.com/data/JWGBpFUP/versions/caLmFTZ1/create_enchantment_industry-1.4.1-for-create-6.0.8.jar",
+        "filename": "create_enchantment_industry-1.4.1-for-create-6.0.8.jar",
+        "primary": true,
+        "size": 503399,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "create-connected",
+      "title": "Create: Connected",
+      "project_id": "Vg5TIO6d",
+      "version_id": "6gnvaVkN",
+      "version": "1.2.3-mc1.20.1",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "u6dRKJwZ",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "hCGNcUjS",
+          "hashes": {
+            "sha512": "eed01b0d7c96b023bf838208819f52d57606089ce6c1f0e824b212bb53b4e00e35d7d3c7066f125e541799b64c0766b526045ced59bb0dbdce9a7075ab3bdfce",
+            "sha1": "98b4a41c452476496713df16ce4d52fc9f476508"
+          },
+          "url": "https://cdn.modrinth.com/data/Vg5TIO6d/versions/6gnvaVkN/create_connected-1.2.3-mc1.20.1-all.jar",
+          "filename": "create_connected-1.2.3-mc1.20.1-all.jar",
+          "primary": true,
+          "size": 6791072,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "hCGNcUjS",
+        "hashes": {
+          "sha512": "eed01b0d7c96b023bf838208819f52d57606089ce6c1f0e824b212bb53b4e00e35d7d3c7066f125e541799b64c0766b526045ced59bb0dbdce9a7075ab3bdfce",
+          "sha1": "98b4a41c452476496713df16ce4d52fc9f476508"
+        },
+        "url": "https://cdn.modrinth.com/data/Vg5TIO6d/versions/6gnvaVkN/create_connected-1.2.3-mc1.20.1-all.jar",
+        "filename": "create_connected-1.2.3-mc1.20.1-all.jar",
+        "primary": true,
+        "size": 6791072,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "create-deco",
+      "title": "Create Deco",
+      "project_id": "sMvUb4Rb",
+      "version_id": "e9gaSRMd",
+      "version": "2.0.3-1.20.1-forge",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "PcTiENZM",
+          "hashes": {
+            "sha1": "54c8ad5686b846310bca9e69982a455e668dede3",
+            "sha512": "50b7e9bb7b09d720160b2491528f2ab751ad2299541be75cc6941e6b6c3d2d40faff5c5fa07a1bea9e3f43b73146ef6e0fdf6a106e65246b9767dd81053766bf"
+          },
+          "url": "https://cdn.modrinth.com/data/sMvUb4Rb/versions/e9gaSRMd/createdeco-2.0.3-1.20.1-forge.jar",
+          "filename": "createdeco-2.0.3-1.20.1-forge.jar",
+          "primary": true,
+          "size": 3509013,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "PcTiENZM",
+        "hashes": {
+          "sha1": "54c8ad5686b846310bca9e69982a455e668dede3",
+          "sha512": "50b7e9bb7b09d720160b2491528f2ab751ad2299541be75cc6941e6b6c3d2d40faff5c5fa07a1bea9e3f43b73146ef6e0fdf6a106e65246b9767dd81053766bf"
+        },
+        "url": "https://cdn.modrinth.com/data/sMvUb4Rb/versions/e9gaSRMd/createdeco-2.0.3-1.20.1-forge.jar",
+        "filename": "createdeco-2.0.3-1.20.1-forge.jar",
+        "primary": true,
+        "size": 3509013,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "slice-and-dice",
+      "title": "Create Slice & Dice",
+      "project_id": "GmjmRQ0A",
+      "version_id": "KWLI8Ng7",
+      "version": "3.6.0",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "R2OftAxM",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "bCxmmxKN",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "JWGBpFUP",
+          "file_name": null,
+          "dependency_type": "optional"
+        }
+      ],
+      "files": [
+        {
+          "id": "hxLDWXsF",
+          "hashes": {
+            "sha1": "a4e47dbf4382ebe092b6c2cb71919e412b456d84",
+            "sha512": "b6108218d933ba6b612f2018efe1329957c0cde473f07bc405f7defa76602bb2f6749763db5734ec8547e8c5c1908ef57a9c539c90c23068ed9ab5be267e73a0"
+          },
+          "url": "https://cdn.modrinth.com/data/GmjmRQ0A/versions/KWLI8Ng7/sliceanddice-forge-3.6.0.jar",
+          "filename": "sliceanddice-forge-3.6.0.jar",
+          "primary": true,
+          "size": 588268,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "hxLDWXsF",
+        "hashes": {
+          "sha1": "a4e47dbf4382ebe092b6c2cb71919e412b456d84",
+          "sha512": "b6108218d933ba6b612f2018efe1329957c0cde473f07bc405f7defa76602bb2f6749763db5734ec8547e8c5c1908ef57a9c539c90c23068ed9ab5be267e73a0"
+        },
+        "url": "https://cdn.modrinth.com/data/GmjmRQ0A/versions/KWLI8Ng7/sliceanddice-forge-3.6.0.jar",
+        "filename": "sliceanddice-forge-3.6.0.jar",
+        "primary": true,
+        "size": 588268,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "create-central-kitchen",
+      "title": "Create: Central Kitchen",
+      "project_id": "btq68HMO",
+      "version_id": "jMB94kRJ",
+      "version": "1.5.1",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "he3jrZJR",
+          "hashes": {
+            "sha512": "3618a5b2a10db62cd0e511f757ae175339e26467ff0ffd44d1a7bd29355fb1183b3f1e6a72e00d8e096f918f5b611ff4586ae93be8215a7504b8c6013e6d5ec5",
+            "sha1": "0b086193c1df819730ca6c06d5de3c7a8ed3b4f3"
+          },
+          "url": "https://cdn.modrinth.com/data/btq68HMO/versions/jMB94kRJ/create_central_kitchen-1.20.1-for-create-6.0.8-1.5.1.jar",
+          "filename": "create_central_kitchen-1.20.1-for-create-6.0.8-1.5.1.jar",
+          "primary": true,
+          "size": 1499795,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "he3jrZJR",
+        "hashes": {
+          "sha512": "3618a5b2a10db62cd0e511f757ae175339e26467ff0ffd44d1a7bd29355fb1183b3f1e6a72e00d8e096f918f5b611ff4586ae93be8215a7504b8c6013e6d5ec5",
+          "sha1": "0b086193c1df819730ca6c06d5de3c7a8ed3b4f3"
+        },
+        "url": "https://cdn.modrinth.com/data/btq68HMO/versions/jMB94kRJ/create_central_kitchen-1.20.1-for-create-6.0.8-1.5.1.jar",
+        "filename": "create_central_kitchen-1.20.1-for-create-6.0.8-1.5.1.jar",
+        "primary": true,
+        "size": 1499795,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "valkyrien-skies",
+      "title": "Valkyrien Skies",
+      "project_id": "V5ujR2yw",
+      "version_id": "pOkdwuUh",
+      "version": "1.20.1-forge-2.4.11",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "9s6osm5g",
+          "file_name": null,
+          "dependency_type": "embedded"
+        },
+        {
+          "version_id": null,
+          "project_id": "ordsPcFz",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "Kxn1dwqd",
+          "hashes": {
+            "sha512": "6a0d959ed4bf76f08dcad0e6a360bda842d85386a05f510069eafbcc6b46b4216cdcfd9e377f82e4266b0f07e6b74118d8382af0bafcbdd65712f8a92f16e146",
+            "sha1": "bd3478fcd43d4168950dfa7e77188d7bb12fd43e"
+          },
+          "url": "https://cdn.modrinth.com/data/V5ujR2yw/versions/pOkdwuUh/valkyrienskies-120-2.4.11.jar",
+          "filename": "valkyrienskies-120-2.4.11.jar",
+          "primary": true,
+          "size": 27752937,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "Kxn1dwqd",
+        "hashes": {
+          "sha512": "6a0d959ed4bf76f08dcad0e6a360bda842d85386a05f510069eafbcc6b46b4216cdcfd9e377f82e4266b0f07e6b74118d8382af0bafcbdd65712f8a92f16e146",
+          "sha1": "bd3478fcd43d4168950dfa7e77188d7bb12fd43e"
+        },
+        "url": "https://cdn.modrinth.com/data/V5ujR2yw/versions/pOkdwuUh/valkyrienskies-120-2.4.11.jar",
+        "filename": "valkyrienskies-120-2.4.11.jar",
+        "primary": true,
+        "size": 27752937,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "create-clockwork",
+      "title": "Clockwork",
+      "project_id": "84USeAvk",
+      "version_id": "fYK8BigB",
+      "version": "1.20.1-forge-0.5.6",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "V5ujR2yw",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "4FSaHEZn",
+          "hashes": {
+            "sha512": "73d34a7992cbad877280efc18f520397863b3828b4815a6551bf8120eb7147ee78f65ea14b1cb958c6e219f8f0dbe7a5676af4d7b09c8cc4e31bec824789763c",
+            "sha1": "725fbcf11619ecc206cf6f98cd10c6b4cd1db5d4"
+          },
+          "url": "https://cdn.modrinth.com/data/84USeAvk/versions/fYK8BigB/clockwork-0.5.6.jar",
+          "filename": "clockwork-0.5.6.jar",
+          "primary": true,
+          "size": 11021061,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "4FSaHEZn",
+        "hashes": {
+          "sha512": "73d34a7992cbad877280efc18f520397863b3828b4815a6551bf8120eb7147ee78f65ea14b1cb958c6e219f8f0dbe7a5676af4d7b09c8cc4e31bec824789763c",
+          "sha1": "725fbcf11619ecc206cf6f98cd10c6b4cd1db5d4"
+        },
+        "url": "https://cdn.modrinth.com/data/84USeAvk/versions/fYK8BigB/clockwork-0.5.6.jar",
+        "filename": "clockwork-0.5.6.jar",
+        "primary": true,
+        "size": 11021061,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "eureka",
+      "title": "Eureka! Ships! for Valkyrien Skies (Forge/Fabric)",
+      "project_id": "EO8aSHxh",
+      "version_id": "J1B6BA08",
+      "version": "1.20.1-forge-1.6.4",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "V5ujR2yw",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "YP099yaw",
+          "hashes": {
+            "sha1": "dfcc1df058fbf8535f5e34ebf5f01810db60addc",
+            "sha512": "6e0749e48673ab020527a04c19292d28ce5ca4833bb1db860ac422c5894eff63954023f77d23a1ba87e83cdfca917d47044d5674186f90d9ef2c5bfd8e3734c4"
+          },
+          "url": "https://cdn.modrinth.com/data/EO8aSHxh/versions/J1B6BA08/eureka-1201-1.6.4.jar",
+          "filename": "eureka-1201-1.6.4.jar",
+          "primary": true,
+          "size": 467753,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "YP099yaw",
+        "hashes": {
+          "sha1": "dfcc1df058fbf8535f5e34ebf5f01810db60addc",
+          "sha512": "6e0749e48673ab020527a04c19292d28ce5ca4833bb1db860ac422c5894eff63954023f77d23a1ba87e83cdfca917d47044d5674186f90d9ef2c5bfd8e3734c4"
+        },
+        "url": "https://cdn.modrinth.com/data/EO8aSHxh/versions/J1B6BA08/eureka-1201-1.6.4.jar",
+        "filename": "eureka-1201-1.6.4.jar",
+        "primary": true,
+        "size": 467753,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "trackwork",
+      "title": "Trackwork",
+      "project_id": "FXDpZRJG",
+      "version_id": "i5GpwEF8",
+      "version": "1.20.1-1.2.3",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "V5ujR2yw",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "D8x63Rxt",
+          "hashes": {
+            "sha1": "458e00fcd2afb2fabf634edc118f8d651c8857f5",
+            "sha512": "e9451d16696a68b313c8fb5a8a239dfad1af4595496db83f15bfbf76685fbfd41af620150a257f860f6465e151f1e8d0f856954e7972c90f1d6cc13a70bff20b"
+          },
+          "url": "https://cdn.modrinth.com/data/FXDpZRJG/versions/i5GpwEF8/trackwork-1.20.1-1.2.3.jar",
+          "filename": "trackwork-1.20.1-1.2.3.jar",
+          "primary": true,
+          "size": 576332,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "D8x63Rxt",
+        "hashes": {
+          "sha1": "458e00fcd2afb2fabf634edc118f8d651c8857f5",
+          "sha512": "e9451d16696a68b313c8fb5a8a239dfad1af4595496db83f15bfbf76685fbfd41af620150a257f860f6465e151f1e8d0f856954e7972c90f1d6cc13a70bff20b"
+        },
+        "url": "https://cdn.modrinth.com/data/FXDpZRJG/versions/i5GpwEF8/trackwork-1.20.1-1.2.3.jar",
+        "filename": "trackwork-1.20.1-1.2.3.jar",
+        "primary": true,
+        "size": 576332,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "cc-tweaked",
+      "title": "CC: Tweaked",
+      "project_id": "gu7yAYhd",
+      "version_id": "Qm9iIIEY",
+      "version": "1.121.0",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "FENBFobQ",
+          "hashes": {
+            "sha1": "739e77a2b60d727d8dcf7874188edf683683329d",
+            "sha512": "6ebe4c1e8e6165cb97f071a5a54acd942c234ae62d36330369fdae4bf720a93e99b84e833385f0f103e8fb03425ed20c9f9122411f0008e8ac9efa24b719522d"
+          },
+          "url": "https://cdn.modrinth.com/data/gu7yAYhd/versions/Qm9iIIEY/cc-tweaked-1.20.1-forge-1.121.0.jar",
+          "filename": "cc-tweaked-1.20.1-forge-1.121.0.jar",
+          "primary": true,
+          "size": 3178213,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "FENBFobQ",
+        "hashes": {
+          "sha1": "739e77a2b60d727d8dcf7874188edf683683329d",
+          "sha512": "6ebe4c1e8e6165cb97f071a5a54acd942c234ae62d36330369fdae4bf720a93e99b84e833385f0f103e8fb03425ed20c9f9122411f0008e8ac9efa24b719522d"
+        },
+        "url": "https://cdn.modrinth.com/data/gu7yAYhd/versions/Qm9iIIEY/cc-tweaked-1.20.1-forge-1.121.0.jar",
+        "filename": "cc-tweaked-1.20.1-forge-1.121.0.jar",
+        "primary": true,
+        "size": 3178213,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "advancedperipherals",
+      "title": "Advanced Peripherals",
+      "project_id": "SOw6jD6x",
+      "version_id": "mIP0ApJY",
+      "version": "1.20.1-0.7.48r",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "gu7yAYhd",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "KZo6R6VY",
+          "hashes": {
+            "sha512": "6f47380de6a74625045630e366a1d6b51a251621e98fdb78c165bdd7e0f9abc443935102d83184ff2e18ae4d018d6d8518a0eb6174cfcdb4f9b28f8dab2ee65f",
+            "sha1": "c93aa2998b54775dc4859f00530d04965b5c5dd1"
+          },
+          "url": "https://cdn.modrinth.com/data/SOw6jD6x/versions/mIP0ApJY/AdvancedPeripherals-1.20.1-0.7.48r.jar",
+          "filename": "AdvancedPeripherals-1.20.1-0.7.48r.jar",
+          "primary": true,
+          "size": 885438,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "KZo6R6VY",
+        "hashes": {
+          "sha512": "6f47380de6a74625045630e366a1d6b51a251621e98fdb78c165bdd7e0f9abc443935102d83184ff2e18ae4d018d6d8518a0eb6174cfcdb4f9b28f8dab2ee65f",
+          "sha1": "c93aa2998b54775dc4859f00530d04965b5c5dd1"
+        },
+        "url": "https://cdn.modrinth.com/data/SOw6jD6x/versions/mIP0ApJY/AdvancedPeripherals-1.20.1-0.7.48r.jar",
+        "filename": "AdvancedPeripherals-1.20.1-0.7.48r.jar",
+        "primary": true,
+        "size": 885438,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "exposure",
+      "title": "Exposure",
+      "project_id": "hB899VmG",
+      "version_id": "vPrmURi1",
+      "version": "1.9.24",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "u6dRKJwZ",
+          "file_name": null,
+          "dependency_type": "optional"
+        }
+      ],
+      "files": [
+        {
+          "id": "LdzgbJ8m",
+          "hashes": {
+            "sha512": "1308f6b01cc763971c83f20420d30f94fe58d7a1c274618ab45a8a8a7657dab24679800bf22acf49df96bd5dacee372e910e747d84fe1892b62703bb7a29676b",
+            "sha1": "5af123b2ac6e553d7fbd13491487b8e35a9b621d"
+          },
+          "url": "https://cdn.modrinth.com/data/hB899VmG/versions/vPrmURi1/exposure-forge-1.20.1-1.9.24.jar",
+          "filename": "exposure-forge-1.20.1-1.9.24.jar",
+          "primary": true,
+          "size": 2249680,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "LdzgbJ8m",
+        "hashes": {
+          "sha512": "1308f6b01cc763971c83f20420d30f94fe58d7a1c274618ab45a8a8a7657dab24679800bf22acf49df96bd5dacee372e910e747d84fe1892b62703bb7a29676b",
+          "sha1": "5af123b2ac6e553d7fbd13491487b8e35a9b621d"
+        },
+        "url": "https://cdn.modrinth.com/data/hB899VmG/versions/vPrmURi1/exposure-forge-1.20.1-1.9.24.jar",
+        "filename": "exposure-forge-1.20.1-1.9.24.jar",
+        "primary": true,
+        "size": 2249680,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "simple-voice-chat",
+      "title": "Simple Voice Chat",
+      "project_id": "9eGKb6K1",
+      "version_id": "S11m0QIb",
+      "version": "forge-1.20.1-2.6.22",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "9s6osm5g",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "qyVF9oeo",
+          "file_name": null,
+          "dependency_type": "optional"
+        }
+      ],
+      "files": [
+        {
+          "id": "daGxMQ3c",
+          "hashes": {
+            "sha1": "ad9179e30cb7b3ffb42b3d9b8e2e9408b473d7fa",
+            "sha512": "23c8b3a593fe506af8d8e0edc0afb45349777d5cdea41ffc3fa99afc2e3b9bc7770bb9951f674017ea5b3c23e111b0c6031ebd61820c9a0b5191e3992d9c8798"
+          },
+          "url": "https://cdn.modrinth.com/data/9eGKb6K1/versions/S11m0QIb/voicechat-forge-1.20.1-2.6.22.jar",
+          "filename": "voicechat-forge-1.20.1-2.6.22.jar",
+          "primary": true,
+          "size": 4923439,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "daGxMQ3c",
+        "hashes": {
+          "sha1": "ad9179e30cb7b3ffb42b3d9b8e2e9408b473d7fa",
+          "sha512": "23c8b3a593fe506af8d8e0edc0afb45349777d5cdea41ffc3fa99afc2e3b9bc7770bb9951f674017ea5b3c23e111b0c6031ebd61820c9a0b5191e3992d9c8798"
+        },
+        "url": "https://cdn.modrinth.com/data/9eGKb6K1/versions/S11m0QIb/voicechat-forge-1.20.1-2.6.22.jar",
+        "filename": "voicechat-forge-1.20.1-2.6.22.jar",
+        "primary": true,
+        "size": 4923439,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "zume",
+      "title": "Zume",
+      "project_id": "o6qsdrrQ",
+      "version_id": "Rh2ImJ86",
+      "version": "1.2.2",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "sk9rgfiA",
+          "file_name": null,
+          "dependency_type": "optional"
+        }
+      ],
+      "files": [
+        {
+          "id": "UvjYyc5d",
+          "hashes": {
+            "sha512": "9803fcf070327ed40316f8323ad7de83977a4ff8dc928c892836c8f49a9be3da6e9282aa85bf8bcf3467c4339f3d16dad5ec92d1a2e9bc9fc10bddba1ffc1190",
+            "sha1": "cbd353ee0e2a35d122a758b9cbb26b2f54145f3f"
+          },
+          "url": "https://cdn.modrinth.com/data/o6qsdrrQ/versions/Rh2ImJ86/zume-1.2.2.jar",
+          "filename": "zume-1.2.2.jar",
+          "primary": true,
+          "size": 99445,
+          "file_type": null
+        },
+        {
+          "id": "wI3hee6n",
+          "hashes": {
+            "sha1": "d85a83a4549731120c0d140aef03f599facc8213",
+            "sha512": "ba01a1a28aa2b6b42b76199b938a3d1f129cf9e5551b3468cbb74b618519f1160db6716f3759b6942b510d51b03f84d7b44be768a5c6194bfeeb7fcbca4ea4a8"
+          },
+          "url": "https://cdn.modrinth.com/data/o6qsdrrQ/versions/Rh2ImJ86/zume-1.2.2-sources.jar",
+          "filename": "zume-1.2.2-sources.jar",
+          "primary": false,
+          "size": 81949,
+          "file_type": null
+        }
+      ],
+      "client_only": true,
+      "selected_file": {
+        "id": "UvjYyc5d",
+        "hashes": {
+          "sha512": "9803fcf070327ed40316f8323ad7de83977a4ff8dc928c892836c8f49a9be3da6e9282aa85bf8bcf3467c4339f3d16dad5ec92d1a2e9bc9fc10bddba1ffc1190",
+          "sha1": "cbd353ee0e2a35d122a758b9cbb26b2f54145f3f"
+        },
+        "url": "https://cdn.modrinth.com/data/o6qsdrrQ/versions/Rh2ImJ86/zume-1.2.2.jar",
+        "filename": "zume-1.2.2.jar",
+        "primary": true,
+        "size": 99445,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "odyssey-quests",
+      "title": "Odyssey Quests",
+      "project_id": "lo90fZoB",
+      "version_id": "9ZUSHiZa",
+      "version": "1.1.13",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "G1hIVOrD",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "sQMGNFVb",
+          "hashes": {
+            "sha1": "ca6de15e1631ccbf5463fcf3df6d3ad37aa5d6e5",
+            "sha512": "e3baefb03efa84e3e5cc8f329d81bd9b2f27a878875acf8ad9977e6a89ee173733060f40980a130970383d6f15c268f63242789d57052fe545a7ba05d5a24949"
+          },
+          "url": "https://cdn.modrinth.com/data/lo90fZoB/versions/9ZUSHiZa/Heracles-forge-1.20.1-1.1.13.jar",
+          "filename": "Heracles-forge-1.20.1-1.1.13.jar",
+          "primary": true,
+          "size": 1420890,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "sQMGNFVb",
+        "hashes": {
+          "sha1": "ca6de15e1631ccbf5463fcf3df6d3ad37aa5d6e5",
+          "sha512": "e3baefb03efa84e3e5cc8f329d81bd9b2f27a878875acf8ad9977e6a89ee173733060f40980a130970383d6f15c268f63242789d57052fe545a7ba05d5a24949"
+        },
+        "url": "https://cdn.modrinth.com/data/lo90fZoB/versions/9ZUSHiZa/Heracles-forge-1.20.1-1.1.13.jar",
+        "filename": "Heracles-forge-1.20.1-1.1.13.jar",
+        "primary": true,
+        "size": 1420890,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "kubejs",
+      "title": "KubeJS",
+      "project_id": "umyGl7zF",
+      "version_id": "hVR2xUSr",
+      "version": "2001.6.5-build.26+forge",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "lhGA9TYQ",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "sk9knFPE",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "CU9nijIc",
+          "hashes": {
+            "sha512": "71ef9e5eb5f3bead86b635b42ad305d075c6487e631217b281d938193dcdc5fe0ff6bae8c86dd4e069726223a66e8690c0610f736c5a62910f60fd80edd575c1",
+            "sha1": "8b0cc9797d4ed00fd2d1002d58960af8b32012ae"
+          },
+          "url": "https://cdn.modrinth.com/data/umyGl7zF/versions/hVR2xUSr/kubejs-forge-2001.6.5-build.26.jar",
+          "filename": "kubejs-forge-2001.6.5-build.26.jar",
+          "primary": true,
+          "size": 1658792,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "CU9nijIc",
+        "hashes": {
+          "sha512": "71ef9e5eb5f3bead86b635b42ad305d075c6487e631217b281d938193dcdc5fe0ff6bae8c86dd4e069726223a66e8690c0610f736c5a62910f60fd80edd575c1",
+          "sha1": "8b0cc9797d4ed00fd2d1002d58960af8b32012ae"
+        },
+        "url": "https://cdn.modrinth.com/data/umyGl7zF/versions/hVR2xUSr/kubejs-forge-2001.6.5-build.26.jar",
+        "filename": "kubejs-forge-2001.6.5-build.26.jar",
+        "primary": true,
+        "size": 1658792,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "lootjs",
+      "title": "LootJS: KubeJS Addon",
+      "project_id": "fJFETWDN",
+      "version_id": "wltVDhRB",
+      "version": "1.20.1-2.13.1+forge",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "nfn13YXA",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "u6dRKJwZ",
+          "file_name": null,
+          "dependency_type": "optional"
+        }
+      ],
+      "files": [
+        {
+          "id": "E51LIj3F",
+          "hashes": {
+            "sha512": "c03a07caf451a272f8027a47bb951db73f19bb24d603b61f0328a1769568a98f3912ec6b7bf39218062add102cb8fa7b29ae4ca73731cfa2db09eaac8fcf1033",
+            "sha1": "804deb0bd34d69cad873170642b9d7e47fa0d6ad"
+          },
+          "url": "https://cdn.modrinth.com/data/fJFETWDN/versions/wltVDhRB/lootjs-forge-1.20.1-2.13.1.jar",
+          "filename": "lootjs-forge-1.20.1-2.13.1.jar",
+          "primary": true,
+          "size": 242267,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "E51LIj3F",
+        "hashes": {
+          "sha512": "c03a07caf451a272f8027a47bb951db73f19bb24d603b61f0328a1769568a98f3912ec6b7bf39218062add102cb8fa7b29ae4ca73731cfa2db09eaac8fcf1033",
+          "sha1": "804deb0bd34d69cad873170642b9d7e47fa0d6ad"
+        },
+        "url": "https://cdn.modrinth.com/data/fJFETWDN/versions/wltVDhRB/lootjs-forge-1.20.1-2.13.1.jar",
+        "filename": "lootjs-forge-1.20.1-2.13.1.jar",
+        "primary": true,
+        "size": 242267,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "almostunified",
+      "title": "Almost Unified",
+      "project_id": "sdaSaQEz",
+      "version_id": "9qc7KIeg",
+      "version": "1.20.1-0.11.0+forge",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "umyGl7zF",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "nfn13YXA",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "u6dRKJwZ",
+          "file_name": null,
+          "dependency_type": "optional"
+        }
+      ],
+      "files": [
+        {
+          "id": "jQVtANNa",
+          "hashes": {
+            "sha512": "fcd7da643e84d7779e32af6916c6f8e808559d4724d565cc6d23fc96527f3bf50ea0b686eca1916c5dfeac146d836cf593a85374b6f04b60215f748aa00e3824",
+            "sha1": "24943e5efe95c10367259a7bbd13874ca56ebf0a"
+          },
+          "url": "https://cdn.modrinth.com/data/sdaSaQEz/versions/9qc7KIeg/almostunified-forge-1.20.1-0.11.0.jar",
+          "filename": "almostunified-forge-1.20.1-0.11.0.jar",
+          "primary": true,
+          "size": 218740,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "jQVtANNa",
+        "hashes": {
+          "sha512": "fcd7da643e84d7779e32af6916c6f8e808559d4724d565cc6d23fc96527f3bf50ea0b686eca1916c5dfeac146d836cf593a85374b6f04b60215f748aa00e3824",
+          "sha1": "24943e5efe95c10367259a7bbd13874ca56ebf0a"
+        },
+        "url": "https://cdn.modrinth.com/data/sdaSaQEz/versions/9qc7KIeg/almostunified-forge-1.20.1-0.11.0.jar",
+        "filename": "almostunified-forge-1.20.1-0.11.0.jar",
+        "primary": true,
+        "size": 218740,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "create-diesel-generators",
+      "title": "Create: Diesel Generators",
+      "project_id": "ZM3tt6p1",
+      "version_id": "DTQVvA5H",
+      "version": "1.20.1-1.3.12",
+      "dependencies": [
+        {
+          "version_id": "8amzvn9x",
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "nYttuK8p",
+          "hashes": {
+            "sha512": "fc9aebaa5b654078be4736e1c35cc34edda0986db75fc3ce1391a86a499df6dcb3958d9854d402f5479eeb38d0f9388223b0359a34d594589e75ed3a58dd45a1",
+            "sha1": "416ea3d5c1190246369bbcfa32e5e86597402264"
+          },
+          "url": "https://cdn.modrinth.com/data/ZM3tt6p1/versions/DTQVvA5H/createdieselgenerators-1.20.1-1.3.12.jar",
+          "filename": "createdieselgenerators-1.20.1-1.3.12.jar",
+          "primary": true,
+          "size": 3128610,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "nYttuK8p",
+        "hashes": {
+          "sha512": "fc9aebaa5b654078be4736e1c35cc34edda0986db75fc3ce1391a86a499df6dcb3958d9854d402f5479eeb38d0f9388223b0359a34d594589e75ed3a58dd45a1",
+          "sha1": "416ea3d5c1190246369bbcfa32e5e86597402264"
+        },
+        "url": "https://cdn.modrinth.com/data/ZM3tt6p1/versions/DTQVvA5H/createdieselgenerators-1.20.1-1.3.12.jar",
+        "filename": "createdieselgenerators-1.20.1-1.3.12.jar",
+        "primary": true,
+        "size": 3128610,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "create-ore-excavation",
+      "title": "Create Ore Excavation",
+      "project_id": "ResbpANg",
+      "version_id": "J3rjB9Lq",
+      "version": "1.20.1-1.6.6",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "gu7yAYhd",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "u6dRKJwZ",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "umyGl7zF",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "h5fw662G",
+          "hashes": {
+            "sha512": "6c31ea25730c39e4694eaf8a9d695b015336ce851bb6905aeac5e15bdf7d5e2b3356d83d102b5849ea95e737ac0ffd3393ed7fde1155ff9f67a6994efeede932",
+            "sha1": "d9a7a2298bfe79ce9cdbaebf22e58454414105eb"
+          },
+          "url": "https://cdn.modrinth.com/data/ResbpANg/versions/J3rjB9Lq/createoreexcavation-1.20-1.6.6.jar",
+          "filename": "createoreexcavation-1.20-1.6.6.jar",
+          "primary": true,
+          "size": 431227,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "h5fw662G",
+        "hashes": {
+          "sha512": "6c31ea25730c39e4694eaf8a9d695b015336ce851bb6905aeac5e15bdf7d5e2b3356d83d102b5849ea95e737ac0ffd3393ed7fde1155ff9f67a6994efeede932",
+          "sha1": "d9a7a2298bfe79ce9cdbaebf22e58454414105eb"
+        },
+        "url": "https://cdn.modrinth.com/data/ResbpANg/versions/J3rjB9Lq/createoreexcavation-1.20-1.6.6.jar",
+        "filename": "createoreexcavation-1.20-1.6.6.jar",
+        "primary": true,
+        "size": 431227,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "create-new-age",
+      "title": "Create: New Age",
+      "project_id": "FTeXqI9v",
+      "version_id": "7vnwbouk",
+      "version": "1.2.0+mc1.20.1",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "qCTM6J1H",
+          "hashes": {
+            "sha512": "2a24913624febc797275654dd31a6ef0aeb63da71d243b5ab9c58b7fc8e51455f24645bed87ec430bd166c69e23df044dcfcf5fc2bde1d8b7c1c3206724a7a07",
+            "sha1": "d84322b22219888a55ad0520150ad3ef784d208a"
+          },
+          "url": "https://cdn.modrinth.com/data/FTeXqI9v/versions/7vnwbouk/create-new-age-1.2.0%2Bforge-mc1.20.1.jar",
+          "filename": "create-new-age-1.2.0+forge-mc1.20.1.jar",
+          "primary": true,
+          "size": 1206077,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "qCTM6J1H",
+        "hashes": {
+          "sha512": "2a24913624febc797275654dd31a6ef0aeb63da71d243b5ab9c58b7fc8e51455f24645bed87ec430bd166c69e23df044dcfcf5fc2bde1d8b7c1c3206724a7a07",
+          "sha1": "d84322b22219888a55ad0520150ad3ef784d208a"
+        },
+        "url": "https://cdn.modrinth.com/data/FTeXqI9v/versions/7vnwbouk/create-new-age-1.2.0%2Bforge-mc1.20.1.jar",
+        "filename": "create-new-age-1.2.0+forge-mc1.20.1.jar",
+        "primary": true,
+        "size": 1206077,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "create-railways-navigator",
+      "title": "Create Railways Navigator",
+      "project_id": "Dq3STxps",
+      "version_id": "clWHhbZY",
+      "version": "1.20.1-beta-0.10.0-C6",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "sbIsGaOV",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "wx3jHjkD",
+          "hashes": {
+            "sha512": "b4e397091bd2ed65f2a57741ce886f3811604cd4ab0a41ddc3c3daf1cfc9bd4a4651ad6764915dd59ef7cf11ff760108df49759fbdbe9855e9f48c8541b4ac87",
+            "sha1": "594f9d0db8ab40b48d0e339dfcffa3f22b3beb05"
+          },
+          "url": "https://cdn.modrinth.com/data/Dq3STxps/versions/clWHhbZY/createrailwaysnavigator-forge-1.20.1-beta-0.10.0-C6.jar",
+          "filename": "createrailwaysnavigator-forge-1.20.1-beta-0.10.0-C6.jar",
+          "primary": true,
+          "size": 4676758,
+          "file_type": null
+        },
+        {
+          "id": "Jdr86YD7",
+          "hashes": {
+            "sha1": "a6dc52f2a5e37c9fd3b8d80175eebe3bb35309af",
+            "sha512": "0602c649895b8631238f556e7825839b20c31d9b335644d7173302c48fa09fa64d91f6d02bf324961d8ec584ae40c2ee5d248e387768de4d359f841541de18bb"
+          },
+          "url": "https://cdn.modrinth.com/data/Dq3STxps/versions/clWHhbZY/createrailwaysnavigator-forge-1.20.1-beta-0.10.0-C6-javadoc.jar",
+          "filename": "createrailwaysnavigator-forge-1.20.1-beta-0.10.0-C6-javadoc.jar",
+          "primary": false,
+          "size": 107440,
+          "file_type": null
+        },
+        {
+          "id": "9dHKs9ZA",
+          "hashes": {
+            "sha512": "de987cc3f2181bbbef370e7270caccba064dc94695449bbda33ee823bb5493ee5de63723e57d379e87f97944db110a77d6e44a3a20e01d1fabd61798c2df4a7c",
+            "sha1": "38c3f8d3918fddc3a3443e717a0432d43a821243"
+          },
+          "url": "https://cdn.modrinth.com/data/Dq3STxps/versions/clWHhbZY/createrailwaysnavigator-forge-1.20.1-beta-0.10.0-C6-sources.jar",
+          "filename": "createrailwaysnavigator-forge-1.20.1-beta-0.10.0-C6-sources.jar",
+          "primary": false,
+          "size": 1490887,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "wx3jHjkD",
+        "hashes": {
+          "sha512": "b4e397091bd2ed65f2a57741ce886f3811604cd4ab0a41ddc3c3daf1cfc9bd4a4651ad6764915dd59ef7cf11ff760108df49759fbdbe9855e9f48c8541b4ac87",
+          "sha1": "594f9d0db8ab40b48d0e339dfcffa3f22b3beb05"
+        },
+        "url": "https://cdn.modrinth.com/data/Dq3STxps/versions/clWHhbZY/createrailwaysnavigator-forge-1.20.1-beta-0.10.0-C6.jar",
+        "filename": "createrailwaysnavigator-forge-1.20.1-beta-0.10.0-C6.jar",
+        "primary": true,
+        "size": 4676758,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "create-power-loader",
+      "title": "Create: Power Loader",
+      "project_id": "wPQ6GgFE",
+      "version_id": "gQuz8jcV",
+      "version": "2.0.3-mc1.20.1",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "u6dRKJwZ",
+          "file_name": null,
+          "dependency_type": "optional"
+        }
+      ],
+      "files": [
+        {
+          "id": "pLWAZjHc",
+          "hashes": {
+            "sha512": "cce4eeb6a7dc942f24f0a7b4182c1b92898b3cc998a876d910148a498d0a39ac8a37fb7d9b66ee81dadd422b9fe42ff57c7f5f9aa05dcdde80b64c04cfb9d55d",
+            "sha1": "6b638fb67730d8429ec64fb43e20ad651f2e49b6"
+          },
+          "url": "https://cdn.modrinth.com/data/wPQ6GgFE/versions/gQuz8jcV/create_power_loader-2.0.3-mc1.20.1.jar",
+          "filename": "create_power_loader-2.0.3-mc1.20.1.jar",
+          "primary": true,
+          "size": 227962,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "pLWAZjHc",
+        "hashes": {
+          "sha512": "cce4eeb6a7dc942f24f0a7b4182c1b92898b3cc998a876d910148a498d0a39ac8a37fb7d9b66ee81dadd422b9fe42ff57c7f5f9aa05dcdde80b64c04cfb9d55d",
+          "sha1": "6b638fb67730d8429ec64fb43e20ad651f2e49b6"
+        },
+        "url": "https://cdn.modrinth.com/data/wPQ6GgFE/versions/gQuz8jcV/create_power_loader-2.0.3-mc1.20.1.jar",
+        "filename": "create_power_loader-2.0.3-mc1.20.1.jar",
+        "primary": true,
+        "size": 227962,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "copycats",
+      "title": "Create: Copycats+",
+      "project_id": "UT2M39wf",
+      "version_id": "LlMxIysb",
+      "version": "3.0.10+mc.1.20.1-forge",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "u6dRKJwZ",
+          "file_name": null,
+          "dependency_type": "optional"
+        }
+      ],
+      "files": [
+        {
+          "id": "whvO72Xe",
+          "hashes": {
+            "sha1": "939d4ca4ac42b93c05a5fb92e629fb8cff060dc9",
+            "sha512": "b92d506eb21b46e1ad00b53e329e7870b4b5c0b3cbff9a75b560de71c0d950912500384b2ea396f6b0a3a69388a7cd1beaff711cf7501c4cc5512673339d46ff"
+          },
+          "url": "https://cdn.modrinth.com/data/UT2M39wf/versions/LlMxIysb/copycats-3.0.10%2Bmc.1.20.1-forge.jar",
+          "filename": "copycats-3.0.10+mc.1.20.1-forge.jar",
+          "primary": true,
+          "size": 2003713,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "whvO72Xe",
+        "hashes": {
+          "sha1": "939d4ca4ac42b93c05a5fb92e629fb8cff060dc9",
+          "sha512": "b92d506eb21b46e1ad00b53e329e7870b4b5c0b3cbff9a75b560de71c0d950912500384b2ea396f6b0a3a69388a7cd1beaff711cf7501c4cc5512673339d46ff"
+        },
+        "url": "https://cdn.modrinth.com/data/UT2M39wf/versions/LlMxIysb/copycats-3.0.10%2Bmc.1.20.1-forge.jar",
+        "filename": "copycats-3.0.10+mc.1.20.1-forge.jar",
+        "primary": true,
+        "size": 2003713,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "bellsandwhistles",
+      "title": "Create: Bells & Whistles",
+      "project_id": "gJ5afkVv",
+      "version_id": "kW8DoegV",
+      "version": "0.4.5-1.20.x",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "o3lN0Ih9",
+          "hashes": {
+            "sha512": "99fc8e509ff2ed5a3c521e17bb04e574f6cf5d1abc9adb170dd5d311b9cdc762f75bd133b63e1fd56e00fe030674cf87ee1760187fed1c3d30dae429ee00861c",
+            "sha1": "2487eea5f1368d70e16c7c6a08c18be3b5d3c0d0"
+          },
+          "url": "https://cdn.modrinth.com/data/gJ5afkVv/versions/kW8DoegV/bellsandwhistles-0.4.5-1.20.x-Create6.0%2B.jar",
+          "filename": "bellsandwhistles-0.4.5-1.20.x-Create6.0+.jar",
+          "primary": true,
+          "size": 199902,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "o3lN0Ih9",
+        "hashes": {
+          "sha512": "99fc8e509ff2ed5a3c521e17bb04e574f6cf5d1abc9adb170dd5d311b9cdc762f75bd133b63e1fd56e00fe030674cf87ee1760187fed1c3d30dae429ee00861c",
+          "sha1": "2487eea5f1368d70e16c7c6a08c18be3b5d3c0d0"
+        },
+        "url": "https://cdn.modrinth.com/data/gJ5afkVv/versions/kW8DoegV/bellsandwhistles-0.4.5-1.20.x-Create6.0%2B.jar",
+        "filename": "bellsandwhistles-0.4.5-1.20.x-Create6.0+.jar",
+        "primary": true,
+        "size": 199902,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "interiors",
+      "title": "Create: Interiors",
+      "project_id": "r4Knci2k",
+      "version_id": "3Gpm5qDT",
+      "version": "1.20.1-forge-0.6.0",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "LNytGWDc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "F6xrSe8L",
+          "hashes": {
+            "sha512": "02f3f01d627f315a5185848ab20bee3d5269705e6fe9a1f6bb57ae47954231a04c8360c0ebf57c3e0fad2bac8cff0e97417f63982caf4545c624805a02984b5e",
+            "sha1": "3371c5ab69a1169f74bee7ab6349bc0f5d6e69bb"
+          },
+          "url": "https://cdn.modrinth.com/data/r4Knci2k/versions/3Gpm5qDT/interiors-1.20.1-forge-0.6.0.jar",
+          "filename": "interiors-1.20.1-forge-0.6.0.jar",
+          "primary": true,
+          "size": 489265,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "F6xrSe8L",
+        "hashes": {
+          "sha512": "02f3f01d627f315a5185848ab20bee3d5269705e6fe9a1f6bb57ae47954231a04c8360c0ebf57c3e0fad2bac8cff0e97417f63982caf4545c624805a02984b5e",
+          "sha1": "3371c5ab69a1169f74bee7ab6349bc0f5d6e69bb"
+        },
+        "url": "https://cdn.modrinth.com/data/r4Knci2k/versions/3Gpm5qDT/interiors-1.20.1-forge-0.6.0.jar",
+        "filename": "interiors-1.20.1-forge-0.6.0.jar",
+        "primary": true,
+        "size": 489265,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "farmers-delight",
+      "title": "Farmer's Delight",
+      "project_id": "R2OftAxM",
+      "version_id": "SiIpcZzM",
+      "version": "1.20.1-1.3.4",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "9r3ldcvK",
+          "hashes": {
+            "sha1": "26f615fd35f652021f5b0f1cba68afa7d578fe15",
+            "sha512": "932ae0ab95fa0755bb5a79fbf1d1e31d0e86f3c0f5186796ed06973a3019a618ee8c66a4eae5b901909aed6232abb2bd3b1ff0e1905f74fc70644fada94a80b5"
+          },
+          "url": "https://cdn.modrinth.com/data/R2OftAxM/versions/SiIpcZzM/FarmersDelight-1.20.1-1.3.4.jar",
+          "filename": "FarmersDelight-1.20.1-1.3.4.jar",
+          "primary": true,
+          "size": 3311051,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "9r3ldcvK",
+        "hashes": {
+          "sha1": "26f615fd35f652021f5b0f1cba68afa7d578fe15",
+          "sha512": "932ae0ab95fa0755bb5a79fbf1d1e31d0e86f3c0f5186796ed06973a3019a618ee8c66a4eae5b901909aed6232abb2bd3b1ff0e1905f74fc70644fada94a80b5"
+        },
+        "url": "https://cdn.modrinth.com/data/R2OftAxM/versions/SiIpcZzM/FarmersDelight-1.20.1-1.3.4.jar",
+        "filename": "FarmersDelight-1.20.1-1.3.4.jar",
+        "primary": true,
+        "size": 3311051,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "brewin-and-chewin",
+      "title": "Brewin' And Chewin'",
+      "project_id": "hIu9KJTT",
+      "version_id": "9myDFPCD",
+      "version": "1.20.1-3.2.1",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "R2OftAxM",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "u6dRKJwZ",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "fRiHVvU7",
+          "file_name": null,
+          "dependency_type": "optional"
+        }
+      ],
+      "files": [
+        {
+          "id": "1gQaRIlb",
+          "hashes": {
+            "sha512": "f784c2530f34e56e70a58ee7345e95abc79b312c39fbbef6339ab19dfd20e2842cd7414c5ef2395db2bfa0a9bb1036affc6a3be685b2b731ee3195b2d0d4eb5d",
+            "sha1": "b11a91386ef9da2569b69fd4c229b1c31dcc2eb9"
+          },
+          "url": "https://cdn.modrinth.com/data/hIu9KJTT/versions/9myDFPCD/BrewinAndChewin-1.20.1-3.2.1.jar",
+          "filename": "BrewinAndChewin-1.20.1-3.2.1.jar",
+          "primary": true,
+          "size": 1206255,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "1gQaRIlb",
+        "hashes": {
+          "sha512": "f784c2530f34e56e70a58ee7345e95abc79b312c39fbbef6339ab19dfd20e2842cd7414c5ef2395db2bfa0a9bb1036affc6a3be685b2b731ee3195b2d0d4eb5d",
+          "sha1": "b11a91386ef9da2569b69fd4c229b1c31dcc2eb9"
+        },
+        "url": "https://cdn.modrinth.com/data/hIu9KJTT/versions/9myDFPCD/BrewinAndChewin-1.20.1-3.2.1.jar",
+        "filename": "BrewinAndChewin-1.20.1-3.2.1.jar",
+        "primary": true,
+        "size": 1206255,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "comforts",
+      "title": "Comforts",
+      "project_id": "SaCpeal4",
+      "version_id": "gBDsc134",
+      "version": "6.4.0+1.20.1",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "n5ZNE6hS",
+          "hashes": {
+            "sha1": "e7b9fe89566bb1ee013e33745f22f309f679536e",
+            "sha512": "5f8bc01de36814bbea454ad306efd6b7ae9de933117fe8c1197a13454804e4b71ddd0685a24ace45b81527a8489d4081f7e75b6c5d3f7d7c8f791520407fac09"
+          },
+          "url": "https://cdn.modrinth.com/data/SaCpeal4/versions/gBDsc134/comforts-forge-6.4.0%2B1.20.1.jar",
+          "filename": "comforts-forge-6.4.0+1.20.1.jar",
+          "primary": true,
+          "size": 382083,
+          "file_type": null
+        },
+        {
+          "id": "LyJskZIK",
+          "hashes": {
+            "sha1": "a7235e6720867280a4faccecd1a0426cc0076ba7",
+            "sha512": "8a4183bc22d748037190ebdaf5e9780828d5f8b8cfe3d829d62188dd317b2e664d54c39e818a039c22cfd906a831440e7a89f0ca18d09370d8af4ecdfc06ba96"
+          },
+          "url": "https://cdn.modrinth.com/data/SaCpeal4/versions/gBDsc134/comforts-forge-6.4.0%2B1.20.1-sources.jar",
+          "filename": "comforts-forge-6.4.0+1.20.1-sources.jar",
+          "primary": false,
+          "size": 72822,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "n5ZNE6hS",
+        "hashes": {
+          "sha1": "e7b9fe89566bb1ee013e33745f22f309f679536e",
+          "sha512": "5f8bc01de36814bbea454ad306efd6b7ae9de933117fe8c1197a13454804e4b71ddd0685a24ace45b81527a8489d4081f7e75b6c5d3f7d7c8f791520407fac09"
+        },
+        "url": "https://cdn.modrinth.com/data/SaCpeal4/versions/gBDsc134/comforts-forge-6.4.0%2B1.20.1.jar",
+        "filename": "comforts-forge-6.4.0+1.20.1.jar",
+        "primary": true,
+        "size": 382083,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "immersive-aircraft",
+      "title": "Immersive Aircraft",
+      "project_id": "x3HZvrj6",
+      "version_id": "aDUlOdzA",
+      "version": "1.5.0+1.20.1",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "Duramjh8",
+          "file_name": null,
+          "dependency_type": "optional"
+        }
+      ],
+      "files": [
+        {
+          "id": "gjUiG8Pp",
+          "hashes": {
+            "sha512": "3c51cc0e056543226c6768117f88201921613df044bb344527855e368573e5f23a88bca890ea10a236f372fca8fdf5c8424d972e57d699134474b6e3f601cc13",
+            "sha1": "dceb59fc5dbfa30625bfa56256480708e0c58419"
+          },
+          "url": "https://cdn.modrinth.com/data/x3HZvrj6/versions/aDUlOdzA/immersive_aircraft-1.5.0%2B1.20.1-forge.jar",
+          "filename": "immersive_aircraft-1.5.0+1.20.1-forge.jar",
+          "primary": true,
+          "size": 2441036,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "gjUiG8Pp",
+        "hashes": {
+          "sha512": "3c51cc0e056543226c6768117f88201921613df044bb344527855e368573e5f23a88bca890ea10a236f372fca8fdf5c8424d972e57d699134474b6e3f601cc13",
+          "sha1": "dceb59fc5dbfa30625bfa56256480708e0c58419"
+        },
+        "url": "https://cdn.modrinth.com/data/x3HZvrj6/versions/aDUlOdzA/immersive_aircraft-1.5.0%2B1.20.1-forge.jar",
+        "filename": "immersive_aircraft-1.5.0+1.20.1-forge.jar",
+        "primary": true,
+        "size": 2441036,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "man-of-many-planes",
+      "title": "Man of Many Planes",
+      "project_id": "9qdTHi0q",
+      "version_id": "pxO4wWCW",
+      "version": "0.2.1+1.20.1",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "NZvqZlKK",
+          "hashes": {
+            "sha1": "d94d4f60df6f1ffa06b7136f2320fbc71e5c222c",
+            "sha512": "1f085b01f4412bc413ac303e11bb03c73dec3cf372146f81c92b54a88e7a4b3298410a74a89c3fc5aefdc9fa6e0576591ed84caabe387324661bed87df72bfec"
+          },
+          "url": "https://cdn.modrinth.com/data/9qdTHi0q/versions/pxO4wWCW/man_of_many_planes-0.2.1%2B1.20.1-forge.jar",
+          "filename": "man_of_many_planes-0.2.1+1.20.1-forge.jar",
+          "primary": true,
+          "size": 311898,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "NZvqZlKK",
+        "hashes": {
+          "sha1": "d94d4f60df6f1ffa06b7136f2320fbc71e5c222c",
+          "sha512": "1f085b01f4412bc413ac303e11bb03c73dec3cf372146f81c92b54a88e7a4b3298410a74a89c3fc5aefdc9fa6e0576591ed84caabe387324661bed87df72bfec"
+        },
+        "url": "https://cdn.modrinth.com/data/9qdTHi0q/versions/pxO4wWCW/man_of_many_planes-0.2.1%2B1.20.1-forge.jar",
+        "filename": "man_of_many_planes-0.2.1+1.20.1-forge.jar",
+        "primary": true,
+        "size": 311898,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "small-ships",
+      "title": "Small Ships",
+      "project_id": "rGWEHQrP",
+      "version_id": "9KNCbtCC",
+      "version": "2.0.2-forge-1.20.1",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "5CEkwyh4",
+          "hashes": {
+            "sha1": "f2721b59e7fe3f6c9423f3f4b70c54bec21412d3",
+            "sha512": "e20175173745df575449dba683803df997922f823699cd4ef57c7bf0a3d5610ddfd6e7817336d0f17e272b90105b70268f3705f1afb7e368bd37ae1dd61157d4"
+          },
+          "url": "https://cdn.modrinth.com/data/rGWEHQrP/versions/9KNCbtCC/smallships-2.0.2-forge-1.20.1.jar",
+          "filename": "smallships-2.0.2-forge-1.20.1.jar",
+          "primary": true,
+          "size": 2964478,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "5CEkwyh4",
+        "hashes": {
+          "sha1": "f2721b59e7fe3f6c9423f3f4b70c54bec21412d3",
+          "sha512": "e20175173745df575449dba683803df997922f823699cd4ef57c7bf0a3d5610ddfd6e7817336d0f17e272b90105b70268f3705f1afb7e368bd37ae1dd61157d4"
+        },
+        "url": "https://cdn.modrinth.com/data/rGWEHQrP/versions/9KNCbtCC/smallships-2.0.2-forge-1.20.1.jar",
+        "filename": "smallships-2.0.2-forge-1.20.1.jar",
+        "primary": true,
+        "size": 2964478,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "storagedrawers",
+      "title": "Storage Drawers",
+      "project_id": "guitPqEi",
+      "version_id": "53npfO5m",
+      "version": "1.20.1-12.15.1",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "pSznxIdS",
+          "hashes": {
+            "sha1": "9e6f098c376a96b699a1a883719976b0bbea9e20",
+            "sha512": "920ff86c0de718bd25ee1d7c1e457defee5ce8b3a166769aba334f5dd669097ff2db46e16e37b85d983814f3d48d14af55985779b155b9932b46751ae30694eb"
+          },
+          "url": "https://cdn.modrinth.com/data/guitPqEi/versions/53npfO5m/StorageDrawers-forge-1.20.1-12.15.1.jar",
+          "filename": "StorageDrawers-forge-1.20.1-12.15.1.jar",
+          "primary": true,
+          "size": 1205433,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "pSznxIdS",
+        "hashes": {
+          "sha1": "9e6f098c376a96b699a1a883719976b0bbea9e20",
+          "sha512": "920ff86c0de718bd25ee1d7c1e457defee5ce8b3a166769aba334f5dd669097ff2db46e16e37b85d983814f3d48d14af55985779b155b9932b46751ae30694eb"
+        },
+        "url": "https://cdn.modrinth.com/data/guitPqEi/versions/53npfO5m/StorageDrawers-forge-1.20.1-12.15.1.jar",
+        "filename": "StorageDrawers-forge-1.20.1-12.15.1.jar",
+        "primary": true,
+        "size": 1205433,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "tectonic",
+      "title": "Tectonic",
+      "project_id": "lWDHr9jE",
+      "version_id": "KLmvRxwh",
+      "version": "3.0.17",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "pewWXZCc",
+          "hashes": {
+            "sha512": "96840393db8e50645d80ee1a04fdecf11b8e9ce5aa807fc1be626429d874fd5b7cb57a6ed8d7d7e2448a3e3f43ef3826f33abeafd430c6d852cb1b1af6c793b2",
+            "sha1": "07bfe13bc1bd75a6277f3d62bf92a549b33067a9"
+          },
+          "url": "https://cdn.modrinth.com/data/lWDHr9jE/versions/KLmvRxwh/tectonic-3.0.17-forge-1.20.1.jar",
+          "filename": "tectonic-3.0.17-forge-1.20.1.jar",
+          "primary": true,
+          "size": 322575,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "pewWXZCc",
+        "hashes": {
+          "sha512": "96840393db8e50645d80ee1a04fdecf11b8e9ce5aa807fc1be626429d874fd5b7cb57a6ed8d7d7e2448a3e3f43ef3826f33abeafd430c6d852cb1b1af6c793b2",
+          "sha1": "07bfe13bc1bd75a6277f3d62bf92a549b33067a9"
+        },
+        "url": "https://cdn.modrinth.com/data/lWDHr9jE/versions/KLmvRxwh/tectonic-3.0.17-forge-1.20.1.jar",
+        "filename": "tectonic-3.0.17-forge-1.20.1.jar",
+        "primary": true,
+        "size": 322575,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "terralith",
+      "title": "Terralith",
+      "project_id": "8oi3bsk5",
+      "version_id": "WeYhEb5d",
+      "version": "2.5.4",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "yiGKzGuD",
+          "hashes": {
+            "sha1": "79e1409b8db4ce86df9d6d6730f09c4bd8860a30",
+            "sha512": "885e171d8b34aae7e142f082d0364285ec5a8e8342f11c60d341f7a94083d5a42c4e30612fe4f9f64d57b484396a3dff3a224e2a2497d4ced8d22f2ad6cd561d"
+          },
+          "url": "https://cdn.modrinth.com/data/8oi3bsk5/versions/WeYhEb5d/Terralith_1.20.x_v2.5.4.jar",
+          "filename": "Terralith_1.20.x_v2.5.4.jar",
+          "primary": true,
+          "size": 3156901,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "yiGKzGuD",
+        "hashes": {
+          "sha1": "79e1409b8db4ce86df9d6d6730f09c4bd8860a30",
+          "sha512": "885e171d8b34aae7e142f082d0364285ec5a8e8342f11c60d341f7a94083d5a42c4e30612fe4f9f64d57b484396a3dff3a224e2a2497d4ced8d22f2ad6cd561d"
+        },
+        "url": "https://cdn.modrinth.com/data/8oi3bsk5/versions/WeYhEb5d/Terralith_1.20.x_v2.5.4.jar",
+        "filename": "Terralith_1.20.x_v2.5.4.jar",
+        "primary": true,
+        "size": 3156901,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "lithostitched",
+      "title": "Lithostitched",
+      "project_id": "XaDC71GB",
+      "version_id": "Uqt1Zm1l",
+      "version": "1.4.12-forge-20.1",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "2yz1kaem",
+          "hashes": {
+            "sha1": "c8a23f9c1975f11a8d10110aa862251a6043db78",
+            "sha512": "bb96c8518cf0ccfa1210fee4f01ff38cbee09c3b7f82df330cef8fe4d2c8cfca19a1c7d36136fdd3f23804cb814317de99f907cd5880a8bf1229397e0b2ffc25"
+          },
+          "url": "https://cdn.modrinth.com/data/XaDC71GB/versions/Uqt1Zm1l/lithostitched-forge-1.20.1-1.4.12.jar",
+          "filename": "lithostitched-forge-1.20.1-1.4.12.jar",
+          "primary": true,
+          "size": 480788,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "2yz1kaem",
+        "hashes": {
+          "sha1": "c8a23f9c1975f11a8d10110aa862251a6043db78",
+          "sha512": "bb96c8518cf0ccfa1210fee4f01ff38cbee09c3b7f82df330cef8fe4d2c8cfca19a1c7d36136fdd3f23804cb814317de99f907cd5880a8bf1229397e0b2ffc25"
+        },
+        "url": "https://cdn.modrinth.com/data/XaDC71GB/versions/Uqt1Zm1l/lithostitched-forge-1.20.1-1.4.12.jar",
+        "filename": "lithostitched-forge-1.20.1-1.4.12.jar",
+        "primary": true,
+        "size": 480788,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "towns-and-towers",
+      "title": "Towns and Towers",
+      "project_id": "DjLobEOy",
+      "version_id": "7ZwnSrVW",
+      "version": "1.12",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "cl223EMc",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "ZEUjMsG6",
+          "hashes": {
+            "sha1": "5a28ec56457cf1bf154e993cf73dba0428a7921b",
+            "sha512": "ed734046c356bb996b628c2e0c47e64ba598c87016591fd77533069de68f27b8bfdcd2173d7d3db97f1981ebb806133c3d1751c330d539ade3d6c37ed2d5598f"
+          },
+          "url": "https://cdn.modrinth.com/data/DjLobEOy/versions/7ZwnSrVW/Towns-and-Towers-1.12-Fabric%2BForge.jar",
+          "filename": "Towns-and-Towers-1.12-Fabric+Forge.jar",
+          "primary": true,
+          "size": 2864275,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "ZEUjMsG6",
+        "hashes": {
+          "sha1": "5a28ec56457cf1bf154e993cf73dba0428a7921b",
+          "sha512": "ed734046c356bb996b628c2e0c47e64ba598c87016591fd77533069de68f27b8bfdcd2173d7d3db97f1981ebb806133c3d1751c330d539ade3d6c37ed2d5598f"
+        },
+        "url": "https://cdn.modrinth.com/data/DjLobEOy/versions/7ZwnSrVW/Towns-and-Towers-1.12-Fabric%2BForge.jar",
+        "filename": "Towns-and-Towers-1.12-Fabric+Forge.jar",
+        "primary": true,
+        "size": 2864275,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "yungs-bridges",
+      "title": "YUNG's Bridges",
+      "project_id": "Ht4BfYp6",
+      "version_id": "KgO1gfM2",
+      "version": "1.20-Forge-4.0.3",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "Ua7DFN59",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "hd9xK2Rc",
+          "hashes": {
+            "sha512": "2705fbaeb62115c5604719d68756f723a974ea9a62a4194771ebbea877ee715de72cefe3b01ec0d318d4d6fe2e9de87e6a7122ef21ee54d48153e84cb7bae0c6",
+            "sha1": "88467fe87b95e6cf7a432822033cf74dd8586254"
+          },
+          "url": "https://cdn.modrinth.com/data/Ht4BfYp6/versions/KgO1gfM2/YungsBridges-1.20-Forge-4.0.3.jar",
+          "filename": "YungsBridges-1.20-Forge-4.0.3.jar",
+          "primary": true,
+          "size": 136236,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "hd9xK2Rc",
+        "hashes": {
+          "sha512": "2705fbaeb62115c5604719d68756f723a974ea9a62a4194771ebbea877ee715de72cefe3b01ec0d318d4d6fe2e9de87e6a7122ef21ee54d48153e84cb7bae0c6",
+          "sha1": "88467fe87b95e6cf7a432822033cf74dd8586254"
+        },
+        "url": "https://cdn.modrinth.com/data/Ht4BfYp6/versions/KgO1gfM2/YungsBridges-1.20-Forge-4.0.3.jar",
+        "filename": "YungsBridges-1.20-Forge-4.0.3.jar",
+        "primary": true,
+        "size": 136236,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "jei",
+      "title": "Just Enough Items (JEI)",
+      "project_id": "u6dRKJwZ",
+      "version_id": "9jqubC9n",
+      "version": "15.56.0.205",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "V6Nv4XOX",
+          "hashes": {
+            "sha1": "7f64b7f8fde7f001ef054dabe3618a8780ba2650",
+            "sha512": "1306fe15c81d54aa9ff8f3d9f04812c0d61ffaaae433c29621f926db8f8e2c898669ccdd99e025849859d38b7a2eac170c466390b467f4dfa77542b5dbdd1678"
+          },
+          "url": "https://cdn.modrinth.com/data/u6dRKJwZ/versions/9jqubC9n/jei-1.20.1-forge-15.56.0.205.jar",
+          "filename": "jei-1.20.1-forge-15.56.0.205.jar",
+          "primary": true,
+          "size": 1778129,
+          "file_type": null
+        }
+      ],
+      "client_only": true,
+      "selected_file": {
+        "id": "V6Nv4XOX",
+        "hashes": {
+          "sha1": "7f64b7f8fde7f001ef054dabe3618a8780ba2650",
+          "sha512": "1306fe15c81d54aa9ff8f3d9f04812c0d61ffaaae433c29621f926db8f8e2c898669ccdd99e025849859d38b7a2eac170c466390b467f4dfa77542b5dbdd1678"
+        },
+        "url": "https://cdn.modrinth.com/data/u6dRKJwZ/versions/9jqubC9n/jei-1.20.1-forge-15.56.0.205.jar",
+        "filename": "jei-1.20.1-forge-15.56.0.205.jar",
+        "primary": true,
+        "size": 1778129,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "emi",
+      "title": "EMI",
+      "project_id": "fRiHVvU7",
+      "version_id": "Axuu9I9R",
+      "version": "1.1.24+1.20.1+forge",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "xYUmFJ1U",
+          "hashes": {
+            "sha512": "02743be3476b7dc5668cedbcc5a6d384e9806981833926a83fed76a2800c44da33576e86308c058250718c128d58076f1b62bc53d200464326ace70a43229c8b",
+            "sha1": "ea320200878e4a49196760234a22da763671520a"
+          },
+          "url": "https://cdn.modrinth.com/data/fRiHVvU7/versions/Axuu9I9R/emi-1.1.24%2B1.20.1%2Bforge.jar",
+          "filename": "emi-1.1.24+1.20.1+forge.jar",
+          "primary": true,
+          "size": 1121750,
+          "file_type": null
+        }
+      ],
+      "client_only": true,
+      "selected_file": {
+        "id": "xYUmFJ1U",
+        "hashes": {
+          "sha512": "02743be3476b7dc5668cedbcc5a6d384e9806981833926a83fed76a2800c44da33576e86308c058250718c128d58076f1b62bc53d200464326ace70a43229c8b",
+          "sha1": "ea320200878e4a49196760234a22da763671520a"
+        },
+        "url": "https://cdn.modrinth.com/data/fRiHVvU7/versions/Axuu9I9R/emi-1.1.24%2B1.20.1%2Bforge.jar",
+        "filename": "emi-1.1.24+1.20.1+forge.jar",
+        "primary": true,
+        "size": 1121750,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "jade",
+      "title": "Jade 🔍",
+      "project_id": "nvQzSEkH",
+      "version_id": "xJQHCmWJ",
+      "version": "11.13.3+forge",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "u6dRKJwZ",
+          "file_name": null,
+          "dependency_type": "optional"
+        }
+      ],
+      "files": [
+        {
+          "id": "uveGC7Bk",
+          "hashes": {
+            "sha1": "d08e64e66521d69e083c8525f1fc507f1c202384",
+            "sha512": "72025c4ad6d26522bafe3d5d6ac9d4702c006a868312cb34df8a7a2398a4618205839607b129c167fd176e58cb7655f08e3afbf1993925c80d4fcc559c45a037"
+          },
+          "url": "https://cdn.modrinth.com/data/nvQzSEkH/versions/xJQHCmWJ/Jade-1.20.1-Forge-11.13.3.jar",
+          "filename": "Jade-1.20.1-Forge-11.13.3.jar",
+          "primary": true,
+          "size": 553487,
+          "file_type": null
+        }
+      ],
+      "client_only": true,
+      "selected_file": {
+        "id": "uveGC7Bk",
+        "hashes": {
+          "sha1": "d08e64e66521d69e083c8525f1fc507f1c202384",
+          "sha512": "72025c4ad6d26522bafe3d5d6ac9d4702c006a868312cb34df8a7a2398a4618205839607b129c167fd176e58cb7655f08e3afbf1993925c80d4fcc559c45a037"
+        },
+        "url": "https://cdn.modrinth.com/data/nvQzSEkH/versions/xJQHCmWJ/Jade-1.20.1-Forge-11.13.3.jar",
+        "filename": "Jade-1.20.1-Forge-11.13.3.jar",
+        "primary": true,
+        "size": 553487,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "jade-addons-forge",
+      "title": "Jade Addons (Neo/Forge)",
+      "project_id": "xuDOzCLy",
+      "version_id": "l9IrZYLt",
+      "version": "5.5.1+forge",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "nvQzSEkH",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "LENNdgIz",
+          "hashes": {
+            "sha512": "24eb1ca5c13003487b959199dfc70422c373c65aaf12f2dfaab17adbad25303cb735203b43faa353597568615f31f867e7c33d8b213f4bec447df62c6be828f7",
+            "sha1": "c4339eb3ef0c4728cb511efe60726653a35c7a0d"
+          },
+          "url": "https://cdn.modrinth.com/data/xuDOzCLy/versions/l9IrZYLt/JadeAddons-1.20.1-Forge-5.5.1.jar",
+          "filename": "JadeAddons-1.20.1-Forge-5.5.1.jar",
+          "primary": true,
+          "size": 91754,
+          "file_type": null
+        }
+      ],
+      "client_only": true,
+      "selected_file": {
+        "id": "LENNdgIz",
+        "hashes": {
+          "sha512": "24eb1ca5c13003487b959199dfc70422c373c65aaf12f2dfaab17adbad25303cb735203b43faa353597568615f31f867e7c33d8b213f4bec447df62c6be828f7",
+          "sha1": "c4339eb3ef0c4728cb511efe60726653a35c7a0d"
+        },
+        "url": "https://cdn.modrinth.com/data/xuDOzCLy/versions/l9IrZYLt/JadeAddons-1.20.1-Forge-5.5.1.jar",
+        "filename": "JadeAddons-1.20.1-Forge-5.5.1.jar",
+        "primary": true,
+        "size": 91754,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "appleskin",
+      "title": "AppleSkin",
+      "project_id": "EsAfCjCV",
+      "version_id": "XdXDExVF",
+      "version": "2.5.1+mc1.20.1",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "ARbRIxPg",
+          "hashes": {
+            "sha1": "81919356f84eab14258db98924b66c3c38e372b1",
+            "sha512": "3176f928fb6c60d27f5edb610ca4ab0236175404eebf32797a1ec6cdd794bb294a260231579578536d03571377e43c6181adc75d8dd2c0733f17fce4f7e636b9"
+          },
+          "url": "https://cdn.modrinth.com/data/EsAfCjCV/versions/XdXDExVF/appleskin-forge-mc1.20.1-2.5.1.jar",
+          "filename": "appleskin-forge-mc1.20.1-2.5.1.jar",
+          "primary": true,
+          "size": 47428,
+          "file_type": null
+        }
+      ],
+      "client_only": true,
+      "selected_file": {
+        "id": "ARbRIxPg",
+        "hashes": {
+          "sha1": "81919356f84eab14258db98924b66c3c38e372b1",
+          "sha512": "3176f928fb6c60d27f5edb610ca4ab0236175404eebf32797a1ec6cdd794bb294a260231579578536d03571377e43c6181adc75d8dd2c0733f17fce4f7e636b9"
+        },
+        "url": "https://cdn.modrinth.com/data/EsAfCjCV/versions/XdXDExVF/appleskin-forge-mc1.20.1-2.5.1.jar",
+        "filename": "appleskin-forge-mc1.20.1-2.5.1.jar",
+        "primary": true,
+        "size": 47428,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "mouse-tweaks",
+      "title": "Mouse Tweaks",
+      "project_id": "aC3cM3Vq",
+      "version_id": "7JVXOe3K",
+      "version": "1.20.1-2.25.1-forge",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "Y924Y0Er",
+          "hashes": {
+            "sha1": "d751153e722a4e014691c83f39f5b07c6ec5333c",
+            "sha512": "a3bb0272c0a1a3be9250dfee030bb8f86217fa6a32bd534be8c940fdd8c466c800c2df85874877983ced36ecfc28c8ced6c0d42107c1ab621385b4be9a7c65eb"
+          },
+          "url": "https://cdn.modrinth.com/data/aC3cM3Vq/versions/7JVXOe3K/MouseTweaks-forge-mc1.20.1-2.25.1.jar",
+          "filename": "MouseTweaks-forge-mc1.20.1-2.25.1.jar",
+          "primary": true,
+          "size": 76237,
+          "file_type": null
+        },
+        {
+          "id": "yJUodsoB",
+          "hashes": {
+            "sha512": "98916c93bed3ca456c6f0de0f5b52a40a70f88c2d308414e02eb18fee3aeaefe2437fe3fc3cc29bc78a4d06258d158836e85216a7f2c66a838d2ff1b89853abe",
+            "sha1": "abfc1f2e2112efd147cd092122287d3d5a59e35d"
+          },
+          "url": "https://cdn.modrinth.com/data/aC3cM3Vq/versions/7JVXOe3K/MouseTweaks-forge-mc1.20.1-2.25.1-api.jar",
+          "filename": "MouseTweaks-forge-mc1.20.1-2.25.1-api.jar",
+          "primary": false,
+          "size": 1995,
+          "file_type": null
+        },
+        {
+          "id": "62lEFwVs",
+          "hashes": {
+            "sha512": "2f641413fc64371853e1ca07243348de5759d8e30f419347af8c2edc556c010297d8f45f088d4a394f0b5494bd951412c0b9d9dce2eaa29bd5bb0fdf97ac6acd",
+            "sha1": "946f3003fbf087ad5a0361a317afb2bda73b69ce"
+          },
+          "url": "https://cdn.modrinth.com/data/aC3cM3Vq/versions/7JVXOe3K/MouseTweaks-forge-mc1.20.1-2.25.1-src.jar",
+          "filename": "MouseTweaks-forge-mc1.20.1-2.25.1-src.jar",
+          "primary": false,
+          "size": 19734,
+          "file_type": null
+        }
+      ],
+      "client_only": true,
+      "selected_file": {
+        "id": "Y924Y0Er",
+        "hashes": {
+          "sha1": "d751153e722a4e014691c83f39f5b07c6ec5333c",
+          "sha512": "a3bb0272c0a1a3be9250dfee030bb8f86217fa6a32bd534be8c940fdd8c466c800c2df85874877983ced36ecfc28c8ced6c0d42107c1ab621385b4be9a7c65eb"
+        },
+        "url": "https://cdn.modrinth.com/data/aC3cM3Vq/versions/7JVXOe3K/MouseTweaks-forge-mc1.20.1-2.25.1.jar",
+        "filename": "MouseTweaks-forge-mc1.20.1-2.25.1.jar",
+        "primary": true,
+        "size": 76237,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "controlling",
+      "title": "Controlling",
+      "project_id": "xv94TkTM",
+      "version_id": "LH6Bi6Am",
+      "version": "12.0.2",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "fuuu3xnx",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "files": [
+        {
+          "id": "EPTGTZ6c",
+          "hashes": {
+            "sha512": "3945bf3f6d843957f13584dfc70bede253d1e48f0dcb96f647fbcc6fcd3d1748a0dd9c6ca5c882e07a41f98eb84057934f51e43ab6023ed0a19695de2e6fe9f5",
+            "sha1": "6195a3d1464f8fb641d7e165163aea1a857ce08e"
+          },
+          "url": "https://cdn.modrinth.com/data/xv94TkTM/versions/LH6Bi6Am/Controlling-forge-1.20.1-12.0.2.jar",
+          "filename": "Controlling-forge-1.20.1-12.0.2.jar",
+          "primary": true,
+          "size": 115280,
+          "file_type": null
+        }
+      ],
+      "client_only": true,
+      "selected_file": {
+        "id": "EPTGTZ6c",
+        "hashes": {
+          "sha512": "3945bf3f6d843957f13584dfc70bede253d1e48f0dcb96f647fbcc6fcd3d1748a0dd9c6ca5c882e07a41f98eb84057934f51e43ab6023ed0a19695de2e6fe9f5",
+          "sha1": "6195a3d1464f8fb641d7e165163aea1a857ce08e"
+        },
+        "url": "https://cdn.modrinth.com/data/xv94TkTM/versions/LH6Bi6Am/Controlling-forge-1.20.1-12.0.2.jar",
+        "filename": "Controlling-forge-1.20.1-12.0.2.jar",
+        "primary": true,
+        "size": 115280,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "ferrite-core",
+      "title": "FerriteCore",
+      "project_id": "uXXizFIs",
+      "version_id": "DG5Fn9Sz",
+      "version": "6.0.1",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "5DAl5AST",
+          "hashes": {
+            "sha512": "a1960a7c03dc32d4ccaccaf28afdd9b078758bbd62d15a91d4039a83fa9397a098e89b69591f6bd5190254d9ee97e502504154b9aec764adb8c65f000b75ba2c",
+            "sha1": "417fb6ce8f52abf40bd9d0390371790f9576f8ba"
+          },
+          "url": "https://cdn.modrinth.com/data/uXXizFIs/versions/DG5Fn9Sz/ferritecore-6.0.1-forge.jar",
+          "filename": "ferritecore-6.0.1-forge.jar",
+          "primary": true,
+          "size": 123034,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "5DAl5AST",
+        "hashes": {
+          "sha512": "a1960a7c03dc32d4ccaccaf28afdd9b078758bbd62d15a91d4039a83fa9397a098e89b69591f6bd5190254d9ee97e502504154b9aec764adb8c65f000b75ba2c",
+          "sha1": "417fb6ce8f52abf40bd9d0390371790f9576f8ba"
+        },
+        "url": "https://cdn.modrinth.com/data/uXXizFIs/versions/DG5Fn9Sz/ferritecore-6.0.1-forge.jar",
+        "filename": "ferritecore-6.0.1-forge.jar",
+        "primary": true,
+        "size": 123034,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "modernfix",
+      "title": "ModernFix",
+      "project_id": "nmDcB62a",
+      "version_id": "PJeJimdc",
+      "version": "5.27.93+mc1.20.1",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "LMVrFOoM",
+          "hashes": {
+            "sha512": "7e5e5892f7da3a8692fce8602cf15d12b6c7d426d06c9edda40c19fcbd9b9cc04df4955f6ea308eb42d3543c19e321717c2f7f4630f2130ed4e568858687a7ec",
+            "sha1": "a88e749a40778753fd2f6c649339dc1b6c572e5b"
+          },
+          "url": "https://cdn.modrinth.com/data/nmDcB62a/versions/PJeJimdc/modernfix-forge-5.27.93%2Bmc1.20.1.jar",
+          "filename": "modernfix-forge-5.27.93+mc1.20.1.jar",
+          "primary": true,
+          "size": 1012808,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "LMVrFOoM",
+        "hashes": {
+          "sha512": "7e5e5892f7da3a8692fce8602cf15d12b6c7d426d06c9edda40c19fcbd9b9cc04df4955f6ea308eb42d3543c19e321717c2f7f4630f2130ed4e568858687a7ec",
+          "sha1": "a88e749a40778753fd2f6c649339dc1b6c572e5b"
+        },
+        "url": "https://cdn.modrinth.com/data/nmDcB62a/versions/PJeJimdc/modernfix-forge-5.27.93%2Bmc1.20.1.jar",
+        "filename": "modernfix-forge-5.27.93+mc1.20.1.jar",
+        "primary": true,
+        "size": 1012808,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "spark",
+      "title": "spark",
+      "project_id": "l6YH9Als",
+      "version_id": "4FXHDE9F",
+      "version": "1.10.53-forge",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "YAm66NKH",
+          "hashes": {
+            "sha1": "231fb325368c0660954f47bfb03493f5246fa4d1",
+            "sha512": "15c6a3753dcba380624643a1e19c856240e8f6bed280f908e1be12c6154a86284ac86405c806273842975e0b7270af93ea9b1db5cf575a3853e54e1088cf7343"
+          },
+          "url": "https://cdn.modrinth.com/data/l6YH9Als/versions/4FXHDE9F/spark-1.10.53-forge.jar",
+          "filename": "spark-1.10.53-forge.jar",
+          "primary": true,
+          "size": 3114590,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "YAm66NKH",
+        "hashes": {
+          "sha1": "231fb325368c0660954f47bfb03493f5246fa4d1",
+          "sha512": "15c6a3753dcba380624643a1e19c856240e8f6bed280f908e1be12c6154a86284ac86405c806273842975e0b7270af93ea9b1db5cf575a3853e54e1088cf7343"
+        },
+        "url": "https://cdn.modrinth.com/data/l6YH9Als/versions/4FXHDE9F/spark-1.10.53-forge.jar",
+        "filename": "spark-1.10.53-forge.jar",
+        "primary": true,
+        "size": 3114590,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "chunky",
+      "title": "Chunky",
+      "project_id": "fALzjamp",
+      "version_id": "4FTDk9wv",
+      "version": "1.3.146",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "tCotg5gH",
+          "hashes": {
+            "sha1": "0b782d12b4ac3b03a94c28f32e9b2d5587d1dd50",
+            "sha512": "13ef9d5bfea1895118eec45aa3071e2d79408241f29990624f67e157d4c525391753b0a1539ff3359dad79a6e5ab5e0b84fffbe528bdefcaaefd579ec794d9c9"
+          },
+          "url": "https://cdn.modrinth.com/data/fALzjamp/versions/4FTDk9wv/Chunky-1.3.146.jar",
+          "filename": "Chunky-1.3.146.jar",
+          "primary": true,
+          "size": 341451,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "tCotg5gH",
+        "hashes": {
+          "sha1": "0b782d12b4ac3b03a94c28f32e9b2d5587d1dd50",
+          "sha512": "13ef9d5bfea1895118eec45aa3071e2d79408241f29990624f67e157d4c525391753b0a1539ff3359dad79a6e5ab5e0b84fffbe528bdefcaaefd579ec794d9c9"
+        },
+        "url": "https://cdn.modrinth.com/data/fALzjamp/versions/4FTDk9wv/Chunky-1.3.146.jar",
+        "filename": "Chunky-1.3.146.jar",
+        "primary": true,
+        "size": 341451,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "xaeros-minimap",
+      "title": "Xaero's Minimap",
+      "project_id": "1bokaNcj",
+      "version_id": "dB6E0CY9",
+      "version": "forge-1.20.1-26.6.0",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "gF3BGWvG",
+          "file_name": null,
+          "dependency_type": "optional"
+        }
+      ],
+      "files": [
+        {
+          "id": "QSSAoOu3",
+          "hashes": {
+            "sha512": "9c566a2b9537c37b438a38a060cc251187e6643e96522466c50c90c7fa747a4e4edc3a5fff0f31fb042e1eeefd047df2a57d1bbe6a3d741837cef8cdb6426a25",
+            "sha1": "ee73886f2f5f27bf28cffa7cc8f2b9b4540df2aa"
+          },
+          "url": "https://cdn.modrinth.com/data/1bokaNcj/versions/dB6E0CY9/xaerominimap-forge-1.20.1-26.6.0.jar",
+          "filename": "xaerominimap-forge-1.20.1-26.6.0.jar",
+          "primary": true,
+          "size": 2196194,
+          "file_type": null
+        }
+      ],
+      "client_only": true,
+      "selected_file": {
+        "id": "QSSAoOu3",
+        "hashes": {
+          "sha512": "9c566a2b9537c37b438a38a060cc251187e6643e96522466c50c90c7fa747a4e4edc3a5fff0f31fb042e1eeefd047df2a57d1bbe6a3d741837cef8cdb6426a25",
+          "sha1": "ee73886f2f5f27bf28cffa7cc8f2b9b4540df2aa"
+        },
+        "url": "https://cdn.modrinth.com/data/1bokaNcj/versions/dB6E0CY9/xaerominimap-forge-1.20.1-26.6.0.jar",
+        "filename": "xaerominimap-forge-1.20.1-26.6.0.jar",
+        "primary": true,
+        "size": 2196194,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "xaeros-world-map",
+      "title": "Xaero's World Map",
+      "project_id": "NcUtCpym",
+      "version_id": "KtEupJvB",
+      "version": "forge-1.20.1-1.47.0",
+      "dependencies": [
+        {
+          "version_id": null,
+          "project_id": "gF3BGWvG",
+          "file_name": null,
+          "dependency_type": "optional"
+        }
+      ],
+      "files": [
+        {
+          "id": "WbgjvUJk",
+          "hashes": {
+            "sha1": "6715c1d3758a3805589d82c41dc581537fe185cd",
+            "sha512": "a8c775ad1645cd3dc922072955fff65f7874bd6a1c99e6a61d370e7a9a5880e450ba61dafa6c719ad8f719fcff3b17ec6124b7f47288009547b4b136d81e5657"
+          },
+          "url": "https://cdn.modrinth.com/data/NcUtCpym/versions/KtEupJvB/xaeroworldmap-forge-1.20.1-1.47.0.jar",
+          "filename": "xaeroworldmap-forge-1.20.1-1.47.0.jar",
+          "primary": true,
+          "size": 1429424,
+          "file_type": null
+        }
+      ],
+      "client_only": true,
+      "selected_file": {
+        "id": "WbgjvUJk",
+        "hashes": {
+          "sha1": "6715c1d3758a3805589d82c41dc581537fe185cd",
+          "sha512": "a8c775ad1645cd3dc922072955fff65f7874bd6a1c99e6a61d370e7a9a5880e450ba61dafa6c719ad8f719fcff3b17ec6124b7f47288009547b4b136d81e5657"
+        },
+        "url": "https://cdn.modrinth.com/data/NcUtCpym/versions/KtEupJvB/xaeroworldmap-forge-1.20.1-1.47.0.jar",
+        "filename": "xaeroworldmap-forge-1.20.1-1.47.0.jar",
+        "primary": true,
+        "size": 1429424,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "kotlin-for-forge",
+      "title": "Kotlin for Forge",
+      "project_id": "ordsPcFz",
+      "version_id": "Zsh14XeQ",
+      "version": "4.12.0",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "xYoHr1NU",
+          "hashes": {
+            "sha512": "767f40030ed4b370a3838fa65ae1b79974f31979342fff7cc834a0d5f39eb28612642519352ff2a1dd5226ce1f745f8b3156ee3625ffde01219137d064c1ee40",
+            "sha1": "962fdb760409d6d71cbf079235f1ca94e3863a22"
+          },
+          "url": "https://cdn.modrinth.com/data/ordsPcFz/versions/Zsh14XeQ/kotlinforforge-4.12.0-all.jar",
+          "filename": "kotlinforforge-4.12.0-all.jar",
+          "primary": true,
+          "size": 7442998,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "xYoHr1NU",
+        "hashes": {
+          "sha512": "767f40030ed4b370a3838fa65ae1b79974f31979342fff7cc834a0d5f39eb28612642519352ff2a1dd5226ce1f745f8b3156ee3625ffde01219137d064c1ee40",
+          "sha1": "962fdb760409d6d71cbf079235f1ca94e3863a22"
+        },
+        "url": "https://cdn.modrinth.com/data/ordsPcFz/versions/Zsh14XeQ/kotlinforforge-4.12.0-all.jar",
+        "filename": "kotlinforforge-4.12.0-all.jar",
+        "primary": true,
+        "size": 7442998,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "resourceful-lib",
+      "title": "Resourceful Lib",
+      "project_id": "G1hIVOrD",
+      "version_id": "OhsHaCcW",
+      "version": "2.1.29",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "qk2F9Pnn",
+          "hashes": {
+            "sha512": "8dbe951d431545a7d18081a8b11a52a248e6d8ff9862ae6462b0f5a6f57ff523af12704c3adb071ae99a7c5c1dd895bd7875dea59f9c4956c1597a668b6e8820",
+            "sha1": "6fc590a7c56a720fec57e290cbb0a106efbb3ffa"
+          },
+          "url": "https://cdn.modrinth.com/data/G1hIVOrD/versions/OhsHaCcW/resourcefullib-forge-1.20.1-2.1.29.jar",
+          "filename": "resourcefullib-forge-1.20.1-2.1.29.jar",
+          "primary": true,
+          "size": 432753,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "qk2F9Pnn",
+        "hashes": {
+          "sha512": "8dbe951d431545a7d18081a8b11a52a248e6d8ff9862ae6462b0f5a6f57ff523af12704c3adb071ae99a7c5c1dd895bd7875dea59f9c4956c1597a668b6e8820",
+          "sha1": "6fc590a7c56a720fec57e290cbb0a106efbb3ffa"
+        },
+        "url": "https://cdn.modrinth.com/data/G1hIVOrD/versions/OhsHaCcW/resourcefullib-forge-1.20.1-2.1.29.jar",
+        "filename": "resourcefullib-forge-1.20.1-2.1.29.jar",
+        "primary": true,
+        "size": 432753,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "architectury-api",
+      "title": "Architectury API",
+      "project_id": "lhGA9TYQ",
+      "version_id": "1MKTLiiG",
+      "version": "9.2.14+forge",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "8klw0xxP",
+          "hashes": {
+            "sha512": "cf67f2050cafa00f0bee42e6d7bef77fdb808ac4f71742f7b4d6d5c1e6ffb49561a5a252f332d2b78a9767bdb5faa284611790dba303fbdc736ae36d794f61c7",
+            "sha1": "a52918a500ff421180a1cbd1a0cabee712134ec4"
+          },
+          "url": "https://cdn.modrinth.com/data/lhGA9TYQ/versions/1MKTLiiG/architectury-9.2.14-forge.jar",
+          "filename": "architectury-9.2.14-forge.jar",
+          "primary": true,
+          "size": 580602,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "8klw0xxP",
+        "hashes": {
+          "sha512": "cf67f2050cafa00f0bee42e6d7bef77fdb808ac4f71742f7b4d6d5c1e6ffb49561a5a252f332d2b78a9767bdb5faa284611790dba303fbdc736ae36d794f61c7",
+          "sha1": "a52918a500ff421180a1cbd1a0cabee712134ec4"
+        },
+        "url": "https://cdn.modrinth.com/data/lhGA9TYQ/versions/1MKTLiiG/architectury-9.2.14-forge.jar",
+        "filename": "architectury-9.2.14-forge.jar",
+        "primary": true,
+        "size": 580602,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "rhino",
+      "title": "Rhino",
+      "project_id": "sk9knFPE",
+      "version_id": "uNALdylI",
+      "version": "2001.2.3-build.10+forge",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "6zHFpmtq",
+          "hashes": {
+            "sha1": "c83c9b719a6bab33fbd2b3f2f680eb3adbfc1aa1",
+            "sha512": "4eb6a635f3eff3baa158539bd55344421cf69b15e28f7da8bf55f370a11c071f3525063a6f81b67fbfca550ad8aaab7e6208df87f65ca6ed2851edd46f032b58"
+          },
+          "url": "https://cdn.modrinth.com/data/sk9knFPE/versions/uNALdylI/rhino-forge-2001.2.3-build.10.jar",
+          "filename": "rhino-forge-2001.2.3-build.10.jar",
+          "primary": true,
+          "size": 1798244,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "6zHFpmtq",
+        "hashes": {
+          "sha1": "c83c9b719a6bab33fbd2b3f2f680eb3adbfc1aa1",
+          "sha512": "4eb6a635f3eff3baa158539bd55344421cf69b15e28f7da8bf55f370a11c071f3525063a6f81b67fbfca550ad8aaab7e6208df87f65ca6ed2851edd46f032b58"
+        },
+        "url": "https://cdn.modrinth.com/data/sk9knFPE/versions/uNALdylI/rhino-forge-2001.2.3-build.10.jar",
+        "filename": "rhino-forge-2001.2.3-build.10.jar",
+        "primary": true,
+        "size": 1798244,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "dragonlib",
+      "title": "DragonLib",
+      "project_id": "sbIsGaOV",
+      "version_id": "uTj9SemI",
+      "version": "3.0.29+1.20.1-forge",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "TWaVODma",
+          "hashes": {
+            "sha1": "0c0a7b66d3a3e3b8a7c5191231e2fcd43f62e0b1",
+            "sha512": "38aaa961a70ce1c1943476bfddeae0268ccf9f3cb9a7eed9fff6a94e690f59e90c3b4c0060bab8397ce09d815c3262221a28bfce4539894f56547f2bffbf7050"
+          },
+          "url": "https://cdn.modrinth.com/data/sbIsGaOV/versions/uTj9SemI/dragonlib-3.0.29%2Bmc1.20.1-forge.jar",
+          "filename": "dragonlib-3.0.29+mc1.20.1-forge.jar",
+          "primary": true,
+          "size": 2631747,
+          "file_type": null
+        },
+        {
+          "id": "qTv8CDxO",
+          "hashes": {
+            "sha512": "0817a34653aa61de836727b67cc2949c5b934da4ec0b212604b045aa27b538116a855361e302294d83d36c80811d32947f13ef7266e22bd53542a87081a01e73",
+            "sha1": "072c693696432389868802e161101d0d09d65b0e"
+          },
+          "url": "https://cdn.modrinth.com/data/sbIsGaOV/versions/uTj9SemI/dragonlib-3.0.29%2Bmc1.20.1-forge-javadoc.jar",
+          "filename": "dragonlib-3.0.29+mc1.20.1-forge-javadoc.jar",
+          "primary": false,
+          "size": 169620,
+          "file_type": null
+        },
+        {
+          "id": "HH1F9Ffo",
+          "hashes": {
+            "sha1": "9cd899f7b83fed83e96be0325624ad9b1adced3d",
+            "sha512": "b319859cfd0f15237d02669f955748bd439f33cb3209501c2df5d939a3a01871de7a480ddf56500bf22df925042ce395a454d22650012b304624808792eaae9e"
+          },
+          "url": "https://cdn.modrinth.com/data/sbIsGaOV/versions/uTj9SemI/dragonlib-3.0.29%2Bmc1.20.1-forge-sources.jar",
+          "filename": "dragonlib-3.0.29+mc1.20.1-forge-sources.jar",
+          "primary": false,
+          "size": 856851,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "TWaVODma",
+        "hashes": {
+          "sha1": "0c0a7b66d3a3e3b8a7c5191231e2fcd43f62e0b1",
+          "sha512": "38aaa961a70ce1c1943476bfddeae0268ccf9f3cb9a7eed9fff6a94e690f59e90c3b4c0060bab8397ce09d815c3262221a28bfce4539894f56547f2bffbf7050"
+        },
+        "url": "https://cdn.modrinth.com/data/sbIsGaOV/versions/uTj9SemI/dragonlib-3.0.29%2Bmc1.20.1-forge.jar",
+        "filename": "dragonlib-3.0.29+mc1.20.1-forge.jar",
+        "primary": true,
+        "size": 2631747,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "cristel-lib",
+      "title": "Cristel Lib",
+      "project_id": "cl223EMc",
+      "version_id": "DOsSK4NK",
+      "version": "1.1.6-forge",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "XExsTfHO",
+          "hashes": {
+            "sha512": "8d5c8bb59be56c49ef0fcc3593862ad09862210e5099f39bf66c29c73f1b54b637ec6e6fa01b2e1409dafe4cc3e2f2e43d9c6113c78372f49d7c2ff71d056ca0",
+            "sha1": "524ecf0f93f28be2f5db21d87dd81bdbc1a450e1"
+          },
+          "url": "https://cdn.modrinth.com/data/cl223EMc/versions/DOsSK4NK/cristellib-1.1.6-forge.jar",
+          "filename": "cristellib-1.1.6-forge.jar",
+          "primary": true,
+          "size": 431318,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "XExsTfHO",
+        "hashes": {
+          "sha512": "8d5c8bb59be56c49ef0fcc3593862ad09862210e5099f39bf66c29c73f1b54b637ec6e6fa01b2e1409dafe4cc3e2f2e43d9c6113c78372f49d7c2ff71d056ca0",
+          "sha1": "524ecf0f93f28be2f5db21d87dd81bdbc1a450e1"
+        },
+        "url": "https://cdn.modrinth.com/data/cl223EMc/versions/DOsSK4NK/cristellib-1.1.6-forge.jar",
+        "filename": "cristellib-1.1.6-forge.jar",
+        "primary": true,
+        "size": 431318,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "yungs-api",
+      "title": "YUNG's API",
+      "project_id": "Ua7DFN59",
+      "version_id": "PJOYAmAs",
+      "version": "1.20-Forge-4.0.6",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "i3C7x3NM",
+          "hashes": {
+            "sha1": "af584b690f5646c6032002b58abc4591beed3833",
+            "sha512": "7d83d94a90e55a712f6508485c044ff202916e9b9b9166b75177cb8f2eb919543bbbe1547d11c41cfd4763820f934235f47c0b26dd9e89bc1030954afa9fb889"
+          },
+          "url": "https://cdn.modrinth.com/data/Ua7DFN59/versions/PJOYAmAs/YungsApi-1.20-Forge-4.0.6.jar",
+          "filename": "YungsApi-1.20-Forge-4.0.6.jar",
+          "primary": true,
+          "size": 370524,
+          "file_type": null
+        }
+      ],
+      "client_only": false,
+      "selected_file": {
+        "id": "i3C7x3NM",
+        "hashes": {
+          "sha1": "af584b690f5646c6032002b58abc4591beed3833",
+          "sha512": "7d83d94a90e55a712f6508485c044ff202916e9b9b9166b75177cb8f2eb919543bbbe1547d11c41cfd4763820f934235f47c0b26dd9e89bc1030954afa9fb889"
+        },
+        "url": "https://cdn.modrinth.com/data/Ua7DFN59/versions/PJOYAmAs/YungsApi-1.20-Forge-4.0.6.jar",
+        "filename": "YungsApi-1.20-Forge-4.0.6.jar",
+        "primary": true,
+        "size": 370524,
+        "file_type": null
+      }
+    },
+    {
+      "slug": "searchables",
+      "title": "Searchables",
+      "project_id": "fuuu3xnx",
+      "version_id": "PM9yAW1G",
+      "version": "1.0.3",
+      "dependencies": [],
+      "files": [
+        {
+          "id": "RRYEkxNy",
+          "hashes": {
+            "sha1": "5b976f6e76ec74cdef21865e31f56bcb11558db7",
+            "sha512": "185617d6d446f3d4ef6c7d5c6ee4e2fb731a89f7495157313b21292ec6b8e3dbcc10c0379ab49ecb2d0c64d0a78df74750d7f7336d5e6c43516a7c92f278c0a2"
+          },
+          "url": "https://cdn.modrinth.com/data/fuuu3xnx/versions/PM9yAW1G/Searchables-forge-1.20.1-1.0.3.jar",
+          "filename": "Searchables-forge-1.20.1-1.0.3.jar",
+          "primary": true,
+          "size": 77732,
+          "file_type": null
+        }
+      ],
+      "client_only": true,
+      "selected_file": {
+        "id": "RRYEkxNy",
+        "hashes": {
+          "sha1": "5b976f6e76ec74cdef21865e31f56bcb11558db7",
+          "sha512": "185617d6d446f3d4ef6c7d5c6ee4e2fb731a89f7495157313b21292ec6b8e3dbcc10c0379ab49ecb2d0c64d0a78df74750d7f7336d5e6c43516a7c92f278c0a2"
+        },
+        "url": "https://cdn.modrinth.com/data/fuuu3xnx/versions/PM9yAW1G/Searchables-forge-1.20.1-1.0.3.jar",
+        "filename": "Searchables-forge-1.20.1-1.0.3.jar",
+        "primary": true,
+        "size": 77732,
+        "file_type": null
+      }
+    }
+  ],
+  "runtime_test": {
+    "ready": true,
+    "exit_code": 0,
+    "timed_out": false,
+    "events": [
+      "server_ready"
+    ],
+    "heap_mb": 768,
+    "world": "flat smoke world",
+    "client_tested": false,
+    "integration_pass": true,
+    "integration_fail": false,
+    "clean_exit": true
+  }
+}

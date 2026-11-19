@@ -1,0 +1,18 @@
+{
+  "type": "createoreexcavation:vein",
+  "amountMultiplierMax": 40.0,
+  "amountMultiplierMin": 15.0,
+  "biomeWhitelist": "longhaul:arid",
+  "finite": "default",
+  "icon": {
+    "count": 1,
+    "id": "minecraft:redstone"
+  },
+  "name": "{\"translate\": \"item.minecraft.redstone\"}",
+  "placement": {
+    "salt": 274196,
+    "separation": 8,
+    "spacing": 128
+  },
+  "priority": 0
+}

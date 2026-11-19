@@ -1,0 +1,66 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "1": {
+      "title": "Enter the Overworld",
+      "icon": {
+        "item": {
+          "id": "minecraft:grass_block",
+          "count": 1
+        },
+        "type": "heracles:item"
+      },
+      "biomes": "#minecraft:is_overworld",
+      "type": "heracles:biome"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "subtitle": "{\"translate\":\"\"}",
+    "description": [
+      "## || VORTEX Foundations",
+      "/7/1 - New Beginnings/7/",
+      "",
+      "**/7/||/7/** Welcome to the world **Creator.**",
+      "",
+      "**/7/||/7/** In this stage of progression you'll learn to **Explore and Exploit** the world around you. Starting off with whatever you can find in the wild. Working your way up to the next chapter.",
+      "",
+      "<columns>",
+      "<column>",
+      "<item id=\"minecraft:birch_leaves\" scale=\"2\"/>",
+      "</column>",
+      "<column>",
+      "<item id=\"minecraft:oak_log\" scale=\"2\"/>",
+      "</column>",
+      "<column>",
+      "<item id=\"minecraft:gravel\" scale=\"2\"/>",
+      "</column>",
+      "</columns>"
+    ],
+    "groups": {
+      "I - Safe Travels": {
+        "position": [
+          -170,
+          -282
+        ]
+      }
+    },
+    "icon": {
+      "item": {
+        "id": "minecraft:green_glazed_terracotta",
+        "count": 1
+      },
+      "type": "heracles:item"
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/hexagons.png",
+    "title": "{\"translate\":\"VORTEX Foundations\"}"
+  },
+  "settings": {
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false,
+    "individual_progress": false,
+    "hidden": "LOCKED",
+    "unlockNotification": false
+  }
+}

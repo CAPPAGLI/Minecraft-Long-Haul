@@ -1,0 +1,52 @@
+{
+  "dependencies": [
+    "alloy_plate",
+    "gold_vein"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "megaproject:precision_frame",
+      "amount": 4,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 200
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Прецизионная рама\"}",
+    "subtitle": "{\"text\": \"Мегапроект: шаг 2\"}",
+    "description": [
+      "Соберите 4 прецизионные рамы: сплавные пластины + золото + редстоун.",
+      "Золото и редстоун — из аридного пояса. Мегапроект заставляет строить трансконтинентальную логистику."
+    ],
+    "groups": {
+      "07 · Мегапроект": {
+        "position": [
+          -32,
+          -28
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "megaproject:precision_frame",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

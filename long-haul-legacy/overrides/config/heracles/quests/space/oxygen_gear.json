@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "tier1_rocket"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "ad_astra:oxygen_gear",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 150
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Кислородное снаряжение\"}",
+    "subtitle": "{\"text\": \"Ad Astra: выживание\"}",
+    "description": [
+      "Соберите кислородное снаряжение: маску, баки и распределитель кислорода.",
+      "Без кислорода на Луне и планетах вы задохнётесь за секунды."
+    ],
+    "groups": {
+      "08 · Космическая программа": {
+        "position": [
+          -32,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "ad_astra:oxygen_gear",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

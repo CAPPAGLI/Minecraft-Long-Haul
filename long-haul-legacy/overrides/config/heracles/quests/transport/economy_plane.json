@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "airship"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "man_of_many_planes:economy_plane",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 200
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Тяжёлый самолёт\"}",
+    "subtitle": "{\"text\": \"Man of Many Planes\"}",
+    "description": [
+      "Соберите грузовой самолёт Man of Many Planes для дальних перевозок.",
+      "Тяжёлые самолёты — самый быстрый способ доставить грузы через 50 000 блоков."
+    ],
+    "groups": {
+      "03 · Транспорт": {
+        "position": [
+          0,
+          56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "man_of_many_planes:economy_plane",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

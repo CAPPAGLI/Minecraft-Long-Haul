@@ -1,0 +1,50 @@
+{
+  "dependencies": [
+    "first_tools"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "minecraft:coal",
+      "amount": 16,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 25
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Уголь\"}",
+    "subtitle": "{\"text\": \"Топливо и факелы\"}",
+    "description": [
+      "Добудьте 16 угля. Угольные жилы Create: Ore Excavation находятся в умеренном поясе — позже автоматизируете добычу буром."
+    ],
+    "groups": {
+      "01 · Начало": {
+        "position": [
+          32,
+          28
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:coal",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

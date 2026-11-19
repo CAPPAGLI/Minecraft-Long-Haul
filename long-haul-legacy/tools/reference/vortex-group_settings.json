@@ -1,0 +1,38 @@
+{
+  "V - State of Matter": {
+    "icon": "createdeco:decal_radioactive",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "II - Ancient Foundry": {
+    "icon": "createdeco:decal_creeper",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "+ Additional Quests": {
+    "icon": "minecraft:book",
+    "iconEnabled": false,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "III - All Alloying": {
+    "icon": "createdeco:decal_fire",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "I - Safe Travels": {
+    "icon": "createdeco:decal_flow",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "IV - Powerful Problems": {
+    "icon": "createdeco:decal_electrical",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  }
+}

@@ -1,0 +1,2695 @@
+[
+  {
+    "slug": "create",
+    "version": "mc1.20.1-6.0.8",
+    "version_id": "8amzvn9x",
+    "file": "create-1.20.1-6.0.8.jar",
+    "mods": [
+      {
+        "id": "create",
+        "version": "6.0.8"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.1.3,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1]",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create"
+      },
+      {
+        "modId": "flywheel",
+        "mandatory": true,
+        "versionRange": "[1.0.0,2.0)",
+        "ordering": "AFTER",
+        "side": "CLIENT",
+        "owner": "create"
+      },
+      {
+        "modId": "ponder",
+        "mandatory": true,
+        "versionRange": "[0.8,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "create"
+      },
+      {
+        "modId": "jei",
+        "mandatory": false,
+        "versionRange": "[15.19.0,)",
+        "ordering": "NONE",
+        "side": "CLIENT",
+        "owner": "create"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": []
+  },
+  {
+    "slug": "create-steam-n-rails",
+    "version": "1.7.3+forge-mc1.20.1",
+    "version_id": "7Uk6lWkU",
+    "file": "Steam_Rails-1.7.3+forge-mc1.20.1.jar",
+    "mods": [
+      {
+        "id": "railways",
+        "version": "1.7.3+forge-mc1.20.1"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "railways"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1]",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "railways"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.7,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "railways"
+      },
+      {
+        "modId": "hexcasting",
+        "mandatory": false,
+        "versionRange": ",",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "railways"
+      },
+      {
+        "modId": "voicechat",
+        "mandatory": false,
+        "versionRange": "[1.20.1-2.4.11,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "railways"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.7,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "createaddition",
+    "version": "forge-1.20.1-1.3.3",
+    "version_id": "9LgyB6Yb",
+    "file": "createaddition-1.20.1-1.3.3.jar",
+    "mods": [
+      {
+        "id": "createaddition",
+        "version": "${file.jarVersion}"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[40,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createaddition"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.3,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createaddition"
+      },
+      {
+        "modId": "jei",
+        "mandatory": false,
+        "versionRange": "[15.0.0.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createaddition"
+      },
+      {
+        "modId": "computercraft",
+        "mandatory": false,
+        "versionRange": "[0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createaddition"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,1.21)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createaddition"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.3,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-enchantment-industry",
+    "version": "1.4.1",
+    "version_id": "caLmFTZ1",
+    "file": "create_enchantment_industry-1.4.1-for-create-6.0.8.jar",
+    "mods": [
+      {
+        "id": "create_enchantment_industry",
+        "version": "${file.jarVersion}"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_enchantment_industry"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,1.21)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_enchantment_industry"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.8,6.0.9)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_enchantment_industry"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.8,6.0.9)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-connected",
+    "version": "1.2.3-mc1.20.1",
+    "version_id": "6gnvaVkN",
+    "file": "create_connected-1.2.3-mc1.20.1-all.jar",
+    "mods": [
+      {
+        "id": "create_connected",
+        "version": "1.2.3-mc1.20.1"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_connected"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,1.21)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_connected"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.8,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_connected"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.8,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-deco",
+    "version": "2.0.3-1.20.1-forge",
+    "version_id": "e9gaSRMd",
+    "file": "createdeco-2.0.3-1.20.1-forge.jar",
+    "mods": [
+      {
+        "id": "createdeco",
+        "version": "2.0.3-1.20.1-forge"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createdeco"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "1.20.1",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createdeco"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "6.0.2",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "createdeco"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "6.0.2",
+        "satisfied": null
+      }
+    ]
+  },
+  {
+    "slug": "slice-and-dice",
+    "version": "3.6.0",
+    "version_id": "KWLI8Ng7",
+    "file": "sliceanddice-forge-3.6.0.jar",
+    "mods": [
+      {
+        "id": "sliceanddice",
+        "version": "3.6.0"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "sliceanddice"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "sliceanddice"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.7,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "sliceanddice"
+      },
+      {
+        "modId": "create_enchantment_industry",
+        "mandatory": false,
+        "versionRange": "[1.3.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "sliceanddice"
+      },
+      {
+        "modId": "kotlinforforge",
+        "mandatory": true,
+        "versionRange": "[4.3.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "sliceanddice"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.7,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-central-kitchen",
+    "version": "1.5.1",
+    "version_id": "jMB94kRJ",
+    "file": "create_central_kitchen-1.20.1-for-create-6.0.8-1.5.1.jar",
+    "mods": [
+      {
+        "id": "create_central_kitchen",
+        "version": "${file.jarVersion}"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.4.10,48)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_central_kitchen"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,1.20.2)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_central_kitchen"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.8,6.1.0)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "create_central_kitchen"
+      },
+      {
+        "modId": "ends_delight",
+        "mandatory": false,
+        "versionRange": "[2.6.1,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "create_central_kitchen"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.8,6.1.0)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "valkyrien-skies",
+    "version": "1.20.1-forge-2.4.11",
+    "version_id": "pOkdwuUh",
+    "file": "valkyrienskies-120-2.4.11.jar",
+    "mods": [
+      {
+        "id": "valkyrienskies",
+        "version": "2.4.11"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.2.0,),[47.1.21,47.1.47]",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "valkyrienskies"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1]",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "valkyrienskies"
+      },
+      {
+        "modId": "create",
+        "mandatory": false,
+        "versionRange": "[6.0.6, )",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "valkyrienskies"
+      },
+      {
+        "modId": "computercraft",
+        "mandatory": false,
+        "versionRange": "[1.115.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "valkyrienskies"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": []
+  },
+  {
+    "slug": "create-clockwork",
+    "version": "1.20.1-forge-0.5.7",
+    "version_id": "a9JnVNQz",
+    "file": "clockwork-0.5.7.jar",
+    "mods": [
+      {
+        "id": "vs_clockwork",
+        "version": "0.5.7"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "vs_clockwork"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "1.20.1",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "vs_clockwork"
+      },
+      {
+        "modId": "valkyrienskies",
+        "mandatory": true,
+        "versionRange": "[2.4.8,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "vs_clockwork"
+      },
+      {
+        "modId": "kelvin",
+        "mandatory": true,
+        "versionRange": "[0.5.2,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "vs_clockwork"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.7,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "vs_clockwork"
+      },
+      {
+        "modId": "architectury",
+        "mandatory": true,
+        "versionRange": "[9.1.12,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "vs_clockwork"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.7,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "eureka",
+    "version": "1.20.1-forge-1.6.4",
+    "version_id": "J1B6BA08",
+    "file": "eureka-1201-1.6.4.jar",
+    "mods": [
+      {
+        "id": "vs_eureka",
+        "version": "1.6.4"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.0.18,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "vs_eureka"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "vs_eureka"
+      },
+      {
+        "modId": "valkyrienskies",
+        "mandatory": true,
+        "versionRange": "[2.4.10,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "vs_eureka"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": []
+  },
+  {
+    "slug": "trackwork",
+    "version": "1.20.1-1.2.3",
+    "version_id": "i5GpwEF8",
+    "file": "trackwork-1.20.1-1.2.3.jar",
+    "mods": [
+      {
+        "id": "trackwork",
+        "version": "1.2.3"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "trackwork"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "1.20.1",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "trackwork"
+      },
+      {
+        "modId": "valkyrienskies",
+        "mandatory": true,
+        "versionRange": "[2.4,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "trackwork"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.0,6.1.0)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "trackwork"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.0,6.1.0)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "cc-tweaked",
+    "version": "1.121.0",
+    "version_id": "Qm9iIIEY",
+    "file": "cc-tweaked-1.20.1-forge-1.121.0.jar",
+    "mods": [
+      {
+        "id": "computercraft",
+        "version": "1.121.0"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.1.0,48)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "computercraft"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": []
+  },
+  {
+    "slug": "exposure",
+    "version": "1.9.24",
+    "version_id": "vPrmURi1",
+    "file": "exposure-forge-1.20.1-1.9.24.jar",
+    "mods": [
+      {
+        "id": "exposure",
+        "version": "1.9.24"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "exposure"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20,1.20.2)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "exposure"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": []
+  },
+  {
+    "slug": "simple-voice-chat",
+    "version": "forge-1.20.1-2.6.22",
+    "version_id": "S11m0QIb",
+    "file": "voicechat-forge-1.20.1-2.6.22.jar",
+    "mods": [
+      {
+        "id": "voicechat",
+        "version": "1.20.1-2.6.22"
+      },
+      {
+        "id": "voicechat_api",
+        "version": "2.6.20"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.0.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "voicechat"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20,1.20.1]",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "voicechat"
+      },
+      {
+        "modId": "cloth_config",
+        "mandatory": false,
+        "versionRange": "[11.0.99,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "voicechat"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": []
+  },
+  {
+    "slug": "zume",
+    "version": "1.2.2",
+    "version_id": "Rh2ImJ86",
+    "file": "zume-1.2.2.jar",
+    "mods": [
+      {
+        "id": "zume",
+        "version": "1.2.2"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "minecraft",
+        "type": "required",
+        "mandatory": true,
+        "versionRange": "[1.14,1.20.5)",
+        "ordering": "NONE",
+        "side": "CLIENT",
+        "owner": "zume"
+      },
+      {
+        "modId": "embeddiumplus",
+        "type": "optional",
+        "mandatory": false,
+        "versionRange": "[1.2.6,)",
+        "ordering": "BEFORE",
+        "side": "CLIENT",
+        "owner": "zume"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": []
+  },
+  {
+    "slug": "odyssey-quests",
+    "version": "1.1.13",
+    "version_id": "9ZUSHiZa",
+    "file": "Heracles-forge-1.20.1-1.1.13.jar",
+    "mods": [
+      {
+        "id": "heracles",
+        "version": "1.1.13"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[46,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "heracles"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "heracles"
+      },
+      {
+        "modId": "resourcefullib",
+        "mandatory": true,
+        "versionRange": "[2.1.17,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "heracles"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": []
+  },
+  {
+    "slug": "kubejs",
+    "version": "2001.6.5-build.26+forge",
+    "version_id": "hVR2xUSr",
+    "file": "kubejs-forge-2001.6.5-build.26.jar",
+    "mods": [
+      {
+        "id": "kubejs",
+        "version": "2001.6.5-build.26"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.1.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "kubejs"
+      },
+      {
+        "modId": "rhino",
+        "mandatory": true,
+        "versionRange": "[2001.2.2-build.1,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "kubejs"
+      },
+      {
+        "modId": "architectury",
+        "mandatory": true,
+        "versionRange": "[9.1.12,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "kubejs"
+      },
+      {
+        "modId": "jei",
+        "mandatory": false,
+        "versionRange": "[1.0.0,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "kubejs"
+      },
+      {
+        "modId": "roughlyenoughitems",
+        "mandatory": false,
+        "versionRange": "[9.1.572,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "kubejs"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": []
+  },
+  {
+    "slug": "lootjs",
+    "version": "1.20.1-2.13.1+forge",
+    "version_id": "wltVDhRB",
+    "file": "lootjs-forge-1.20.1-2.13.1.jar",
+    "mods": [
+      {
+        "id": "lootjs",
+        "version": "1.20.1-2.13.1"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.1.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "lootjs"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "lootjs"
+      },
+      {
+        "modId": "kubejs",
+        "mandatory": true,
+        "versionRange": "[2001.6.4-build.120,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "lootjs"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": []
+  },
+  {
+    "slug": "probejs",
+    "version": "6.0.0",
+    "version_id": "XIxTqWLF",
+    "file": "probejs-6.0.0-forge.jar",
+    "mods": [
+      {
+        "id": "probejs",
+        "version": "6.0.0"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[40,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "probejs"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.18.2,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "probejs"
+      },
+      {
+        "modId": "architectury",
+        "mandatory": true,
+        "versionRange": "[4.1.39,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "probejs"
+      },
+      {
+        "modId": "kubejs",
+        "mandatory": true,
+        "versionRange": "[2001.6.4-build.120,)",
+        "owner": "probejs"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": []
+  },
+  {
+    "slug": "advancedperipherals",
+    "version": "1.20.1-0.7.48r",
+    "version_id": "mIP0ApJY",
+    "file": "AdvancedPeripherals-1.20.1-0.7.48r.jar",
+    "mods": [
+      {
+        "id": "advancedperipherals",
+        "version": "0.7.48r"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.1.106,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "advancedperipherals"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "advancedperipherals"
+      },
+      {
+        "modId": "computercraft",
+        "mandatory": true,
+        "versionRange": "[1.116.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "advancedperipherals"
+      },
+      {
+        "modId": "curios",
+        "mandatory": false,
+        "versionRange": "[5.2.0+1.20.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "advancedperipherals"
+      },
+      {
+        "modId": "ae2",
+        "mandatory": false,
+        "versionRange": "[15.0.9-beta,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "advancedperipherals"
+      },
+      {
+        "modId": "refinedstorage",
+        "mandatory": false,
+        "versionRange": "[1.12.4,)",
+        "ordnering": "NONE",
+        "side": "BOTH",
+        "owner": "advancedperipherals"
+      },
+      {
+        "modId": "minecolonies",
+        "mandatory": false,
+        "versionRange": "[1.20.1-1.1.1186-snapshot,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "advancedperipherals"
+      },
+      {
+        "modId": "patchouli",
+        "mandatory": false,
+        "versionRange": "[1.20.1-84,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "advancedperipherals"
+      },
+      {
+        "modId": "create",
+        "mandatory": false,
+        "versionRange": "[0.5.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "advancedperipherals"
+      },
+      {
+        "modId": "botania",
+        "mandatory": false,
+        "versionRange": "[1.20.1-443-FORGE,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "advancedperipherals"
+      },
+      {
+        "modId": "mekanism",
+        "mandatory": false,
+        "versionRange": "[1.20.1-10.4.2.16,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "advancedperipherals"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": []
+  },
+  {
+    "slug": "almostunified",
+    "version": "1.20.1-0.11.0+forge",
+    "version_id": "9qc7KIeg",
+    "file": "almostunified-forge-1.20.1-0.11.0.jar",
+    "mods": [
+      {
+        "id": "almostunified",
+        "version": "1.20.1-0.11.0"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.0.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "almostunified"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "almostunified"
+      },
+      {
+        "modId": "jei",
+        "mandatory": false,
+        "versionRange": "[15.1.0.18,)",
+        "ordering": "BEFORE",
+        "side": "BOTH",
+        "owner": "almostunified"
+      },
+      {
+        "modId": "roughlyenoughitems",
+        "mandatory": false,
+        "versionRange": "[12.0.625,)",
+        "ordering": "BEFORE",
+        "side": "BOTH",
+        "owner": "almostunified"
+      },
+      {
+        "modId": "emi",
+        "mandatory": false,
+        "versionRange": "[1.1.2,)",
+        "ordering": "BEFORE",
+        "side": "BOTH",
+        "owner": "almostunified"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": []
+  },
+  {
+    "slug": "create-diesel-generators",
+    "version": "1.20.1-1.3.12",
+    "version_id": "DTQVvA5H",
+    "file": "createdieselgenerators-1.20.1-1.3.12.jar",
+    "mods": [
+      {
+        "id": "createdieselgenerators",
+        "version": "1.20.1-1.3.12"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[40.2.4,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createdieselgenerators"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createdieselgenerators"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.7,6.1.0)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createdieselgenerators"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.7,6.1.0)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-new-age",
+    "version": "1.2.0+mc1.20.1",
+    "version_id": "7vnwbouk",
+    "file": "create-new-age-1.2.0+forge-mc1.20.1.jar",
+    "mods": [
+      {
+        "id": "create_new_age",
+        "version": "1.2.0+mc1.20.1"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_new_age"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1]",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_new_age"
+      },
+      {
+        "modId": "esl",
+        "mandatory": true,
+        "versionRange": "[1.1.3]",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_new_age"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.8,6.1.0)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_new_age"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.8,6.1.0)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-ore-excavation",
+    "version": "1.20.1-1.6.6",
+    "version_id": "J3rjB9Lq",
+    "file": "createoreexcavation-1.20-1.6.6.jar",
+    "mods": [
+      {
+        "id": "createoreexcavation",
+        "version": "${file.jarVersion}"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createoreexcavation"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.2,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createoreexcavation"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20,1.20.1]",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createoreexcavation"
+      },
+      {
+        "modId": "journeymap",
+        "mandatory": false,
+        "versionRange": "[1.20.1-6.0.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createoreexcavation"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.2,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-mechanical-extruder",
+    "version": "1.20.1-1.6.11-6.0.6",
+    "version_id": "hXjb2B03",
+    "file": "create_mecanical_extruder-1.20.1-1.6.11-6.0.6.jar",
+    "mods": [
+      {
+        "id": "create_mechanical_extruder",
+        "version": "1.20.1-1.6.10-6.0.6"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.1.3,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_mechanical_extruder"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20,1.21)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_mechanical_extruder"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.6,6.1.0)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "create_mechanical_extruder"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.6,6.1.0)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-sifting",
+    "version": "1.20.1-1.8.6-6.0.6",
+    "version_id": "GlQRvUIe",
+    "file": "createsifter-1.20.1-1.8.6-6.0.6.jar",
+    "mods": [
+      {
+        "id": "createsifter",
+        "version": "1.20.1-1.8.6-6.0.6"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.1.3,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createsifter"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20,1.21)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createsifter"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.6,6.1.0)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createsifter"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.6,6.1.0)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-metallurgy",
+    "version": "1.0.1-1.20.1",
+    "version_id": "VYcLBgY3",
+    "file": "createmetallurgy-1.0.1-1.20.1.jar",
+    "mods": [
+      {
+        "id": "createmetallurgy",
+        "version": "${file.jarVersion}"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.0.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createmetallurgy"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20,1.21)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createmetallurgy"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.8,6.1.0)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createmetallurgy"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.8,6.1.0)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-big-cannons",
+    "version": "5.11.4",
+    "version_id": "ZRgu5o3x",
+    "file": "createbigcannons-5.11.4-mc.1.20.1-forge.jar",
+    "mods": [
+      {
+        "id": "createbigcannons",
+        "version": "5.11.4"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createbigcannons"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1]",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createbigcannons"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.7,6.1.0)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "createbigcannons"
+      },
+      {
+        "modId": "ritchiesprojectilelib",
+        "mandatory": true,
+        "versionRange": "[2.1.1,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "createbigcannons"
+      },
+      {
+        "modId": "copycats",
+        "mandatory": false,
+        "versionRange": "[3.0.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createbigcannons"
+      },
+      {
+        "modId": "framedblocks",
+        "mandatory": false,
+        "versionRange": "[9.0.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createbigcannons"
+      },
+      {
+        "modId": "curios",
+        "mandatory": false,
+        "versionRange": "[5.2.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createbigcannons"
+      },
+      {
+        "modId": "cbc_at",
+        "mandatory": false,
+        "versionRange": "[0.1.4,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createbigcannons"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.7,6.1.0)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-tweaked-controllers",
+    "version": "1.20.1-1.2.7",
+    "version_id": "8XoqeODw",
+    "file": "create_tweaked_controllers-1.20.1-1.2.7.jar",
+    "mods": [
+      {
+        "id": "create_tweaked_controllers",
+        "version": "1.20.1-1.2.7"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.4.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_tweaked_controllers"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,1.21)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_tweaked_controllers"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_tweaked_controllers"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.0,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-goggles",
+    "version": "6.1.1",
+    "version_id": "Nc2Ag5HT",
+    "file": "creategoggles-1.20.1-6.1.1-[FORGE].jar",
+    "mods": [
+      {
+        "id": "creategoggles",
+        "version": "6.1.1"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[43,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "creategoggles"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,1.21)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "creategoggles"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.8,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "creategoggles"
+      },
+      {
+        "modId": "architectury",
+        "mandatory": true,
+        "versionRange": "[9.2.14,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "creategoggles"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.8,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "copycats",
+    "version": "3.0.10+mc.1.20.1-forge",
+    "version_id": "LlMxIysb",
+    "file": "copycats-3.0.10+mc.1.20.1-forge.jar",
+    "mods": [
+      {
+        "id": "copycats",
+        "version": "3.0.10+mc.1.20.1-forge"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "copycats"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,1.21)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "copycats"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.7,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "copycats"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.7,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-framed",
+    "version": "1.7.1+1.20.1",
+    "version_id": "k1du8nDj",
+    "file": "createframed-1.7.1.jar",
+    "mods": [
+      {
+        "id": "createframed",
+        "version": "1.7.1"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createframed"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,1.21)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createframed"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": []
+  },
+  {
+    "slug": "create-design-n-decor",
+    "version": "0.4.0b",
+    "version_id": "JtCSM1oV",
+    "file": "design_decor-0.4.0b-1.20.1.jar",
+    "mods": [
+      {
+        "id": "design_decor",
+        "version": "0.4.0b"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[43,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "design_decor"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[0.5.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "design_decor"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,1.21)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "design_decor"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[0.5.1,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-railways-navigator",
+    "version": "1.20.1-beta-0.10.0-C6",
+    "version_id": "clWHhbZY",
+    "file": "createrailwaysnavigator-forge-1.20.1-beta-0.10.0-C6.jar",
+    "mods": [
+      {
+        "id": "createrailwaysnavigator",
+        "version": "1.20.1-beta-0.10.0-C6"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createrailwaysnavigator"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,1.21)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createrailwaysnavigator"
+      },
+      {
+        "modId": "dragonlib",
+        "mandatory": true,
+        "versionRange": "[1.20.1-beta-3.0.28,)",
+        "ordering": "BEFORE",
+        "side": "BOTH",
+        "owner": "createrailwaysnavigator"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.8,)",
+        "ordering": "BEFORE",
+        "side": "BOTH",
+        "owner": "createrailwaysnavigator"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.8,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-track-map",
+    "version": "1.4",
+    "version_id": "wAEMENRX",
+    "file": "create-track-map-1.4+mc1.20.1-neoforge.jar",
+    "mods": [
+      {
+        "id": "createtrackmap",
+        "version": "1.4"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createtrackmap"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "1.20.1",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createtrackmap"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[0.5.1.d,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createtrackmap"
+      },
+      {
+        "modId": "kotlinforforge",
+        "mandatory": true,
+        "versionRange": "[3.9.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createtrackmap"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[0.5.1.d,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-power-loader",
+    "version": "2.0.3-mc1.20.1",
+    "version_id": "gQuz8jcV",
+    "file": "create_power_loader-2.0.3-mc1.20.1.jar",
+    "mods": [
+      {
+        "id": "create_power_loader",
+        "version": "2.0.3-mc1.20.1"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_power_loader"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,1.21)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_power_loader"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_power_loader"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.0,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-stuff-additions",
+    "version": "2.1.2",
+    "version_id": "uzmWSzyy",
+    "file": "create-stuff-additions1.20.1_v2.1.2.jar",
+    "mods": [
+      {
+        "id": "create_sa",
+        "version": "2.1.2"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1]",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_sa"
+      },
+      {
+        "modId": "create",
+        "mandatory": false,
+        "versionRange": "[0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_sa"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": []
+  },
+  {
+    "slug": "create-liquid-fuel",
+    "version": "2.2.0-1.20.1",
+    "version_id": "zRiNFWm2",
+    "file": "createliquidfuel-2.2.0-1.20.1.jar",
+    "mods": [
+      {
+        "id": "createliquidfuel",
+        "version": "2.2.0-1.20.1"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createliquidfuel"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20,1.21)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createliquidfuel"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[0.5.0.e,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createliquidfuel"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[0.5.0.e,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-low-heated",
+    "version": "1.20.1-6.0.8-7",
+    "version_id": "c50Vtvhd",
+    "file": "createlowheated-forge-1.20.1-6.0.8-7.jar",
+    "mods": [
+      {
+        "id": "createlowheated",
+        "version": "1.20.1-6.0.8-7"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.0.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createlowheated"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createlowheated"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20,1.21)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createlowheated"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.0,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-deco-additions",
+    "version": "1.3.2+mod",
+    "version_id": "zXYMiPys",
+    "file": "create-deco-additions-1.3.2.jar",
+    "mods": [
+      {
+        "id": "mr_create_decoadditions",
+        "version": "1.3.2"
+      }
+    ],
+    "dependencies": [],
+    "status": "inspected",
+    "create_6_0_8": []
+  },
+  {
+    "slug": "create-vintage-improvements",
+    "version": "1.20.1-0.2.0.3",
+    "version_id": "a7TBDYtd",
+    "file": "vintageimprovements-1.20.1-0.2.0.3.jar",
+    "mods": [
+      {
+        "id": "vintageimprovements",
+        "version": "1.20.1-0.2.0.3"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "vintageimprovements"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,1.21)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "vintageimprovements"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[0.5.1.a,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "vintageimprovements"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[0.5.1.a,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-optical",
+    "version": "0.4.2",
+    "version_id": "P1wv4ixj",
+    "file": "create_optical-0.4.2.jar",
+    "mods": [
+      {
+        "id": "create_optical",
+        "version": "0.4.2"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.1.33,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_optical"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1]",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_optical"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.8,6.1.0)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_optical"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.8,6.1.0)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-garnished",
+    "version": "2.1.7.c+1.20.1-forge",
+    "version_id": "8juNVSLp",
+    "file": "garnished-2.1.7.c+1.20.1-neoforged.jar",
+    "mods": [
+      {
+        "id": "garnished",
+        "version": "2.1.7.c"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "garnished"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20,1.20.1]",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "garnished"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "garnished"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.1,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-confectionery",
+    "version": "1.1.3",
+    "version_id": "3AaYpdLZ",
+    "file": "create-confectionery1.20.1_v1.1.3.jar",
+    "mods": [
+      {
+        "id": "create_confectionery",
+        "version": "1.1.3"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1]",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_confectionery"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_confectionery"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[0,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-bitterballen",
+    "version": "1.0.4+1.20.1-forge",
+    "version_id": "1Pjo9Fow",
+    "file": "create_bitterballen+1.20.1-1.0.4.jar",
+    "mods": [
+      {
+        "id": "create_bic_bit",
+        "version": "1.0.4"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1]",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_bic_bit"
+      },
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_bic_bit"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.6,6.1.0)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_bic_bit"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.6,6.1.0)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-structures",
+    "version": "0.1.1",
+    "version_id": "XALEBs0a",
+    "file": "create-structures-0.1.1-1.20.1-FORGE.jar",
+    "mods": [
+      {
+        "id": "create_structures",
+        "version": "0.1.1"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_structures"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[0.5.1.a,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "create_structures"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[0.5.1.a,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-contraption-terminals",
+    "version": "1.20.1-1.2.0",
+    "version_id": "Rdo5tUmb",
+    "file": "createcontraptionterminals-1.20-1.2.0.jar",
+    "mods": [
+      {
+        "id": "createcontraptionterminals",
+        "version": "${file.jarVersion}"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createcontraptionterminals"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createcontraptionterminals"
+      },
+      {
+        "modId": "toms_storage",
+        "mandatory": true,
+        "versionRange": "[1.7.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createcontraptionterminals"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20,1.20.1]",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createcontraptionterminals"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.0,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-stock-bridge",
+    "version": "1.20.1-0.2.0",
+    "version_id": "NVPFDqFj",
+    "file": "createstockbridge-1.20-0.2.0.jar",
+    "mods": [
+      {
+        "id": "createstockbridge",
+        "version": "${file.jarVersion}"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createstockbridge"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createstockbridge"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20,1.20.1]",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createstockbridge"
+      },
+      {
+        "modId": "ae2",
+        "mandatory": true,
+        "versionRange": "[15.0.0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "createstockbridge"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.0,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-logistics",
+    "version": "1.0.0",
+    "version_id": "5kzUHfVm",
+    "file": "create_logistics-1.20.1-0.0.1.jar",
+    "mods": [
+      {
+        "id": "create_logistics",
+        "version": "1.0.0"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1]",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_logistics"
+      },
+      {
+        "modId": "create",
+        "mandatory": false,
+        "versionRange": "[0,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_logistics"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": []
+  },
+  {
+    "slug": "clockwork-additions",
+    "version": "1.20.1-0.0.7",
+    "version_id": "DMppmhST",
+    "file": "ClockworkAdditions-forge-1.20.1-0.0.7.jar",
+    "mods": [
+      {
+        "id": "clockworkadditions",
+        "version": "1.20.1-0.0.7"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "clockworkadditions"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "clockworkadditions"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": []
+  },
+  {
+    "slug": "create-dynamic-lights",
+    "version": "forge-1.0.2",
+    "version_id": "A0VugLKf",
+    "file": "create-dyn-light-forge1.20.1+1.0.2.jar",
+    "mods": [
+      {
+        "id": "createdynlight",
+        "version": "1.0.2"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "CLIENT",
+        "owner": "createdynlight"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20,1.21)",
+        "ordering": "NONE",
+        "side": "CLIENT",
+        "owner": "createdynlight"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[0.5.0,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "createdynlight"
+      },
+      {
+        "modId": "dynamiclightsreforged",
+        "mandatory": false,
+        "versionRange": "[1.6.0,)",
+        "ordering": "AFTER",
+        "side": "CLIENT",
+        "owner": "createdynlight"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[0.5.0,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "numismatics",
+    "version": "1.1.0+forge-mc1.20.1",
+    "version_id": "OYnlR0GB",
+    "file": "CreateNumismatics-1.1.0+forge-mc1.20.1.jar",
+    "mods": [
+      {
+        "id": "numismatics",
+        "version": "1.1.0+forge-mc1.20.1"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "numismatics"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "1.20.1",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "numismatics"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.8,6.1.0)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "numismatics"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.8,6.1.0)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "create-mobile-packages",
+    "version": "1.20.1-0.6.1",
+    "version_id": "5KlbqQtT",
+    "file": "create_mobile_packages-1.20.1-0.6.1.jar",
+    "mods": [
+      {
+        "id": "create_mobile_packages",
+        "version": "0.6.1"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_mobile_packages"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20.1,1.21)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_mobile_packages"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.7,6.1.0)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "create_mobile_packages"
+      },
+      {
+        "modId": "jei",
+        "mandatory": false,
+        "versionRange": "[15.19.0,)",
+        "ordering": "NONE",
+        "owner": "create_mobile_packages"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.7,6.1.0)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "bellsandwhistles",
+    "version": "0.4.5-1.20.x",
+    "version_id": "kW8DoegV",
+    "file": "bellsandwhistles-0.4.5-1.20.x-Create6.0+.jar",
+    "mods": [
+      {
+        "id": "bellsandwhistles",
+        "version": "0.4.3-1.20.x"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47.1,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "bellsandwhistles"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "[1.20,1.22)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "bellsandwhistles"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6.0.2,6.1.0)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "bellsandwhistles"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6.0.2,6.1.0)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "interiors",
+    "version": "1.20.1-forge-0.6.0",
+    "version_id": "3Gpm5qDT",
+    "file": "interiors-1.20.1-forge-0.6.0.jar",
+    "mods": [
+      {
+        "id": "interiors",
+        "version": "0.6.0"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "[6,)",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "interiors"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "[6,)",
+        "satisfied": true
+      }
+    ]
+  },
+  {
+    "slug": "extended-cogwheels",
+    "version": "2.1.1-1.20.1-0.5.1.f-forge",
+    "version_id": "ujnQ2zz6",
+    "file": "extendedgears-2.1.1-1.20.1-0.5.1.f-forge.jar",
+    "mods": [
+      {
+        "id": "extendedgears",
+        "version": "2.1.1-1.20.1-0.5.1.f-forge"
+      }
+    ],
+    "dependencies": [
+      {
+        "modId": "forge",
+        "mandatory": true,
+        "versionRange": "[47,)",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "extendedgears"
+      },
+      {
+        "modId": "minecraft",
+        "mandatory": true,
+        "versionRange": "1.20.1",
+        "ordering": "NONE",
+        "side": "BOTH",
+        "owner": "extendedgears"
+      },
+      {
+        "modId": "create",
+        "mandatory": true,
+        "versionRange": "0.5.1.f",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "extendedgears"
+      },
+      {
+        "modId": "kubejs",
+        "mandatory": false,
+        "versionRange": "*",
+        "ordering": "AFTER",
+        "side": "BOTH",
+        "owner": "extendedgears"
+      }
+    ],
+    "status": "inspected",
+    "create_6_0_8": [
+      {
+        "range": "0.5.1.f",
+        "satisfied": null
+      }
+    ]
+  }
+]

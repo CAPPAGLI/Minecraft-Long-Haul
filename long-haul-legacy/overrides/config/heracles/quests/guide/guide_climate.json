@@ -1,0 +1,47 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "task1": {
+      "type": "heracles:dummy"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 10
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Климат и выживание\"}",
+    "subtitle": "{\"text\": \"Cold Sweat + Natural Temperature\"}",
+    "description": [
+      "Мир разделён на 5 климатических поясов: полярный, холодный, умеренный (спавн), аридный и тропический.",
+      "Cold Sweat следит за температурой тела: на севере утепляйтесь (кожа, шерсть, костры), на экваторе охлаждайтесь.",
+      "Create: Cold Sweat: механизмы Create хуже работают на морозе — отапливайте мастерские."
+    ],
+    "groups": {
+      "09 · Справочник": {
+        "position": [
+          -64,
+          -56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:leather_chestplate",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

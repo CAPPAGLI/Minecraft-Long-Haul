@@ -1,0 +1,43 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "item": {
+      "type": "heracles:item",
+      "item": "exposure:black_and_white_film",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Запас плёнки\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha\"}",
+    "description": [
+      "Учебная веха: обнаружение предмета, НЕ испытание работающего предприятия.",
+      "Чёрно-белая плёнка нужна для первых полевых снимков."
+    ],
+    "groups": {
+      "02 · Мастерская и экспедиция": {
+        "position": [
+          -42,
+          72
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "exposure:black_and_white_film",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individual_progress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

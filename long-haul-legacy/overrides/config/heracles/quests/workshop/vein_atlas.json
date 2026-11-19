@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "drilling_machine"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "createoreexcavation:vein_atlas",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 100
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Атлас жил\"}",
+    "subtitle": "{\"text\": \"Карта ресурсов мира\"}",
+    "description": [
+      "Сделайте атлас жил — он показывает расположение буровых жил вокруг вас.",
+      "Золото, редстоун и лазурит — в аридном поясе на юге. Алмазы и изумруды — в тропиках и на севере."
+    ],
+    "groups": {
+      "02 · Мастерская": {
+        "position": [
+          -64,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "createoreexcavation:vein_atlas",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

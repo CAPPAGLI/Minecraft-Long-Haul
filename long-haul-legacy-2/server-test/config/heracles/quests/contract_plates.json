@@ -1,0 +1,47 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "receipt": {
+      "type": "heracles:advancement",
+      "title": "Подтверждение серверной приёмки",
+      "advancements": [
+        "longhaul:contracts/plates"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Первая партия пластин\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha\"}",
+    "description": [
+      "Начало: /lh accept plates",
+      "64 железные пластины.",
+      "Нужно реально передать товары в зарегистрированную бочку после принятия заказа. Наличие предметов в инвентаре не завершает этот квест.",
+      "Товары расходуются. Статус: /lh status. Награда: 15 опыта один раз; повторный вход не выдаёт её заново.",
+      "Условия и ограничения прототипа описаны в первой главе."
+    ],
+    "groups": {
+      "03 · Контрольные поставки": {
+        "position": [
+          -126,
+          -36
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:iron_sheet",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individual_progress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

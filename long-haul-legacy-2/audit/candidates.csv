@@ -1,0 +1,574 @@
+category,slug,status,version,reason
+core,create,candidate,mc1.20.1-6.0.8,Доступен релиз; совместимость не проверена
+core,create-steam-n-rails,candidate,1.7.3+forge-mc1.20.1,Доступен релиз; совместимость не проверена
+core,createaddition,candidate,forge-1.20.1-1.3.3,Доступен релиз; совместимость не проверена
+core,create-enchantment-industry,candidate,1.4.1,Доступен релиз; совместимость не проверена
+core,create-connected,candidate,1.2.3-mc1.20.1,Доступен релиз; совместимость не проверена
+core,create-deco,candidate,2.0.3-1.20.1-forge,Доступен релиз; совместимость не проверена
+core,slice-and-dice,candidate,3.6.0,Доступен релиз; совместимость не проверена
+core,create-central-kitchen,candidate,1.5.1,Доступен релиз; совместимость не проверена
+core,valkyrien-skies,candidate,1.20.1-forge-2.4.11,Доступен релиз; совместимость не проверена
+core,create-clockwork,candidate,1.20.1-forge-0.5.7,Доступен релиз; совместимость не проверена
+core,eureka,candidate,1.20.1-forge-1.6.4,Доступен релиз; совместимость не проверена
+core,trackwork,candidate,1.20.1-1.2.3,Доступен релиз; совместимость не проверена
+core,cc-tweaked,candidate,1.121.0,Доступен релиз; совместимость не проверена
+core,advanced-peripherals,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+core,exposure,candidate,1.9.24,Доступен релиз; совместимость не проверена
+core,simple-voice-chat,candidate,forge-1.20.1-2.6.22,Доступен релиз; совместимость не проверена
+core,zume,candidate,1.2.2,Доступен релиз; совместимость не проверена
+core,odyssey-quests,candidate,1.1.13,Доступен релиз; совместимость не проверена
+core,kubejs,candidate,2001.6.5-build.26+forge,Доступен релиз; совместимость не проверена
+core,lootjs,candidate,1.20.1-2.13.1+forge,Доступен релиз; совместимость не проверена
+core,probejs,candidate,6.0.0,Доступен релиз; совместимость не проверена
+core,almost-unified,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+core,advancedperipherals,candidate,1.20.1-0.7.48r,Доступен релиз; совместимость не проверена
+core,almostunified,candidate,1.20.1-0.11.0+forge,Доступен релиз; совместимость не проверена
+create_industry,create-diesel-generators,candidate,1.20.1-1.3.12,Доступен релиз; совместимость не проверена
+create_industry,create-new-age,candidate,1.2.0+mc1.20.1,Доступен релиз; совместимость не проверена
+create_industry,create-ore-excavation,candidate,1.20.1-1.6.6,Доступен релиз; совместимость не проверена
+create_industry,create-crafts-and-additions,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+create_industry,create-mechanical-extruder,candidate,1.20.1-1.6.11-6.0.6,Доступен релиз; совместимость не проверена
+create_industry,create-sifting,candidate,1.20.1-1.8.6-6.0.6,Доступен релиз; совместимость не проверена
+create_industry,create-metallurgy,candidate,1.0.1-1.20.1,Доступен релиз; совместимость не проверена
+create_industry,create-broken-bad,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+create_industry,create-big-cannons,candidate,5.11.4,Доступен релиз; совместимость не проверена
+create_industry,create-tweaked-controllers,candidate,1.20.1-1.2.7,Доступен релиз; совместимость не проверена
+create_industry,create-extended-cogwheels,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+create_industry,create-utilities,excluded,0.3.2+1.20.1,Риск дистанционной передачи ресурсов/энергии без маршрута; не включать без разбора
+create_industry,create-goggles,candidate,6.1.1,Доступен релиз; совместимость не проверена
+create_industry,create-copycats,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+create_industry,copycats,candidate,3.0.10+mc.1.20.1-forge,Доступен релиз; совместимость не проверена
+create_industry,create-framed,candidate,1.7.1+1.20.1,Доступен релиз; совместимость не проверена
+create_industry,create-bells-and-whistles,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+create_industry,create-design-n-decor,candidate,0.4.0b,Доступен релиз; совместимость не проверена
+create_industry,create-interiors,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+create_industry,create-railways-navigator,candidate,1.20.1-beta-0.10.0-C6,Доступен релиз; совместимость не проверена
+create_industry,create-track-map,candidate,1.4,Доступен релиз; совместимость не проверена
+create_industry,create-power-loader,candidate,2.0.3-mc1.20.1,Доступен релиз; совместимость не проверена
+create_industry,create-stuff-additions,candidate,2.1.2,Доступен релиз; совместимость не проверена
+create_industry,create-jetpack,excluded,4.4.6,Неограниченный личный полёт слишком рано заменяет транспорт
+create_industry,create-liquid-fuel,candidate,2.2.0-1.20.1,Доступен релиз; совместимость не проверена
+create_industry,create-low-heated,candidate,1.20.1-6.0.8-7,Доступен релиз; совместимость не проверена
+create_industry,create-deco-additions,candidate,1.3.2+mod,Доступен релиз; совместимость не проверена
+create_industry,create-vintage-improvements,candidate,1.20.1-0.2.0.3,Доступен релиз; совместимость не проверена
+create_industry,create-optical,candidate,0.4.2,Доступен релиз; совместимость не проверена
+create_industry,create-radar,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+create_industry,create-mechanical-spawner,excluded,1.20.1-0.1.7-6.0.6,Не включать до аудита лута: потенциальный обход ресурсных регионов
+create_industry,create-garnished,candidate,2.1.7.c+1.20.1-forge,Доступен релиз; совместимость не проверена
+create_industry,create-confectionery,candidate,1.1.3,Доступен релиз; совместимость не проверена
+create_industry,create-bitterballen,candidate,1.0.4+1.20.1-forge,Доступен релиз; совместимость не проверена
+create_industry,create-structures,candidate,0.1.1,Доступен релиз; совместимость не проверена
+create_industry,create-structure-expansion,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+create_industry,create-contraption-terminals,candidate,1.20.1-1.2.0,Доступен релиз; совместимость не проверена
+create_industry,create-stock-bridge,candidate,1.20.1-0.2.0,Доступен релиз; совместимость не проверена
+create_industry,create-logistics,candidate,1.0.0,Доступен релиз; совместимость не проверена
+create_industry,create-interactive,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+create_industry,vs-additions,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+create_industry,clockwork-additions,candidate,1.20.1-0.0.7,Доступен релиз; совместимость не проверена
+create_industry,create-dynamic-lights,candidate,forge-1.0.2,Доступен релиз; совместимость не проверена
+create_industry,create-immersive-tacz,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+create_industry,create-numismatics,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+create_industry,numismatics,candidate,1.1.0+forge-mc1.20.1,Доступен релиз; совместимость не проверена
+create_industry,create-mobile-packages,candidate,1.20.1-0.6.1,Доступен релиз; совместимость не проверена
+create_industry,create-package-frogport,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+create_industry,create-railways-refueled,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+create_industry,bellsandwhistles,candidate,0.4.5-1.20.x,Доступен релиз; совместимость не проверена
+create_industry,interiors,candidate,1.20.1-forge-0.6.0,Доступен релиз; совместимость не проверена
+create_industry,extended-cogwheels,candidate,2.1.1-1.20.1-0.5.1.f-forge,Доступен релиз; совместимость не проверена
+technology,immersiveengineering,candidate,10.2.0-183,Доступен релиз; совместимость не проверена
+technology,immersive-petroleum,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+technology,immersive-geology,candidate,0.9.1-b5525,Доступен релиз; совместимость не проверена
+technology,immersive-industry,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+technology,immersive-intelligence,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+technology,immersive-posts,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+technology,engineers-decor,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+technology,engineers-tools,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+technology,pneumaticcraft-repressurized,candidate,6.0.23,Доступен релиз; совместимость не проверена
+technology,computercraft-create,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+technology,cccbridge,candidate,1.7.1,Доступен релиз; совместимость не проверена
+technology,toms-peripherals,candidate,1.20-1.3.1,Доступен релиз; совместимость не проверена
+technology,wired-redstone,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+technology,super-factory-manager,candidate,4.34.0,Доступен релиз; совместимость не проверена
+technology,laser-io,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+technology,modular-routers,candidate,12.1.1,Доступен релиз; совместимость не проверена
+technology,prettypipes,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+technology,logistics-pipes,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+technology,integrated-dynamics,candidate,1.20.1-1.31.5,Доступен релиз; совместимость не проверена
+technology,integrated-tunnels,excluded,1.20.1-1.10.1,Дальняя передача может обесценить грузовые маршруты
+technology,integrated-terminals,candidate,1.20.1-1.7.1,Доступен релиз; совместимость не проверена
+technology,storage-drawers,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+technology,functional-storage,candidate,1.20.1-1.2.14,Доступен релиз; совместимость не проверена
+technology,simple-storage-network,candidate,1.20.1-1.13.2,Доступен релиз; совместимость не проверена
+technology,toms-storage,candidate,1.20-1.7.1,Доступен релиз; совместимость не проверена
+technology,iron-chests,candidate,1.20.1-14.4.4,Доступен релиз; совместимость не проверена
+technology,iron-barrels,candidate,1.20.1-V1.02,Доступен релиз; совместимость не проверена
+technology,metal-barrels,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+technology,more-minecarts,candidate,1.1,Доступен релиз; совместимость не проверена
+technology,little-logistics,candidate,1.20.1.1,Доступен релиз; совместимость не проверена
+technology,little-contraptions,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+technology,immersive-aircraft,candidate,1.5.0+1.20.1,Доступен релиз; совместимость не проверена
+technology,man-of-many-planes,candidate,0.2.1+1.20.1,Доступен релиз; совместимость не проверена
+technology,small-ships,candidate,2.0.2-forge-1.20.1,Доступен релиз; совместимость не проверена
+technology,automobility,candidate,0.4.2+1.20.1-forge,Доступен релиз; совместимость не проверена
+technology,ultimate-car-mod,candidate,forge-1.20.1-1.0.42,Доступен релиз; совместимость не проверена
+technology,astikorcarts-redux,candidate,1.2.5,Доступен релиз; совместимость не проверена
+technology,railcraft-reborn,candidate,1.1.11,Доступен релиз; совместимость не проверена
+technology,xnet,excluded,1.20-6.1.7,Пока отложено: избежать второй универсальной сети до настройки расстояний
+technology,rftools-base,candidate,1.20-5.0.7,Доступен релиз; совместимость не проверена
+technology,rftools-control,excluded,1.20-7.0.4,Пока отложено: роль программирования отдаётся CC: Tweaked
+technology,rftools-power,excluded,1.20-6.0.3,Пока отложено: лишняя энергетическая экосистема
+technology,mekanism-generators,excluded,10.4.16.80,Отложено вместе с Mekanism
+technology,mekanism,excluded,10.4.16.80,Отложено: универсальная переработка/телепортация/переносные хранилища
+technology,thermal-foundation,excluded,11.0.6,Резерв: не добавлять параллельную переработку без промышленной роли
+technology,thermal-expansion,excluded,11.0.1,Резерв: основа — Create и Immersive Engineering
+technology,thermal-cultivation,excluded,11.0.1,Резерв вместе с Thermal
+technology,thermal-locomotion,excluded,11.0.1,Резерв вместе с Thermal
+technology,thermal-integration,excluded,11.0.1,Резерв вместе с Thermal
+technology,thermal-innovation,excluded,11.0.1,Резерв вместе с Thermal
+technology,thermal-dynamics,excluded,11.0.1,Резерв вместе с Thermal
+technology,immersivepetroleum,candidate,4.3.0-36b,Доступен релиз; совместимость не проверена
+world,tectonic,candidate,3.0.17,Доступен релиз; совместимость не проверена
+world,terralith,candidate,2.5.4,Доступен релиз; совместимость не проверена
+world,biomes-o-plenty,candidate,18.0.0.592,Доступен релиз; совместимость не проверена
+world,regions-unexplored,candidate,F-0.5.6+1.20.1,Доступен релиз; совместимость не проверена
+world,ecologics,candidate,2.2.7-Forge,Доступен релиз; совместимость не проверена
+world,atmospheric,candidate,6.1.1,Доступен релиз; совместимость не проверена
+world,autumnity,candidate,5.0.2,Доступен релиз; совместимость не проверена
+world,environmental,candidate,4.1.2,Доступен релиз; совместимость не проверена
+world,upgrade-aquatic,candidate,6.0.3,Доступен релиз; совместимость не проверена
+world,quark,candidate,1.20.1-4.0-462,Доступен релиз; совместимость не проверена
+world,alexs-caves,candidate,2.0.2,Доступен релиз; совместимость не проверена
+world,alexs-mobs,candidate,1.22.9,Доступен релиз; совместимость не проверена
+world,naturalist,candidate,5.0pre2,Доступен релиз; совместимость не проверена
+world,wilder-wild,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+world,critters-and-companions,candidate,2.7.1,Доступен релиз; совместимость не проверена
+world,creeper-overhaul,candidate,3.0.2,Доступен релиз; совместимость не проверена
+world,enderman-overhaul,candidate,1.0.4,Доступен релиз; совместимость не проверена
+world,friends-and-foes,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+world,guard-villagers,candidate,1.6.19,Доступен релиз; совместимость не проверена
+world,villager-recruits,candidate,1.15.2,Доступен релиз; совместимость не проверена
+world,illager-invasion,candidate,v8.0.7-1.20.1-Forge,Доступен релиз; совместимость не проверена
+world,takes-a-pillage,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+world,the-conjurer,candidate,1.1.6,Доступен релиз; совместимость не проверена
+world,mutant-monsters,candidate,v8.0.8-1.20.1-Forge,Доступен релиз; совместимость не проверена
+world,mowzies-mobs,candidate,1.8.2,Доступен релиз; совместимость не проверена
+world,born-in-chaos,excluded,,Отложено: тяжёлые вторжения не должны превращать дороги в постоянный бой
+world,immersive-weathering,candidate,1.20.1-2.0.5,Доступен релиз; совместимость не проверена
+world,serene-seasons,excluded,9.1.0.3,Не вводить второе обязательное ограничение роста/климата
+world,snow-real-magic,candidate,10.7.0,Доступен релиз; совместимость не проверена
+world,snowy-spirit,candidate,1.20-3.0.10,Доступен релиз; совместимость не проверена
+world,snow-under-trees,candidate,v1.4.12,Доступен релиз; совместимость не проверена
+world,aquamirae,candidate,6.4.0,Доступен релиз; совместимость не проверена
+world,nether-depths-upgrade,candidate,3.1.5-1.20,Доступен релиз; совместимость не проверена
+world,spawn,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+world,oceanic-delight,candidate,1.0.3,Доступен релиз; совместимость не проверена
+world,ambient-environment,candidate,11.0.0.1,Доступен релиз; совместимость не проверена
+world,falling-leaves,candidate,1.0,Доступен релиз; совместимость не проверена
+world,particle-rain,candidate,v4.0.3+1.20.1-forge,Доступен релиз; совместимость не проверена
+world,particular,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+world,presence-footsteps,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+world,sound-physics-remastered,candidate,forge-1.20.1-1.5.1,Доступен релиз; совместимость не проверена
+world,ambientsounds,candidate,6.3.11,Доступен релиз; совместимость не проверена
+world,effective,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+world,subtle-effects,candidate,1.15.1-hotfix.1,Доступен релиз; совместимость не проверена
+world,better-fog,candidate,2.0.0,Доступен релиз; совместимость не проверена
+world,better-clouds,candidate,1.3.37+1.20.1-forge-b,Доступен релиз; совместимость не проверена
+world,wakes,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+cities_and_structures,the-lost-cities,excluded,1.20-7.5.7,"Не включать по умолчанию: меняет характер генерации, не решает экономику городов"
+cities_and_structures,choice-theorems-overhauled-village,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+cities_and_structures,towns-and-towers,candidate,1.12,Доступен релиз; совместимость не проверена
+cities_and_structures,repurposed-structures-forge,candidate,7.1.25+1.20.1-forge,Доступен релиз; совместимость не проверена
+cities_and_structures,repurposed-structures,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+cities_and_structures,idas,candidate,1.13.0+1.20.1,Доступен релиз; совместимость не проверена
+cities_and_structures,integrated-dungeons-and-structures,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+cities_and_structures,dungeons-and-taverns,candidate,3.0.3.f+mod,Доступен релиз; совместимость не проверена
+cities_and_structures,yungs-better-mineshafts,candidate,1.20-Forge-4.0.4,Доступен релиз; совместимость не проверена
+cities_and_structures,yungs-better-dungeons,candidate,1.20-Forge-4.0.4,Доступен релиз; совместимость не проверена
+cities_and_structures,yungs-better-strongholds,candidate,1.20-Forge-4.0.3,Доступен релиз; совместимость не проверена
+cities_and_structures,yungs-better-desert-temples,candidate,1.20-Forge-3.0.3,Доступен релиз; совместимость не проверена
+cities_and_structures,yungs-better-jungle-temples,candidate,1.20-Forge-2.0.5,Доступен релиз; совместимость не проверена
+cities_and_structures,yungs-better-ocean-monuments,candidate,1.20-Forge-3.0.4,Доступен релиз; совместимость не проверена
+cities_and_structures,yungs-better-witch-huts,candidate,1.20-Forge-3.0.3,Доступен релиз; совместимость не проверена
+cities_and_structures,yungs-better-nether-fortresses,candidate,1.20-Forge-2.0.6,Доступен релиз; совместимость не проверена
+cities_and_structures,yungs-better-end-island,candidate,1.20-Forge-2.0.6,Доступен релиз; совместимость не проверена
+cities_and_structures,yungs-bridges,candidate,1.20-Forge-4.0.3,Доступен релиз; совместимость не проверена
+cities_and_structures,yungs-extras,candidate,1.20-Forge-4.0.3,Доступен релиз; совместимость не проверена
+cities_and_structures,explorify,candidate,v1.6.6,Доступен релиз; совместимость не проверена
+cities_and_structures,structory,candidate,1.3.5,Доступен релиз; совместимость не проверена
+cities_and_structures,structory-towers,candidate,1.0.7,Доступен релиз; совместимость не проверена
+cities_and_structures,formations-overworld,candidate,1.0.5-mc1.20,Доступен релиз; совместимость не проверена
+cities_and_structures,formations-nether,candidate,1.0.5,Доступен релиз; совместимость не проверена
+cities_and_structures,formations,candidate,1.0.4-forge-mc1.20.2,Доступен релиз; совместимость не проверена
+cities_and_structures,hopo-better-mineshaft,candidate,1.2.2c,Доступен релиз; совместимость не проверена
+cities_and_structures,hopo-better-underwater-ruins,candidate,1.1.5b,Доступен релиз; совместимость не проверена
+cities_and_structures,hopo-better-ruined-portals,candidate,1.3.7c,Доступен релиз; совместимость не проверена
+cities_and_structures,when-dungeons-arise,candidate,2.1.58-1.20.x,Доступен релиз; совместимость не проверена
+cities_and_structures,when-dungeons-arise-seven-seas,candidate,1.0.2,Доступен релиз; совместимость не проверена
+cities_and_structures,stony-cliffs-are-cool,candidate,1.1.2,Доступен релиз; совместимость не проверена
+cities_and_structures,lithostitched,candidate,1.4.12-forge-20.1,Доступен релиз; совместимость не проверена
+cities_and_structures,structurify,candidate,forge-2.0.43+mc1.20.1,Доступен релиз; совместимость не проверена
+cities_and_structures,sparse-structures,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+cities_and_structures,structure-gel-api,candidate,2.16.2,Доступен релиз; совместимость не проверена
+cities_and_structures,more-villagers,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+cities_and_structures,villagersplus,candidate,4.1.1+mc1.20.1-forge,Доступен релиз; совместимость не проверена
+cities_and_structures,easy-npc,candidate,7.19.0,Доступен релиз; совместимость не проверена
+cities_and_structures,handcrafted,candidate,3.0.6,Доступен релиз; совместимость не проверена
+cities_and_structures,villager-names,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+cities_and_structures,bountiful,candidate,6.0.4+1.20.1,Доступен релиз; совместимость не проверена
+cities_and_structures,quests-additions,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,farmers-delight,candidate,1.20.1-1.3.4,Доступен релиз; совместимость не проверена
+food_and_farming,farmers-delight-expansion,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,farmers-respite,candidate,1.20.1-2.1,Доступен релиз; совместимость не проверена
+food_and_farming,farmers-respite-compat,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,delightful,candidate,3.8.1-1.20.1,Доступен релиз; совместимость не проверена
+food_and_farming,cultural-delights,candidate,0.16.7,Доступен релиз; совместимость не проверена
+food_and_farming,corn-delight,candidate,1.2.11-1.20.1,Доступен релиз; совместимость не проверена
+food_and_farming,brewin-and-chewin,candidate,1.20.1-3.2.1,Доступен релиз; совместимость не проверена
+food_and_farming,brewin-and-chewin-compat,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,miners-delight,candidate,1.20.1-1.4.5-backport,Доступен релиз; совместимость не проверена
+food_and_farming,nether-delight,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,ends-delight,candidate,2.4,Доступен релиз; совместимость не проверена
+food_and_farming,crabbers-delight,candidate,1.2.3,Доступен релиз; совместимость не проверена
+food_and_farming,butchers-delight,candidate,1.20.12.1.0,Доступен релиз; совместимость не проверена
+food_and_farming,rustic-delight,candidate,1.7.0,Доступен релиз; совместимость не проверена
+food_and_farming,fruits-delight,candidate,1.1.3,Доступен релиз; совместимость не проверена
+food_and_farming,pineapple-delight,candidate,1.1.4-1.20.1-forge,Доступен релиз; совместимость не проверена
+food_and_farming,cuisines-delight,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,festival-delights,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,collectors-reap,candidate,1.20.1-1.5.5,Доступен релиз; совместимость не проверена
+food_and_farming,ubes-delight,candidate,forge-1.20.1-0.4.15,Доступен релиз; совместимость не проверена
+food_and_farming,casualness-delight,candidate,1.20.1-0.4n,Доступен релиз; совместимость не проверена
+food_and_farming,chefs-delight,candidate,1.0.5-forge-1.20.1,Доступен релиз; совместимость не проверена
+food_and_farming,enders-delight,candidate,1.1.4,Доступен релиз; совместимость не проверена
+food_and_farming,crock-pot,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,croptopia,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,croptopia-delight,candidate,1.3.2,Доступен релиз; совместимость не проверена
+food_and_farming,bakery,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,brewery,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,vinery,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,herbalbrews,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,meadow,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,beachparty,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,candlelight,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,lets-do-farm-and-charm,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,farm-and-charm,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,ex-deorum,excluded,1.53,Генерация любых ресурсов на базе против региональной экономики
+food_and_farming,productivebees,candidate,1.20.1-12.6.0,Доступен релиз; совместимость не проверена
+food_and_farming,productive-trees,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,forestry,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,fruit-trees,candidate,1.0.0-1.20.1-forge,Доступен релиз; совместимость не проверена
+food_and_farming,aquaculture,candidate,2.5.7,Доступен релиз; совместимость не проверена
+food_and_farming,aquaculture-delight,candidate,1.1.0,Доступен релиз; совместимость не проверена
+food_and_farming,aquaculturedelight,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,cooking-for-blockheads,candidate,16.0.15+forge-1.20.1,Доступен релиз; совместимость не проверена
+food_and_farming,farming-for-blockheads,candidate,14.0.4+forge-1.20.1,Доступен релиз; совместимость не проверена
+food_and_farming,cookingforblockheads,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,farmingforblockheads,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,culinary-construct,candidate,5.2.1+1.20.1,Доступен релиз; совместимость не проверена
+food_and_farming,spice-of-life-carrot-edition,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,sol-onion,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,diet,candidate,2.1.1+1.20.1,Доступен релиз; совместимость не проверена
+food_and_farming,appleskin,candidate,2.5.1+mc1.20.1,Доступен релиз; совместимость не проверена
+food_and_farming,farmers-structures,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+food_and_farming,farmers-delight-cookbook,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+building,supplementaries,candidate,1.20-3.1.44-forge,Доступен релиз; совместимость не проверена
+building,supplementaries-squared,candidate,1.20-1.1.29,Доступен релиз; совместимость не проверена
+building,amendments,candidate,1.20-2.2.6,Доступен релиз; совместимость не проверена
+building,every-compat,candidate,1.20-2.9.29-forge,Доступен релиз; совместимость не проверена
+building,chipped,candidate,3.0.7,Доступен релиз; совместимость не проверена
+building,rechiseled,candidate,1.2.6-forge-mc1.20.1,Доступен релиз; совместимость не проверена
+building,rechiseled-create,candidate,1.1.1-forge-mc1.20,Доступен релиз; совместимость не проверена
+building,framedblocks,candidate,9.4.3,Доступен релиз; совместимость не проверена
+building,domum-ornamentum,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+building,decorative-blocks,candidate,4.1.3+forge,Доступен релиз; совместимость не проверена
+building,another-furniture,candidate,3.0.4,Доступен релиз; совместимость не проверена
+building,beautify,candidate,2.0.2,Доступен релиз; совместимость не проверена
+building,twigs,candidate,1.20.1-3.1.1,Доступен релиз; совместимость не проверена
+building,architects-palette,candidate,1.3.6.1,Доступен релиз; совместимость не проверена
+building,macaws-bridges,candidate,3.1.2,Доступен релиз; совместимость не проверена
+building,macaws-doors,candidate,1.1.5,Доступен релиз; совместимость не проверена
+building,macaws-fences-and-walls,candidate,1.2.1,Доступен релиз; совместимость не проверена
+building,macaws-furniture,candidate,3.4.1,Доступен релиз; совместимость не проверена
+building,macaws-lights-and-lamps,candidate,1.1.5,Доступен релиз; совместимость не проверена
+building,macaws-paintings,candidate,1.1.0,Доступен релиз; совместимость не проверена
+building,macaws-paths-and-pavings,candidate,1.1.1,Доступен релиз; совместимость не проверена
+building,macaws-roofs,candidate,2.3.2,Доступен релиз; совместимость не проверена
+building,macaws-trapdoors,candidate,1.1.5,Доступен релиз; совместимость не проверена
+building,macaws-windows,candidate,2.4.2,Доступен релиз; совместимость не проверена
+building,mcw-bridges,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+building,mcw-paths-and-pavings,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+building,engineersdecor,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+building,immersive-paintings,candidate,0.6.13+1.20.1,Доступен релиз; совместимость не проверена
+building,exposure-expanded,candidate,1.1.0,Доступен релиз; совместимость не проверена
+building,exposure-catalog,candidate,1.1.1,Доступен релиз; совместимость не проверена
+building,exposure-polaroid,candidate,1.1.4,Доступен релиз; совместимость не проверена
+building,sewingkit,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+building,chalk,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+building,construction-wand,candidate,1.20.1-2.11,Доступен релиз; совместимость не проверена
+building,building-gadgets,excluded,,Не включать до ограничения дистанции/источника блоков
+building,building-gadgets-2,excluded,,Не включать до ограничения дистанции/источника блоков
+building,effortless-building,candidate,3.11,Доступен релиз; совместимость не проверена
+building,worldedit,excluded,7.2.15,"Инструмент разработки, не игрока"
+building,litematica,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+building,item-borders,candidate,1.2.2,Доступен релиз; совместимость не проверена
+building,simply-light,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+building,additional-lights,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+building,additional-lanterns,candidate,1.1.2-forge-mc1.20.2,Доступен релиз; совместимость не проверена
+building,additional-banners,candidate,14.0.5,Доступен релиз; совместимость не проверена
+building,additional-placements,candidate,3.0.1,Доступен релиз; совместимость не проверена
+building,additional-additions,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+building,signpost,candidate,2.02.0,Доступен релиз; совместимость не проверена
+building,labels,candidate,1.20-2.0.0,Доступен релиз; совместимость не проверена
+building,display-case,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+building,furnish,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+building,sullysmod,candidate,3.3.1-beta,Доступен релиз; совместимость не проверена
+building,allurement,candidate,4.0.0,Доступен релиз; совместимость не проверена
+building,clayworks,candidate,3.0.4,Доступен релиз; совместимость не проверена
+building,woodworks,candidate,3.0.2,Доступен релиз; совместимость не проверена
+building,copperworks,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+building,stoneworks,candidate,v8.0.0-1.20.1-Forge,Доступен релиз; совместимость не проверена
+building,buildersaddition,candidate,1.20.1-20230928a,Доступен релиз; совместимость не проверена
+building,building-but-better,candidate,1.20.1-1.1.1,Доступен релиз; совместимость не проверена
+building,diagonal-fences,candidate,v8.1.5-1.20.1-Forge,Доступен релиз; совместимость не проверена
+building,diagonal-windows,candidate,v8.1.5-1.20.1-Forge,Доступен релиз; совместимость не проверена
+building,diagonal-walls,candidate,v8.0.4-1.20.1-Forge,Доступен релиз; совместимость не проверена
+travel_and_equipment,comforts,candidate,6.4.0+1.20.1,Доступен релиз; совместимость не проверена
+travel_and_equipment,travelers-backpack,excluded,,До проверки запретов контейнеров: не включать
+travel_and_equipment,travelersbackpack,excluded,1.20.1-9.1.58,До проверки запретов контейнеров: не включать
+travel_and_equipment,sophisticated-backpacks,excluded,1.20.1-3.26.20.2248,Огромные переносные хранилища
+travel_and_equipment,camping,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+travel_and_equipment,campanion,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+travel_and_equipment,nomadic-tents,excluded,,Карманная база требует надёжных ограничений: не включать по умолчанию
+travel_and_equipment,simply-camping,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+travel_and_equipment,portable-tents,excluded,,Карманное измерение не требуется
+travel_and_equipment,packed-up,excluded,0.5.4,Переносные хранилища не нужны
+travel_and_equipment,map-atlases,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+travel_and_equipment,antique-atlas,excluded,,Дублирует Map Atlases
+travel_and_equipment,xaeros-minimap,candidate,forge-1.20.1-26.6.0,Доступен релиз; совместимость не проверена
+travel_and_equipment,xaeros-world-map,candidate,forge-1.20.1-1.47.0,Доступен релиз; совместимость не проверена
+travel_and_equipment,journeymap,excluded,1.20.1-6.0.7+forge,Дублирует выбранные карты Xaero
+travel_and_equipment,natures-compass,candidate,1.20.1-1.12.0-forge,Доступен релиз; совместимость не проверена
+travel_and_equipment,explorers-compass,candidate,1.20.1-1.4.0-forge,Доступен релиз; совместимость не проверена
+travel_and_equipment,waystones,excluded,14.1.21+forge-1.20.1,Телепортация запрещена
+travel_and_equipment,tempad,excluded,2.3.4,Телепортация запрещена
+travel_and_equipment,paraglider,excluded,,Личный полёт отложен до баланса транспорта
+travel_and_equipment,grappling-hook-mod,candidate,v13-1.20.1,Доступен релиз; совместимость не проверена
+travel_and_equipment,grapplemod,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+travel_and_equipment,hang-glider,excluded,v8.0.1-1.20.1-Forge,Личный полёт отложен
+travel_and_equipment,gliders,excluded,1.2.0+forge,Личный полёт отложен
+travel_and_equipment,sophisticated-storage,excluded,1.20.1-1.5.17.2230,Улучшения вместимости и перенос требуют отдельного баланса
+travel_and_equipment,carry-on,excluded,2.1.2.7,Перенос заполненных контейнеров обходит логистику
+travel_and_equipment,corpse,candidate,forge-1.20.1-1.0.23,Доступен релиз; совместимость не проверена
+travel_and_equipment,gravestone-mod,candidate,forge-1.20.1-1.0.35,Доступен релиз; совместимость не проверена
+travel_and_equipment,loot-corpse,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+travel_and_equipment,tacz,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+travel_and_equipment,timeless-and-classics-zero,candidate,1.2.0-hotfix,Доступен релиз; совместимость не проверена
+travel_and_equipment,immersive-armors,candidate,1.7.2+1.20.1,Доступен релиз; совместимость не проверена
+travel_and_equipment,simply-swords,candidate,1.70.2-1.20.1,Доступен релиз; совместимость не проверена
+travel_and_equipment,backpacked,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+travel_and_equipment,tool-belt,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+travel_and_equipment,tetra,candidate,6.17.0,Доступен релиз; совместимость не проверена
+travel_and_equipment,tetra-extras,candidate,0.2.1,Доступен релиз; совместимость не проверена
+travel_and_equipment,art-of-forging,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+travel_and_equipment,tetra-pak,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+travel_and_equipment,tetranomicon,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+travel_and_equipment,tetra-additions,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+travel_and_equipment,tetra-materials,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+travel_and_equipment,artifacts,excluded,9.5.19,Эффекты мобильности и перенос предметов требуют отдельного аудита
+travel_and_equipment,relics,excluded,,Эффекты мобильности и перенос предметов требуют отдельного аудита
+travel_and_equipment,relics-artifacts-compat,excluded,,Базовые моды не выбраны
+travel_and_equipment,travelers-titles,candidate,1.20-Forge-4.0.2,Доступен релиз; совместимость не проверена
+travel_and_equipment,travelers-compass,candidate,4.0.01,Доступен релиз; совместимость не проверена
+travel_and_equipment,horse-expert,candidate,v8.1.1-1.20.1-Forge,Доступен релиз; совместимость не проверена
+travel_and_equipment,horse-stats-vanilla,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+travel_and_equipment,callable-horses,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+travel_and_equipment,horse-combat-controls,candidate,1.20.1-1.0.3,Доступен релиз; совместимость не проверена
+travel_and_equipment,better-horse-hud,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+travel_and_equipment,astikorcarts-horsepower,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,jei,candidate,15.56.0.205,Доступен релиз; совместимость не проверена
+qol,emi,candidate,1.1.24+1.20.1+forge,Доступен релиз; совместимость не проверена
+qol,jade,candidate,11.13.3+forge,Доступен релиз; совместимость не проверена
+qol,jade-addons-forge,candidate,5.5.1+forge,Доступен релиз; совместимость не проверена
+qol,jade-addons,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,jei-integration,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,jei-professions,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,just-enough-resources-jer,candidate,1.4.0.247,Доступен релиз; совместимость не проверена
+qol,just-enough-effect-descriptions-jeed,candidate,1.20-2.2.6,Доступен релиз; совместимость не проверена
+qol,just-enough-advancements,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,just-enough-breeding,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,just-enough-professions-jep,candidate,3.0.1,Доступен релиз; совместимость не проверена
+qol,just-enough-paintings,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,emi-loot,candidate,0.7.10+1.20.1+forge,Доступен релиз; совместимость не проверена
+qol,emi-enchanting,candidate,0.1.2+1.20.1+forge,Доступен релиз; совместимость не проверена
+qol,emi-professions,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,emi-effect-descriptions,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,emi-addons,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,emi-ores,candidate,1.3+1.20.1+forge,Доступен релиз; совместимость не проверена
+qol,emi-trades,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,emi-create-schematics,candidate,1.0.4,Доступен релиз; совместимость не проверена
+qol,emi-farmers-delight,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,emi-lets-do-compat,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,controlling,candidate,12.0.2,Доступен релиз; совместимость не проверена
+qol,searchables,candidate,1.0.3,Доступен релиз; совместимость не проверена
+qol,configured,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,catalogue,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,better-advancements,candidate,0.6.0.73,Доступен релиз; совместимость не проверена
+qol,advancement-plaques,candidate,1.6.9,Доступен релиз; совместимость не проверена
+qol,toast-control,candidate,8.0.3,Доступен релиз; совместимость не проверена
+qol,polymorph,candidate,0.49.11+1.20.1,Доступен релиз; совместимость не проверена
+qol,craftingtweaks,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,crafting-tweaks,candidate,18.2.9+forge-1.20.1,Доступен релиз; совместимость не проверена
+qol,inventory-profiles-next,excluded,forge-1.20.1-1.10.20,"Выбрать один сортировщик, не несколько"
+qol,inventory-sorter,excluded,,Резерв сортировщика
+qol,mouse-tweaks,candidate,1.20.1-2.25.1-forge,Доступен релиз; совместимость не проверена
+qol,mousetweaks,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,inventory-essentials,candidate,8.2.19+forge-1.20.1,Доступен релиз; совместимость не проверена
+qol,trashslot,candidate,15.1.5+forge-1.20.1,Доступен релиз; совместимость не проверена
+qol,trash-slot,candidate,1.1.0,Доступен релиз; совместимость не проверена
+qol,shulkerboxtooltip,candidate,4.0.4+1.20.1-forge,Доступен релиз; совместимость не проверена
+qol,betterf3,candidate,7.0.2,Доступен релиз; совместимость не проверена
+qol,better-f3,candidate,1.20.1-1.0,Доступен релиз; совместимость не проверена
+qol,better-ping-display,candidate,1.20.1-1.1,Доступен релиз; совместимость не проверена
+qol,better-third-person,candidate,1.9.0,Доступен релиз; совместимость не проверена
+qol,immediatelyfast,candidate,1.5.5+1.20.4-forge,Доступен релиз; совместимость не проверена
+qol,modernfix,candidate,5.27.93+mc1.20.1,Доступен релиз; совместимость не проверена
+qol,ferrite-core,candidate,6.0.1,Доступен релиз; совместимость не проверена
+qol,ferritecore,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,entityculling,candidate,1.12.1,Доступен релиз; совместимость не проверена
+qol,entity-culling,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,embeddium,candidate,0.3.31+mc1.20.1,Доступен релиз; совместимость не проверена
+qol,oculus,candidate,1.20.1-1.8.0,Доступен релиз; совместимость не проверена
+qol,spark,candidate,1.10.53-forge,Доступен релиз; совместимость не проверена
+qol,chunky,candidate,1.3.146,Доступен релиз; совместимость не проверена
+qol,chunk-pregenerator,excluded,,Дублирует Chunky
+qol,clumps,candidate,12.0.0.4,Доступен релиз; совместимость не проверена
+qol,fastload,excluded,mc1.20.1-3.4.0,Не включать оптимизации вслепую
+qol,fastsuite,candidate,5.1.2,Доступен релиз; совместимость не проверена
+qol,fastworkbench,candidate,8.0.4,Доступен релиз; совместимость не проверена
+qol,fastfurnace,candidate,8.0.2,Доступен релиз; совместимость не проверена
+qol,memoryleakfix,candidate,v1.1.5,Доступен релиз; совместимость не проверена
+qol,fix-gpu-memory-leak,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,smooth-boot-reloaded,candidate,mc1.20.1-0.0.4,Доступен релиз; совместимость не проверена
+qol,smooth-chunk-save,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,servercore,candidate,1.5.2+1.20.1,Доступен релиз; совместимость не проверена
+qol,connectivity,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,packet-fixer,candidate,3.3.2,Доступен релиз; совместимость не проверена
+qol,let-me-despawn,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,despawn-tweaker,excluded,,Дублирует Let Me Despawn
+qol,radium,candidate,0.12.4,Доступен релиз; совместимость не проверена
+qol,canary,excluded,mc1.20.1-0.3.3,Не сочетать автоматически с Radium
+qol,saturn,candidate,mc1.20.1-0.1.3,Доступен релиз; совместимость не проверена
+qol,badoptimizations,candidate,2.4.1,Доступен релиз; совместимость не проверена
+qol,dynamic-fps,candidate,3.11.4,Доступен релиз; совместимость не проверена
+qol,fps-reducer,candidate,1.20.1-2.5.1,Доступен релиз; совместимость не проверена
+qol,entity-collision-fps-fix,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,ai-improvements,candidate,0.5.2,Доступен релиз; совместимость не проверена
+qol,alternate-current,candidate,forge-mc1.20-1.7.0,Доступен релиз; совместимость не проверена
+qol,noisium,candidate,2.3.0+mc1.20-1.20.1,Доступен релиз; совместимость не проверена
+qol,better-chunk-loading,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,does-it-tick,candidate,forge-1.20.1-1.1.4,Доступен релиз; совместимость не проверена
+qol,distant-horizons,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,not-enough-crashes,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,crash-assistant,candidate,1.11.12,Доступен релиз; совместимость не проверена
+qol,crash-utilities,candidate,8.1.4,Доступен релиз; совместимость не проверена
+qol,modonomicon,candidate,1.20.1-1.79.3,Доступен релиз; совместимость не проверена
+qol,patchouli,candidate,1.20.1-85-forge,Доступен релиз; совместимость не проверена
+qol,akashic-tome,candidate,1.20.1-1.7-27,Доступен релиз; совместимость не проверена
+qol,eccentric-tome,candidate,1.20.1,Доступен релиз; совместимость не проверена
+qol,better-combat,excluded,1.9.0+1.20.1-forge,Оставить бой ближе к ванили до теста Doomed
+qol,combat-roll,candidate,1.3.3+1.20.1-forge,Доступен релиз; совместимость не проверена
+qol,better-mount-hud,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,skinlayers3d,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,entity-model-features,candidate,3.3.12-forge-1.20.1,Доступен релиз; совместимость не проверена
+qol,entity-texture-features,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,eating-animation,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,visuality,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,legendary-tooltips,candidate,1.4.5,Доступен релиз; совместимость не проверена
+qol,equipment-compare,candidate,1.3.7,Доступен релиз; совместимость не проверена
+qol,visual-workbench,candidate,v8.0.1-1.20.1-Forge,Доступен релиз; совместимость не проверена
+qol,item-highlighter,candidate,1.1.9,Доступен релиз; совместимость не проверена
+qol,enchdesc,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,enchantment-descriptions,candidate,17.1.21,Доступен релиз; совместимость не проверена
+qol,chat-heads,candidate,0.15.7,Доступен релиз; совместимость не проверена
+qol,chat-heads-forge,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,chat-notify,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,chat-patches,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,chat-tabs,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,better-chat,candidate,1.1,Доступен релиз; совместимость не проверена
+qol,fancy-menu,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,fancymenu,candidate,3.10.0-1.20.1-forge,Доступен релиз; совместимость не проверена
+qol,drippy-loading-screen,candidate,3.1.5-1.20.1-forge,Доступен релиз; совместимость не проверена
+qol,load-my-f-resources,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,default-options,candidate,18.0.5+forge-1.20.1,Доступен релиз; совместимость не проверена
+qol,defaultoptions,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,default-server-properties,candidate,81.1.0,Доступен релиз; совместимость не проверена
+qol,better-statistics-screen,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,screenshot-to-clipboard,candidate,1.0.9+forge,Доступен релиз; совместимость не проверена
+qol,screenshot-viewer,candidate,1.20-forge-5,Доступен релиз; совместимость не проверена
+qol,ok-zoomer,candidate,5.4.0-beta.9+forge,Доступен релиз; совместимость не проверена
+qol,zoomify,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,just-zoom,candidate,3.1.0-1.20.1-forge,Доступен релиз; совместимость не проверена
+qol,sound-controller,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,extreme-sound-muffler,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,simple-discord-rpc,candidate,4.1.4,Доступен релиз; совместимость не проверена
+qol,voice-chat-interaction,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,audio-player,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,voice-chat-recording,candidate,2.1,Доступен релиз; совместимость не проверена
+qol,simple-voice-radio,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,walkie-talkie,candidate,forge-1.3.0,Доступен релиз; совместимость не проверена
+qol,global-packs,excluded,,Достаточно одного загрузчика ресурсов
+qol,open-loader,excluded,19.0.5,Достаточно одного загрузчика ресурсов
+qol,paxi,candidate,1.20-Forge-4.0,Доступен релиз; совместимость не проверена
+qol,resource-pack-overrides,candidate,v8.0.3-1.20.1-Forge,Доступен релиз; совместимость не проверена
+qol,resourcepackoverrides,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,resource-pack-organizer,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,durability-tooltip,candidate,1.2.0-forge-mc1.20,Доступен релиз; совместимость не проверена
+qol,better-tooltips,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,pick-up-notifier,candidate,v8.0.0-1.20.1-Forge,Доступен релиз; совместимость не проверена
+qol,pickupnotifier,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,tipthescales,candidate,9.0.0.1,Доступен релиз; совместимость не проверена
+qol,tips,candidate,12.1.9,Доступен релиз; совместимость не проверена
+qol,ding,candidate,1.5.0,Доступен релиз; совместимость не проверена
+qol,bed-benefits,candidate,13.0.4,Доступен релиз; совместимость не проверена
+qol,sleep-tight,excluded,1.20-1.5.8,Резерв: не добавлять вторую систему сна
+qol,sleep-tight-forge,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,swingthroughgrass,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,leaves-be-gone,candidate,v8.0.0-1.20.1-Forge,Доступен релиз; совместимость не проверена
+qol,falling-tree,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,treechop,candidate,0.19.0,Доступен релиз; совместимость не проверена
+qol,tree-chop,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,rightclickharvest,candidate,4.7.0+1.20.1,Доступен релиз; совместимость не проверена
+qol,right-click-harvest,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,better-ladders,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,ladder-placement,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,universal-bone-meal,candidate,v8.0.1-1.20.1-Forge,Доступен релиз; совместимость не проверена
+qol,universalbonemeal,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,better-spawner-control,candidate,1.20.1-4.9-fabric+forge+neo,Доступен релиз; совместимость не проверена
+qol,spawn-animations,excluded,1.11.6+mod,"Опциональный визуальный слой, не промышленная механика"
+qol,savage-ender-dragon,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,better-archeology,candidate,1.2.1-1.20.1,Доступен релиз; совместимость не проверена
+qol,better-archeology-forge,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,archaeology-banners,candidate,5.1.8,Доступен релиз; совместимость не проверена
+qol,visuality-reforged,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,seamless-loading-screen,candidate,2.0.3+1.20.1,Доступен релиз; совместимость не проверена
+qol,smooth-swapping,candidate,0.9.3.2-1.20.1,Доступен релиз; совместимость не проверена
+qol,starlight-forge,excluded,1.1.2+1.20,Не включать автоматически: отдельный аудит освещения и физики
+qol,starlight,excluded,,Не включать автоматически: отдельный аудит освещения и физики
+qol,dynamic-lights,candidate,1.9+mod,Доступен релиз; совместимость не проверена
+qol,embeddium-dynamic-lights,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,ryoamiclights,candidate,0.2.3+mc1.20.1-forge,Доступен релиз; совместимость не проверена
+qol,entityjs,candidate,0.7.5,Доступен релиз; совместимость не проверена
+qol,morejs,candidate,1.20.1-0.10.1+forge,Доступен релиз; совместимость не проверена
+qol,ponder,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,ponderjs,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,kubejs-create,candidate,2001.3.0-build.8+forge,Доступен релиз; совместимость не проверена
+qol,kubejs-immersive-engineering,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,kubejs-thermal,candidate,2001.1.10-build.5,Доступен релиз; совместимость не проверена
+qol,kubejs-mekanism,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,recipe-stages,candidate,8.0.0.2,Доступен релиз; совместимость не проверена
+qol,game-stages,candidate,15.0.2,Доступен релиз; совместимость не проверена
+qol,item-stages,candidate,8.0.3,Доступен релиз; совместимость не проверена
+qol,ftb-teams,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник
+qol,ftb-chunks,excluded,,Телепортация/чанклоадинг требуют ограничений
+qol,ftb-quests,excluded,,Резерв: Heracles остаётся основным до решения о миграции
+qol,ftb-library,unavailable,,Нет найденного релиза Forge 1.20.1; проверить slug/другой источник

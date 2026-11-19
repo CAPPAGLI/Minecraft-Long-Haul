@@ -1,0 +1,47 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "task1": {
+      "type": "heracles:dummy"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 10
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Интерфейс и производительность\"}",
+    "subtitle": "{\"text\": \"JEI/EMI/Jade + Sodium/C2ME\"}",
+    "description": [
+      "JEI и EMI: просмотр рецептов. Jade: информация о блоках и мобах. AppleSkin: голод и насыщение.",
+      "Sodium, Lithium, C2ME, ModernFix и другие ускоряют игру — важно для огромного мира.",
+      "Chunky: ускоренная генерация чанков для новых территорий."
+    ],
+    "groups": {
+      "09 · Справочник": {
+        "position": [
+          64,
+          56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:clock",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

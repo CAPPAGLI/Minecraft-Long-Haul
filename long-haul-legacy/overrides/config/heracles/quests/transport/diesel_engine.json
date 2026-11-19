@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "steam_engine"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "createdieselgenerators:diesel_engine",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 200
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Дизельный двигатель\"}",
+    "subtitle": "{\"text\": \"Create: Diesel Generators\"}",
+    "description": [
+      "Соберите дизельный двигатель — мощнее парового и не требует воды.",
+      "Дизельное топливо добывается в аридном поясе (глава «Региональная экспансия»)."
+    ],
+    "groups": {
+      "03 · Транспорт": {
+        "position": [
+          128,
+          56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "createdieselgenerators:diesel_engine",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

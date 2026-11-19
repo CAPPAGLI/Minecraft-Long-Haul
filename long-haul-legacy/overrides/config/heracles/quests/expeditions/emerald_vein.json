@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "tropical_journey"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "minecraft:emerald",
+      "amount": 8,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 150
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Изумрудная жила\"}",
+    "subtitle": "{\"text\": \"Тропические недра\"}",
+    "description": [
+      "Добудьте 8 изумрудов в тропиках.",
+      "Изумруды нужны для энергетического ядра Мегапроекта."
+    ],
+    "groups": {
+      "05 · Дальние экспедиции": {
+        "position": [
+          -32,
+          -28
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:emerald",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "version": "2.0-alpha.2",
+  "base_lock": "history/alpha.1/lock.json",
+  "categories": {
+    "industrial": [
+      "immersiveengineering",
+      "immersivepetroleum",
+      "little-logistics",
+      "automobility",
+      "astikorcarts-redux"
+    ],
+    "biomes": [
+      "biomes-o-plenty",
+      "atmospheric",
+      "autumnity",
+      "environmental",
+      "ecologics",
+      "upgrade-aquatic"
+    ],
+    "structures": [
+      "yungs-better-mineshafts",
+      "yungs-better-dungeons",
+      "yungs-better-desert-temples",
+      "yungs-better-jungle-temples",
+      "yungs-better-strongholds",
+      "yungs-better-ocean-monuments",
+      "yungs-better-witch-huts",
+      "yungs-better-nether-fortresses",
+      "yungs-extras",
+      "explorify"
+    ],
+    "building": [
+      "supplementaries",
+      "amendments",
+      "framedblocks",
+      "decorative-blocks",
+      "another-furniture",
+      "architects-palette",
+      "macaws-bridges",
+      "macaws-doors",
+      "macaws-roofs",
+      "macaws-windows",
+      "macaws-paths-and-pavings",
+      "diagonal-fences",
+      "diagonal-walls"
+    ],
+    "food": [
+      "farmers-respite",
+      "cultural-delights",
+      "miners-delight",
+      "rustic-delight"
+    ],
+    "performance": [
+      "embeddium",
+      "entityculling",
+      "immediatelyfast",
+      "clumps",
+      "alternate-current",
+      "ai-improvements",
+      "fastsuite",
+      "fastfurnace"
+    ],
+    "qol": [
+      "polymorph",
+      "construction-wand"
+    ]
+  },
+  "reasons": {
+    "industrial": "Stationary heavy industry/oil and differentiated real-world transport; no teleport freight.",
+    "biomes": "One major biome pack plus smaller thematic ecosystems; keep vanilla vertical limits.",
+    "structures": "Replace distinct vanilla landmarks and add small exploration sites; not economic cities.",
+    "building": "Different structural shapes, framing, paths, bridges and architectural parts; no tech gating on decoration.",
+    "food": "Tea, crops, underground rations and farm processing; no temperature locks or compulsory hunger penalties.",
+    "performance": "Different measured-subsystem candidates; client optimizations remain client-unverified.",
+    "qol": "Recipe conflict selection and building assistance; no portable bulk cargo."
+  },
+  "client_only": [
+    "embeddium",
+    "entityculling",
+    "immediatelyfast"
+  ]
+}

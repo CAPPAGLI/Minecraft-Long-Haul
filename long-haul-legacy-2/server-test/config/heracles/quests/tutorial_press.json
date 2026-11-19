@@ -1,0 +1,43 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "item": {
+      "type": "heracles:item",
+      "item": "create:mechanical_press",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Обработка металла\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha\"}",
+    "description": [
+      "Учебная веха: обнаружение предмета, НЕ испытание работающего предприятия.",
+      "Пресс штампует пластины. Далее используйте их для заказов терминала."
+    ],
+    "groups": {
+      "02 · Мастерская и экспедиция": {
+        "position": [
+          -42,
+          -72
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:mechanical_press",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individual_progress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

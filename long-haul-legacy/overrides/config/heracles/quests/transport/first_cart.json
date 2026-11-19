@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "first_tools"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "astikorcartsredux:acacia_hand_cart",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 50
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Первая тележка\"}",
+    "subtitle": "{\"text\": \"AstikorCarts\"}",
+    "description": [
+      "Соберите ручную тележку — первый транспорт для коротких поездок до 2 000 блоков.",
+      "Тележки быстры на дорогах и не требуют топлива."
+    ],
+    "groups": {
+      "03 · Транспорт": {
+        "position": [
+          -128,
+          -56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "astikorcartsredux:acacia_hand_cart",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

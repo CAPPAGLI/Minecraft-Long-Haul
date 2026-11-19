@@ -1,0 +1,13 @@
+PASS inventory presence alone never completes
+PASS wrong items do not count
+PASS one-off requires actual accepted full quantity
+PASS completed contract cannot consume twice
+PASS unloaded terminal pauses without consuming or ticking
+PASS large stockpile cannot complete timed trial immediately
+PASS one empty window fails
+PASS every input must meet quota
+PASS three successful windows complete only after 180 active seconds
+PASS JSON roundtrip preserves timer and totals
+PASS negative and fractional consumption rejected
+PASS failed trial never resumes accidentally
+12 model tests passed; Minecraft integration is a separate test.

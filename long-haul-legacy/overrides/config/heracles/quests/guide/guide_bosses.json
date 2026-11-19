@@ -1,0 +1,47 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "task1": {
+      "type": "heracles:dummy"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 10
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Боссы и структуры\"}",
+    "subtitle": "{\"text\": \"Cataclysm + BOMD + End Remastered\"}",
+    "description": [
+      "L_Ender's Cataclysm: Древний остаток, незеритовый голем и другие боссы.",
+      "Bosses of Mass Destruction: Древний лич, обсидилит и другие.",
+      "End Remastered усиливает лут ванильных структур. Explorify добавляет поселения и мавзолеи."
+    ],
+    "groups": {
+      "09 · Справочник": {
+        "position": [
+          -64,
+          56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "cataclysm:cursed_eye",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

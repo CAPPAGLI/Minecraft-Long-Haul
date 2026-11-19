@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "first_zinc"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "megaproject:alloy_plate",
+      "amount": 8,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 100
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Сплавная пластина\"}",
+    "subtitle": "{\"text\": \"Мегапроект: шаг 1\"}",
+    "description": [
+      "Соберите 8 сплавных пластин из железа и цинка (умеренный пояс).",
+      "Это базовый компонент Инженерного Мегапроекта — аналога космического лифта из Satisfactory."
+    ],
+    "groups": {
+      "07 · Мегапроект": {
+        "position": [
+          -96,
+          -28
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "megaproject:alloy_plate",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

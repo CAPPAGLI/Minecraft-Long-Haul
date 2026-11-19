@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "welcome"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "minecraft:stone_pickaxe",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 25
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Первые инструменты\"}",
+    "subtitle": "{\"text\": \"Камень и дерево рядом с домом\"}",
+    "description": [
+      "Срубите дерево, добудьте булыжник и сделайте каменную кирку.",
+      "Всё базовое для старта есть в умеренном поясе — уходить далеко не нужно."
+    ],
+    "groups": {
+      "01 · Начало": {
+        "position": [
+          -32,
+          -28
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:stone_pickaxe",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

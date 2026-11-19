@@ -1,0 +1,50 @@
+{
+  "dependencies": [
+    "ancient_remnant"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:kill_entity",
+      "entity": "bosses_of_mass_destruction:lich",
+      "amount": 1
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 300
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Древний лич\"}",
+    "subtitle": "{\"text\": \"Bosses of Mass Destruction\"}",
+    "description": [
+      "Победите Древнего лича в его башне.",
+      "Лич даёт звезду душ и обсидиановое сердце для Мегапроекта."
+    ],
+    "groups": {
+      "06 · Боссы и структуры": {
+        "position": [
+          32,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "bosses_of_mass_destruction:soul_star",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

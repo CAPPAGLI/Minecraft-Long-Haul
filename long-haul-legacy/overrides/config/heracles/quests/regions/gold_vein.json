@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "arid_journey"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "minecraft:gold_ingot",
+      "amount": 16,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 100
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Золотая жила\"}",
+    "subtitle": "{\"text\": \"Буры аридного пояса\"}",
+    "description": [
+      "Добудьте 16 золота с буровых жил аридного пояса (или в пещерах пустыни).",
+      "Золото нужно для прецизионной рамы Мегапроекта."
+    ],
+    "groups": {
+      "04 · Региональная экспансия": {
+        "position": [
+          0,
+          -28
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:gold_ingot",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

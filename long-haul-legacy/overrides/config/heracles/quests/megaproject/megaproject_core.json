@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "orbital_module"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "megaproject:core",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 500
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Ядро Мегапроекта\"}",
+    "subtitle": "{\"text\": \"Мегапроект: финал\"}",
+    "description": [
+      "Соберите ядро Мегапроекта из 8 орбитальных модулей и катализатора.",
+      "Это центральный блок конструкции — огромный поглотитель ресурсов всей игры."
+    ],
+    "groups": {
+      "07 · Мегапроект": {
+        "position": [
+          -32,
+          28
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "megaproject:core",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

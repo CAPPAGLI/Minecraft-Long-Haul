@@ -1,0 +1,50 @@
+{
+  "dependencies": [
+    "diamond_drill"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:kill_entity",
+      "entity": "cataclysm:ancient_remnant",
+      "amount": 1
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 300
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Древний остаток\"}",
+    "subtitle": "{\"text\": \"L_Ender's Cataclysm\"}",
+    "description": [
+      "Победите Древнего остатка — первого крупного босса Cataclysm.",
+      "Идите в глубокие пещеры и подземные храмы. Босс требует алмазного снаряжения и еды."
+    ],
+    "groups": {
+      "06 · Боссы и структуры": {
+        "position": [
+          -96,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "cataclysm:ancient_metal_ingot",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

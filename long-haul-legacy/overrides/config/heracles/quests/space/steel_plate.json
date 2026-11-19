@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "launch_catalyst"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "ad_astra:steel_plate",
+      "amount": 16,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 100
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Стальные пластины\"}",
+    "subtitle": "{\"text\": \"Ad Astra: материалы\"}",
+    "description": [
+      "Соберите 16 стальных пластин Ad Astra из стальных слитков.",
+      "Сталь плавится из железа и угля. Пластины нужны для ракет и орбитальных модулей."
+    ],
+    "groups": {
+      "08 · Космическая программа": {
+        "position": [
+          -160,
+          -56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "ad_astra:steel_plate",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "welcome"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "minecraft:wheat",
+      "amount": 8,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 25
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Первая ферма\"}",
+    "subtitle": "{\"text\": \"Пшеница растёт только в умеренном поясе\"}",
+    "description": [
+      "Посадите и соберите 8 пшеницы. Культуры в этом мире растут только в своём климатическом поясе (Biome Limited Growth).",
+      "Пшеница, морковь, картофель и свёкла — только здесь, у спавна."
+    ],
+    "groups": {
+      "01 · Начало": {
+        "position": [
+          -32,
+          28
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:wheat",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

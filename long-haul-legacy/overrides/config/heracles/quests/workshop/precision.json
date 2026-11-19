@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "brass_age"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "create:precision_mechanism",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 150
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Прецизионный механизм\"}",
+    "subtitle": "{\"text\": \"Продвинутая механика\"}",
+    "description": [
+      "Соберите прецизионный механизм — ключевой компонент для поездов, самолётов и Мегапроекта.",
+      "Также прецизионные механизмы в большом количестве дают редкие структуры (глава «Боссы»)."
+    ],
+    "groups": {
+      "02 · Мастерская": {
+        "position": [
+          128,
+          -56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:precision_mechanism",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

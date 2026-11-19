@@ -1,0 +1,21 @@
+# Natural Temperature — конфигурация масштаба мира Long Haul Legacy
+# Формат: NeoForge COMMON TOML (config/naturaltemperature-common.toml)
+#
+# generation_mode: 6 = Banded (6 климатических поясов, пресет)
+# equatorial_distance: расстояние от спавна (умеренный пояс) до экватора в блоках.
+#   50000 = ~50 000 блоков. На поезде со скоростью 40 м/с это ~21 минута пути.
+#   Именно это расстояние делает путешествие через весь мир настоящим приключением.
+#
+# Пояса (с севера на юг): Полярный -> Холодный -> Умеренный (спавн) -> Аридный -> Тропический (экватор)
+
+generation_mode = 6
+equatorial_distance = 50000.0
+equator_offset = 0.0
+looping_world = false
+multidimensional_bands = false
+natural_temperature_influence = true
+enable_humidity_bands = true
+humidity_bands_width = 0.5
+humidity_offset = 0.0
+show_gui_button = true
+randomize_underground = false

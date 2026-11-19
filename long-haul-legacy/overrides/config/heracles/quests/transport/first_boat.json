@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "first_cart"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "smallships:acacia_rowboat",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 50
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Первый корабль\"}",
+    "subtitle": "{\"text\": \"Small Ships\"}",
+    "description": [
+      "Соберите лодку Small Ships для плавания по рекам и морям.",
+      "Водные пути — быстрый способ добраться до аридного пояса, если река течёт на юг."
+    ],
+    "groups": {
+      "03 · Транспорт": {
+        "position": [
+          -128,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "smallships:acacia_rowboat",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

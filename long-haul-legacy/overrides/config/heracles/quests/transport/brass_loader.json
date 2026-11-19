@@ -1,0 +1,50 @@
+{
+  "dependencies": [
+    "chunk_loader"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "create_power_loader:brass_chunk_loader",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 150
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Латунный чанк-лоадер\"}",
+    "subtitle": "{\"text\": \"Больший радиус загрузки\"}",
+    "description": [
+      "Улучшите чанк-лоадер до латунного — больший радиус и надёжность для магистралей."
+    ],
+    "groups": {
+      "03 · Транспорт": {
+        "position": [
+          64,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create_power_loader:brass_chunk_loader",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

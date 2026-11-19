@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "tier2_rocket"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "ad_astra:ostrum_ingot",
+      "amount": 8,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 400
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Марс\"}",
+    "subtitle": "{\"text\": \"Острум — марсианская руда\"}",
+    "description": [
+      "Добудьте 8 слитков острума на Марсе.",
+      "Острум — главный материал ракет 3 тира."
+    ],
+    "groups": {
+      "08 · Космическая программа": {
+        "position": [
+          160,
+          56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "ad_astra:ostrum_ingot",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

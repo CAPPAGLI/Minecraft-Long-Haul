@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "scout_plane"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "immersive_aircraft:airship",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 200
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Дирижабль\"}",
+    "subtitle": "{\"text\": \"Грузовой полёт\"}",
+    "description": [
+      "Соберите дирижабль для перевозки грузов по воздуху.",
+      "Дирижабли медленнее самолётов, но везут больше и не зависят от рельефа."
+    ],
+    "groups": {
+      "03 · Транспорт": {
+        "position": [
+          64,
+          56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "immersive_aircraft:airship",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

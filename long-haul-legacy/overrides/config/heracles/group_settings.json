@@ -1,0 +1,56 @@
+{
+  "01 · Начало": {
+    "icon": "minecraft:compass",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "02 · Мастерская": {
+    "icon": "create:mechanical_mixer",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "03 · Транспорт": {
+    "icon": "create:track",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "04 · Региональная экспансия": {
+    "icon": "minecraft:gold_ingot",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "05 · Дальние экспедиции": {
+    "icon": "minecraft:diamond",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "06 · Боссы и структуры": {
+    "icon": "cataclysm:burning_ashes",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "07 · Мегапроект": {
+    "icon": "megaproject:energy_core",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "08 · Космическая программа": {
+    "icon": "ad_astra:tier_1_rocket",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  },
+  "09 · Справочник": {
+    "icon": "minecraft:book",
+    "iconEnabled": true,
+    "background": "",
+    "backgroundOpacity": 100
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "water_power"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "create:mechanical_mixer",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 50
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Механический миксер\"}",
+    "subtitle": "{\"text\": \"Смешивание и сплавы\"}",
+    "description": [
+      "Соберите механический миксер и подключите к водяному колесу.",
+      "Миксер нужен для латуни и многих продвинутых рецептов."
+    ],
+    "groups": {
+      "02 · Мастерская": {
+        "position": [
+          -64,
+          -56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:mechanical_mixer",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

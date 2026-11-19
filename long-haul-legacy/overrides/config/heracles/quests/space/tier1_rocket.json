@@ -1,0 +1,52 @@
+{
+  "dependencies": [
+    "nose_cone",
+    "rocket_fin"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "ad_astra:tier_1_rocket",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 300
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Ракета тира 1\"}",
+    "subtitle": "{\"text\": \"Первый полёт\"}",
+    "description": [
+      "Соберите ракету тира 1 в верстаке NASA и заправьте топливом.",
+      "Ракета 1 тира летит на Луну. Поставьте её на стартовую площадку и запускайте."
+    ],
+    "groups": {
+      "08 · Космическая программа": {
+        "position": [
+          32,
+          -56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "ad_astra:tier_1_rocket",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

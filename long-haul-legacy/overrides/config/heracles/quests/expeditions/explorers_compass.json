@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "tropical_journey"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "explorerscompass:explorerscompass",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 50
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Компас исследователя\"}",
+    "subtitle": "{\"text\": \"Поиск структур\"}",
+    "description": [
+      "Сделайте компас исследователя — он находит структуры.",
+      "Структуры в этом мире в 3 раза реже, но награды в них богаче (глава «Боссы»)."
+    ],
+    "groups": {
+      "05 · Дальние экспедиции": {
+        "position": [
+          96,
+          -28
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "explorerscompass:explorerscompass",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

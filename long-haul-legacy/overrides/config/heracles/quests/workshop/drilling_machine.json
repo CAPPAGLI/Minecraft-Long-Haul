@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "ore_drill"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "createoreexcavation:drilling_machine",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 150
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Буровая машина\"}",
+    "subtitle": "{\"text\": \"Бесконечные руды\"}",
+    "description": [
+      "Соберите буровую машину и поставьте на жилу. Она будет добывать руду бесконечно, пока хватает кинетической энергии.",
+      "Жилы видны в атласе жил (vein atlas) и на миникарте JEI."
+    ],
+    "groups": {
+      "02 · Мастерская": {
+        "position": [
+          0,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "createoreexcavation:drilling_machine",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

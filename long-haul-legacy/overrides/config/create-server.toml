@@ -1,0 +1,17 @@
+# Create — конфигурация поездов Long Haul Legacy
+# Увеличенная скорость для трансконтинентальных перевозок.
+# Стандартная скорость Create ~40 м/с. Здесь: 50 м/с (обычный) и 70 м/с (мощный локомотив).
+# На скорости 50 м/с путь в 50 000 блоков занимает ~17 минут.
+
+[trains]
+trainTopSpeed = 50.0
+trainTurningTopSpeed = 20.0
+trainAcceleration = 0.05
+poweredTrainTopSpeed = 70.0
+poweredTrainTurningTopSpeed = 25.0
+poweredTrainAcceleration = 0.08
+trainsCauseDamage = true
+maxTrackPlacementLength = 1000
+maxAssemblyLength = 2000
+maxBogeyCount = 8
+manualTrainSpeedModifier = 1.0

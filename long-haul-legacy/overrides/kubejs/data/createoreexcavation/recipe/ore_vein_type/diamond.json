@@ -1,0 +1,18 @@
+{
+  "type": "createoreexcavation:vein",
+  "amountMultiplierMax": 40.0,
+  "amountMultiplierMin": 15.0,
+  "biomeWhitelist": "longhaul:tropical",
+  "finite": "default",
+  "icon": {
+    "count": 1,
+    "id": "createoreexcavation:raw_diamond"
+  },
+  "name": "{\"translate\": \"item.createoreexcavation.raw_diamond\"}",
+  "placement": {
+    "salt": 632215,
+    "separation": 8,
+    "spacing": 128
+  },
+  "priority": 0
+}

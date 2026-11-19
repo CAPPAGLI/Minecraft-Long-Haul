@@ -1,0 +1,50 @@
+{
+  "game_versions": [
+    "1.20.1"
+  ],
+  "loaders": [
+    "forge"
+  ],
+  "environment": "client_and_server",
+  "id": "fYK8BigB",
+  "project_id": "84USeAvk",
+  "author_id": "wEmpASle",
+  "featured": false,
+  "name": "Clockwork v0.5.6 [Forge 1.20.1] - MELTING POINT",
+  "version_number": "1.20.1-forge-0.5.6",
+  "changelog": "## 0.5.6\n**big changes**\n\n## Changes\n- Updated tr_tr.json for newest version of mod by @AdamProGamingTR in https://github.com/ValkyrienSkies/Clockwork/pull/302\n- Update zh_cn.json by @LogicWheat in https://github.com/ValkyrienSkies/Clockwork/pull/311\n- Set max bearing angle to 90\n- Merged @GigaBrawler 's joint stability PR. Joint blocks (Phys bearing, Hoses, Extendon, etc.) should be more stable\n- Gas engine nerf\n- Smart flap bearing slot colors match up now\n\n## Fixes\n- Fix delivery cannon targeting bugs\n- Fix dual links not rendering with flywheel visuals by @zaafonin in https://github.com/ValkyrienSkies/Clockwork/pull/322\n- Fix delivery cannon not dropping its internal itemstack on break by @zaafonin in https://github.com/ValkyrienSkies/Clockwork/pull/323\n- Fix gas tanks not saving\n- Make balloon casings drop items\n- Fix clockwork blocks crashing schematics\n- Fix kelvin ponder crashing on servers\n- Fix getNode() log spam\n- Fix methane recipe\n- Fix Gas Backtank saving issues",
+  "changelog_url": null,
+  "date_published": "2026-04-30T20:01:22.433583Z",
+  "downloads": 94168,
+  "version_type": "release",
+  "status": "listed",
+  "requested_status": null,
+  "files": [
+    {
+      "id": "4FSaHEZn",
+      "hashes": {
+        "sha512": "73d34a7992cbad877280efc18f520397863b3828b4815a6551bf8120eb7147ee78f65ea14b1cb958c6e219f8f0dbe7a5676af4d7b09c8cc4e31bec824789763c",
+        "sha1": "725fbcf11619ecc206cf6f98cd10c6b4cd1db5d4"
+      },
+      "url": "https://cdn.modrinth.com/data/84USeAvk/versions/fYK8BigB/clockwork-0.5.6.jar",
+      "filename": "clockwork-0.5.6.jar",
+      "primary": true,
+      "size": 11021061,
+      "file_type": null
+    }
+  ],
+  "dependencies": [
+    {
+      "version_id": null,
+      "project_id": "LNytGWDc",
+      "file_name": null,
+      "dependency_type": "required"
+    },
+    {
+      "version_id": null,
+      "project_id": "V5ujR2yw",
+      "file_name": null,
+      "dependency_type": "required"
+    }
+  ]
+}

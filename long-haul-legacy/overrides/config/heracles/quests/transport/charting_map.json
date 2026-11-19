@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "first_cart"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "via_romana:charting_map",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 50
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Карта дорог\"}",
+    "subtitle": "{\"text\": \"Via Romana\"}",
+    "description": [
+      "Сделайте карту дорог Via Romana — она показывает существующие дороги и помогает планировать маршруты.",
+      "Дороги ускоряют тележки и повозки."
+    ],
+    "groups": {
+      "03 · Транспорт": {
+        "position": [
+          -64,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "via_romana:charting_map",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

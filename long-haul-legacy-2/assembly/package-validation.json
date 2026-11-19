@@ -1,0 +1,16 @@
+{
+  "external_downloads": 62,
+  "external_download_bytes": 162290796,
+  "local_mods": 1,
+  "installed_quests": 26,
+  "archives": {
+    "Long-Haul-Legacy-2.0-alpha.1.mrpack": {
+      "bytes": 60994,
+      "sha512": "9fe247752388df9dd420bac8153471fc2fed1097488088e07b83f148aa1ba2ec10f4c44f53f034b84c23f49bfd7843a7ca775123b54091bbacce5a52ba7dceb2"
+    },
+    "Long-Haul-Legacy-2.0-alpha.1-Sources-and-Report.zip": {
+      "bytes": 4940761,
+      "sha512": "66b35c935f7a924a65f85a8c021b96117381fbb2c760199a697c2c9146e1f67a34869edc88bb7452673fbb0a568b735bcfa2e694253c192fb9e5d74a06dafe2e"
+    }
+  }
+}

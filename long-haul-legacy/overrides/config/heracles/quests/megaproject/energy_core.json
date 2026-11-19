@@ -1,0 +1,52 @@
+{
+  "dependencies": [
+    "precision_frame",
+    "diamond_vein"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "megaproject:energy_core",
+      "amount": 2,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 300
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Энергетическое ядро\"}",
+    "subtitle": "{\"text\": \"Мегапроект: шаг 3\"}",
+    "description": [
+      "Соберите 2 энергетических ядра: рамы + алмазы + изумруды.",
+      "Алмазы и изумруды — из тропиков или полярного пояса."
+    ],
+    "groups": {
+      "07 · Мегапроект": {
+        "position": [
+          32,
+          -28
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "megaproject:energy_core",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

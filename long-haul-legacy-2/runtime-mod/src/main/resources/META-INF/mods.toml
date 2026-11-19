@@ -1,0 +1,20 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+[[mods]]
+modId="longhaul_runtime"
+version="0.1.0"
+displayName="Long Haul Runtime"
+description='''Small spawn preload region for the Long Haul Legacy alpha. Not a city generator or quest verification mod.'''
+[[dependencies.longhaul_runtime]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1]"
+ordering="NONE"
+side="BOTH"
+[[dependencies.longhaul_runtime]]
+modId="forge"
+mandatory=true
+versionRange="[47.4.10,47.4.11)"
+ordering="NONE"
+side="BOTH"

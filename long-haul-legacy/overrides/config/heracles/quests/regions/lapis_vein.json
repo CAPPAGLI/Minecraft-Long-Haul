@@ -1,0 +1,50 @@
+{
+  "dependencies": [
+    "gold_vein"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "minecraft:lapis_lazuli",
+      "amount": 16,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 50
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Лазуритовая жила\"}",
+    "subtitle": "{\"text\": \"Зачарования\"}",
+    "description": [
+      "Добудьте 16 лазурита в аридном поясе для зачарований."
+    ],
+    "groups": {
+      "04 · Региональная экспансия": {
+        "position": [
+          64,
+          28
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:lapis_lazuli",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

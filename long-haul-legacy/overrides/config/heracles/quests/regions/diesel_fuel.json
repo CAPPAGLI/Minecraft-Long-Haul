@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "diesel_engine"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "createdieselgenerators:diesel",
+      "amount": 4,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 100
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Дизельное топливо\"}",
+    "subtitle": "{\"text\": \"Заправка двигателей\"}",
+    "description": [
+      "Добудьте дизельное топливо для дизельных двигателей.",
+      "Топливо добывается бурением в аридном поясе."
+    ],
+    "groups": {
+      "04 · Региональная экспансия": {
+        "position": [
+          -64,
+          28
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "createdieselgenerators:diesel",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

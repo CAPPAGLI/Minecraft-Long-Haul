@@ -1,0 +1,62 @@
+{
+  "dependencies": [
+    "root"
+  ],
+  "tasks": {
+    "1": {
+      "item": "minecraft:stick",
+      "components": {},
+      "amount": 8,
+      "collection": "AUTOMATIC",
+      "title": "Gather Sticks from Leaves",
+      "type": "heracles:item"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "subtitle": "{\"translate\":\"\"}",
+    "description": [
+      "",
+      "## || Stickstart",
+      "/7/Fetching branches.../7/",
+      "",
+      "**/7/||/7/ Leaves** will be your primary source of **/6/Sticks/6/** to make tools and equipment, mainly handles.",
+      "",
+      "<columns>",
+      "<column>",
+      "<item id=\"minecraft:birch_leaves\" scale=\"2\"/>",
+      "</column>",
+      "<column>",
+      "<item id=\"immersive_weathering:birch_leaf_pile\" scale=\"2\"/>",
+      "</column>",
+      "</columns>",
+      "",
+      "**/7/||/7/** You can use your **/7/Flint Hoe/7/** on leaves with **[ RMB ]** to cut them and gather a guaranteed stick!"
+    ],
+    "groups": {
+      "I - Safe Travels": {
+        "position": [
+          -143,
+          -228
+        ]
+      }
+    },
+    "icon": {
+      "item": {
+        "id": "minecraft:birch_leaves",
+        "count": 1
+      },
+      "type": "heracles:item"
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/hexagons.png",
+    "title": "{\"translate\":\"Stickstart\"}"
+  },
+  "settings": {
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "autoClaimRewards": false,
+    "individual_progress": false,
+    "hidden": "IN_PROGRESS",
+    "unlockNotification": false
+  }
+}

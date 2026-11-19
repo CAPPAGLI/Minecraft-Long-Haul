@@ -1,0 +1,14 @@
+{
+  "ready": true,
+  "exit_code": 0,
+  "timed_out": false,
+  "events": [
+    "server_ready"
+  ],
+  "heap_mb": 768,
+  "world": "flat smoke world",
+  "client_tested": false,
+  "integration_pass": true,
+  "integration_fail": false,
+  "clean_exit": true
+}

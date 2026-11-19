@@ -1,0 +1,50 @@
+{
+  "dependencies": [
+    "steel_plate"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "ad_astra:nasa_workbench",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 150
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Верстак NASA\"}",
+    "subtitle": "{\"text\": \"Ad Astra: сборка ракет\"}",
+    "description": [
+      "Соберите верстак NASA — в нём крафтятся ракеты всех тиров."
+    ],
+    "groups": {
+      "08 · Космическая программа": {
+        "position": [
+          -96,
+          -56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "ad_astra:nasa_workbench",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

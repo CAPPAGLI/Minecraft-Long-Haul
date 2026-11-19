@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "megaproject:block/core"
+    }
+  }
+}

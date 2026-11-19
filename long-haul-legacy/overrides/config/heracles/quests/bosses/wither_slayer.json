@@ -1,0 +1,49 @@
+{
+  "dependencies": [
+    "lich"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:kill_entity",
+      "entity": "minecraft:wither",
+      "amount": 1
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 300
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Убийца визера\"}",
+    "subtitle": "{\"text\": \"Ванильный босс\"}",
+    "description": [
+      "Призовите и победите визера. Его звезда — финальный ингредиент многих эндгейм-рецептов."
+    ],
+    "groups": {
+      "06 · Боссы и структуры": {
+        "position": [
+          -32,
+          112
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:nether_star",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

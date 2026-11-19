@@ -1,0 +1,50 @@
+{
+  "dependencies": [
+    "lich"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "bosses_of_mass_destruction:obsidian_heart",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 200
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Обсидиановое сердце\"}",
+    "subtitle": "{\"text\": \"Дроп лича\"}",
+    "description": [
+      "Добудьте обсидиановое сердце с Древнего лича."
+    ],
+    "groups": {
+      "06 · Боссы и структуры": {
+        "position": [
+          96,
+          56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "bosses_of_mass_destruction:obsidian_heart",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

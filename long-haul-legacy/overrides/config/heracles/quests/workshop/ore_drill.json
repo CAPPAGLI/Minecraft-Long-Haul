@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "precision"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "createoreexcavation:drill",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 100
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Буровая насадка\"}",
+    "subtitle": "{\"text\": \"Начало промышленной добычи\"}",
+    "description": [
+      "Соберите буровую насадку Create: Ore Excavation.",
+      "Буры работают на жилах своего климатического пояса: уголь, железо, медь и цинк — здесь, в умеренном поясе."
+    ],
+    "groups": {
+      "02 · Мастерская": {
+        "position": [
+          64,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "createoreexcavation:drill",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

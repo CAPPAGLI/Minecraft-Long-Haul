@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "desh_plate"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "ad_astra:tier_2_rocket",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 400
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Ракета тира 2\"}",
+    "subtitle": "{\"text\": \"Полёт на Марс\"}",
+    "description": [
+      "Соберите ракету тира 2 из дешовых блоков, баков и двигателя.",
+      "Ракета 2 тира летит на Марс."
+    ],
+    "groups": {
+      "08 · Космическая программа": {
+        "position": [
+          160,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "ad_astra:tier_2_rocket",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

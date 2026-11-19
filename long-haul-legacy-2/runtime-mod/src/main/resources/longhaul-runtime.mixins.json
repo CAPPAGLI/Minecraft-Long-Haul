@@ -1,0 +1,1 @@
+{"required":true,"minVersion":"0.8","package":"longhaul.runtime.mixin","compatibilityLevel":"JAVA_17","mixins":["SmallSpawnMixin"],"injectors":{"defaultRequire":1}}

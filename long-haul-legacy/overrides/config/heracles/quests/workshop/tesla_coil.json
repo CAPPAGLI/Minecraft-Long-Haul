@@ -1,0 +1,50 @@
+{
+  "dependencies": [
+    "rolling_mill"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "createaddition:tesla_coil",
+      "amount": 1,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 150
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Катушка Теслы\"}",
+    "subtitle": "{\"text\": \"Зарядка и оборона\"}",
+    "description": [
+      "Соберите катушку Теслы — она заряжает инструменты и бьёт врагов током."
+    ],
+    "groups": {
+      "02 · Мастерская": {
+        "position": [
+          64,
+          56
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "createaddition:tesla_coil",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

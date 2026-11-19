@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "first_iron"
+  ],
+  "tasks": {
+    "task1": {
+      "type": "heracles:item",
+      "item": "create:zinc_ingot",
+      "amount": 4,
+      "collection": "AUTOMATIC"
+    }
+  },
+  "rewards": {
+    "reward1": {
+      "type": "heracles:xp",
+      "xptype": "POINTS",
+      "amount": 50
+    }
+  },
+  "display": {
+    "title": "{\"text\": \"Цинк\"}",
+    "subtitle": "{\"text\": \"Ключ к Create\"}",
+    "description": [
+      "Добудьте 4 цинка. Цинковые жилы — тоже в умеренном поясе, рядом со спавном.",
+      "Цинк нужен для латунных компонентов Create и сплавной пластины Мегапроекта."
+    ],
+    "groups": {
+      "01 · Начало": {
+        "position": [
+          96,
+          -28
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:zinc_ingot",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "unlockNotification": true,
+    "showDependencyArrow": true,
+    "repeatable": false,
+    "individual_progress": false,
+    "hidden": "LOCKED"
+  }
+}

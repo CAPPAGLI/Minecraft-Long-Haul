@@ -1,0 +1,18 @@
+{
+  "type": "createoreexcavation:vein",
+  "amountMultiplierMax": 40.0,
+  "amountMultiplierMin": 15.0,
+  "biomeWhitelist": "longhaul:temperate",
+  "finite": "default",
+  "icon": {
+    "count": 1,
+    "id": "minecraft:coal"
+  },
+  "name": "{\"translate\": \"item.minecraft.coal\"}",
+  "placement": {
+    "salt": 492204,
+    "separation": 8,
+    "spacing": 128
+  },
+  "priority": 0
+}

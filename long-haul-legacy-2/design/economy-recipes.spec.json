@@ -1,0 +1,248 @@
+{
+  "status": "design_only",
+  "initial_resources": [
+    "coal",
+    "copper_ingot",
+    "iron_ingot",
+    "sand",
+    "stone",
+    "water",
+    "wheat",
+    "wood"
+  ],
+  "recipes": [
+    {
+      "id": "mine_bootstrap",
+      "tier": 1,
+      "site_type": "mine",
+      "mode": "manual_low_output",
+      "inputs": {
+        "iron_ingot": 4,
+        "coal": 1
+      },
+      "output": "ore_concentrate",
+      "amount": 1,
+      "note": "Невысокий выпуск; доступен без импортного оборудования. Требует физического доступа к локальному узлу."
+    },
+    {
+      "id": "mine_industrial",
+      "tier": 2,
+      "site_type": "mine",
+      "mode": "automated",
+      "inputs": {
+        "iron_ingot": 8,
+        "machine_parts": 1,
+        "technical_glass": 1
+      },
+      "output": "ore_concentrate",
+      "amount": 8
+    },
+    {
+      "id": "forest_bootstrap",
+      "tier": 1,
+      "site_type": "forest",
+      "mode": "manual_low_output",
+      "inputs": {
+        "wood": 4,
+        "coal": 1
+      },
+      "output": "treated_timber",
+      "amount": 1,
+      "note": "Невысокий выпуск; доступен без импортного оборудования. Требует физического доступа к локальному узлу."
+    },
+    {
+      "id": "forest_industrial",
+      "tier": 2,
+      "site_type": "forest",
+      "mode": "automated",
+      "inputs": {
+        "wood": 8,
+        "ore_concentrate": 1,
+        "machine_parts": 1
+      },
+      "output": "treated_timber",
+      "amount": 8
+    },
+    {
+      "id": "farm_bootstrap",
+      "tier": 1,
+      "site_type": "farm",
+      "mode": "manual_low_output",
+      "inputs": {
+        "wheat": 4,
+        "coal": 1
+      },
+      "output": "field_rations",
+      "amount": 1,
+      "note": "Невысокий выпуск; доступен без импортного оборудования. Требует физического доступа к локальному узлу."
+    },
+    {
+      "id": "farm_industrial",
+      "tier": 2,
+      "site_type": "farm",
+      "mode": "automated",
+      "inputs": {
+        "wheat": 8,
+        "treated_timber": 1,
+        "ore_concentrate": 1
+      },
+      "output": "field_rations",
+      "amount": 8
+    },
+    {
+      "id": "port_bootstrap",
+      "tier": 1,
+      "site_type": "port",
+      "mode": "manual_low_output",
+      "inputs": {
+        "water": 4,
+        "coal": 1
+      },
+      "output": "marine_reagent",
+      "amount": 1,
+      "note": "Невысокий выпуск; доступен без импортного оборудования. Требует физического доступа к локальному узлу."
+    },
+    {
+      "id": "port_industrial",
+      "tier": 2,
+      "site_type": "port",
+      "mode": "automated",
+      "inputs": {
+        "water": 8,
+        "field_rations": 1,
+        "treated_timber": 1
+      },
+      "output": "marine_reagent",
+      "amount": 8
+    },
+    {
+      "id": "badlands_bootstrap",
+      "tier": 1,
+      "site_type": "badlands",
+      "mode": "manual_low_output",
+      "inputs": {
+        "stone": 4,
+        "coal": 1
+      },
+      "output": "refractory_mix",
+      "amount": 1,
+      "note": "Невысокий выпуск; доступен без импортного оборудования. Требует физического доступа к локальному узлу."
+    },
+    {
+      "id": "badlands_industrial",
+      "tier": 2,
+      "site_type": "badlands",
+      "mode": "automated",
+      "inputs": {
+        "stone": 8,
+        "marine_reagent": 1,
+        "field_rations": 1
+      },
+      "output": "refractory_mix",
+      "amount": 8
+    },
+    {
+      "id": "wetland_bootstrap",
+      "tier": 1,
+      "site_type": "wetland",
+      "mode": "manual_low_output",
+      "inputs": {
+        "coal": 1
+      },
+      "output": "technical_oil",
+      "amount": 1,
+      "note": "Невысокий выпуск; доступен без импортного оборудования. Требует физического доступа к локальному узлу."
+    },
+    {
+      "id": "wetland_industrial",
+      "tier": 2,
+      "site_type": "wetland",
+      "mode": "automated",
+      "inputs": {
+        "coal": 8,
+        "refractory_mix": 1,
+        "marine_reagent": 1
+      },
+      "output": "technical_oil",
+      "amount": 8
+    },
+    {
+      "id": "smelter_bootstrap",
+      "tier": 1,
+      "site_type": "smelter",
+      "mode": "manual_low_output",
+      "inputs": {
+        "sand": 4,
+        "coal": 1
+      },
+      "output": "technical_glass",
+      "amount": 1,
+      "note": "Невысокий выпуск; доступен без импортного оборудования. Требует физического доступа к локальному узлу."
+    },
+    {
+      "id": "smelter_industrial",
+      "tier": 2,
+      "site_type": "smelter",
+      "mode": "automated",
+      "inputs": {
+        "sand": 8,
+        "technical_oil": 1,
+        "refractory_mix": 1
+      },
+      "output": "technical_glass",
+      "amount": 8
+    },
+    {
+      "id": "machine_bootstrap",
+      "tier": 1,
+      "site_type": "machine",
+      "mode": "manual_low_output",
+      "inputs": {
+        "copper_ingot": 4,
+        "coal": 1
+      },
+      "output": "machine_parts",
+      "amount": 1,
+      "note": "Невысокий выпуск; доступен без импортного оборудования. Требует физического доступа к локальному узлу."
+    },
+    {
+      "id": "machine_industrial",
+      "tier": 2,
+      "site_type": "machine",
+      "mode": "automated",
+      "inputs": {
+        "copper_ingot": 8,
+        "technical_glass": 1,
+        "technical_oil": 1
+      },
+      "output": "machine_parts",
+      "amount": 8
+    },
+    {
+      "id": "continental_hub",
+      "tier": 4,
+      "site_type": "machine",
+      "mode": "automated",
+      "inputs": {
+        "ore_concentrate": 8,
+        "treated_timber": 8,
+        "field_rations": 8,
+        "marine_reagent": 8,
+        "refractory_mix": 8,
+        "technical_oil": 8,
+        "technical_glass": 8,
+        "machine_parts": 8
+      },
+      "output": "continental_module",
+      "amount": 1
+    }
+  ],
+  "reachability_test": "passed_for_material_graph_only",
+  "not_tested": [
+    "Minecraft recipes",
+    "site placement",
+    "game balance",
+    "currency arbitrage",
+    "runtime"
+  ]
+}
