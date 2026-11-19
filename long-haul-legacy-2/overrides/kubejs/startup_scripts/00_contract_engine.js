@@ -174,6 +174,7 @@ global.LHSiteCatalog = [
 ];
 
 global.LHWorldPlanner = (function () {
+  var JMath = (typeof Java !== 'undefined') ? Java.loadClass('java.lang.Math') : Math;
   var BORDER_SAFE_LIMIT = 84000;
   var MIN_SEPARATION = 2400;
 
@@ -197,7 +198,7 @@ global.LHWorldPlanner = (function () {
   function dist2D(ax, az, bx, bz) {
     var dx = ax - bx;
     var dz = az - bz;
-    return Math.sqrt(dx * dx + dz * dz);
+    return JMath.sqrt(dx * dx + dz * dz);
   }
 
   function planSites(seed) {
@@ -206,14 +207,14 @@ global.LHWorldPlanner = (function () {
     var count = global.LHSiteCatalog.length;
     for (var i = 0; i < count; i++) {
       var spec = global.LHSiteCatalog[i];
-      var baseAngle = (Math.PI * 2 * i) / count;
+      var baseAngle = (JMath.PI * 2 * i) / count;
       var chosen = null;
       for (var attempt = 0; attempt < 64; attempt++) {
         var angle = baseAngle + (rng() - 0.5) * 0.9 + attempt * 0.13;
         var radius = spec.minDist + rng() * (spec.maxDist - spec.minDist);
-        var x = Math.round(Math.cos(angle) * radius);
-        var z = Math.round(Math.sin(angle) * radius);
-        if (!(Math.abs(x) <= BORDER_SAFE_LIMIT && Math.abs(z) <= BORDER_SAFE_LIMIT)) continue;
+        var x = JMath.round(JMath.cos(angle) * radius);
+        var z = JMath.round(JMath.sin(angle) * radius);
+        if (!(JMath.abs(x) <= BORDER_SAFE_LIMIT && JMath.abs(z) <= BORDER_SAFE_LIMIT)) continue;
         var ok = true;
         for (var j = 0; j < placed.length; j++) {
           if (dist2D(x, z, placed[j].x, placed[j].z) < MIN_SEPARATION) {
@@ -229,7 +230,7 @@ global.LHWorldPlanner = (function () {
             unique: !!spec.unique,
             x: x,
             z: z,
-            distanceFromOrigin: Math.round(dist2D(0, 0, x, z)),
+            distanceFromOrigin: JMath.round(dist2D(0, 0, x, z)),
             commissioned: false,
             discovered: false,
             depot: null,
@@ -240,14 +241,14 @@ global.LHWorldPlanner = (function () {
       }
       if (!chosen) {
         var fallbackAngle = baseAngle;
-        var fallbackRadius = Math.min(BORDER_SAFE_LIMIT - 1000, Math.round((spec.minDist + spec.maxDist) / 2));
+        var fallbackRadius = JMath.min(BORDER_SAFE_LIMIT - 1000, JMath.round((spec.minDist + spec.maxDist) / 2));
         chosen = {
           id: spec.id,
           name: spec.name,
           tier: spec.tier,
           unique: !!spec.unique,
-          x: Math.round(Math.cos(fallbackAngle) * fallbackRadius),
-          z: Math.round(Math.sin(fallbackAngle) * fallbackRadius),
+          x: JMath.round(JMath.cos(fallbackAngle) * fallbackRadius),
+          z: JMath.round(JMath.sin(fallbackAngle) * fallbackRadius),
           distanceFromOrigin: fallbackRadius,
           commissioned: false,
           discovered: false,
