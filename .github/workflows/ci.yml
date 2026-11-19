@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   checks: write
   issues: write
   pull-requests: write
@@ -13,7 +13,7 @@ permissions:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -66,11 +66,19 @@ jobs:
           mkdir -p /tmp/ci-logs
           python3 long-haul-legacy-2/tools/inspect_alpha.py | tee /tmp/ci-logs/inspect.txt
 
-      - name: Re-sync runtime jar & run Forge headless integration smoke test
+      - name: Re-sync runtime jar & run Forge headless void integration test
         run: |
           mkdir -p /tmp/ci-logs
           python3 long-haul-legacy-2/tools/prepare_server.py --mode void --skip-forge-install
-          python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 360 --world-label "alpha2 void integration test" | tee /tmp/ci-logs/smoke.txt
+          python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 360 --world-label "alpha2 void integration test" | tee /tmp/ci-logs/smoke-void.txt
+          cp long-haul-legacy-2/server-test/smoke-result.json /tmp/ci-logs/smoke-void-result.json
+
+      - name: Run Forge headless normal Overworld generation test (Terralith + Tectonic + BOP + YUNG + Towns)
+        run: |
+          mkdir -p /tmp/ci-logs
+          python3 long-haul-legacy-2/tools/prepare_server.py --mode normal --skip-forge-install
+          python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 420 --world-label "alpha2 normal overworld test" | tee /tmp/ci-logs/smoke-normal.txt
+          cp long-haul-legacy-2/server-test/smoke-result.json /tmp/ci-logs/smoke-normal-result.json
 
       - name: Package .mrpack and source bundle
         run: python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.2 | tee /tmp/ci-logs/package.txt
@@ -81,11 +89,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python3 - << 'PY'
-          import json, os, pathlib, subprocess
+          import os, pathlib, subprocess
           lines = ['### CI Diagnostic Report (`' + os.environ['GITHUB_SHA'][:7] + '`)', '']
           for label, p in [
               ('Inspect JARs', '/tmp/ci-logs/inspect.txt'),
-              ('Smoke Result', 'long-haul-legacy-2/server-test/smoke-result.json'),
+              ('Void Smoke Result', '/tmp/ci-logs/smoke-void-result.json'),
+              ('Normal Overworld Result', '/tmp/ci-logs/smoke-normal-result.json'),
               ('Package Summary', '/tmp/ci-logs/package.txt'),
               ('KubeJS Startup Log', 'long-haul-legacy-2/server-test/logs/kubejs/startup.log'),
               ('KubeJS Server Log', 'long-haul-legacy-2/server-test/logs/kubejs/server.log'),
@@ -94,12 +103,11 @@ jobs:
               if fp.exists():
                   txt = fp.read_text(errors='replace')[-4000:]
                   lines.append(f'<details><summary>{label}</summary>\n\n```\n{txt}\n```\n</details>\n')
-          crashes = sorted(pathlib.Path('long-haul-legacy-2/server-test/crash-reports').glob('*.txt')) if pathlib.Path('long-haul-legacy-2/server-test/crash-reports').exists() else []
-          for c in crashes[-2:]:
-              lines.append(f'<details><summary>Crash: {c.name}</summary>\n\n```\n{c.read_text(errors="replace")[:4000]}\n```\n</details>\n')
           sc = pathlib.Path('long-haul-legacy-2/server-test/smoke-console.log')
           if sc.exists():
-              tail = '\n'.join(sc.read_text(errors='replace').splitlines()[-80:])
+              errs = [l for l in sc.read_text(errors='replace').splitlines() if ('ERROR' in l or 'FATAL' in l or 'Exception' in l or 'LH_INTEGRATION' in l)]
+              lines.append(f'<details><summary>Console Errors/Highlights ({len(errs)})</summary>\n\n```\n' + '\n'.join(errs[-60:]) + '\n```\n</details>\n')
+              tail = '\n'.join(sc.read_text(errors='replace').splitlines()[-60:])
               lines.append(f'<details><summary>Smoke Console Tail</summary>\n\n```\n{tail}\n```\n</details>\n')
           body = '\n'.join(lines)[:60000]
           subprocess.run(['gh', 'api', f"repos/{os.environ['GITHUB_REPOSITORY']}/commits/{os.environ['GITHUB_SHA']}/comments", '-f', f'body={body}'], check=False)

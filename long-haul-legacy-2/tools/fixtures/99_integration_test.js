@@ -65,13 +65,38 @@ ServerEvents.loaded(function (event) {
     ok(lhAccept(server, actor, 'plates') === 1, 'actual adapter accept');
     inv.setStackInSlot(0, Item.of('create:iron_sheet', 64));
 
+    // Timed shift live persistence actor
+    var b2 = overworld.getBlock(2, 80, 0);
+    b2.set('minecraft:barrel');
+    for (var s2 = 0; s2 < b2.inventory.slots; s2++) b2.inventory.setStackInSlot(s2, Item.empty);
+    var shiftActor = {
+      uuid: '00000000-0000-4000-8000-000000000004',
+      level: overworld,
+      x: 2.5, y: 81, z: 0.5,
+      tell: function () {},
+      isAdvancementDone: function () { return false; },
+      unlockAdvancement: function () {}
+    };
+    delete db.players[String(shiftActor.uuid)];
+    ok(lhRegister(server, shiftActor) === 1, 'shift actor register');
+    ok(lhAccept(server, shiftActor, 'plate_shift') === 1, 'shift actor accept');
+    b2.inventory.setStackInSlot(0, Item.of('create:iron_sheet', 16));
+
     LHIntegrationVerify = function () {
       try {
-        // 3. Live tick contract completion + real ServerPlayer advancement idempotency
+        // 3. Live tick contract completion + timed shift tick progress + reload persistence
         var profile = lhProfile(server, actor);
         ok(profile.job.status === 'complete', 'live tick completion ' + JSON.stringify(profile));
         ok(profile.receipts.plates.totals['create:iron_sheet'] === 64, 'receipt quantity');
         ok(inv.isEmpty(), 'goods consumed by real adapter');
+
+        var shiftProf = lhProfile(server, shiftActor);
+        ok(shiftProf.job.status === 'active' && shiftProf.job.seconds >= 1 && shiftProf.job.totals['create:iron_sheet'] === 16,
+           'timed shift consumed first window quota and ticked: ' + JSON.stringify(shiftProf.job));
+        lhSave(server);
+        LHState = null; // simulate server restart reload from persistentData
+        var reloaded = lhProfile(server, shiftActor);
+        ok(reloaded.job.id === 'plate_shift' && reloaded.job.totals['create:iron_sheet'] === 16, 'state survived persistentData reload');
 
         var PlayerClass = Java.loadClass('net.minecraft.server.level.ServerPlayer');
         var ProfileClass = Java.loadClass('com.mojang.authlib.GameProfile');
@@ -84,6 +109,16 @@ ServerEvents.loaded(function (event) {
         var xp = fp.totalExperience;
         lhSync(fp, profile, server);
         ok(fp.totalExperience === xp, 'no duplicate XP from receipt sync');
+
+        // 3b. Real Brigadier command tree checks
+        var src = fp.createCommandSourceStack();
+        var disp = server.commands;
+        ok(disp.performPrefixedCommand(src, 'lh help') === 1, 'brigadier /lh help');
+        ok(disp.performPrefixedCommand(src, 'lh sites') === 1, 'brigadier /lh sites');
+        ok(disp.performPrefixedCommand(src, 'lh site info forest') === 1, 'brigadier /lh site info forest');
+        ok(disp.performPrefixedCommand(src, 'lh camp list') === 1, 'brigadier /lh camp list');
+        ok(disp.performPrefixedCommand(src, 'lh route list') === 1, 'brigadier /lh route list');
+        ok(disp.performPrefixedCommand(src, 'lh status') === 1, 'brigadier /lh status');
 
         // 4. Site planner + remote rejection + on-site commission & production
         var sitesDb = lhSitesRead(server);
@@ -153,7 +188,10 @@ ServerEvents.loaded(function (event) {
         ok(lhCargoDeliver(server, destActor) === 0, 'cargo manifest cannot be delivered twice');
 
         // Cleanup test artifacts
-        delete db.players[String(actor.uuid)];
+        var curDb = lhRead(server);
+        delete curDb.players[String(actor.uuid)];
+        delete curDb.players[String(shiftActor.uuid)];
+        delete curDb.players[String(fp.uuid)];
         lhSave(server);
         delete sitesDb.sites.forest.depot;
         sitesDb.sites.forest.commissioned = false;
@@ -165,6 +203,7 @@ ServerEvents.loaded(function (event) {
         lhLogSave(server);
 
         b.set('minecraft:air');
+        b2.set('minecraft:air');
         fb.set('minecraft:air');
         overworld.getBlock(800, 80, 0).set('minecraft:air');
         overworld.getBlock(801, 80, 0).set('minecraft:air');
@@ -173,7 +212,7 @@ ServerEvents.loaded(function (event) {
         server.runCommandSilent('forceload remove ' + fcx + ' ' + fcz);
         server.runCommandSilent('forceload remove 800 0');
 
-        console.info('LH_INTEGRATION_PASS: items + contracts + sites + production + camp + cargo + advancement sync');
+        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + production + camp + cargo + advancement sync');
       } catch (err2) {
         console.error('LH_INTEGRATION_FAIL: live adapter ' + err2);
       }
