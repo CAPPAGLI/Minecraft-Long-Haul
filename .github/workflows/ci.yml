@@ -4,6 +4,12 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  checks: write
+  issues: write
+  pull-requests: write
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -56,15 +62,48 @@ jobs:
         run: python3 long-haul-legacy-2/tools/build_runtime.py
 
       - name: Inspect JAR mod IDs & version ranges
-        run: python3 long-haul-legacy-2/tools/inspect_alpha.py
+        run: |
+          mkdir -p /tmp/ci-logs
+          python3 long-haul-legacy-2/tools/inspect_alpha.py | tee /tmp/ci-logs/inspect.txt
 
       - name: Re-sync runtime jar & run Forge headless integration smoke test
         run: |
+          mkdir -p /tmp/ci-logs
           python3 long-haul-legacy-2/tools/prepare_server.py --mode void --skip-forge-install
-          python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 360 --world-label "alpha2 void integration test"
+          python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 360 --world-label "alpha2 void integration test" | tee /tmp/ci-logs/smoke.txt
 
       - name: Package .mrpack and source bundle
-        run: python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.2
+        run: python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.2 | tee /tmp/ci-logs/package.txt
+
+      - name: Post diagnostic report to commit comment
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - << 'PY'
+          import json, os, pathlib, subprocess
+          lines = ['### CI Diagnostic Report (`' + os.environ['GITHUB_SHA'][:7] + '`)', '']
+          for label, p in [
+              ('Inspect JARs', '/tmp/ci-logs/inspect.txt'),
+              ('Smoke Result', 'long-haul-legacy-2/server-test/smoke-result.json'),
+              ('Package Summary', '/tmp/ci-logs/package.txt'),
+              ('KubeJS Startup Log', 'long-haul-legacy-2/server-test/logs/kubejs/startup.log'),
+              ('KubeJS Server Log', 'long-haul-legacy-2/server-test/logs/kubejs/server.log'),
+          ]:
+              fp = pathlib.Path(p)
+              if fp.exists():
+                  txt = fp.read_text(errors='replace')[-4000:]
+                  lines.append(f'<details><summary>{label}</summary>\n\n```\n{txt}\n```\n</details>\n')
+          crashes = sorted(pathlib.Path('long-haul-legacy-2/server-test/crash-reports').glob('*.txt')) if pathlib.Path('long-haul-legacy-2/server-test/crash-reports').exists() else []
+          for c in crashes[-2:]:
+              lines.append(f'<details><summary>Crash: {c.name}</summary>\n\n```\n{c.read_text(errors="replace")[:4000]}\n```\n</details>\n')
+          sc = pathlib.Path('long-haul-legacy-2/server-test/smoke-console.log')
+          if sc.exists():
+              tail = '\n'.join(sc.read_text(errors='replace').splitlines()[-80:])
+              lines.append(f'<details><summary>Smoke Console Tail</summary>\n\n```\n{tail}\n```\n</details>\n')
+          body = '\n'.join(lines)[:60000]
+          subprocess.run(['gh', 'api', f"repos/{os.environ['GITHUB_REPOSITORY']}/commits/{os.environ['GITHUB_SHA']}/comments", '-f', f'body={body}'], check=False)
+          PY
 
       - name: Upload build & test artifacts
         if: always()
