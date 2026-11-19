@@ -179,21 +179,18 @@ global.LHWorldPlanner = (function () {
 
   function hashSeed(seedInput) {
     var s = String(seedInput || '0');
-    var h = 2166136261;
+    var h = 5381;
     for (var i = 0; i < s.length; i++) {
-      h ^= s.charCodeAt(i);
-      h = Math.imul(h, 16777619);
+      h = (h * 33 + s.charCodeAt(i)) % 2147483647;
     }
-    return h >>> 0;
+    return h > 0 ? h : 1;
   }
 
   function makeRng(seed) {
-    var state = hashSeed(seed) || 1;
+    var state = hashSeed(seed);
     return function () {
-      state = (state + 0x6D2B79F5) | 0;
-      var t = Math.imul(state ^ (state >>> 15), 1 | state);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      state = (state * 48271) % 2147483647;
+      return (state - 1) / 2147483646;
     };
   }
 
@@ -216,7 +213,7 @@ global.LHWorldPlanner = (function () {
         var radius = spec.minDist + rng() * (spec.maxDist - spec.minDist);
         var x = Math.round(Math.cos(angle) * radius);
         var z = Math.round(Math.sin(angle) * radius);
-        if (Math.abs(x) > BORDER_SAFE_LIMIT || Math.abs(z) > BORDER_SAFE_LIMIT) continue;
+        if (!(Math.abs(x) <= BORDER_SAFE_LIMIT && Math.abs(z) <= BORDER_SAFE_LIMIT)) continue;
         var ok = true;
         for (var j = 0; j < placed.length; j++) {
           if (dist2D(x, z, placed[j].x, placed[j].z) < MIN_SEPARATION) {

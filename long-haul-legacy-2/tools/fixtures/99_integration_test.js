@@ -123,7 +123,7 @@ ServerEvents.loaded(function (event) {
         // 4. Site planner + remote rejection + on-site commission & production
         var sitesDb = lhSitesRead(server);
         var forest = sitesDb.sites.forest;
-        ok(forest && Math.abs(forest.x) <= 84000 && Math.abs(forest.z) <= 84000, 'forest site within +/-84000');
+        ok(forest && Math.abs(forest.x) <= 84000 && Math.abs(forest.z) <= 84000, 'forest site within +/-84000: ' + JSON.stringify(forest));
         ok(lhSiteCommission(server, actor, 'forest') === 0, 'remote site commission rejected');
 
         var fcx = Math.floor(forest.x / 16) * 16, fcz = Math.floor(forest.z / 16) * 16;
