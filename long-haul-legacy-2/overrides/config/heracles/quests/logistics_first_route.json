@@ -1,0 +1,44 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "verified": {
+      "type": "heracles:advancement",
+      "title": "Серверное подтверждение",
+      "advancements": [
+        "longhaul:routes/first_route"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Испытание маршрута\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
+    "description": [
+      "Разметьте маршрут длиной >= 750 м: /lh route begin <имя>, добавьте контрольные точки (/lh route gate), завершите (/lh route finish) и пройдите на транспорте (/lh route start <имя>).",
+      "Аномальная скорость (> 85 м/с, телепорт) отменяет испытание."
+    ],
+    "groups": {
+      "05 · Маршруты и лагеря": {
+        "position": [
+          42,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:rail",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

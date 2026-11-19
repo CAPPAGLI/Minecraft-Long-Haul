@@ -1,0 +1,45 @@
+{
+  "dependencies": [
+    "logistics_first_camp"
+  ],
+  "tasks": {
+    "verified": {
+      "type": "heracles:advancement",
+      "title": "Серверное подтверждение",
+      "advancements": [
+        "longhaul:expedition/three_camps"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Сеть из трёх лагерей\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
+    "description": [
+      "Разверните 3 активных полевых лагеря на расстоянии >= 500 м друг от друга."
+    ],
+    "groups": {
+      "05 · Маршруты и лагеря": {
+        "position": [
+          -42,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "comforts:sleeping_bag_red",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

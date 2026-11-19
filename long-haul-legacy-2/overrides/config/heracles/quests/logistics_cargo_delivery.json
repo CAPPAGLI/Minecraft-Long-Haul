@@ -1,0 +1,43 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "verified": {
+      "type": "heracles:advancement",
+      "title": "Серверное подтверждение",
+      "advancements": [
+        "longhaul:routes/cargo_delivery"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Серверная грузовая накладная\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
+    "description": [
+      "Получите накладную на одном узле (/lh cargo issue <откуда> <куда>), физически доставьте её в целевой узел и сдайте (/lh cargo deliver)."
+    ],
+    "groups": {
+      "05 · Маршруты и лагеря": {
+        "position": [
+          126,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "longhaul:cargo_manifest",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

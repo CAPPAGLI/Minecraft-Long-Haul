@@ -8,12 +8,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Мир без климатической тюрьмы\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha\"}",
+    "title": "{\"text\": \"Мир и региональные узлы\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
     "description": [
       "Natural Temperature и Cold Sweat отсутствуют. Фермерство не заперто в старых климатических поясах.",
-      "Граница обычного мира: 175000 блоков, центр 0,0. В этом alpha ещё НЕТ гарантии всех сюжетных ресурсов внутри неё.",
-      "Создайте отдельный тестовый мир. Не переносите сюда сохранение 1.21.1."
+      "Граница обычного мира: 175000 блоков, центр 0,0. Планировщик размещает 8 экономических центров, Архив и Узел консорциума внутри ±84000.",
+      "Посмотреть направления: /lh sites и /lh site info <id>."
     ],
     "groups": {
       "01 · Начало и правила": {
@@ -35,7 +35,7 @@
   "settings": {
     "hidden": "LOCKED",
     "showDependencyArrow": true,
-    "individual_progress": true,
+    "individualProgress": true,
     "repeatable": false,
     "unlockNotification": true
   }

@@ -9,7 +9,7 @@
   "rewards": {},
   "display": {
     "title": "{\"text\": \"Что измеряют испытания\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
     "description": [
       "Контракты с суффиксом _shift считают норму в КАЖДОМ окне по 60 игровых секунд. Один полный сундук не завершает испытание мгновенно.",
       "Выгрузка чанка приостанавливает часы. Серверный прогресс сохраняется; /lh status показывает детали.",
@@ -36,7 +36,7 @@
   "settings": {
     "hidden": "LOCKED",
     "showDependencyArrow": true,
-    "individual_progress": true,
+    "individualProgress": true,
     "repeatable": false,
     "unlockNotification": true
   }

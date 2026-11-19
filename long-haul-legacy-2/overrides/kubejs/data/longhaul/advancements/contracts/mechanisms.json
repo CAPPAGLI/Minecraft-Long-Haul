@@ -1,6 +1,6 @@
 {
   "criteria": {
-    "server_receipt": {
+    "server_verified": {
       "trigger": "minecraft:impossible"
     }
   },

@@ -1,0 +1,84 @@
+name: Long Haul Legacy 2.0 Build & Smoke Test
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache Modrinth JARs
+        uses: actions/cache@v4
+        with:
+          path: long-haul-legacy-2/assembly/mods
+          key: modrinth-mods-${{ hashFiles('long-haul-legacy-2/assembly/lock.json') }}
+
+      - name: Cache Forge 47.4.10 server libraries
+        uses: actions/cache@v4
+        with:
+          path: long-haul-legacy-2/server-test/libraries
+          key: forge-libs-1.20.1-47.4.10
+
+      - name: Run pure-JS contract, planner, route & economy tests
+        run: node long-haul-legacy-2/tools/test_contracts.js
+
+      - name: Verify Heracles quest & advancement generation
+        run: python3 long-haul-legacy-2/tools/generate_alpha_quests.py
+
+      - name: Download & verify pinned mods from lock.json
+        run: python3 long-haul-legacy-2/tools/assemble_alpha.py --from-lock
+
+      - name: Prepare headless Forge 47.4.10 server (void fixture)
+        run: python3 long-haul-legacy-2/tools/prepare_server.py --mode void
+
+      - name: Build longhaul-runtime mod
+        run: python3 long-haul-legacy-2/tools/build_runtime.py
+
+      - name: Inspect JAR mod IDs & version ranges
+        run: python3 long-haul-legacy-2/tools/inspect_alpha.py
+
+      - name: Re-sync runtime jar & run Forge headless integration smoke test
+        run: |
+          python3 long-haul-legacy-2/tools/prepare_server.py --mode void --skip-forge-install
+          python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 360 --world-label "alpha2 void integration test"
+
+      - name: Package .mrpack and source bundle
+        run: python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.2
+
+      - name: Upload build & test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: long-haul-legacy-2.0-alpha.2
+          path: |
+            Long-Haul-Legacy-2.0-alpha.2.mrpack
+            Long-Haul-Legacy-2.0-alpha.2-Sources-and-Report.zip
+            long-haul-legacy-2/server-test/smoke-result.json
+            long-haul-legacy-2/server-test/smoke-console.log
+            long-haul-legacy-2/server-test/logs/latest.log
+            long-haul-legacy-2/server-test/logs/kubejs/
+            long-haul-legacy-2/server-test/crash-reports/
+            long-haul-legacy-2/assembly/jar-registry.json
+            long-haul-legacy-2/assembly/package-validation.json
+          if-no-files-found: warn

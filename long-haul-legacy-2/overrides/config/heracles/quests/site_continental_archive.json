@@ -1,0 +1,44 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "archive": {
+      "type": "heracles:advancement",
+      "title": "Однократная фиксация уникального объекта",
+      "advancements": [
+        "longhaul:sites/continental_archive"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Центральный архив магистралей\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
+    "description": [
+      "Экспедиция к уникальному архиву (/lh site info continental_archive).",
+      "Подойдите ближе 96 м и выполните /lh site archive. Повторные награды не выдаются."
+    ],
+    "groups": {
+      "04 · Экономические центры": {
+        "position": [
+          -42,
+          216
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:writable_book",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

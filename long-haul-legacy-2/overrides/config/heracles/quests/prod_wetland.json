@@ -1,0 +1,46 @@
+{
+  "dependencies": [
+    "site_wetland"
+  ],
+  "tasks": {
+    "produce": {
+      "type": "heracles:advancement",
+      "title": "Местный выпуск продукции",
+      "advancements": [
+        "longhaul:production/wetland"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Химический посёлок: Техническое масло\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
+    "description": [
+      "Выпустите партию Техническое масло непосредственно на площадке: /lh site produce wetland bootstrap (или industrial).",
+      "Удалённое производство на домашней базе заблокировано сервером."
+    ],
+    "groups": {
+      "04 · Экономические центры": {
+        "position": [
+          42,
+          144
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "longhaul:technical_oil",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

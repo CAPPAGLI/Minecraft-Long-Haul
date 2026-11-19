@@ -1,0 +1,46 @@
+{
+  "dependencies": [
+    "site_machine"
+  ],
+  "tasks": {
+    "produce": {
+      "type": "heracles:advancement",
+      "title": "Местный выпуск продукции",
+      "advancements": [
+        "longhaul:production/machine"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Машиностроительный центр: Прецизионные узлы\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
+    "description": [
+      "Выпустите партию Прецизионные узлы непосредственно на площадке: /lh site produce machine bootstrap (или industrial).",
+      "Удалённое производство на домашней базе заблокировано сервером."
+    ],
+    "groups": {
+      "04 · Экономические центры": {
+        "position": [
+          126,
+          144
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "longhaul:machine_parts",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

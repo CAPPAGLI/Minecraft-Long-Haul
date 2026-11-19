@@ -9,7 +9,7 @@
   "rewards": {},
   "display": {
     "title": "{\"text\": \"Фотодокументация\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
     "description": [
       "Exposure добавлен: камера, плёнка, проявка и альбомы.",
       "Снимайте фабрики, лагеря и маршруты. Автоматическая проверка объекта в кадре ещё не реализована; фотографии пока не открывают критические технологии."
@@ -34,7 +34,7 @@
   "settings": {
     "hidden": "LOCKED",
     "showDependencyArrow": true,
-    "individual_progress": true,
+    "individualProgress": true,
     "repeatable": false,
     "unlockNotification": true
   }

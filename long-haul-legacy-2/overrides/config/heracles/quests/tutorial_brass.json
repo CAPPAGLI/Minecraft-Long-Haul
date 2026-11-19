@@ -11,7 +11,7 @@
   "rewards": {},
   "display": {
     "title": "{\"text\": \"Латунная мастерская\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
     "description": [
       "Учебная веха: обнаружение предмета, НЕ испытание работающего предприятия.",
       "Латунь открывает точные механизмы и новую автоматизацию."
@@ -36,7 +36,7 @@
   "settings": {
     "hidden": "LOCKED",
     "showDependencyArrow": true,
-    "individual_progress": true,
+    "individualProgress": true,
     "repeatable": false,
     "unlockNotification": true
   }

@@ -1,0 +1,44 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "commission": {
+      "type": "heracles:advancement",
+      "title": "Регистрация площадки на месте",
+      "advancements": [
+        "longhaul:sites/wetland"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Химический посёлок: ввод в строй\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
+    "description": [
+      "Найдите площадку через /lh sites и /lh site info wetland.",
+      "Встаньте НА бочку в радиусе 128 м от координат узла и выполните /lh site commission wetland."
+    ],
+    "groups": {
+      "04 · Экономические центры": {
+        "position": [
+          42,
+          72
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:barrel",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

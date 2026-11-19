@@ -1,0 +1,46 @@
+{
+  "dependencies": [
+    "site_mine"
+  ],
+  "tasks": {
+    "produce": {
+      "type": "heracles:advancement",
+      "title": "Местный выпуск продукции",
+      "advancements": [
+        "longhaul:production/mine"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Горный рудник: Рудный концентрат\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
+    "description": [
+      "Выпустите партию Рудный концентрат непосредственно на площадке: /lh site produce mine bootstrap (или industrial).",
+      "Удалённое производство на домашней базе заблокировано сервером."
+    ],
+    "groups": {
+      "04 · Экономические центры": {
+        "position": [
+          42,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "longhaul:ore_concentrate",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

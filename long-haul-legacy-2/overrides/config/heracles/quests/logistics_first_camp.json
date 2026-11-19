@@ -1,0 +1,43 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "verified": {
+      "type": "heracles:advancement",
+      "title": "Серверное подтверждение",
+      "advancements": [
+        "longhaul:expedition/first_camp"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Первый полевой лагерь\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
+    "description": [
+      "Отойдите минимум на 750 м от (0,0), поставьте костёр и спальник Comforts (<= 6 м) и выполните /lh camp deploy."
+    ],
+    "groups": {
+      "05 · Маршруты и лагеря": {
+        "position": [
+          -126,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:campfire",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

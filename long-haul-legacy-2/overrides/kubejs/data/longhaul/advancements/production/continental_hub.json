@@ -1,0 +1,10 @@
+{
+  "criteria": {
+    "server_verified": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "rewards": {
+    "experience": 100
+  }
+}

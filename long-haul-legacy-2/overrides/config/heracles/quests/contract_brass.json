@@ -12,13 +12,12 @@
   "rewards": {},
   "display": {
     "title": "{\"text\": \"Латунный заказ\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
     "description": [
       "Начало: /lh accept brass",
       "32 латунных слитка.",
       "Нужно реально передать товары в зарегистрированную бочку после принятия заказа. Наличие предметов в инвентаре не завершает этот квест.",
-      "Товары расходуются. Статус: /lh status. Награда: 15 опыта один раз; повторный вход не выдаёт её заново.",
-      "Условия и ограничения прототипа описаны в первой главе."
+      "Товары расходуются. Статус: /lh status."
     ],
     "groups": {
       "03 · Контрольные поставки": {
@@ -40,7 +39,7 @@
   "settings": {
     "hidden": "LOCKED",
     "showDependencyArrow": true,
-    "individual_progress": true,
+    "individualProgress": true,
     "repeatable": false,
     "unlockNotification": true
   }
