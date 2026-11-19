@@ -65,7 +65,10 @@ def main():
             f.write(line)
             f.flush()
             print(line, end='', flush=True)
-            if 'Failed to start the minecraft server' in line or 'Failed to complete lifecycle event' in line:
+            if ('Failed to start the minecraft server' in line
+                    or 'Failed to complete lifecycle event' in line
+                    or 'Encountered an unexpected exception' in line
+                    or 'Preparing crash report' in line):
                 def abort_fast():
                     time.sleep(5)
                     if p.poll() is None:
