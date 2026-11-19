@@ -86,7 +86,7 @@ jobs:
           set -o pipefail
           mkdir -p /tmp/ci-logs
           python3 long-haul-legacy-2/tools/prepare_server.py --mode normal --skip-forge-install
-          python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 480 --world-label "alpha3 normal overworld test" | tee /tmp/ci-logs/smoke-normal.txt
+          python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 540 --world-label "alpha3 normal overworld test" | tee /tmp/ci-logs/smoke-normal.txt
           cp long-haul-legacy-2/server-test/smoke-result.json /tmp/ci-logs/smoke-normal-result.json
 
       - name: Package .mrpack and source bundle

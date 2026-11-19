@@ -39,6 +39,7 @@ def main():
     log = S / 'smoke-console.log'
     ready = False
     timed_out = False
+    integration_done = threading.Event()
     events = []
     p = subprocess.Popen(cmd, cwd=S, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
 
@@ -65,6 +66,8 @@ def main():
             f.write(line)
             f.flush()
             print(line, end='', flush=True)
+            if 'LH_INTEGRATION_PASS:' in line or 'LH_INTEGRATION_FAIL:' in line:
+                integration_done.set()
             if ('Failed to start the minecraft server' in line
                     or 'Failed to complete lifecycle event' in line
                     or 'Encountered an unexpected exception' in line
@@ -78,7 +81,8 @@ def main():
                 ready = True
                 events.append('server_ready')
                 def finish():
-                    time.sleep(15)
+                    integration_done.wait(timeout=75)
+                    time.sleep(2)
                     if p.poll() is None:
                         p.stdin.write('list\nworldborder get\nkubejs errors server\nsave-all\nstop\n')
                         p.stdin.flush()
