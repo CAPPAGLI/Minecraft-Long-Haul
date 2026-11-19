@@ -174,9 +174,32 @@ global.LHSiteCatalog = [
 ];
 
 global.LHWorldPlanner = (function () {
-  var JMath = (typeof Java !== 'undefined') ? Java.loadClass('java.lang.Math') : Math;
   var BORDER_SAFE_LIMIT = 84000;
   var MIN_SEPARATION = 2400;
+  var PI = 3.141592653589793;
+
+  function abs(v) { return v < 0 ? -v : v; }
+  function min(a, b) { return a < b ? a : b; }
+  function round(v) {
+    if (!(v === v)) return 0;
+    return v >= 0 ? Math.floor(v + 0.5) : -Math.floor(-v + 0.5);
+  }
+  function sqrt(v) {
+    if (v <= 0) return 0;
+    var g = v > 1 ? v * 0.5 : 1;
+    for (var i = 0; i < 24; i++) g = 0.5 * (g + v / g);
+    return g;
+  }
+  function sinRad(x) {
+    var twoPi = 2 * PI;
+    x = x - Math.floor(x / twoPi) * twoPi;
+    if (x > PI) x -= twoPi;
+    if (x > PI * 0.5) x = PI - x;
+    else if (x < -PI * 0.5) x = -PI - x;
+    var x2 = x * x;
+    return x * (1 - x2 / 6 * (1 - x2 / 20 * (1 - x2 / 42 * (1 - x2 / 72))));
+  }
+  function cosRad(x) { return sinRad(x + PI * 0.5); }
 
   function hashSeed(seedInput) {
     var s = String(seedInput || '0');
@@ -198,7 +221,7 @@ global.LHWorldPlanner = (function () {
   function dist2D(ax, az, bx, bz) {
     var dx = ax - bx;
     var dz = az - bz;
-    return JMath.sqrt(dx * dx + dz * dz);
+    return sqrt(dx * dx + dz * dz);
   }
 
   function planSites(seed) {
@@ -207,14 +230,14 @@ global.LHWorldPlanner = (function () {
     var count = global.LHSiteCatalog.length;
     for (var i = 0; i < count; i++) {
       var spec = global.LHSiteCatalog[i];
-      var baseAngle = (JMath.PI * 2 * i) / count;
+      var baseAngle = (PI * 2 * i) / count;
       var chosen = null;
       for (var attempt = 0; attempt < 64; attempt++) {
         var angle = baseAngle + (rng() - 0.5) * 0.9 + attempt * 0.13;
         var radius = spec.minDist + rng() * (spec.maxDist - spec.minDist);
-        var x = JMath.round(JMath.cos(angle) * radius);
-        var z = JMath.round(JMath.sin(angle) * radius);
-        if (!(JMath.abs(x) <= BORDER_SAFE_LIMIT && JMath.abs(z) <= BORDER_SAFE_LIMIT)) continue;
+        var x = round(cosRad(angle) * radius);
+        var z = round(sinRad(angle) * radius);
+        if (!(abs(x) <= BORDER_SAFE_LIMIT && abs(z) <= BORDER_SAFE_LIMIT)) continue;
         var ok = true;
         for (var j = 0; j < placed.length; j++) {
           if (dist2D(x, z, placed[j].x, placed[j].z) < MIN_SEPARATION) {
@@ -230,7 +253,7 @@ global.LHWorldPlanner = (function () {
             unique: !!spec.unique,
             x: x,
             z: z,
-            distanceFromOrigin: JMath.round(dist2D(0, 0, x, z)),
+            distanceFromOrigin: round(dist2D(0, 0, x, z)),
             commissioned: false,
             discovered: false,
             depot: null,
@@ -241,14 +264,14 @@ global.LHWorldPlanner = (function () {
       }
       if (!chosen) {
         var fallbackAngle = baseAngle;
-        var fallbackRadius = JMath.min(BORDER_SAFE_LIMIT - 1000, JMath.round((spec.minDist + spec.maxDist) / 2));
+        var fallbackRadius = min(BORDER_SAFE_LIMIT - 1000, round((spec.minDist + spec.maxDist) / 2));
         chosen = {
           id: spec.id,
           name: spec.name,
           tier: spec.tier,
           unique: !!spec.unique,
-          x: JMath.round(JMath.cos(fallbackAngle) * fallbackRadius),
-          z: JMath.round(JMath.sin(fallbackAngle) * fallbackRadius),
+          x: round(cosRad(fallbackAngle) * fallbackRadius),
+          z: round(sinRad(fallbackAngle) * fallbackRadius),
           distanceFromOrigin: fallbackRadius,
           commissioned: false,
           discovered: false,

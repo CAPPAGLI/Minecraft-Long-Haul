@@ -65,6 +65,12 @@ def main():
             f.write(line)
             f.flush()
             print(line, end='', flush=True)
+            if 'Failed to start the minecraft server' in line or 'Failed to complete lifecycle event' in line:
+                def abort_fast():
+                    time.sleep(5)
+                    if p.poll() is None:
+                        p.kill()
+                threading.Thread(target=abort_fast, daemon=True).start()
             if 'Done (' in line and 'For help' in line and not ready:
                 ready = True
                 events.append('server_ready')
