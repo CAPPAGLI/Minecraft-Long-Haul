@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "restored": {
+      "type": "heracles:advancement",
+      "title": "Серверное восстановление объекта",
+      "advancements": [
+        "longhaul:recovery/power_plant"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Восстановление энергоузла\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
+    "description": [
+      "Обследуйте объект (/lh recovery list, /lh recovery survey power_plant).",
+      "Подайте 32 меди, 16 латуни, 48 угля и установите паровую/генераторную установку.",
+      "Встаньте на ремонтную бочку и выполните /lh recovery restore power_plant."
+    ],
+    "groups": {
+      "06 · Восстановление и полевые отчёты": {
+        "position": [
+          0,
+          -36
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:steam_engine",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

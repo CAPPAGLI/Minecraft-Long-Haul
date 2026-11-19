@@ -29,12 +29,14 @@ def resolve_profile(profile_path: pathlib.Path):
     roots = list(BASE_ROOTS) + list(dict.fromkeys(s for group in profile['categories'].values() for s in group))
     client = set(BASE_CLIENT) | set(profile.get('client_only', []))
     rows = json.loads((R / 'audit/candidates.json').read_text())
+    dg_projects = json.loads((R / 'audit/dependency-graph.json').read_text()).get('projects', [])
     by_slug = {r['slug']: r for r in rows}
+    by_pid = {r['project_id']: r for r in dg_projects}
     known = {}
     work = list(roots)
     while work:
         slug = work.pop(0)
-        row = by_slug.get(slug)
+        row = by_slug.get(slug) or by_pid.get(slug)
         if row and row.get('status') == 'candidate':
             v = {'project_id': row['project_id'], 'id': row['version_id'], 'version_number': row['version'], 'dependencies': row['dependencies'], 'files': row['files']}
         else:

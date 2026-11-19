@@ -1,0 +1,17 @@
+{
+  "version": "2.0-alpha.2",
+  "ci_run_id": 44633948134,
+  "ci_commit": "937a258",
+  "ready": true,
+  "exit_code": 0,
+  "timed_out": false,
+  "events": [
+    "server_ready"
+  ],
+  "heap_mb": 4096,
+  "world": "alpha2 void + normal overworld integration tests",
+  "client_tested": false,
+  "integration_pass": true,
+  "integration_fail": false,
+  "clean_exit": true
+}

@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "restored": {
+      "type": "heracles:advancement",
+      "title": "Серверное восстановление объекта",
+      "advancements": [
+        "longhaul:recovery/collapsed_bridge"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Магистральный мост\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
+    "description": [
+      "Обследуйте объект (/lh recovery list, /lh recovery survey collapsed_bridge).",
+      "Подайте 24 балки, 48 рельсов, 64 каменного кирпича и восстановите рельсовый переход.",
+      "Встаньте на ремонтную бочку и выполните /lh recovery restore collapsed_bridge."
+    ],
+    "groups": {
+      "06 · Восстановление и полевые отчёты": {
+        "position": [
+          84,
+          -36
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:metal_girder",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

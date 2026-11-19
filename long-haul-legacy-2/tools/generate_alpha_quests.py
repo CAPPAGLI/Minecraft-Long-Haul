@@ -171,12 +171,61 @@ for i, (adv_id, title, icon, desc, deps) in enumerate(logistics):
           {'verified': {'type': 'heracles:advancement', 'title': 'Серверное подтверждение', 'advancements': ['longhaul:' + adv_id]}},
           desc, deps=deps)
 
+recoveries = [
+    ('sawmill', 'Восстановление лесопилки', 'create:mechanical_saw', 'Подайте 16 железа, 16 андезитового сплава, 32 бревна и установите пилу/водяное колесо.'),
+    ('quarry', 'Карьер с повреждённым подъездом', 'create:mechanical_drill', 'Подайте 24 пластины, 32 рельса, 64 булыжника и смонтируйте бур/дробилку/станцию.'),
+    ('river_port', 'Восстановление речного порта', 'create:portable_storage_interface', 'Подайте 64 доски, 16 железа, 2 интерфейса и смонтируйте перегрузочный узел.'),
+    ('sorting_yard', 'Сортировочная станция', 'create:brass_funnel', 'Подайте 64 рельса, 16 латуни, 8 лент и смонтируйте станцию/сортировку.'),
+    ('power_plant', 'Восстановление энергоузла', 'create:steam_engine', 'Подайте 32 меди, 16 латуни, 48 угля и установите паровую/генераторную установку.'),
+    ('collapsed_bridge', 'Магистральный мост', 'create:metal_girder', 'Подайте 24 балки, 48 рельсов, 64 каменного кирпича и восстановите рельсовый переход.'),
+]
+for i, (rid, title, icon, detail) in enumerate(recoveries):
+    adv('recovery/' + rid, 40)
+    quest('recovery_' + rid, title, '06 · Восстановление и полевые отчёты', [(i % 3) * 84 - 84, (i // 3) * 72 - 108], icon,
+          {'restored': {'type': 'heracles:advancement', 'title': 'Серверное восстановление объекта', 'advancements': ['longhaul:recovery/' + rid]}},
+          ['Обследуйте объект (/lh recovery list, /lh recovery survey ' + rid + ').', detail, 'Встаньте на ремонтную бочку и выполните /lh recovery restore ' + rid + '.'])
+
+photo_sites = [
+    ('forest', 'Фотоотчёт: Лесная артель'),
+    ('farm', 'Фотоотчёт: Речной агрогород'),
+    ('mine', 'Фотоотчёт: Горный рудник'),
+    ('port', 'Фотоотчёт: Морской порт'),
+    ('badlands', 'Фотоотчёт: Карьер пустошей'),
+    ('smelter', 'Фотоотчёт: Стекольная долина'),
+    ('wetland', 'Фотоотчёт: Химический посёлок'),
+    ('machine', 'Фотоотчёт: Машиностроительный центр'),
+    ('continental_archive', 'Фотоотчёт: Архив магистралей'),
+]
+for i, (sid, title) in enumerate(photo_sites):
+    adv('photo/' + sid, 20)
+    quest('photo_' + sid, title, '06 · Восстановление и полевые отчёты', [(i % 5) * 84 - 168, (i // 5) * 72 + 54], 'exposure:photograph',
+          {'photo': {'type': 'heracles:advancement', 'title': 'Уникальный полевой снимок', 'advancements': ['longhaul:photo/' + sid]}},
+          ['Сделайте снимок Exposure на месте (<= 160 м от узла) и выполните /lh photo report ' + sid + '.', 'Один снимок нельзя использовать для двух разных узлов.'])
+
+cc_sites = [
+    ('forest', 'Телеметрия склада: Лесная артель'),
+    ('farm', 'Телеметрия склада: Агрогород'),
+    ('mine', 'Телеметрия склада: Рудник'),
+    ('port', 'Телеметрия склада: Порт'),
+    ('badlands', 'Телеметрия склада: Карьер'),
+    ('smelter', 'Телеметрия склада: Стекольная долина'),
+    ('wetland', 'Телеметрия склада: Химпосёлок'),
+    ('machine', 'Телеметрия склада: Машцентр'),
+]
+for i, (sid, title) in enumerate(cc_sites):
+    adv('cc/' + sid, 25)
+    quest('cc_' + sid, title, '06 · Восстановление и полевые отчёты', [(i % 4) * 84 - 126, (i // 4) * 72 + 210], 'computercraft:computer_normal',
+          {'telemetry': {'type': 'heracles:advancement', 'title': 'Подтверждение телеметрии и запаса', 'advancements': ['longhaul:cc/' + sid]}},
+          ['Запустите /lh cc challenge ' + sid + ', установите компьютер CC: Tweaked в 12 м от бочки узла и обеспечьте реальный запас продукции в бочке, затем /lh cc verify ' + sid + '.'],
+          deps=['site_' + sid])
+
 (O / 'config/heracles/groups.txt').write_text(
     '01 · Начало и правила\n'
     '02 · Мастерская и экспедиция\n'
     '03 · Контрольные поставки\n'
     '04 · Экономические центры\n'
     '05 · Маршруты и лагеря\n'
+    '06 · Восстановление и полевые отчёты\n'
 )
 total_q = len(list(Q.glob('*.json')))
 total_adv = len(list(ADV_ROOT.rglob('*.json')))

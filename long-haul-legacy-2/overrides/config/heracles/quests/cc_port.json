@@ -1,0 +1,45 @@
+{
+  "dependencies": [
+    "site_port"
+  ],
+  "tasks": {
+    "telemetry": {
+      "type": "heracles:advancement",
+      "title": "Подтверждение телеметрии и запаса",
+      "advancements": [
+        "longhaul:cc/port"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Телеметрия склада: Порт\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
+    "description": [
+      "Запустите /lh cc challenge port, установите компьютер CC: Tweaked в 12 м от бочки узла и обеспечьте реальный запас продукции в бочке, затем /lh cc verify port."
+    ],
+    "groups": {
+      "06 · Восстановление и полевые отчёты": {
+        "position": [
+          126,
+          210
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "computercraft:computer_normal",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

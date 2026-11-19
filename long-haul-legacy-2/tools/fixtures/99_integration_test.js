@@ -119,6 +119,9 @@ ServerEvents.loaded(function (event) {
         ok(disp.performPrefixedCommand(src, 'lh camp list') === 1, 'brigadier /lh camp list');
         ok(disp.performPrefixedCommand(src, 'lh route list') === 1, 'brigadier /lh route list');
         ok(disp.performPrefixedCommand(src, 'lh status') === 1, 'brigadier /lh status');
+        ok(disp.performPrefixedCommand(src, 'lh recovery list') === 1, 'brigadier /lh recovery list');
+        ok(disp.performPrefixedCommand(src, 'lh photo status') === 1, 'brigadier /lh photo status');
+        ok(disp.performPrefixedCommand(src, 'lh cc status') === 1, 'brigadier /lh cc status');
 
         // 4. Site planner + remote rejection + on-site commission & production
         var sitesDb = lhSitesRead(server);
@@ -187,6 +190,59 @@ ServerEvents.loaded(function (event) {
         ok(lhCargoDeliver(server, destActor) === 1, 'cargo manifest delivered');
         ok(lhCargoDeliver(server, destActor) === 0, 'cargo manifest cannot be delivered twice');
 
+        // 7. Recoverable industrial facility restoration (sawmill)
+        var recDb = lhRecRead(server);
+        var sawmill = recDb.items.sawmill;
+        ok(sawmill && Math.abs(sawmill.x) <= 84000 && Math.abs(sawmill.z) <= 84000, 'sawmill planned within +/-84000');
+        var scx = Math.floor(sawmill.x / 16) * 16, scz = Math.floor(sawmill.z / 16) * 16;
+        server.runCommandSilent('forceload add ' + scx + ' ' + scz);
+        var rBarrel = overworld.getBlock(sawmill.x, 80, sawmill.z);
+        rBarrel.set('minecraft:barrel');
+        var rSaw = overworld.getBlock(sawmill.x + 1, 80, sawmill.z);
+        var recActor = {
+          uuid: siteActor.uuid, level: overworld,
+          x: sawmill.x + 0.5, y: 81, z: sawmill.z + 0.5,
+          mainHandItem: Item.empty,
+          tell: function () {},
+          isAdvancementDone: function () { return false; },
+          unlockAdvancement: function () {}
+        };
+        ok(lhRecSurvey(server, recActor, 'sawmill') === 1, 'sawmill surveyed');
+        ok(lhRecRestore(server, recActor, 'sawmill') === 0, 'sawmill restore fails without machinery');
+        rSaw.set('create:mechanical_saw');
+        rBarrel.inventory.setStackInSlot(0, Item.of('minecraft:iron_ingot', 16));
+        rBarrel.inventory.setStackInSlot(1, Item.of('create:andesite_alloy', 16));
+        rBarrel.inventory.setStackInSlot(2, Item.of('minecraft:oak_log', 32));
+        ok(lhRecRestore(server, recActor, 'sawmill') === 1, 'sawmill restored with machinery and materials');
+
+        // 8. Exposure photo field report (unique token, no reuse across sites)
+        var photoItem = Item.of('exposure:photograph', { id: 'lh_test_frame_01' });
+        var photoActor = {
+          uuid: siteActor.uuid, level: overworld,
+          x: forest.x + 0.5, y: 81, z: forest.z + 0.5,
+          mainHandItem: Item.of('minecraft:paper'),
+          tell: function () {},
+          isAdvancementDone: function () { return false; },
+          unlockAdvancement: function () {}
+        };
+        ok(lhPhotoReport(server, photoActor, 'forest') === 0, 'vanilla paper rejected as photo');
+        photoActor.mainHandItem = photoItem;
+        ok(lhPhotoReport(server, photoActor, 'forest') === 1, 'authentic Exposure photo accepted at forest');
+        var farmSite = sitesDb.sites.farm;
+        photoActor.x = farmSite.x + 0.5;
+        photoActor.z = farmSite.z + 0.5;
+        ok(lhPhotoReport(server, photoActor, 'farm') === 0, 'same photo token cannot be reused for farm');
+
+        // 9. CC: Tweaked depot telemetry challenge (requires physical computer + actual barrel inventory)
+        ok(lhCCIssue(server, siteActor, 'forest') === 1, 'CC challenge issued for forest');
+        var fdb = lhFieldRead(server);
+        var needCount = fdb.ccChallenges.forest.count;
+        ok(lhCCVerify(server, siteActor, 'forest') === 0, 'CC verify fails without computer block');
+        var compBlock = overworld.getBlock(forest.x + 2, 80, forest.z);
+        compBlock.set('computercraft:computer_normal');
+        finv.setStackInSlot(0, Item.of('longhaul:treated_timber', needCount));
+        ok(lhCCVerify(server, siteActor, 'forest') === 1, 'CC telemetry verified with real computer and depot stock');
+
         // Cleanup test artifacts
         var curDb = lhRead(server);
         delete curDb.players[String(actor.uuid)];
@@ -198,6 +254,18 @@ ServerEvents.loaded(function (event) {
         sitesDb.sites.forest.discovered = false;
         sitesDb.sites.forest.producedTotal = 0;
         lhSitesSave(server);
+        sawmill.surveyed = false;
+        sawmill.restored = false;
+        delete sawmill.depot;
+        delete sawmill.machineryFound;
+        lhRecSave(server);
+        delete fdb.photoClaims.forest;
+        delete fdb.ccChallenges.forest;
+        delete fdb.ccVerified.forest;
+        Object.keys(fdb.usedPhotoTokens).forEach(function (tk) {
+          if (fdb.usedPhotoTokens[tk] === 'forest') delete fdb.usedPhotoTokens[tk];
+        });
+        lhFieldSave(server);
         var ldb = lhLogRead(server);
         delete ldb.camps[String(campActor.uuid)];
         lhLogSave(server);
@@ -205,14 +273,18 @@ ServerEvents.loaded(function (event) {
         b.set('minecraft:air');
         b2.set('minecraft:air');
         fb.set('minecraft:air');
+        compBlock.set('minecraft:air');
+        rBarrel.set('minecraft:air');
+        rSaw.set('minecraft:air');
         overworld.getBlock(800, 80, 0).set('minecraft:air');
         overworld.getBlock(801, 80, 0).set('minecraft:air');
         campBarrel.set('minecraft:air');
         server.runCommandSilent('forceload remove 0 0');
         server.runCommandSilent('forceload remove ' + fcx + ' ' + fcz);
+        server.runCommandSilent('forceload remove ' + scx + ' ' + scz);
         server.runCommandSilent('forceload remove 800 0');
 
-        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + production + camp + cargo + advancement sync');
+        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + production + recovery + photo + cc + camp + cargo + advancement sync');
       } catch (err2) {
         console.error('LH_INTEGRATION_FAIL: live adapter ' + err2);
       }

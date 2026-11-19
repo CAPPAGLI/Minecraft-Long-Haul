@@ -288,8 +288,109 @@ global.LHWorldPlanner = (function () {
     BORDER_SAFE_LIMIT: BORDER_SAFE_LIMIT,
     MIN_SEPARATION: MIN_SEPARATION,
     dist2D: dist2D,
+    round: round,
+    abs: abs,
+    sinRad: sinRad,
+    cosRad: cosRad,
+    makeRng: makeRng,
     planSites: planSites
   };
+})();
+
+global.LHRecoveryCatalog = [
+  {
+    id: 'sawmill',
+    name: 'Заброшенная лесопилка',
+    parentSite: 'forest',
+    offsetMin: 320,
+    offsetMax: 720,
+    repairInputs: { 'minecraft:iron_ingot': 16, 'create:andesite_alloy': 16, 'minecraft:oak_log': 32 },
+    requiredMachinery: ['create:mechanical_saw', 'create:water_wheel', 'create:large_water_wheel', 'create:steam_engine'],
+    summary: 'Восстановите привод пилы и подайте крепёж в бочку площадки.'
+  },
+  {
+    id: 'quarry',
+    name: 'Карьер с повреждённым подъездом',
+    parentSite: 'mine',
+    offsetMin: 360,
+    offsetMax: 780,
+    repairInputs: { 'create:iron_sheet': 24, 'create:track': 32, 'minecraft:cobblestone': 64 },
+    requiredMachinery: ['create:mechanical_drill', 'create:crushing_wheel', 'create:track_station'],
+    summary: 'Установите буровой/дробильный узел и доставьте рельсы с обшивкой.'
+  },
+  {
+    id: 'river_port',
+    name: 'Занесённый речной порт',
+    parentSite: 'port',
+    offsetMin: 340,
+    offsetMax: 760,
+    repairInputs: { 'minecraft:oak_planks': 64, 'minecraft:iron_ingot': 16, 'create:portable_storage_interface': 2 },
+    requiredMachinery: ['create:portable_storage_interface', 'create:mechanical_harvester', 'create:chute', 'minecraft:hopper'],
+    summary: 'Смонтируйте перегрузочный узел на причале и поставьте лес со сталью.'
+  },
+  {
+    id: 'sorting_yard',
+    name: 'Сортировочная станция',
+    parentSite: 'smelter',
+    offsetMin: 400,
+    offsetMax: 840,
+    repairInputs: { 'create:track': 64, 'create:brass_ingot': 16, 'create:belt_connector': 8 },
+    requiredMachinery: ['create:track_station', 'create:brass_funnel', 'create:belt'],
+    summary: 'Разверните станцию или латунный узел сортировки и поставьте комплектующие.'
+  },
+  {
+    id: 'power_plant',
+    name: 'Завод с разбитой энергосистемой',
+    parentSite: 'wetland',
+    offsetMin: 360,
+    offsetMax: 800,
+    repairInputs: { 'minecraft:copper_ingot': 32, 'create:brass_ingot': 16, 'minecraft:coal': 48 },
+    requiredMachinery: ['create:steam_engine', 'createaddition:alternator', 'immersiveengineering:dynamo', 'create:windmill_bearing'],
+    summary: 'Подключите генератор/паровой двигатель и подайте медь, латунь и топливо.'
+  },
+  {
+    id: 'collapsed_bridge',
+    name: 'Обрушенный магистральный мост',
+    parentSite: 'machine',
+    offsetMin: 420,
+    offsetMax: 860,
+    repairInputs: { 'create:metal_girder': 24, 'create:track': 48, 'minecraft:stone_bricks': 64 },
+    requiredMachinery: ['create:track_station', 'create:gantry_carriage', 'create:track'],
+    summary: 'Проложите рельсовый переход или пролёт рядом с обвалом и сдайте конструкции.'
+  }
+];
+
+global.LHRecoveryPlanner = (function () {
+  function planRecoveries(seed, sitesMap) {
+    var P = global.LHWorldPlanner;
+    var rng = P.makeRng(String(seed) + '_recovery');
+    var placed = {};
+    for (var i = 0; i < global.LHRecoveryCatalog.length; i++) {
+      var spec = global.LHRecoveryCatalog[i];
+      var parent = sitesMap[spec.parentSite];
+      var px = parent ? parent.x : (i + 1) * 1500;
+      var pz = parent ? parent.z : (i + 1) * 1500;
+      var angle = rng() * 6.283185307179586;
+      var r = spec.offsetMin + rng() * (spec.offsetMax - spec.offsetMin);
+      var x = P.round(px + P.cosRad(angle) * r);
+      var z = P.round(pz + P.sinRad(angle) * r);
+      if (P.abs(x) > P.BORDER_SAFE_LIMIT) x = x > 0 ? P.BORDER_SAFE_LIMIT - 200 : -P.BORDER_SAFE_LIMIT + 200;
+      if (P.abs(z) > P.BORDER_SAFE_LIMIT) z = z > 0 ? P.BORDER_SAFE_LIMIT - 200 : -P.BORDER_SAFE_LIMIT + 200;
+      placed[spec.id] = {
+        id: spec.id,
+        name: spec.name,
+        parentSite: spec.parentSite,
+        x: x,
+        z: z,
+        surveyed: false,
+        restored: false,
+        depot: null
+      };
+    }
+    return placed;
+  }
+
+  return { planRecoveries: planRecoveries };
 })();
 
 global.LHRouteValidator = (function () {
@@ -297,22 +398,20 @@ global.LHRouteValidator = (function () {
 
   function pathLength(gates) {
     if (!gates || gates.length < 2) return 0;
+    var P = global.LHWorldPlanner;
     var total = 0;
     for (var i = 1; i < gates.length; i++) {
-      var dx = gates[i].x - gates[i - 1].x;
-      var dz = gates[i].z - gates[i - 1].z;
-      total += Math.sqrt(dx * dx + dz * dz);
+      total += P.dist2D(gates[i - 1].x, gates[i - 1].z, gates[i].x, gates[i].z);
     }
-    return Math.round(total);
+    return P.round(total);
   }
 
   function validateSegmentSpeed(prevGate, nextGate, elapsedSeconds) {
-    var dx = nextGate.x - prevGate.x;
-    var dz = nextGate.z - prevGate.z;
-    var dist = Math.sqrt(dx * dx + dz * dz);
-    var dt = Math.max(1, elapsedSeconds);
+    var P = global.LHWorldPlanner;
+    var dist = P.dist2D(prevGate.x, prevGate.z, nextGate.x, nextGate.z);
+    var dt = elapsedSeconds > 1 ? elapsedSeconds : 1;
     var speed = dist / dt;
-    return { distance: Math.round(dist), seconds: dt, speedBps: Math.round(speed * 10) / 10, ok: speed <= MAX_SPEED_BPS };
+    return { distance: P.round(dist), seconds: dt, speedBps: P.round(speed * 10) / 10, ok: speed <= MAX_SPEED_BPS };
   }
 
   return { MAX_SPEED_BPS: MAX_SPEED_BPS, pathLength: pathLength, validateSegmentSpeed: validateSegmentSpeed };

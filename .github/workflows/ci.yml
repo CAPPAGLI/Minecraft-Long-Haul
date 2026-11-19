@@ -38,7 +38,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: long-haul-legacy-2/assembly/mods
-          key: modrinth-mods-${{ hashFiles('long-haul-legacy-2/assembly/lock.json') }}
+          key: modrinth-mods-${{ hashFiles('long-haul-legacy-2/profiles/alpha3.json', 'long-haul-legacy-2/assembly/lock.json') }}
+          restore-keys: |
+            modrinth-mods-
 
       - name: Cache Forge 47.4.10 server libraries
         uses: actions/cache@v4
@@ -46,14 +48,18 @@ jobs:
           path: long-haul-legacy-2/server-test/libraries
           key: forge-libs-1.20.1-47.4.10
 
-      - name: Run pure-JS contract, planner, route & economy tests
+      - name: Run pure-JS contract, planner, recovery, route & economy tests
         run: node long-haul-legacy-2/tools/test_contracts.js
 
       - name: Verify Heracles quest & advancement generation
         run: python3 long-haul-legacy-2/tools/generate_alpha_quests.py
 
-      - name: Download & verify pinned mods from lock.json
-        run: python3 long-haul-legacy-2/tools/assemble_alpha.py --from-lock
+      - name: Resolve, download & verify pinned mods from profiles/alpha3.json
+        run: |
+          set -o pipefail
+          mkdir -p /tmp/ci-logs
+          python3 long-haul-legacy-2/tools/assemble_alpha.py --profile long-haul-legacy-2/profiles/alpha3.json | tee /tmp/ci-logs/assemble.txt
+          python3 long-haul-legacy-2/tools/generate_modlist.py
 
       - name: Prepare headless Forge 47.4.10 server (void fixture)
         run: python3 long-haul-legacy-2/tools/prepare_server.py --mode void
@@ -72,21 +78,21 @@ jobs:
           set -o pipefail
           mkdir -p /tmp/ci-logs
           python3 long-haul-legacy-2/tools/prepare_server.py --mode void --skip-forge-install
-          python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 360 --world-label "alpha2 void integration test" | tee /tmp/ci-logs/smoke-void.txt
+          python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 420 --world-label "alpha3 void integration test" | tee /tmp/ci-logs/smoke-void.txt
           cp long-haul-legacy-2/server-test/smoke-result.json /tmp/ci-logs/smoke-void-result.json
 
-      - name: Run Forge headless normal Overworld generation test (Terralith + Tectonic + BOP + YUNG + Towns)
+      - name: Run Forge headless normal Overworld generation test (Terralith + Tectonic + BOP + RU + YUNG + Structures)
         run: |
           set -o pipefail
           mkdir -p /tmp/ci-logs
           python3 long-haul-legacy-2/tools/prepare_server.py --mode normal --skip-forge-install
-          python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 420 --world-label "alpha2 normal overworld test" | tee /tmp/ci-logs/smoke-normal.txt
+          python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 480 --world-label "alpha3 normal overworld test" | tee /tmp/ci-logs/smoke-normal.txt
           cp long-haul-legacy-2/server-test/smoke-result.json /tmp/ci-logs/smoke-normal-result.json
 
       - name: Package .mrpack and source bundle
         run: |
           set -o pipefail
-          python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.2 | tee /tmp/ci-logs/package.txt
+          python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.3 | tee /tmp/ci-logs/package.txt
 
       - name: Post diagnostic report to commit comment
         if: always()
@@ -94,8 +100,14 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python3 - << 'PY'
-          import os, pathlib, subprocess
+          import json, os, pathlib, subprocess
           lines = ['### CI Diagnostic Report (`' + os.environ['GITHUB_SHA'][:7] + '`)', '']
+          lk = pathlib.Path('long-haul-legacy-2/assembly/lock.json')
+          if lk.exists():
+              d = json.loads(lk.read_text())
+              mods = d.get('mods', [])
+              cli = sum(1 for m in mods if m.get('client_only'))
+              lines.append(f"**Lock:** `{d.get('version')}` · `{len(mods)}` mods (`{len(mods)-cli}` server / `{cli}` client-only)\n")
           for label, p in [
               ('Inspect JARs', '/tmp/ci-logs/inspect.txt'),
               ('Void Smoke Result', '/tmp/ci-logs/smoke-void-result.json'),
@@ -122,10 +134,12 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: long-haul-legacy-2.0-alpha.2
+          name: long-haul-legacy-2.0-alpha.3
           path: |
-            Long-Haul-Legacy-2.0-alpha.2.mrpack
-            Long-Haul-Legacy-2.0-alpha.2-Sources-and-Report.zip
+            Long-Haul-Legacy-2.0-alpha.3.mrpack
+            Long-Haul-Legacy-2.0-alpha.3-Sources-and-Report.zip
+            long-haul-legacy-2/assembly/lock.json
+            long-haul-legacy-2/MODLIST.md
             long-haul-legacy-2/server-test/smoke-result.json
             long-haul-legacy-2/server-test/smoke-console.log
             long-haul-legacy-2/server-test/logs/latest.log

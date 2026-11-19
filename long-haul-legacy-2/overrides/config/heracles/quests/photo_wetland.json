@@ -1,0 +1,44 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "photo": {
+      "type": "heracles:advancement",
+      "title": "Уникальный полевой снимок",
+      "advancements": [
+        "longhaul:photo/wetland"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Фотоотчёт: Химический посёлок\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
+    "description": [
+      "Сделайте снимок Exposure на месте (<= 160 м от узла) и выполните /lh photo report wetland.",
+      "Один снимок нельзя использовать для двух разных узлов."
+    ],
+    "groups": {
+      "06 · Восстановление и полевые отчёты": {
+        "position": [
+          -84,
+          126
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "exposure:photograph",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

@@ -21,6 +21,8 @@ LootJS.modifiers(function (event) {
     event.addLootTableModifier(/.*/).removeLoot(id);
   });
   event.addLootTableModifier(/.*/).removeLoot('minecraft:ender_chest');
+  event.addLootTableModifier(/.*/).removeLoot('supplementaries:sack');
+  event.addLootTableModifier(/.*/).removeLoot('supplementaries:safe');
 });
 
 BlockEvents.rightClicked('minecraft:ender_chest', function (event) {
@@ -33,6 +35,22 @@ LH_SHULKERS.forEach(function (id) {
     event.player.tell('[Long Haul] Шалкеровые ящики отключены; используйте транспорт и стационарные склады.');
     event.cancel();
   });
+});
+
+['supplementaries:sack', 'supplementaries:safe'].forEach(function (id) {
+  BlockEvents.rightClicked(id, function (event) {
+    event.player.tell('[Long Haul] Переносные мешки и сейфы отключены правилами логистики.');
+    event.cancel();
+  });
+  BlockEvents.placed(id, function (event) {
+    event.player.tell('[Long Haul] Размещение ' + id + ' отключено правилами логистики.');
+    event.cancel();
+  });
+});
+
+ItemEvents.rightClicked('supplementaries:sack', function (event) {
+  event.player.tell('[Long Haul] Переносные мешки отключены правилами логистики.');
+  event.cancel();
 });
 
 PlayerEvents.loggedIn(function (event) {

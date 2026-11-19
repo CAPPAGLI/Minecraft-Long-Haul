@@ -50,4 +50,22 @@ test('site economy reachability graph passes with zero circular deadlocks', () =
   assert.equal(res.ok, true, 'Missing: ' + JSON.stringify(res.missing));
 });
 
+test('recovery planner places all 6 industrial facilities near parent sites within +/-84000', () => {
+  const sites = planner.planSites('123456789');
+  const map = {};
+  sites.forEach(s => { map[s.id] = s; });
+  const r1 = sandbox.global.LHRecoveryPlanner.planRecoveries('123456789', map);
+  const r2 = sandbox.global.LHRecoveryPlanner.planRecoveries('123456789', map);
+  assert.deepEqual(r1, r2);
+  assert.equal(Object.keys(r1).length, 6);
+  sandbox.global.LHRecoveryCatalog.forEach(spec => {
+    const rec = r1[spec.id];
+    assert(rec, 'Missing recovery ' + spec.id);
+    assert(Math.abs(rec.x) <= planner.BORDER_SAFE_LIMIT);
+    assert(Math.abs(rec.z) <= planner.BORDER_SAFE_LIMIT);
+    assert(Object.keys(spec.repairInputs).length >= 2);
+    assert(spec.requiredMachinery.length >= 2);
+  });
+});
+
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');
