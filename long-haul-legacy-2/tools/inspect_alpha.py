@@ -78,20 +78,20 @@ def main():
     range_mismatches = []
     for mod in allmods:
         for d in mod['deps']:
-            if not d.get('mandatory'):
-                continue
             dep_id = d['modId']
             vr = d.get('versionRange', '')
+            is_mand = bool(d.get('mandatory'))
             if dep_id in baseline:
                 if fits(baseline[dep_id], vr) is False:
-                    range_mismatches.append({'parent': mod['id'], 'dependency': dep_id, 'range': vr, 'actual': baseline[dep_id]})
+                    range_mismatches.append({'parent': mod['id'], 'dependency': dep_id, 'mandatory': is_mand, 'range': vr, 'actual': baseline[dep_id]})
                 continue
             if dep_id not in registry:
-                missing.append({'parent': mod['id'], 'dependency': d})
+                if is_mand:
+                    missing.append({'parent': mod['id'], 'dependency': d})
                 continue
             versions = [x.get('version') for x in registry[dep_id]]
             if vr and all(fits(v, vr) is False for v in versions):
-                range_mismatches.append({'parent': mod['id'], 'dependency': dep_id, 'range': vr, 'actual': versions})
+                range_mismatches.append({'parent': mod['id'], 'dependency': dep_id, 'mandatory': is_mand, 'range': vr, 'actual': versions})
 
     out = {
         'status': 'JAR_IDS_AND_RANGES_CHECKED',
