@@ -1,5 +1,5 @@
 {
-  "status": "ASSEMBLED_NOT_RUNTIME_TESTED",
+  "status": "HEADLESS_VOID_AND_OVERWORLD_TESTED",
   "minecraft": "1.20.1",
   "forge": "47.4.10",
   "roots": [

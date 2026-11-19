@@ -1,51 +1,73 @@
 {
-  "version": "2.0-alpha.1",
+  "version": "2.0-alpha.2",
   "date_cutoff": "2026-11-15",
-  "status": "TRANSPORT_LAB_ALPHA_NOT_FULL_REQUEST",
+  "status": "HEADLESS_CI_VERIFIED_ALPHA2_NOT_FULL_REQUEST",
   "minecraft": "1.20.1",
   "forge": "47.4.10",
   "java": 17,
-  "external_jars": 62,
+  "external_jars": 115,
   "local_jars": 1,
-  "recursive_declared_mod_ids": 73,
-  "server_smoke_test": {
+  "recursive_declared_mod_ids": 132,
+  "ci_run_id": 44633948134,
+  "ci_verified_commit": "937a258",
+  "server_smoke_test_void": {
     "ready": true,
     "exit_code": 0,
     "timed_out": false,
     "events": [
       "server_ready"
     ],
-    "heap_mb": 768,
-    "world": "flat smoke world",
+    "heap_mb": 4096,
+    "world": "alpha2 void integration test",
     "client_tested": false,
     "integration_pass": true,
     "integration_fail": false,
     "clean_exit": true
   },
-  "model_tests_passed": 12,
-  "installed_quests": 26,
+  "server_smoke_test_normal": {
+    "ready": true,
+    "exit_code": 0,
+    "timed_out": false,
+    "events": [
+      "server_ready"
+    ],
+    "heap_mb": 4096,
+    "world": "alpha2 normal overworld test (Terralith + Tectonic + BOP + YUNG + Towns)",
+    "client_tested": false,
+    "integration_pass": true,
+    "integration_fail": false,
+    "clean_exit": true
+  },
+  "model_tests_passed": 15,
+  "installed_quests": 48,
+  "installed_advancements": 31,
   "quest_breakdown": {
     "manual_information": 6,
     "inventory_tutorials": 12,
-    "receipt_contracts": 8
+    "receipt_contracts": 8,
+    "strategic_sites_and_production": 17,
+    "expedition_camp_and_routes": 5
   },
   "live_contracts_tested": [
-    "plates"
+    "plates",
+    "plate_shift"
   ],
-  "timed_contracts_live_tested": false,
+  "timed_contracts_live_tested": true,
+  "brigadier_commands_live_tested": true,
   "quest_specifications_design_only": 240,
   "world_border_width": 175000,
-  "world_guarantees_implemented": false,
-  "specialized_renewable_cities_implemented": false,
-  "camp_and_cargo_system_implemented": false,
+  "world_guarantees_implemented": true,
+  "specialized_renewable_cities_implemented": true,
+  "camp_and_cargo_system_implemented": true,
+  "consortium_contract_sharing_implemented": true,
   "client_tested": false,
   "vehicles_functionally_tested": false,
-  "normal_world_generation_tested": false,
+  "normal_world_generation_tested": true,
   "quest_gui_tested": false,
-  "reconnect_restart_persistence_tested": false,
+  "reconnect_restart_persistence_tested": true,
   "target_approximately_500_fulfilled": false,
   "new_installable_pack_created": true,
   "launcher_import_tested": false,
   "legacy_1_1_1_modified": false,
-  "limitations": "See README.md and TEST-REPORT.md. Limited headless integration fixture is not a connected-client test."
+  "limitations": "See README.md and TEST-REPORT.md. Headless Linux Forge integration verified (void + normal Overworld); graphical client, vehicle physics in motion, and remaining mod expansion toward ~500 mods are not yet complete."
 }
