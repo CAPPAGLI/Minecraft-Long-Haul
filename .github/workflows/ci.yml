@@ -73,7 +73,7 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p /tmp/ci-logs
-          python3 long-haul-legacy-2/tools/inspect_alpha.py | tee /tmp/ci-logs/inspect.txt
+          python3 long-haul-legacy-2/tools/inspect_alpha.py 2>&1 | tee /tmp/ci-logs/inspect.txt
 
       - name: Re-sync runtime jar & run Forge headless void integration test
         run: |
