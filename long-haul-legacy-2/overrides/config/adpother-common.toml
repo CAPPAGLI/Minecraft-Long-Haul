@@ -1,0 +1,44 @@
+# Global rate of emissions for all pollutants and sources on the server
+# Range: 0.0 ~ 10.0
+globalEmissionRate = 2.5
+# How fast the surface of a polluted chunk degrades under the influence of pollutants
+# Range: 0.0 ~ 10.0
+environmentDegradationRate = 0.8
+# Whether pollution affects water
+waterPollution = true
+# Enables or disables pollution impacts on hostile mobs (buffs by default)
+hostileMobImpacts = true
+# Experience gain after replacing the filter material in a respirator or a vacuum bag
+# Range: -10 ~ 10
+filterReplacingExpGain = 0
+# Maximum number of gas entities present at the same time in a chunk
+# Range: 0 ~ 256
+maxGasEntitiesInChunk = 24
+
+[GasExplosions]
+	ignitionSources = true
+	enclosedEmitters = true
+	setOnFire = true
+	explosionInteraction = "TNT"
+	maxChainLength = 512
+	alwaysDestroyEmitter = true
+
+[EmissionSources]
+	Breakables = 1.5
+	Entities = 1.5
+	WallTorches = 0.15
+	DroppedTorches = 0.2
+	Campfires = 0.4
+	BurntItems = 2.0
+	Furnaces = true
+	BurntBlocks = true
+	Explosion = true
+	LavaTouchingWater = true
+	HostileMobDying = true
+	HostileMobBurning = true
+	PlayerEating = true
+	PlayerBurning = true
+	AnimalBurning = true
+	AnimalFeeding = true
+	AnimalDying = true
+	PlayerDying = true
