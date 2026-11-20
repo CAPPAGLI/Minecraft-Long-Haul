@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/expedition_13"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Три региона — три лагеря\"}",
+    "subtitle": "{\"text\": \"Этап 4 · Лагеря и экспедиции\"}",
+    "description": [
+      "Этап 4 · Тип: camp_visit (опционально)",
+      "Условия каталога: {\"distinct_regions\": 3, \"distinct_camps\": 3}",
+      "Проверка сервером: /lh catalog verify expedition_13 (сведения: /lh catalog info expedition_13)."
+    ],
+    "groups": {
+      "11 · Кампания: Лагеря и экспедиции": {
+        "position": [
+          -210,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:campfire",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

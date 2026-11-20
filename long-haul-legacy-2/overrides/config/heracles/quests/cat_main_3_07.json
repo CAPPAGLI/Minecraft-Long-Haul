@@ -1,0 +1,46 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/main_3_07"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Груз через горы\"}",
+    "subtitle": "{\"text\": \"Этап 3 · Основная прогрессия\"}",
+    "description": [
+      "Этап 3 · Тип: vehicle_delivery (основной заказ)",
+      "Условия каталога: {\"vehicle_family\": \"airship\", \"batch_items\": 2048, \"mountain_route\": true}",
+      "Проверка сервером: /lh catalog verify main_3_07 (сведения: /lh catalog info main_3_07).",
+      "Честное ограничение: физический трекер train/VS ID ещё не подключён; сервер проверяет маршрут/доставку контрольной партии в бочке на месте без фиктивного трекинга транспорта."
+    ],
+    "groups": {
+      "07 · Кампания: Основная прогрессия": {
+        "position": [
+          126,
+          72
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:track",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

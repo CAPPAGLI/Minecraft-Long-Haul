@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/main_1_06"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Первый удалённый лагерь\"}",
+    "subtitle": "{\"text\": \"Этап 1 · Основная прогрессия\"}",
+    "description": [
+      "Этап 1 · Тип: camp_visit (основной заказ)",
+      "Условия каталога: {\"distance_from_home_blocks\": 1000}",
+      "Проверка сервером: /lh catalog verify main_1_06 (сведения: /lh catalog info main_1_06)."
+    ],
+    "groups": {
+      "07 · Кампания: Основная прогрессия": {
+        "position": [
+          210,
+          -144
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:campfire",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

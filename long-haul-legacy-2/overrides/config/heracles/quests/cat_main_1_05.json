@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/main_1_05"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Первые рационы\"}",
+    "subtitle": "{\"text\": \"Этап 1 · Основная прогрессия\"}",
+    "description": [
+      "Этап 1 · Тип: controlled_production (основной заказ)",
+      "Условия каталога: {\"food_groups\": 3, \"output_portions\": 32}",
+      "Проверка сервером: /lh catalog verify main_1_05 (сведения: /lh catalog info main_1_05)."
+    ],
+    "groups": {
+      "07 · Кампания: Основная прогрессия": {
+        "position": [
+          126,
+          -144
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:mechanical_press",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/photo_farm_arrival"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Речной агрогород: Первый вид города\"}",
+    "subtitle": "{\"text\": \"Этап 1 · Экспедиционная документация\"}",
+    "description": [
+      "Этап 1 · Тип: photo_evidence (опционально)",
+      "Условия каталога: {\"site\": \"farm\", \"phase\": \"arrival\", \"distinct_server_photo_id\": true, \"capture_after_assignment\": true, \"image_semantics\": \"requires_Exposure_adapter_or_manual_review\", \"honest_fallback\": \"visit_plus_new_developed_film_report\"}",
+      "Проверка сервером: /lh catalog verify photo_farm_arrival (сведения: /lh catalog info photo_farm_arrival)."
+    ],
+    "groups": {
+      "10 · Кампания: Фотодокументация": {
+        "position": [
+          -42,
+          -72
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "exposure:photograph",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

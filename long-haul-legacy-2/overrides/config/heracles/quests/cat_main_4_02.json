@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/main_4_02"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Резервный маршрут\"}",
+    "subtitle": "{\"text\": \"Этап 4 · Основная прогрессия\"}",
+    "description": [
+      "Этап 4 · Тип: route_trial (основной заказ)",
+      "Условия каталога: {\"independent_routes_to_same_destination\": 2}",
+      "Проверка сервером: /lh catalog verify main_4_02 (сведения: /lh catalog info main_4_02)."
+    ],
+    "groups": {
+      "07 · Кампания: Основная прогрессия": {
+        "position": [
+          -126,
+          144
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:rail",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

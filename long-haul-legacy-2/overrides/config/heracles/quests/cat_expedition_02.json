@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/expedition_02"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Лагерь за первой рекой\"}",
+    "subtitle": "{\"text\": \"Этап 1 · Лагеря и экспедиции\"}",
+    "description": [
+      "Этап 1 · Тип: camp_visit (опционально)",
+      "Условия каталога: {\"minimum_distance_from_home\": 1000, \"safe_sleep_setup\": true}",
+      "Проверка сервером: /lh catalog verify expedition_02 (сведения: /lh catalog info expedition_02)."
+    ],
+    "groups": {
+      "11 · Кампания: Лагеря и экспедиции": {
+        "position": [
+          -126,
+          -144
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:campfire",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

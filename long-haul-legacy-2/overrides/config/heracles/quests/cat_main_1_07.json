@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/main_1_07"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Запуск лесной артели\"}",
+    "subtitle": "{\"text\": \"Этап 1 · Основная прогрессия\"}",
+    "description": [
+      "Этап 1 · Тип: site_commission (основной заказ)",
+      "Условия каталога: {\"site\": \"forest\", \"accepted_batches\": 2}",
+      "Проверка сервером: /lh catalog verify main_1_07 (сведения: /lh catalog info main_1_07)."
+    ],
+    "groups": {
+      "07 · Кампания: Основная прогрессия": {
+        "position": [
+          -210,
+          -72
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:compass",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

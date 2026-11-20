@@ -1,0 +1,46 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/main_2_02"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Порт для тяжёлого груза\"}",
+    "subtitle": "{\"text\": \"Этап 2 · Основная прогрессия\"}",
+    "description": [
+      "Этап 2 · Тип: vehicle_delivery (основной заказ)",
+      "Условия каталога: {\"vehicle_family\": \"ship\", \"batch_items\": 1024}",
+      "Проверка сервером: /lh catalog verify main_2_02 (сведения: /lh catalog info main_2_02).",
+      "Честное ограничение: физический трекер train/VS ID ещё не подключён; сервер проверяет маршрут/доставку контрольной партии в бочке на месте без фиктивного трекинга транспорта."
+    ],
+    "groups": {
+      "07 · Кампания: Основная прогрессия": {
+        "position": [
+          42,
+          -72
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:track",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

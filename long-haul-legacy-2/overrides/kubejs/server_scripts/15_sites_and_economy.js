@@ -46,6 +46,54 @@ function lhNearSite(player, site, radius) {
   return global.LHWorldPlanner.dist2D(player.x, player.z, site.x, site.z) <= radius;
 }
 
+function lhFindSurfaceY(overworld, cx, cz) {
+  var probe = new LHSitePos(cx, 80, cz);
+  if (!overworld.hasChunkAt(probe)) return null;
+  for (var y = 185; y >= 48; y--) {
+    var bid = String(overworld.getBlock(cx, y, cz).id);
+    if (bid !== 'minecraft:air' && bid !== 'minecraft:cave_air' && bid !== 'minecraft:void_air' &&
+        bid.indexOf('leaves') === -1 && bid.indexOf('grass') === -1 && bid.indexOf('flower') === -1 &&
+        bid !== 'minecraft:snow' && bid !== 'minecraft:vine') {
+      return y;
+    }
+  }
+  return 79;
+}
+
+function lhPlaceStructureAt(server, kind, entry, forceRepair) {
+  if (!entry || (entry.placed && !forceRepair)) return 0;
+  var overworld = server.getLevel('minecraft:overworld');
+  if (!overworld) return 0;
+  var cx = Math.floor(entry.x), cz = Math.floor(entry.z);
+  var probe = new LHSitePos(cx, 80, cz);
+  if (!overworld.hasChunkAt(probe)) return 0;
+  var padY = (forceRepair && typeof entry.placedY === 'number') ? entry.placedY : lhFindSurfaceY(overworld, cx, cz);
+  if (padY === null) return 0;
+  // Stabilize foundation skirt below padY so structure never floats on slopes
+  for (var dx = -4; dx <= 4; dx++) {
+    for (var dz = -4; dz <= 4; dz++) {
+      for (var dy = 1; dy <= 2; dy++) {
+        var under = overworld.getBlock(cx + dx, padY - dy, cz + dz);
+        var uid = String(under.id);
+        if (uid === 'minecraft:air' || uid === 'minecraft:cave_air' || uid === 'minecraft:water') {
+          under.set('minecraft:cobblestone');
+        }
+      }
+    }
+  }
+  var tpl = 'longhaul:' + kind + '/' + entry.id;
+  server.runCommandSilent('place template ' + tpl + ' ' + (cx - 4) + ' ' + padY + ' ' + (cz - 4));
+  var depotY = padY + 1;
+  var depotBlock = overworld.getBlock(cx, depotY, cz);
+  if (String(depotBlock.id) !== 'minecraft:barrel') {
+    depotBlock.set('minecraft:barrel');
+  }
+  entry.placed = true;
+  entry.placedY = padY;
+  entry.depot = { dim: 'minecraft:overworld', x: cx, y: depotY, z: cz };
+  return 1;
+}
+
 function lhSiteCommission(server, player, siteId) {
   var db = lhSitesRead(server), site = db.sites[siteId], spec = lhSiteSpec(siteId);
   if (!site || !spec) { lhMsg(player, 'Неизвестный узел: ' + siteId); return 0; }
@@ -55,9 +103,22 @@ function lhSiteCommission(server, player, siteId) {
     lhMsg(player, 'Слишком далеко от "' + site.name + '". До точки ~' + d + ' м (' + lhBearing(site.x - player.x, site.z - player.z) + '), требуется <= 128 м.');
     return 0;
   }
+  if (!site.placed && lhPlaceStructureAt(server, 'sites', site, false)) {
+    lhSitesSave(server);
+    lhMsg(player, 'На площадке "' + site.name + '" развёрнут базовый терминал из шаблона ' + site.id + '.');
+  }
   var depotPos = { dim: 'minecraft:overworld', x: Math.floor(player.x), y: Math.floor(player.y) - 1, z: Math.floor(player.z) };
   var block = lhLoadedBlock(server, depotPos);
   if (!block || block.id !== 'minecraft:barrel') {
+    if (site.depot) {
+      var autoB = lhLoadedBlock(server, site.depot);
+      if (autoB && String(autoB.id) === 'minecraft:barrel') {
+        depotPos = site.depot;
+        block = autoB;
+      }
+    }
+  }
+  if (!block || String(block.id) !== 'minecraft:barrel') {
     lhMsg(player, 'Встаньте НА бочку площадки узла и повторите /lh site commission ' + siteId);
     return 0;
   }
@@ -136,12 +197,31 @@ function lhSiteArchive(server, player) {
     lhMsg(player, 'Архив магистралей не рядом (~' + d + ' м, направление ' + lhBearing(site.x - player.x, site.z - player.z) + ').');
     return 0;
   }
+  if (!site.placed && lhPlaceStructureAt(server, 'sites', site, false)) {
+    lhSitesSave(server);
+  }
   var firstTime = !site.commissioned;
   site.discovered = true;
   site.commissioned = true;
   lhSitesSave(server);
   lhUnlock(player, 'longhaul:sites/continental_archive');
   lhMsg(player, firstTime ? 'Уникальный Центральный архив магистралей зафиксирован однократно по ID мира!' : 'Архив уже зафиксирован (повторные награды не выдаются).');
+  return 1;
+}
+
+function lhSiteRepairArchive(server, player) {
+  var db = lhSitesRead(server), site = db.sites.continental_archive;
+  if (!site) return 0;
+  if (!lhNearSite(player, site, 128)) {
+    lhMsg(player, 'Для восстановления архива подойдите ближе 128 м к сохранённым координатам [' + site.x + ', ' + site.z + '].');
+    return 0;
+  }
+  if (!lhPlaceStructureAt(server, 'sites', site, true)) {
+    lhMsg(player, 'Не удалось разместить шаблон архива (чанк не загружен).');
+    return 0;
+  }
+  lhSitesSave(server);
+  lhMsg(player, 'Конструкция Центрального архива восстановлена на прежних координатах [' + site.x + ', ' + site.z + '] без повторной выдачи наград.');
   return 1;
 }
 
@@ -187,8 +267,28 @@ ServerEvents.commandRegistry(function (event) {
   siteCmd.then(comm);
   siteCmd.then(prod);
   siteCmd.then(C.literal('archive').executes(function (ctx) { return lhSiteArchive(ctx.source.server, ctx.source.playerOrException); }));
+  siteCmd.then(C.literal('repair_archive').executes(function (ctx) { return lhSiteRepairArchive(ctx.source.server, ctx.source.playerOrException); }));
   root.then(siteCmd);
   event.register(root);
+});
+
+ServerEvents.tick(function (event) {
+  if (LHClock % 40 !== 0) return;
+  var server = event.server, db = lhSitesRead(server), changed = false;
+  server.players.forEach(function (player) {
+    if (String(player.level.dimension) !== 'minecraft:overworld') return;
+    Object.keys(db.sites).forEach(function (sid) {
+      var s = db.sites[sid];
+      if (!s.placed && global.LHWorldPlanner.dist2D(player.x, player.z, s.x, s.z) <= 144) {
+        if (lhPlaceStructureAt(server, 'sites', s, false)) {
+          s.discovered = true;
+          changed = true;
+          lhMsg(player, 'Обнаружен и размещён узел "' + s.name + '" [' + s.x + ', ' + s.z + '].');
+        }
+      }
+    });
+  });
+  if (changed) lhSitesSave(server);
 });
 
 ServerEvents.loaded(function (event) {

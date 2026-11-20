@@ -59,6 +59,9 @@ function lhRecSurvey(server, player, recId) {
     lhMsg(player, 'До объекта "' + rec.name + '" ~' + d + ' м (' + lhBearing(rec.x - player.x, rec.z - player.z) + '), требуется <= 128 м.');
     return 0;
   }
+  if (!rec.placed && lhPlaceStructureAt(server, 'recovery', rec, false)) {
+    lhMsg(player, 'На точке "' + rec.name + '" проявлены руины объекта из шаблона ' + rec.id + '.');
+  }
   rec.surveyed = true;
   lhRecSave(server);
   lhMsg(player, 'Объект "' + rec.name + '" обследован на [' + rec.x + ', ' + rec.z + ']. ' + spec.summary);
@@ -81,7 +84,16 @@ function lhRecRestore(server, player, recId) {
   }
   var depotPos = { dim: 'minecraft:overworld', x: Math.floor(player.x), y: Math.floor(player.y) - 1, z: Math.floor(player.z) };
   var block = lhLoadedBlock(server, depotPos);
-  if (!block || block.id !== 'minecraft:barrel') {
+  if (!block || String(block.id) !== 'minecraft:barrel') {
+    if (rec.depot) {
+      var autoB = lhLoadedBlock(server, rec.depot);
+      if (autoB && String(autoB.id) === 'minecraft:barrel') {
+        depotPos = rec.depot;
+        block = autoB;
+      }
+    }
+  }
+  if (!block || String(block.id) !== 'minecraft:barrel') {
     lhMsg(player, 'Встаньте НА ремонтную бочку объекта и повторите /lh recovery restore ' + recId);
     return 0;
   }
@@ -142,6 +154,25 @@ ServerEvents.commandRegistry(function (event) {
   recCmd.then(restore);
   root.then(recCmd);
   event.register(root);
+});
+
+ServerEvents.tick(function (event) {
+  if (LHClock % 40 !== 0) return;
+  var server = event.server, db = lhRecRead(server), changed = false;
+  server.players.forEach(function (player) {
+    if (String(player.level.dimension) !== 'minecraft:overworld') return;
+    Object.keys(db.items).forEach(function (rid) {
+      var r = db.items[rid];
+      if (!r.placed && global.LHWorldPlanner.dist2D(player.x, player.z, r.x, r.z) <= 144) {
+        if (lhPlaceStructureAt(server, 'recovery', r, false)) {
+          r.surveyed = true;
+          changed = true;
+          lhMsg(player, 'Обнаружен повреждённый объект "' + r.name + '" [' + r.x + ', ' + r.z + '].');
+        }
+      }
+    });
+  });
+  if (changed) lhRecSave(server);
 });
 
 ServerEvents.loaded(function (event) {

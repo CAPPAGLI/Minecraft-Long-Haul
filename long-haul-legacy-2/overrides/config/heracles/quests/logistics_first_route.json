@@ -12,7 +12,7 @@
   "rewards": {},
   "display": {
     "title": "{\"text\": \"Испытание маршрута\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
     "description": [
       "Разметьте маршрут длиной >= 750 м: /lh route begin <имя>, добавьте контрольные точки (/lh route gate), завершите (/lh route finish) и пройдите на транспорте (/lh route start <имя>).",
       "Аномальная скорость (> 85 м/с, телепорт) отменяет испытание."

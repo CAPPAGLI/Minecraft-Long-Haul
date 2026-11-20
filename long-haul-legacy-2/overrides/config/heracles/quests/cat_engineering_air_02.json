@@ -1,0 +1,46 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/engineering_air_02"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Воздушная доставка: класс 2\"}",
+    "subtitle": "{\"text\": \"Этап 1 · Инженерные испытания\"}",
+    "description": [
+      "Этап 1 · Тип: vehicle_delivery (опционально)",
+      "Условия каталога: {\"vehicle_family\": \"aircraft_or_airship\", \"batch_items\": 256, \"minimum_distance_blocks\": 4000, \"refuel_stops_max\": 0}",
+      "Проверка сервером: /lh catalog verify engineering_air_02 (сведения: /lh catalog info engineering_air_02).",
+      "Честное ограничение: физический трекер train/VS ID ещё не подключён; сервер проверяет маршрут/доставку контрольной партии в бочке на месте без фиктивного трекинга транспорта."
+    ],
+    "groups": {
+      "09 · Кампания: Инженерные испытания": {
+        "position": [
+          -126,
+          144
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:track",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

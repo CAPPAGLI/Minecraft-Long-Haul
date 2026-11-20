@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/main_1_03"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Мастерская у реки\"}",
+    "subtitle": "{\"text\": \"Этап 1 · Основная прогрессия\"}",
+    "description": [
+      "Этап 1 · Тип: site_commission (основной заказ)",
+      "Условия каталога: {\"site\": \"starter_workshop\", \"test_seconds\": 120}",
+      "Проверка сервером: /lh catalog verify main_1_03 (сведения: /lh catalog info main_1_03)."
+    ],
+    "groups": {
+      "07 · Кампания: Основная прогрессия": {
+        "position": [
+          -42,
+          -144
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:compass",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

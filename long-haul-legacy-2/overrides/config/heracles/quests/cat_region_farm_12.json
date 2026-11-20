@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/region_farm_12"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Речной агрогород: Заказ консорциума\"}",
+    "subtitle": "{\"text\": \"Этап 3 · Региональные контракты\"}",
+    "description": [
+      "Этап 3 · Тип: network_supply (опционально)",
+      "Условия каталога: {\"origin\": \"farm\", \"distinct_destinations\": 3, \"minimum_deliveries_each\": 3}",
+      "Проверка сервером: /lh catalog verify region_farm_12 (сведения: /lh catalog info region_farm_12)."
+    ],
+    "groups": {
+      "08 · Кампания: Региональные контракты": {
+        "position": [
+          -42,
+          144
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "longhaul:cargo_manifest",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

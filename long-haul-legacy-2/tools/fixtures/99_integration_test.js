@@ -122,8 +122,11 @@ ServerEvents.loaded(function (event) {
         ok(disp.performPrefixedCommand(src, 'lh recovery list') === 1, 'brigadier /lh recovery list');
         ok(disp.performPrefixedCommand(src, 'lh photo status') === 1, 'brigadier /lh photo status');
         ok(disp.performPrefixedCommand(src, 'lh cc status') === 1, 'brigadier /lh cc status');
+        ok(disp.performPrefixedCommand(src, 'lh catalog list') === 1, 'brigadier /lh catalog list');
+        ok(disp.performPrefixedCommand(src, 'lh catalog stage 1') === 1, 'brigadier /lh catalog stage 1');
+        ok(disp.performPrefixedCommand(src, 'lh catalog info main_1_01') === 1, 'brigadier /lh catalog info main_1_01');
 
-        // 4. Site planner + remote rejection + on-site commission & production
+        // 4. Site planner + remote rejection + physical NBT placement + on-site commission & production
         var sitesDb = lhSitesRead(server);
         var forest = sitesDb.sites.forest;
         ok(forest && Math.abs(forest.x) <= 84000 && Math.abs(forest.z) <= 84000, 'forest site within +/-84000: ' + JSON.stringify(forest));
@@ -131,11 +134,6 @@ ServerEvents.loaded(function (event) {
 
         var fcx = Math.floor(forest.x / 16) * 16, fcz = Math.floor(forest.z / 16) * 16;
         server.runCommandSilent('forceload add ' + fcx + ' ' + fcz);
-        var fb = overworld.getBlock(forest.x, 80, forest.z);
-        fb.set('minecraft:barrel');
-        var finv = fb.inventory;
-        for (var fs = 0; fs < finv.slots; fs++) finv.setStackInSlot(fs, Item.empty);
-
         var siteActor = {
           uuid: '00000000-0000-4000-8000-000000000002',
           level: overworld,
@@ -146,11 +144,34 @@ ServerEvents.loaded(function (event) {
           isAdvancementDone: function () { return false; },
           unlockAdvancement: function () {}
         };
-        ok(lhSiteCommission(server, siteActor, 'forest') === 1, 'on-site commission accepted');
+        ok(lhSiteCommission(server, siteActor, 'forest') === 1, 'on-site commission accepted with physical NBT placement');
+        ok(forest.placed === true && forest.depot && typeof forest.placedY === 'number', 'forest NBT placed and depot recorded');
+        var fb = overworld.getBlock(forest.depot.x, forest.depot.y, forest.depot.z);
+        ok(String(fb.id) === 'minecraft:barrel', 'NBT structure placed depot barrel at forest: ' + fb.id);
+        ok(String(overworld.getBlock(forest.x - 1, forest.placedY, forest.z).id) === 'minecraft:spruce_planks', 'NBT structure placed spruce floor at forest');
+        var finv = fb.inventory;
+        for (var fs = 0; fs < finv.slots; fs++) finv.setStackInSlot(fs, Item.empty);
         finv.setStackInSlot(0, Item.of('minecraft:oak_log', 4));
         finv.setStackInSlot(1, Item.of('minecraft:coal', 1));
         ok(lhSiteProduce(server, siteActor, 'forest', 'bootstrap') === 1, 'on-site bootstrap production');
         ok(String(finv.getStackInSlot(0).id) === 'longhaul:treated_timber' && finv.getStackInSlot(0).count === 1, 'site produced treated_timber');
+
+        // 4b. Unique Continental Archive NBT placement + idempotent repair
+        var arch = sitesDb.sites.continental_archive;
+        var acx = Math.floor(arch.x / 16) * 16, acz = Math.floor(arch.z / 16) * 16;
+        server.runCommandSilent('forceload add ' + acx + ' ' + acz);
+        var archActor = {
+          uuid: siteActor.uuid, level: overworld,
+          x: arch.x + 0.5, y: 81, z: arch.z + 0.5,
+          tell: function () {},
+          isAdvancementDone: function () { return false; },
+          unlockAdvancement: function () {}
+        };
+        ok(lhSiteArchive(server, archActor) === 1, 'continental_archive NBT placed and commissioned');
+        ok(String(overworld.getBlock(arch.x - 1, arch.placedY, arch.z).id) === 'minecraft:polished_deepslate', 'archive monument deepslate floor verified');
+        overworld.getBlock(arch.x - 1, arch.placedY, arch.z).set('minecraft:air');
+        ok(lhSiteRepairArchive(server, archActor) === 1, 'archive repaired idempotently');
+        ok(String(overworld.getBlock(arch.x - 1, arch.placedY, arch.z).id) === 'minecraft:polished_deepslate', 'archive floor restored by repair_archive');
 
         // 5. Camp deployment + non-empty container pack block + clean pack
         ok(lhCampDeploy(server, actor) === 0, 'camp near origin rejected');
@@ -190,15 +211,12 @@ ServerEvents.loaded(function (event) {
         ok(lhCargoDeliver(server, destActor) === 1, 'cargo manifest delivered');
         ok(lhCargoDeliver(server, destActor) === 0, 'cargo manifest cannot be delivered twice');
 
-        // 7. Recoverable industrial facility restoration (sawmill)
+        // 7. Recoverable industrial facility NBT placement & restoration (sawmill)
         var recDb = lhRecRead(server);
         var sawmill = recDb.items.sawmill;
         ok(sawmill && Math.abs(sawmill.x) <= 84000 && Math.abs(sawmill.z) <= 84000, 'sawmill planned within +/-84000');
         var scx = Math.floor(sawmill.x / 16) * 16, scz = Math.floor(sawmill.z / 16) * 16;
         server.runCommandSilent('forceload add ' + scx + ' ' + scz);
-        var rBarrel = overworld.getBlock(sawmill.x, 80, sawmill.z);
-        rBarrel.set('minecraft:barrel');
-        var rSaw = overworld.getBlock(sawmill.x + 1, 80, sawmill.z);
         var recActor = {
           uuid: siteActor.uuid, level: overworld,
           x: sawmill.x + 0.5, y: 81, z: sawmill.z + 0.5,
@@ -207,7 +225,11 @@ ServerEvents.loaded(function (event) {
           isAdvancementDone: function () { return false; },
           unlockAdvancement: function () {}
         };
-        ok(lhRecSurvey(server, recActor, 'sawmill') === 1, 'sawmill surveyed');
+        ok(lhRecSurvey(server, recActor, 'sawmill') === 1, 'sawmill surveyed and ruin NBT placed');
+        ok(sawmill.placed === true && sawmill.depot, 'sawmill NBT placed with depot');
+        var rBarrel = overworld.getBlock(sawmill.depot.x, sawmill.depot.y, sawmill.depot.z);
+        ok(String(rBarrel.id) === 'minecraft:barrel', 'sawmill NBT placed depot barrel: ' + rBarrel.id);
+        var rSaw = overworld.getBlock(sawmill.depot.x + 1, sawmill.depot.y, sawmill.depot.z);
         ok(lhRecRestore(server, recActor, 'sawmill') === 0, 'sawmill restore fails without machinery');
         rSaw.set('create:mechanical_saw');
         rBarrel.inventory.setStackInSlot(0, Item.of('minecraft:iron_ingot', 16));
@@ -238,10 +260,32 @@ ServerEvents.loaded(function (event) {
         var fdb = lhFieldRead(server);
         var needCount = fdb.ccChallenges.forest.count;
         ok(lhCCVerify(server, siteActor, 'forest') === 0, 'CC verify fails without computer block');
-        var compBlock = overworld.getBlock(forest.x + 2, 80, forest.z);
+        var compBlock = overworld.getBlock(forest.depot.x + 2, forest.depot.y, forest.depot.z);
         compBlock.set('computercraft:computer_normal');
         finv.setStackInSlot(0, Item.of('longhaul:treated_timber', needCount));
         ok(lhCCVerify(server, siteActor, 'forest') === 1, 'CC telemetry verified with real computer and depot stock');
+
+        // 10. Catalog 240-order server verification (site_visit + photo_evidence + atomic delivery)
+        ok(lhCatVerify(server, siteActor, 'region_forest_01') === 1, 'catalog site_visit verified at forest');
+        var catPhotoActor = {
+          uuid: siteActor.uuid, level: overworld,
+          x: forest.x + 0.5, y: 81, z: forest.z + 0.5,
+          mainHandItem: Item.of('exposure:photograph', { id: 'lh_test_frame_02' }),
+          tell: function () {},
+          isAdvancementDone: function () { return false; },
+          unlockAdvancement: function () {}
+        };
+        ok(lhCatVerify(server, catPhotoActor, 'photo_forest_arrival') === 1, 'catalog photo_evidence verified with fresh photo token');
+        finv.setStackInSlot(0, Item.of('minecraft:oak_planks', 64));
+        var catDelivActor = {
+          uuid: siteActor.uuid, level: overworld,
+          x: forest.depot.x + 0.5, y: forest.depot.y + 1, z: forest.depot.z + 0.5,
+          mainHandItem: Item.empty,
+          tell: function () {},
+          isAdvancementDone: function () { return false; },
+          unlockAdvancement: function () {}
+        };
+        ok(lhCatVerify(server, catDelivActor, 'main_1_01') === 1, 'catalog controlled_production consumed 64 items from depot');
 
         // Cleanup test artifacts
         var curDb = lhRead(server);
@@ -252,10 +296,19 @@ ServerEvents.loaded(function (event) {
         delete sitesDb.sites.forest.depot;
         sitesDb.sites.forest.commissioned = false;
         sitesDb.sites.forest.discovered = false;
+        sitesDb.sites.forest.placed = false;
+        delete sitesDb.sites.forest.placedY;
         sitesDb.sites.forest.producedTotal = 0;
+        delete sitesDb.sites.continental_archive.depot;
+        sitesDb.sites.continental_archive.commissioned = false;
+        sitesDb.sites.continental_archive.discovered = false;
+        sitesDb.sites.continental_archive.placed = false;
+        delete sitesDb.sites.continental_archive.placedY;
         lhSitesSave(server);
         sawmill.surveyed = false;
         sawmill.restored = false;
+        sawmill.placed = false;
+        delete sawmill.placedY;
         delete sawmill.depot;
         delete sawmill.machineryFound;
         lhRecSave(server);
@@ -263,9 +316,14 @@ ServerEvents.loaded(function (event) {
         delete fdb.ccChallenges.forest;
         delete fdb.ccVerified.forest;
         Object.keys(fdb.usedPhotoTokens).forEach(function (tk) {
-          if (fdb.usedPhotoTokens[tk] === 'forest') delete fdb.usedPhotoTokens[tk];
+          if (fdb.usedPhotoTokens[tk] === 'forest' || String(fdb.usedPhotoTokens[tk]).indexOf('catalog:') === 0) delete fdb.usedPhotoTokens[tk];
         });
         lhFieldSave(server);
+        var catDb = lhCatRead(server);
+        delete catDb.completed[String(siteActor.uuid) + ':region_forest_01'];
+        delete catDb.completed[String(siteActor.uuid) + ':photo_forest_arrival'];
+        delete catDb.completed[String(siteActor.uuid) + ':main_1_01'];
+        lhCatSave(server);
         var ldb = lhLogRead(server);
         delete ldb.camps[String(campActor.uuid)];
         lhLogSave(server);
@@ -281,10 +339,11 @@ ServerEvents.loaded(function (event) {
         campBarrel.set('minecraft:air');
         server.runCommandSilent('forceload remove 0 0');
         server.runCommandSilent('forceload remove ' + fcx + ' ' + fcz);
+        server.runCommandSilent('forceload remove ' + acx + ' ' + acz);
         server.runCommandSilent('forceload remove ' + scx + ' ' + scz);
         server.runCommandSilent('forceload remove 800 0');
 
-        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + production + recovery + photo + cc + camp + cargo + advancement sync');
+        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + advancement sync');
       } catch (err2) {
         console.error('LH_INTEGRATION_FAIL: live adapter ' + err2);
       }

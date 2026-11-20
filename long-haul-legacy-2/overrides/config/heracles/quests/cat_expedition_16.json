@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/expedition_16"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Защищённый торговый тракт\"}",
+    "subtitle": "{\"text\": \"Этап 4 · Лагеря и экспедиции\"}",
+    "description": [
+      "Этап 4 · Тип: route_trial (опционально)",
+      "Условия каталога: {\"loaded_vehicle_passes\": 5, \"cargo_loss_allowed\": 0, \"minimum_distance_blocks\": 5000}",
+      "Проверка сервером: /lh catalog verify expedition_16 (сведения: /lh catalog info expedition_16)."
+    ],
+    "groups": {
+      "11 · Кампания: Лагеря и экспедиции": {
+        "position": [
+          42,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:rail",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

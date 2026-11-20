@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/main_3_05"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Промышленный мост\"}",
+    "subtitle": "{\"text\": \"Этап 3 · Основная прогрессия\"}",
+    "description": [
+      "Этап 3 · Тип: route_trial (основной заказ)",
+      "Условия каталога: {\"feature\": \"bridge\", \"vehicle_family\": \"train\", \"successful_round_trips\": 3}",
+      "Проверка сервером: /lh catalog verify main_3_05 (сведения: /lh catalog info main_3_05)."
+    ],
+    "groups": {
+      "07 · Кампания: Основная прогрессия": {
+        "position": [
+          -42,
+          72
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:rail",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

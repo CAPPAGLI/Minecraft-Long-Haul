@@ -1,0 +1,46 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/region_forest_05"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Лесная артель: Вывоз первой партии\"}",
+    "subtitle": "{\"text\": \"Этап 2 · Региональные контракты\"}",
+    "description": [
+      "Этап 2 · Тип: vehicle_delivery (опционально)",
+      "Условия каталога: {\"origin\": \"forest\", \"destination\": \"mine\", \"product\": \"treated_timber\", \"batch_items\": 512}",
+      "Проверка сервером: /lh catalog verify region_forest_05 (сведения: /lh catalog info region_forest_05).",
+      "Честное ограничение: физический трекер train/VS ID ещё не подключён; сервер проверяет маршрут/доставку контрольной партии в бочке на месте без фиктивного трекинга транспорта."
+    ],
+    "groups": {
+      "08 · Кампания: Региональные контракты": {
+        "position": [
+          -294,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:track",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

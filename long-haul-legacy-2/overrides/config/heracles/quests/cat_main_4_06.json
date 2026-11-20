@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/main_4_06"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Рабочая смена комплекса\"}",
+    "subtitle": "{\"text\": \"Этап 4 · Основная прогрессия\"}",
+    "description": [
+      "Этап 4 · Тип: controlled_production (основной заказ)",
+      "Условия каталога: {\"product\": \"continental_module\", \"per_minute\": 4, \"minute_windows\": 10}",
+      "Проверка сервером: /lh catalog verify main_4_06 (сведения: /lh catalog info main_4_06)."
+    ],
+    "groups": {
+      "07 · Кампания: Основная прогрессия": {
+        "position": [
+          210,
+          144
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:mechanical_press",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

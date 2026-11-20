@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/expedition_03"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Первый походный снимок\"}",
+    "subtitle": "{\"text\": \"Этап 1 · Лагеря и экспедиции\"}",
+    "description": [
+      "Этап 1 · Тип: photo_evidence (опционально)",
+      "Условия каталога: {\"site_type\": \"camp\", \"new_photo\": true}",
+      "Проверка сервером: /lh catalog verify expedition_03 (сведения: /lh catalog info expedition_03)."
+    ],
+    "groups": {
+      "11 · Кампания: Лагеря и экспедиции": {
+        "position": [
+          -42,
+          -144
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "exposure:photograph",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

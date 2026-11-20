@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/main_2_01"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Путь к карьеру\"}",
+    "subtitle": "{\"text\": \"Этап 2 · Основная прогрессия\"}",
+    "description": [
+      "Этап 2 · Тип: route_trial (основной заказ)",
+      "Условия каталога: {\"site\": \"badlands\", \"checkpoints\": 3}",
+      "Проверка сервером: /lh catalog verify main_2_01 (сведения: /lh catalog info main_2_01)."
+    ],
+    "groups": {
+      "07 · Кампания: Основная прогрессия": {
+        "position": [
+          -42,
+          -72
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:rail",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

@@ -1,6 +1,7 @@
 const fs = require('fs'), vm = require('vm'), assert = require('assert');
 const sandbox = { global: {} };
 vm.runInNewContext(fs.readFileSync(__dirname + '/../overrides/kubejs/startup_scripts/00_contract_engine.js', 'utf8'), sandbox);
+vm.runInNewContext(fs.readFileSync(__dirname + '/../overrides/kubejs/startup_scripts/02_quest_catalog.js', 'utf8'), sandbox);
 
 const e = sandbox.global.LHContractEngine;
 const planner = sandbox.global.LHWorldPlanner;
@@ -65,6 +66,17 @@ test('recovery planner places all 6 industrial facilities near parent sites with
     assert(Math.abs(rec.z) <= planner.BORDER_SAFE_LIMIT);
     assert(Object.keys(spec.repairInputs).length >= 2);
     assert(spec.requiredMachinery.length >= 2);
+  });
+});
+
+test('quest catalog startup index exposes all 240 unique campaign/regional specs', () => {
+  const cat = sandbox.global.LHQuestCatalog;
+  assert(Array.isArray(cat) && cat.length === 240, 'expected 240 catalog entries, got ' + (cat && cat.length));
+  const ids = new Set();
+  cat.forEach(q => {
+    assert(q.id && q.title && q.chapter && q.verification_type && q.stage >= 1 && q.stage <= 4);
+    assert(!ids.has(q.id), 'duplicate id ' + q.id);
+    ids.add(q.id);
   });
 });
 

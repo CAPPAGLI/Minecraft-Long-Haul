@@ -1,0 +1,46 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/expedition_09"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Экспедиционный вагон\"}",
+    "subtitle": "{\"text\": \"Этап 3 · Лагеря и экспедиции\"}",
+    "description": [
+      "Этап 3 · Тип: vehicle_trial (опционально)",
+      "Условия каталога: {\"vehicle_family\": \"train\", \"roles\": [\"sleep\", \"food\", \"repair\", \"photo\"], \"storage_cap_test\": true}",
+      "Проверка сервером: /lh catalog verify expedition_09 (сведения: /lh catalog info expedition_09).",
+      "Честное ограничение: физический трекер train/VS ID ещё не подключён; сервер проверяет маршрут/доставку контрольной партии в бочке на месте без фиктивного трекинга транспорта."
+    ],
+    "groups": {
+      "11 · Кампания: Лагеря и экспедиции": {
+        "position": [
+          -42,
+          -72
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:track_station",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

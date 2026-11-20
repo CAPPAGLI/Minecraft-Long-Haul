@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/region_mine_03"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Горный рудник: Доставка продовольствия\"}",
+    "subtitle": "{\"text\": \"Этап 1 · Региональные контракты\"}",
+    "description": [
+      "Этап 1 · Тип: delivery (опционально)",
+      "Условия каталога: {\"destination\": \"mine\", \"food_portions\": 64, \"distinct_food_groups\": 3}",
+      "Проверка сервером: /lh catalog verify region_mine_03 (сведения: /lh catalog info region_mine_03)."
+    ],
+    "groups": {
+      "08 · Кампания: Региональные контракты": {
+        "position": [
+          -126,
+          -144
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:barrel",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

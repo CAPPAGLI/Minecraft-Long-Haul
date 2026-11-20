@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/engineering_road_06"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Дорожные испытания: класс 6\"}",
+    "subtitle": "{\"text\": \"Этап 3 · Инженерные испытания\"}",
+    "description": [
+      "Этап 3 · Тип: route_trial (опционально)",
+      "Условия каталога: {\"loaded_vehicle_passes\": 3, \"minimum_distance_blocks\": 3000, \"ordered_checkpoints\": 8, \"route_feature\": \"bridge\"}",
+      "Проверка сервером: /lh catalog verify engineering_road_06 (сведения: /lh catalog info engineering_road_06)."
+    ],
+    "groups": {
+      "09 · Кампания: Инженерные испытания": {
+        "position": [
+          -126,
+          288
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:rail",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

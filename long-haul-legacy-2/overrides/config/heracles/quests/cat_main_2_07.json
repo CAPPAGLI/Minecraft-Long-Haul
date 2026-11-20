@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/main_2_07"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Стекло и флюс\"}",
+    "subtitle": "{\"text\": \"Этап 2 · Основная прогрессия\"}",
+    "description": [
+      "Этап 2 · Тип: multi_input_supply (основной заказ)",
+      "Условия каталога: {\"distinct_inputs\": 2, \"windows\": 5}",
+      "Проверка сервером: /lh catalog verify main_2_07 (сведения: /lh catalog info main_2_07)."
+    ],
+    "groups": {
+      "07 · Кампания: Основная прогрессия": {
+        "position": [
+          -42,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:brass_funnel",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/engineering_repair_05"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Восстановление: класс 5\"}",
+    "subtitle": "{\"text\": \"Этап 3 · Инженерные испытания\"}",
+    "description": [
+      "Этап 3 · Тип: site_commission (опционально)",
+      "Условия каталога: {\"site_template_tier\": 5, \"test_seconds\": 600, \"distinct_inputs\": 3, \"requires_output_acceptance\": true}",
+      "Проверка сервером: /lh catalog verify engineering_repair_05 (сведения: /lh catalog info engineering_repair_05)."
+    ],
+    "groups": {
+      "09 · Кампания: Инженерные испытания": {
+        "position": [
+          -210,
+          576
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:compass",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

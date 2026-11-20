@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/region_smelter_02"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Стекольная долина: Местное сырьё\"}",
+    "subtitle": "{\"text\": \"Этап 1 · Региональные контракты\"}",
+    "description": [
+      "Этап 1 · Тип: controlled_production (опционально)",
+      "Условия каталога: {\"site\": \"smelter\", \"product\": \"technical_glass\", \"minimum_output\": 32}",
+      "Проверка сервером: /lh catalog verify region_smelter_02 (сведения: /lh catalog info region_smelter_02)."
+    ],
+    "groups": {
+      "08 · Кампания: Региональные контракты": {
+        "position": [
+          -210,
+          504
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:mechanical_press",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

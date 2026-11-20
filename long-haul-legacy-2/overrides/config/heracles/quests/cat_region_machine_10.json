@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/region_machine_10"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Машиностроительный центр: Регулярный экспорт\"}",
+    "subtitle": "{\"text\": \"Этап 3 · Региональные контракты\"}",
+    "description": [
+      "Этап 3 · Тип: scheduled_supply (опционально)",
+      "Условия каталога: {\"origin\": \"machine\", \"product\": \"machine_parts\", \"windows\": 5, \"items_each\": 512, \"window_seconds\": 180}",
+      "Проверка сервером: /lh catalog verify region_machine_10 (сведения: /lh catalog info region_machine_10)."
+    ],
+    "groups": {
+      "08 · Кампания: Региональные контракты": {
+        "position": [
+          126,
+          648
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:clock",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

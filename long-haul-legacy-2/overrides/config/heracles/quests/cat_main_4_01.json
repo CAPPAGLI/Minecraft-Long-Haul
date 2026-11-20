@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/main_4_01"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Архив старой магистрали\"}",
+    "subtitle": "{\"text\": \"Этап 4 · Основная прогрессия\"}",
+    "description": [
+      "Этап 4 · Тип: unique_site_visit (основной заказ)",
+      "Условия каталога: {\"unique_site_id\": \"continental_archive\", \"required_copies\": 1}",
+      "Проверка сервером: /lh catalog verify main_4_01 (сведения: /lh catalog info main_4_01)."
+    ],
+    "groups": {
+      "07 · Кампания: Основная прогрессия": {
+        "position": [
+          -210,
+          144
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:writable_book",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

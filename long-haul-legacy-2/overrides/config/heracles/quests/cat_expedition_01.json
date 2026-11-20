@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/expedition_01"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Базовый экспедиционный набор\"}",
+    "subtitle": "{\"text\": \"Этап 1 · Лагеря и экспедиции\"}",
+    "description": [
+      "Этап 1 · Тип: kit_check (опционально)",
+      "Условия каталога: {\"families\": [\"food\", \"bedroll\", \"map\", \"camera\", \"light\", \"tools\"]}",
+      "Проверка сервером: /lh catalog verify expedition_01 (сведения: /lh catalog info expedition_01)."
+    ],
+    "groups": {
+      "11 · Кампания: Лагеря и экспедиции": {
+        "position": [
+          -210,
+          -144
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "exposure:camera",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

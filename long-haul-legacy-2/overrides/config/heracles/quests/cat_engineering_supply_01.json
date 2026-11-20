@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/engineering_supply_01"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Снабжение цеха: класс 1\"}",
+    "subtitle": "{\"text\": \"Этап 1 · Инженерные испытания\"}",
+    "description": [
+      "Этап 1 · Тип: multi_input_supply (опционально)",
+      "Условия каталога: {\"distinct_inputs\": 2, \"minimum_items_each_per_window\": 16, \"windows\": 5, \"window_seconds\": 120, \"max_starvation_seconds\": 30}",
+      "Проверка сервером: /lh catalog verify engineering_supply_01 (сведения: /lh catalog info engineering_supply_01)."
+    ],
+    "groups": {
+      "09 · Кампания: Инженерные испытания": {
+        "position": [
+          126,
+          288
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:brass_funnel",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

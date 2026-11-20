@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/expedition_15"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Альбом дальнего маршрута\"}",
+    "subtitle": "{\"text\": \"Этап 4 · Лагеря и экспедиции\"}",
+    "description": [
+      "Этап 4 · Тип: photo_evidence (опционально)",
+      "Условия каталога: {\"ordered_route_sites\": 8, \"distinct_photos\": 8}",
+      "Проверка сервером: /lh catalog verify expedition_15 (сведения: /lh catalog info expedition_15)."
+    ],
+    "groups": {
+      "11 · Кампания: Лагеря и экспедиции": {
+        "position": [
+          -42,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "exposure:photograph",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/main_4_07"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Континентальное снабжение\"}",
+    "subtitle": "{\"text\": \"Этап 4 · Основная прогрессия\"}",
+    "description": [
+      "Этап 4 · Тип: network_supply (основной заказ)",
+      "Условия каталога: {\"distinct_regions\": 8, \"minimum_uptime_fraction\": 0.9, \"test_seconds\": 1200}",
+      "Проверка сервером: /lh catalog verify main_4_07 (сведения: /lh catalog info main_4_07)."
+    ],
+    "groups": {
+      "07 · Кампания: Основная прогрессия": {
+        "position": [
+          -210,
+          216
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "longhaul:cargo_manifest",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

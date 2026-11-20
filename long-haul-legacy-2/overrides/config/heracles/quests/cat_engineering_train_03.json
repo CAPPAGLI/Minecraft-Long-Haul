@@ -1,0 +1,46 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/engineering_train_03"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Грузовой поезд: класс 3\"}",
+    "subtitle": "{\"text\": \"Этап 2 · Инженерные испытания\"}",
+    "description": [
+      "Этап 2 · Тип: scheduled_train (опционально)",
+      "Условия каталога: {\"vehicle_family\": \"train\", \"batch_items_total\": 1536, \"successful_round_trips\": 4, \"max_interval_seconds\": 300}",
+      "Проверка сервером: /lh catalog verify engineering_train_03 (сведения: /lh catalog info engineering_train_03).",
+      "Честное ограничение: физический трекер train/VS ID ещё не подключён; сервер проверяет маршрут/доставку контрольной партии в бочке на месте без фиктивного трекинга транспорта."
+    ],
+    "groups": {
+      "09 · Кампания: Инженерные испытания": {
+        "position": [
+          126,
+          -72
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:schedule",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/main_3_08"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Межрегиональный консорциум\"}",
+    "subtitle": "{\"text\": \"Этап 3 · Основная прогрессия\"}",
+    "description": [
+      "Этап 3 · Тип: network_supply (основной заказ)",
+      "Условия каталога: {\"distinct_regions\": 5, \"scheduled_windows\": 5}",
+      "Проверка сервером: /lh catalog verify main_3_08 (сведения: /lh catalog info main_3_08)."
+    ],
+    "groups": {
+      "07 · Кампания: Основная прогрессия": {
+        "position": [
+          210,
+          72
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "longhaul:cargo_manifest",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

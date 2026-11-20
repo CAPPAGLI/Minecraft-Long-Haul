@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/engineering_road_07"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Дорожные испытания: класс 7\"}",
+    "subtitle": "{\"text\": \"Этап 4 · Инженерные испытания\"}",
+    "description": [
+      "Этап 4 · Тип: route_trial (опционально)",
+      "Условия каталога: {\"loaded_vehicle_passes\": 3, \"minimum_distance_blocks\": 3500, \"ordered_checkpoints\": 9, \"route_feature\": \"pass\"}",
+      "Проверка сервером: /lh catalog verify engineering_road_07 (сведения: /lh catalog info engineering_road_07)."
+    ],
+    "groups": {
+      "09 · Кампания: Инженерные испытания": {
+        "position": [
+          -42,
+          288
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:rail",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

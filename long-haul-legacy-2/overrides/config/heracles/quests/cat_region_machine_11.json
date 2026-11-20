@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/region_machine_11"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Машиностроительный центр: Восстановленный подъезд\"}",
+    "subtitle": "{\"text\": \"Этап 3 · Региональные контракты\"}",
+    "description": [
+      "Этап 3 · Тип: route_trial (опционально)",
+      "Условия каталога: {\"destination\": \"machine\", \"damaged_route_repaired\": true, \"loaded_vehicle_passes\": 3}",
+      "Проверка сервером: /lh catalog verify region_machine_11 (сведения: /lh catalog info region_machine_11)."
+    ],
+    "groups": {
+      "08 · Кампания: Региональные контракты": {
+        "position": [
+          210,
+          648
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:rail",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

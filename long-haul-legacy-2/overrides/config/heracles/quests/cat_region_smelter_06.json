@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/region_smelter_06"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Стекольная долина: Дорога к предприятию\"}",
+    "subtitle": "{\"text\": \"Этап 2 · Региональные контракты\"}",
+    "description": [
+      "Этап 2 · Тип: route_trial (опционально)",
+      "Условия каталога: {\"destination\": \"smelter\", \"checkpoints\": 3, \"loaded_vehicle_passes\": 2}",
+      "Проверка сервером: /lh catalog verify region_smelter_06 (сведения: /lh catalog info region_smelter_06)."
+    ],
+    "groups": {
+      "08 · Кампания: Региональные контракты": {
+        "position": [
+          126,
+          504
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:rail",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

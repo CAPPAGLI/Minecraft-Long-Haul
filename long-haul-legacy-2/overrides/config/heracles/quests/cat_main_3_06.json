@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/main_3_06"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Запуск разрушенного завода\"}",
+    "subtitle": "{\"text\": \"Этап 3 · Основная прогрессия\"}",
+    "description": [
+      "Этап 3 · Тип: site_commission (основной заказ)",
+      "Условия каталога: {\"site\": \"industrial_ruin\", \"continuous_seconds\": 600}",
+      "Проверка сервером: /lh catalog verify main_3_06 (сведения: /lh catalog info main_3_06)."
+    ],
+    "groups": {
+      "07 · Кампания: Основная прогрессия": {
+        "position": [
+          42,
+          72
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:compass",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

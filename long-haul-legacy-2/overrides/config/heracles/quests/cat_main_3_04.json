@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/main_3_04"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Контрольная диспетчерская\"}",
+    "subtitle": "{\"text\": \"Этап 3 · Основная прогрессия\"}",
+    "description": [
+      "Этап 3 · Тип: computer_challenge (основной заказ)",
+      "Условия каталога: {\"verified_sensor_types\": 3, \"verified_actuations\": 2}",
+      "Проверка сервером: /lh catalog verify main_3_04 (сведения: /lh catalog info main_3_04)."
+    ],
+    "groups": {
+      "07 · Кампания: Основная прогрессия": {
+        "position": [
+          -126,
+          72
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "computercraft:computer_normal",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

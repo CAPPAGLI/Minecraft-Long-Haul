@@ -14,7 +14,7 @@
   "rewards": {},
   "display": {
     "title": "{\"text\": \"Горный рудник: Рудный концентрат\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 2\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
     "description": [
       "Выпустите партию Рудный концентрат непосредственно на площадке: /lh site produce mine bootstrap (или industrial).",
       "Удалённое производство на домашней базе заблокировано сервером."

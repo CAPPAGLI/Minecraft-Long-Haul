@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/engineering_throughput_05"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Производительность: класс 5\"}",
+    "subtitle": "{\"text\": \"Этап 3 · Инженерные испытания\"}",
+    "description": [
+      "Этап 3 · Тип: controlled_production (опционально)",
+      "Условия каталога: {\"minimum_per_minute\": 80, \"minute_windows\": 10, \"controlled_inputs\": true}",
+      "Проверка сервером: /lh catalog verify engineering_throughput_05 (сведения: /lh catalog info engineering_throughput_05)."
+    ],
+    "groups": {
+      "09 · Кампания: Инженерные испытания": {
+        "position": [
+          126,
+          -144
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:mechanical_press",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/expedition_07"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Склад на полпути\"}",
+    "subtitle": "{\"text\": \"Этап 2 · Лагеря и экспедиции\"}",
+    "description": [
+      "Этап 2 · Тип: depot_commission (опционально)",
+      "Условия каталога: {\"route_fraction_min\": 0.3, \"route_fraction_max\": 0.7, \"supply_batches\": 3}",
+      "Проверка сервером: /lh catalog verify expedition_07 (сведения: /lh catalog info expedition_07)."
+    ],
+    "groups": {
+      "11 · Кампания: Лагеря и экспедиции": {
+        "position": [
+          -210,
+          -72
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:item_vault",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/expedition_14"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Регулярное снабжение экспедиции\"}",
+    "subtitle": "{\"text\": \"Этап 4 · Лагеря и экспедиции\"}",
+    "description": [
+      "Этап 4 · Тип: scheduled_supply (опционально)",
+      "Условия каталога: {\"food_portions_each\": 32, \"windows\": 5}",
+      "Проверка сервером: /lh catalog verify expedition_14 (сведения: /lh catalog info expedition_14)."
+    ],
+    "groups": {
+      "11 · Кампания: Лагеря и экспедиции": {
+        "position": [
+          -126,
+          0
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:clock",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

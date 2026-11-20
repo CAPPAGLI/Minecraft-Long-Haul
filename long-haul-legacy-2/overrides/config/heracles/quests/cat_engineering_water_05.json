@@ -1,0 +1,46 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "catalog_verified": {
+      "type": "heracles:advancement",
+      "title": "Серверная проверка заказа",
+      "advancements": [
+        "longhaul:catalog/engineering_water_05"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Речная логистика: класс 5\"}",
+    "subtitle": "{\"text\": \"Этап 3 · Инженерные испытания\"}",
+    "description": [
+      "Этап 3 · Тип: vehicle_delivery (опционально)",
+      "Условия каталога: {\"vehicle_family\": \"ship\", \"batch_items\": 1280, \"minimum_distance_blocks\": 5000, \"single_trip\": true}",
+      "Проверка сервером: /lh catalog verify engineering_water_05 (сведения: /lh catalog info engineering_water_05).",
+      "Честное ограничение: физический трекер train/VS ID ещё не подключён; сервер проверяет маршрут/доставку контрольной партии в бочке на месте без фиктивного трекинга транспорта."
+    ],
+    "groups": {
+      "09 · Кампания: Инженерные испытания": {
+        "position": [
+          -42,
+          72
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:track",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

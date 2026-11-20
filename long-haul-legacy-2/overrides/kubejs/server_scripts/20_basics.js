@@ -13,6 +13,7 @@ ServerEvents.recipes(function (event) {
   event.remove({ output: 'minecraft:ender_chest' });
   event.remove({ output: 'supplementaries:sack' });
   event.remove({ output: 'supplementaries:safe' });
+  event.remove({ output: 'quark:backpack' });
 });
 
 LootJS.modifiers(function (event) {
@@ -23,6 +24,7 @@ LootJS.modifiers(function (event) {
   event.addLootTableModifier(/.*/).removeLoot('minecraft:ender_chest');
   event.addLootTableModifier(/.*/).removeLoot('supplementaries:sack');
   event.addLootTableModifier(/.*/).removeLoot('supplementaries:safe');
+  event.addLootTableModifier(/.*/).removeLoot('quark:backpack');
 });
 
 BlockEvents.rightClicked('minecraft:ender_chest', function (event) {

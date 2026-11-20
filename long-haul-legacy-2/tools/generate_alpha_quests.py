@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Generate real Heracles 1.20.1 quests + server-only receipt/progression advancements.
-Contract, site, route, and camp quests require server-issued advancements, never item-in-inventory.
+Includes the 71 core Alpha mechanics quests (groups 01..06) PLUS all 240 campaign/regional
+specifications from design/quest-catalog.json (groups 07..11), each bound to a server-only
+advancement and verified via /lh catalog verify <id> (never fake check buttons).
 """
 import json, pathlib
 
@@ -20,14 +22,14 @@ def adv(rel_path, xp=15):
         'rewards': {'experience': xp},
     })
 
-def quest(qid, title, group, pos, icon, tasks, desc, deps=None):
+def quest(qid, title, group, pos, icon, tasks, desc, deps=None, subtitle='Long Haul Legacy 2.0 · Alpha 4'):
     put(Q / (qid + '.json'), {
         'dependencies': deps or [],
         'tasks': tasks,
         'rewards': {},
         'display': {
             'title': json.dumps({'text': title}, ensure_ascii=False),
-            'subtitle': json.dumps({'text': 'Long Haul Legacy 2.0 · Alpha 2'}, ensure_ascii=False),
+            'subtitle': json.dumps({'text': subtitle}, ensure_ascii=False),
             'description': desc,
             'groups': {group: {'position': pos}},
             'icon': {'type': 'heracles:item', 'item': {'id': icon, 'count': 1}},
@@ -51,8 +53,8 @@ if ADV_ROOT.exists():
 
 intro = [
     ('alpha_welcome', 'Прототип промышленной сети', 'minecraft:book', [
-        'Это расширяемая alpha-сборка Long Haul Legacy 2.0 (115+ модов на пути к полной кампании).',
-        'Включены: 8 специализированных экономических центров, привязанное к площадкам производство, лагеря, маршрутные испытания и серверные накладные.',
+        'Это расширяемая alpha-сборка Long Haul Legacy 2.0 (на пути к полной кампании).',
+        'Включены: 8 специализированных экономических центров (реальные .nbt площадки), 6 объектов восстановления, лагеря, маршрутные испытания, серверные накладные и 240 заказов каталога.',
         'Подтверждение чтения — ручное; это не инженерное испытание.',
     ]),
     ('alpha_terminal', 'Как зарегистрировать терминал', 'minecraft:barrel', [
@@ -67,8 +69,8 @@ intro = [
         'Пока это доказательство ритма ПРИЁМКИ, а не изготовления на месте. Можно снабжать из запаса.',
     ]),
     ('alpha_limits', 'Честные границы прототипа', 'minecraft:comparator', [
-        'Проверка реального train ID, расхода топлива и содержимого фотографии ещё не подключена.',
-        'Шалкеры и эндер-сундуки отключены в крафте, луте и при открытии. Выездные лагеря проверяют пустоту контейнеров перед сворачиванием.',
+        'Проверка реального train ID, расхода топлива и семантики содержимого фотографии на уровне Java-адаптера ещё не подключена.',
+        'Шалкеры, эндер-сундуки, мешки и сейфы Supplementaries отключены в крафте, луте и при взаимодействии. Выездные лагеря проверяют пустоту контейнеров перед сворачиванием.',
         'Для кооператива доступен общий консорциум: /lh team join <имя>.',
     ]),
     ('alpha_world', 'Мир и региональные узлы', 'minecraft:compass', [
@@ -78,7 +80,7 @@ intro = [
     ]),
     ('alpha_photo', 'Фотодокументация', 'exposure:camera', [
         'Exposure добавлен: камера, плёнка, проявка и альбомы.',
-        'Снимайте фабрики, лагеря и маршруты. Автоматическая проверка объекта в кадре ещё не реализована; фотографии пока не открывают критические технологии.',
+        'Снимайте фабрики, лагеря и маршруты (/lh photo report <узел> и /lh catalog verify <id>). Уникальный токен снимка нельзя использовать дважды.',
     ]),
 ]
 for i, (qid, title, icon, desc) in enumerate(intro):
@@ -146,7 +148,7 @@ for i, (sid, title, prod, prod_name) in enumerate(sites):
 adv('sites/continental_archive', 50)
 quest('site_continental_archive', 'Центральный архив магистралей', '04 · Экономические центры', [-42, 216], 'minecraft:writable_book',
       {'archive': {'type': 'heracles:advancement', 'title': 'Однократная фиксация уникального объекта', 'advancements': ['longhaul:sites/continental_archive']}},
-      ['Экспедиция к уникальному архиву (/lh site info continental_archive).', 'Подойдите ближе 96 м и выполните /lh site archive. Повторные награды не выдаются.'])
+      ['Экспедиция к уникальному архиву (/lh site info continental_archive).', 'Подойдите ближе 96 м и выполните /lh site archive. Для ремонта конструкции: /lh site repair_archive (повторные награды не выдаются).'])
 
 adv('sites/continental_hub', 40)
 adv('production/continental_hub', 100)
@@ -219,6 +221,87 @@ for i, (sid, title) in enumerate(cc_sites):
           ['Запустите /lh cc challenge ' + sid + ', установите компьютер CC: Tweaked в 12 м от бочки узла и обеспечьте реальный запас продукции в бочке, затем /lh cc verify ' + sid + '.'],
           deps=['site_' + sid])
 
+# Full 240-spec catalog from design/quest-catalog.json -> groups 07..11
+CHAPTER_GROUPS = {
+    'Основная прогрессия': '07 · Кампания: Основная прогрессия',
+    'Региональные контракты': '08 · Кампания: Региональные контракты',
+    'Инженерные испытания': '09 · Кампания: Инженерные испытания',
+    'Экспедиционная документация': '10 · Кампания: Фотодокументация',
+    'Лагеря и экспедиции': '11 · Кампания: Лагеря и экспедиции',
+}
+
+TYPE_ICONS = {
+    'photo_evidence': 'exposure:photograph',
+    'route_trial': 'minecraft:rail',
+    'controlled_production': 'create:mechanical_press',
+    'vehicle_delivery': 'create:track',
+    'delivery': 'minecraft:barrel',
+    'multi_input_supply': 'create:brass_funnel',
+    'site_commission': 'minecraft:compass',
+    'network_supply': 'longhaul:cargo_manifest',
+    'scheduled_supply': 'minecraft:clock',
+    'scheduled_train': 'create:schedule',
+    'computer_challenge': 'computercraft:computer_normal',
+    'depot_commission': 'create:item_vault',
+    'site_visit': 'minecraft:lantern',
+    'camp_visit': 'minecraft:campfire',
+    'vehicle_trial': 'create:track_station',
+    'unique_site_visit': 'minecraft:writable_book',
+    'kit_check': 'exposure:camera',
+    'ration_delivery': 'longhaul:field_rations',
+    'sample_return': 'longhaul:ore_concentrate',
+}
+
+UNTRACKED_VEHICLE_TYPES = {'vehicle_delivery', 'scheduled_train', 'vehicle_trial'}
+
+catalog = json.loads((R / 'design/quest-catalog.json').read_text())['quests']
+group_indices = {g: 0 for g in CHAPTER_GROUPS.values()}
+compact_catalog = []
+
+for q in catalog:
+    qid = q['id']
+    grp = CHAPTER_GROUPS[q['chapter']]
+    idx = group_indices[grp]
+    group_indices[grp] += 1
+    vt = q['verification_type']
+    icon = TYPE_ICONS.get(vt, 'minecraft:paper')
+    adv('catalog/' + qid, 20 + q['stage'] * 5)
+
+    desc = [
+        f"Этап {q['stage']} · Тип: {vt}" + (' (опционально)' if q.get('optional') else ' (основной заказ)'),
+        f"Условия каталога: {json.dumps(q['conditions'], ensure_ascii=False)}",
+        f"Проверка сервером: /lh catalog verify {qid} (сведения: /lh catalog info {qid}).",
+    ]
+    if vt in UNTRACKED_VEHICLE_TYPES:
+        desc.append('Честное ограничение: физический трекер train/VS ID ещё не подключён; сервер проверяет маршрут/доставку контрольной партии в бочке на месте без фиктивного трекинга транспорта.')
+
+    cols = 8 if len(catalog) > 40 and grp == '08 · Кампания: Региональные контракты' else 6
+    pos = [(idx % cols) * 84 - (cols * 42) + 42, (idx // cols) * 72 - 144]
+    quest(
+        'cat_' + qid,
+        q['title'],
+        grp,
+        pos,
+        icon,
+        {'catalog_verified': {'type': 'heracles:advancement', 'title': 'Серверная проверка заказа', 'advancements': ['longhaul:catalog/' + qid]}},
+        desc,
+        subtitle=f"Этап {q['stage']} · {q['chapter']}",
+    )
+    compact_catalog.append({
+        'id': qid,
+        'title': q['title'],
+        'chapter': q['chapter'],
+        'verification_type': vt,
+        'stage': q['stage'],
+        'optional': bool(q.get('optional')),
+        'conditions': q['conditions'],
+    })
+
+(O / 'kubejs/startup_scripts/02_quest_catalog.js').write_text(
+    '// Auto-generated from design/quest-catalog.json by tools/generate_alpha_quests.py\n'
+    'global.LHQuestCatalog = ' + json.dumps(compact_catalog, ensure_ascii=False) + ';\n'
+)
+
 (O / 'config/heracles/groups.txt').write_text(
     '01 · Начало и правила\n'
     '02 · Мастерская и экспедиция\n'
@@ -226,7 +309,12 @@ for i, (sid, title) in enumerate(cc_sites):
     '04 · Экономические центры\n'
     '05 · Маршруты и лагеря\n'
     '06 · Восстановление и полевые отчёты\n'
+    '07 · Кампания: Основная прогрессия\n'
+    '08 · Кампания: Региональные контракты\n'
+    '09 · Кампания: Инженерные испытания\n'
+    '10 · Кампания: Фотодокументация\n'
+    '11 · Кампания: Лагеря и экспедиции\n'
 )
 total_q = len(list(Q.glob('*.json')))
 total_adv = len(list(ADV_ROOT.rglob('*.json')))
-print(f'Generated {total_q} real Heracles quests + {total_adv} server-only advancements.')
+print(f'Generated {total_q} real Heracles quests ({len(compact_catalog)} catalog + {total_q - len(compact_catalog)} core) + {total_adv} server-only advancements.')
