@@ -1,16 +1,12 @@
 // TEST WORLD ONLY — deliberately not distributed in overrides.
 var LHIntegrationVerify = null;
+var LHIntegrationSetupDone = false;
+var LHIntegrationServer = null;
 
-ServerEvents.tick(function (event) {
-  if (LHClock >= 60 && LHIntegrationVerify) {
-    var verify = LHIntegrationVerify;
-    LHIntegrationVerify = null;
-    verify();
-  }
-});
-
-ServerEvents.loaded(function (event) {
-  var server = event.server;
+function lhStartIntegrationSetup(server) {
+  if (LHIntegrationSetupDone) return;
+  LHIntegrationSetupDone = true;
+  LHIntegrationServer = server;
   var ok = function (v, msg) { if (!v) throw new Error(msg); };
   try {
     // 1. Custom items registered
@@ -351,5 +347,16 @@ ServerEvents.loaded(function (event) {
   } catch (err) {
     console.error('LH_INTEGRATION_FAIL: ' + err);
     throw err;
+  }
+}
+
+ServerEvents.tick(function (event) {
+  if (!LHIntegrationSetupDone && LHClock >= 2) {
+    lhStartIntegrationSetup(event.server);
+  }
+  if (LHClock >= 65 && LHIntegrationVerify) {
+    var verify = LHIntegrationVerify;
+    LHIntegrationVerify = null;
+    verify();
   }
 });
