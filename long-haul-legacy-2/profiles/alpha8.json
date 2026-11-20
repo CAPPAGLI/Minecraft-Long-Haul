@@ -150,8 +150,7 @@
       "woodworks",
       "clayworks",
       "effortless-building",
-      "quark",
-      "every-compat"
+      "quark"
     ],
     "food": [
       "farmers-respite",
@@ -287,7 +286,7 @@
     "biomes": "Regions Unexplored + Biomes O' Plenty + Terralith + Tectonic + Alex's Caves + thematic sub-biomes with vanilla vertical limits.",
     "structures": "YUNG full suite + Towns & Towers + IDAS + Dungeons and Taverns + Hopo + When Dungeons Arise + Structory + Formations + Archeology + Bountiful + Villager Recruits. Added Structurify density control and Easy NPC site dispatchers.",
     "world": "Ambient wildlife, bosses/encounters, weathering, snow physics, and client audiovisual atmosphere.",
-    "building": "Architecture, framing, chipped/rechiseled, Macaw suite, Quark, Sully's Mod, Immersive Paintings, and wood/stone/clay variants. Added Every Compat (Wood Good / Stone Zone) for cross-mod wood & stone unification.",
+    "building": "Architecture, framing, chipped/rechiseled, Macaw suite, Quark, Sully's Mod, Immersive Paintings, and wood/stone/clay variants.",
     "food": "Expanded Farmer's Delight ecosystem, Fruit Trees, Productive Bees, Culinary Construct, Diet, and Aquaculture without temperature locks. Added Create Confectionery. Added End's Delight.",
     "performance": "Client/server optimization stack with Embeddium/Oculus/Saturn/Noisium/ModernFix/FastWorkbench/RyoamicLights (radium excluded due to Valkyrien Skies POI mixin conflict). Added FastFurnace and Does It Tick for 175k-world TPS stability. Added Smooth Boot Reloaded.",
     "qol": "Compasses, Tetra+Extras, Combat Roll, JEI/EMI integrations, manuals, tooltips, UI polish, and voice chat addons without bulk backpacks or teleportation. Added Corpse, Better Spawner Control, Paxi, EntityJS, Game/Recipe/Item Stages, and FancyMenu/Drippy/ResourcePackOverrides/JustZoom client polish. Added Default Server Properties and Simple Discord RPC (client-only). Added Timeless and Classics Zero (TaCZ) industrial firearms."
