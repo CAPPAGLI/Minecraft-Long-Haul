@@ -481,6 +481,7 @@ function lhStartIntegrationSetup(server) {
         server.runCommandSilent('forceload remove ' + scx + ' ' + scz);
         server.runCommandSilent('forceload remove 800 0');
 
+        ok(Math.round(Number(overworld.worldBorder.size)) === 175000, 'world border initialized to 175000 blocks');
         console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + advancement sync');
       } catch (err2) {
         console.error('LH_INTEGRATION_FAIL: live adapter ' + err2);

@@ -156,8 +156,9 @@ ServerEvents.commandRegistry(function (event) {
 ServerEvents.loaded(function (event) {
   lhRead(event.server);
   if (!event.server.persistentData.getBoolean('longhaul_border_initialized')) {
-    event.server.runCommandSilent('worldborder center 0 0');
-    event.server.runCommandSilent('worldborder set 175000');
+    var wb = event.server.overworld().worldBorder;
+    wb.setCenter(0, 0);
+    wb.setSize(175000);
     event.server.persistentData.putBoolean('longhaul_border_initialized', true);
   }
   console.info('[LH] 8 intake contracts + consortium sharing loaded.');

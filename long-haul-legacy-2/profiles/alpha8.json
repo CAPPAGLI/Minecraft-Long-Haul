@@ -82,8 +82,7 @@
       "handcrafted",
       "villagersplus",
       "structurify",
-      "easy-npc",
-      "villager-recruits"
+      "easy-npc"
     ],
     "world": [
       "alexs-mobs",
@@ -284,7 +283,7 @@
   "reasons": {
     "industrial": "Create 6.0.6-6.0.8 addons, IE/IP/IG heavy industry, road vehicles (Ultimate Car Mod), CC peripherals, SFM/Modular Routers/Integrated Dynamics, stationary chests/barrels, and Exposure expansions without AE2/Tom's Storage. Added Functional Storage stationary drawers (ender_drawer disabled). Added Create Stuff & Additions (jetpacks blocked) and Create Liquid Fuel.",
     "biomes": "Regions Unexplored + Biomes O' Plenty + Terralith + Tectonic + Alex's Caves + thematic sub-biomes with vanilla vertical limits.",
-    "structures": "YUNG full suite + Towns & Towers + IDAS + Dungeons and Taverns + Hopo + When Dungeons Arise + Structory + Formations + Archeology + Bountiful + Villager Recruits. Added Structurify density control and Easy NPC site dispatchers.",
+    "structures": "YUNG full suite + Towns & Towers + IDAS + Dungeons and Taverns + Hopo + When Dungeons Arise + Structory + Formations + Archeology + Bountiful. Added Structurify density control and Easy NPC site dispatchers.",
     "world": "Ambient wildlife, bosses/encounters, weathering, snow physics, and client audiovisual atmosphere.",
     "building": "Architecture, framing, chipped/rechiseled, Macaw suite, Quark, Sully's Mod, Immersive Paintings, and wood/stone/clay variants.",
     "food": "Expanded Farmer's Delight ecosystem, Fruit Trees, Productive Bees, Culinary Construct, Diet, and Aquaculture without temperature locks. Added Create Confectionery. Added End's Delight.",

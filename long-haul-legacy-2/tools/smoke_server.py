@@ -98,13 +98,14 @@ def main():
         'heap_mb': args.heap,
         'world': args.world_label,
         'client_tested': False,
+        'world_border_175000': 'The world border is currently 175000 block(s) wide' in logtext,
         'integration_pass': 'LH_INTEGRATION_PASS:' in logtext,
         'integration_fail': 'LH_INTEGRATION_FAIL:' in logtext,
         'clean_exit': code == 0,
     }
     (S / 'smoke-result.json').write_text(json.dumps(result, indent=2) + '\n')
     print('SMOKE_TEST_DONE ' + json.dumps(result), flush=True)
-    sys.exit(0 if result['ready'] and result['clean_exit'] and result['integration_pass'] and not result['integration_fail'] else 1)
+    sys.exit(0 if result['ready'] and result['clean_exit'] and result['world_border_175000'] and result['integration_pass'] and not result['integration_fail'] else 1)
 
 if __name__ == '__main__':
     main()
