@@ -39,8 +39,7 @@
       "exposure-polaroid",
       "functional-storage",
       "create-stuff-additions",
-      "create-liquid-fuel",
-      "clockwork-additions"
+      "create-liquid-fuel"
     ],
     "biomes": [
       "biomes-o-plenty",
@@ -280,7 +279,7 @@
     ]
   },
   "reasons": {
-    "industrial": "Create 6.0.6-6.0.8 addons, IE/IP/IG heavy industry, road vehicles (Ultimate Car Mod), CC peripherals, SFM/Modular Routers/Integrated Dynamics, stationary chests/barrels, and Exposure expansions without AE2/Tom's Storage. Added Functional Storage stationary drawers (ender_drawer disabled). Added Create Stuff & Additions (jetpacks blocked), Create Liquid Fuel, and Clockwork Additions.",
+    "industrial": "Create 6.0.6-6.0.8 addons, IE/IP/IG heavy industry, road vehicles (Ultimate Car Mod), CC peripherals, SFM/Modular Routers/Integrated Dynamics, stationary chests/barrels, and Exposure expansions without AE2/Tom's Storage. Added Functional Storage stationary drawers (ender_drawer disabled). Added Create Stuff & Additions (jetpacks blocked) and Create Liquid Fuel.",
     "biomes": "Regions Unexplored + Biomes O' Plenty + Terralith + Tectonic + Alex's Caves + thematic sub-biomes with vanilla vertical limits.",
     "structures": "YUNG full suite + Towns & Towers + IDAS + Dungeons and Taverns + Hopo + When Dungeons Arise + Structory + Formations + Archeology + Bountiful + Recruits. Added Structurify density control and Easy NPC site dispatchers.",
     "world": "Ambient wildlife, bosses/encounters, weathering, snow physics, and client audiovisual atmosphere.",

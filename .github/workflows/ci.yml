@@ -129,9 +129,9 @@ jobs:
               raw_lines = sc.read_text(errors='replace').splitlines()
               errs = []
               for idx, l in enumerate(raw_lines):
-                  if ('ERROR' in l or 'FATAL' in l or 'Exception' in l or 'LH_INTEGRATION' in l):
+                  if ('ERROR' in l or 'FATAL' in l or 'Exception' in l or 'Caused by:' in l or 'LH_INTEGRATION' in l):
                       errs.append(l)
-                      if 'Exception caught during firing event' in l or 'NullPointerException' in l:
+                      if 'Exception caught during firing event' in l or 'NullPointerException' in l or 'MixinTransformerError' in l or 'ClassMetadataNotFoundException' in l:
                           errs.extend(raw_lines[idx+1:idx+12])
               lines.append(f'<details><summary>Console Errors/Highlights ({len(errs)})</summary>\n\n```\n' + '\n'.join(errs[-80:]) + '\n```\n</details>\n')
               tail = '\n'.join(sc.read_text(errors='replace').splitlines()[-60:])
