@@ -3,8 +3,9 @@
 API pins are not blindly treated as version constraints; actual Forge jar dependencies
 are inspected separately via inspect_alpha.py and server smoke tests.
 """
-import argparse, concurrent.futures, hashlib, json, pathlib, time, urllib.request
+import argparse, concurrent.futures, hashlib, io, json, pathlib, time, tomllib, urllib.request, zipfile
 from audit_mods import get
+from inspect_alpha import fits
 
 R = pathlib.Path(__file__).resolve().parents[1]
 DIR = R / 'assembly/mods'
@@ -46,6 +47,23 @@ def resolve_profile(profile_path: pathlib.Path):
                 raise RuntimeError('No supported version for ' + slug)
             stable = [v for v in vs if v['version_type'] == 'release']
             v = (stable or vs)[0]
+        if slug == 'parcool':
+            # Pick the newest ParCool build whose mods.toml forge range fits Forge 47.4.10.
+            picked = None
+            for cand in (stable or vs):
+                jf = next((f for f in cand['files'] if f['filename'].endswith('.jar') and f.get('primary')), next(f for f in cand['files'] if f['filename'].endswith('.jar')))
+                req = urllib.request.Request(jf['url'], headers={'User-Agent': 'LongHaulLegacy/2.0 assembler'})
+                with urllib.request.urlopen(req, timeout=60) as resp:
+                    zdata = resp.read()
+                with zipfile.ZipFile(io.BytesIO(zdata)) as zf:
+                    mt = tomllib.loads(zf.read('META-INF/mods.toml').decode(errors='replace'))
+                deps = [d for dl in mt.get('dependencies', {}).values() for d in dl if d.get('modId') == 'forge']
+                if all(fits('47.4.10', d.get('versionRange', '')) is not False for d in deps):
+                    picked = cand
+                    break
+            if not picked:
+                raise RuntimeError('No parcool version compatible with Forge 47.4.10')
+            v = picked
         if slug == 'create-clockwork':
             # 0.5.7 removed bundled Kelvin without exposing an obtainable API dependency.
             # 0.5.6 contains Kelvin 0.5.0 as a proper Forge JarJar dependency.
