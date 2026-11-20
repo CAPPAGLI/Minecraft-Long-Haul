@@ -1,0 +1,46 @@
+{
+  "dependencies": [
+    "story_05_continental_bakery"
+  ],
+  "tasks": {
+    "story": {
+      "type": "heracles:advancement",
+      "title": "Хроника «Ушёл за хлебом»",
+      "advancements": [
+        "longhaul:story/06_forgot_the_milk"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Эпилог: Легендарная буханка… а молоко?\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · История\"}",
+    "description": [
+      "Континентальный комплекс запущен! Ты триумфально приземляешься на грузовом дирижабле прямо у родного порога с идеальной тёплой буханкой хлеба.",
+      "Дверь открывает восемнадцатилетний сын, смотрит на твой железнодорожный консорциум, берёт хлеб и спрашивает: «Пап, супер… а молоко ты тоже забыл?»"
+    ],
+    "groups": {
+      "00 · Сюжет: Ушёл за хлебом": {
+        "position": [
+          96,
+          42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:milk_bucket",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

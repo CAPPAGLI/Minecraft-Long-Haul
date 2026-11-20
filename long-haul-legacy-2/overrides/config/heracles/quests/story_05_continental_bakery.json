@@ -1,0 +1,46 @@
+{
+  "dependencies": [
+    "story_04_snail_at_door"
+  ],
+  "tasks": {
+    "story": {
+      "type": "heracles:advancement",
+      "title": "Хроника «Ушёл за хлебом»",
+      "advancements": [
+        "longhaul:story/05_continental_bakery"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Глава V: Почти на кассе, просто настраиваю НПЗ\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · История\"}",
+    "description": [
+      "Сыну скоро в школу. У тебя уже есть сортировочная станция, три региональных завода, телеметрия CC: Tweaked и фотоальбом «Я правда искал хлебозавод».",
+      "Осталось запустить Континентальный узел консорциума, чтобы наконец испечь Ту Самую Буханку."
+    ],
+    "groups": {
+      "00 · Сюжет: Ушёл за хлебом": {
+        "position": [
+          0,
+          42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:precision_mechanism",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

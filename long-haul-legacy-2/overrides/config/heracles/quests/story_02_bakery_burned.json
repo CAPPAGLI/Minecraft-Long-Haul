@@ -1,0 +1,46 @@
+{
+  "dependencies": [
+    "story_01_left_for_bread"
+  ],
+  "tasks": {
+    "story": {
+      "type": "heracles:advancement",
+      "title": "Хроника «Ушёл за хлебом»",
+      "advancements": [
+        "longhaul:story/02_bakery_burned"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Глава II: Пекарня сгорела — нужен пропитанный брус\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · История\"}",
+    "description": [
+      "Местный пекарь объяснил, что печь без угля не топит, а ближайший лес — за перевалом.",
+      "«Дорогая, я уже у витрины! Просто быстро запущу лесопилку и найду редкую угольную жилу (/lh prospect)»."
+    ],
+    "groups": {
+      "00 · Сюжет: Ушёл за хлебом": {
+        "position": [
+          0,
+          -42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "longhaul:field_rations",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "dependencies": [
+    "story_03_dinner_telegram"
+  ],
+  "tasks": {
+    "story": {
+      "type": "heracles:advancement",
+      "title": "Хроника «Ушёл за хлебом»",
+      "advancements": [
+        "longhaul:story/04_snail_at_door"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Глава IV: Почему за тобой ползёт Бессмертная Улитка?\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · История\"}",
+    "description": [
+      "Ты всё-таки вышел далеко за пределы двора, и старое проклятие проснулось: Бессмертная Улитка медленно ползёт сквозь камень, стены и океаны прямо в твою сторону.",
+      "Убить её невозможно — остаётся строить быстрые поезда, суда, дирижабли и паркурить через завалы (/lh snail status)."
+    ],
+    "groups": {
+      "00 · Сюжет: Ушёл за хлебом": {
+        "position": [
+          -96,
+          42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:slime_ball",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

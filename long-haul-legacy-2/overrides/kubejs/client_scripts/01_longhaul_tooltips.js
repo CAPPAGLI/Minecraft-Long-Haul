@@ -8,7 +8,7 @@ ItemEvents.tooltip(function (event) {
     'longhaul:refractory_mix': 'Узел: Карьер пустошей (/lh site info badlands)',
     'longhaul:technical_glass': 'Узел: Стекольная долина (/lh site info smelter)',
     'longhaul:technical_oil': 'Узел: Заболоченный посёлок (/lh site info wetland)',
-    'longhaul:machine_parts': 'Узел: Машиностроительный центр (/lh site info machines)',
+    'longhaul:machine_parts': 'Узел: Машиностроительный центр (/lh site info machine)',
     'longhaul:continental_module': 'Финальный модуль: Континентальный узел (/lh site info continental_hub)'
   };
   Object.keys(siteNotes).forEach(function (id) {
@@ -25,4 +25,5 @@ ItemEvents.tooltip(function (event) {
 
   event.add('minecraft:bundle', Text.green('Этап I: походный узелок (до телег и грузовых поездов).'));
   event.add('functionalstorage:ender_drawer', Text.red('Отключено правилами Long Haul: портальные сети запрещены.'));
+  event.add('#minecraft:saplings', Text.red('Посадка отключена: добывайте лес в экспедициях и через Лесную артель.'));
 });

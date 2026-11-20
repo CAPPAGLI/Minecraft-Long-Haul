@@ -28,6 +28,25 @@ LootJS.modifiers(function (event) {
   event.addLootTableModifier(/.*/).removeLoot('supplementaries:safe');
   event.addLootTableModifier(/.*/).removeLoot('quark:backpack');
   event.addLootTableModifier(/.*/).removeLoot('functionalstorage:ender_drawer');
+  // Sapling & log scarcity: no local tree farms; explore forests & commission the Forestry Guild.
+  event.addLootTableModifier(/.*/).removeLoot('#minecraft:saplings');
+  event.addBlockLootModifier('#minecraft:leaves').removeLoot('minecraft:azalea');
+  event.addBlockLootModifier('#minecraft:leaves').removeLoot('minecraft:flowering_azalea');
+  event.addBlockLootModifier('#minecraft:logs').randomChance(0.4).removeLoot('#minecraft:logs');
+});
+
+BlockEvents.placed(function (event) {
+  if (event.block && event.block.hasTag('minecraft:saplings')) {
+    if (event.player) event.player.tell('[Long Haul] Посадка саженцев отключена: добывайте дерево в экспедициях по новым лесам или через Лесную Артель.');
+    event.cancel();
+  }
+});
+
+ItemEvents.rightClicked(function (event) {
+  if (event.item && event.item.hasTag('minecraft:saplings')) {
+    if (event.player) event.player.tell('[Long Haul] Посадка саженцев отключена: добывайте дерево в экспедициях по новым лесам.');
+    event.cancel();
+  }
 });
 
 BlockEvents.rightClicked('minecraft:ender_chest', function (event) {

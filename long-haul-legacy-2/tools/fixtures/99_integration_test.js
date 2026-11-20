@@ -481,6 +481,31 @@ function lhStartIntegrationSetup(server) {
         server.runCommandSilent('forceload remove ' + scx + ' ' + scz);
         server.runCommandSilent('forceload remove 800 0');
 
+        // 15. Immortal Snail lifecycle, chunk ore prospecting, and story quest advancements
+        var snailActor = {
+          uuid: '00000000-0000-4000-8000-000000000011',
+          level: overworld,
+          x: 0, y: 80, z: 0,
+          killed: false,
+          isCreative: function () { return false; },
+          isSpectator: function () { return false; },
+          tell: function () {},
+          kill: function () { this.killed = true; },
+          isAdvancementDone: function () { return false; },
+          unlockAdvancement: function () {}
+        };
+        ok(lhSnailStepPlayer(server, snailActor, 20, true) === 0, 'snail does NOT awaken or kill on spawn');
+        ok(lhSnailWake(server, snailActor, true) === 1, 'snail awakens on grace expiration');
+        var sRec = lhSnailGetRecord(server, snailActor);
+        ok(sRec.awake === true && Math.round(global.LHWorldPlanner.dist2D(snailActor.x, snailActor.z, sRec.x, sRec.z)) === 64, 'snail spawns 64m away');
+        sRec.x = snailActor.x + 2.0; sRec.y = snailActor.y; sRec.z = snailActor.z;
+        ok(lhSnailStepPlayer(server, snailActor, 20, true) === 2 && snailActor.killed === true, 'snail strikes lethally on contact and resets');
+        ok(sRec.cooldownTicks === 2400 && Math.round(global.LHWorldPlanner.dist2D(snailActor.x, snailActor.z, sRec.x, sRec.z)) === 80, 'snail resets 80m away with 120s cooldown');
+        ok(lhProspectChunk(server, snailActor) === 1, 'chunk ore prospector scans without error');
+        var sDbClean = lhSnailRead(server);
+        delete sDbClean.players[String(snailActor.uuid)];
+        lhSnailSave(server);
+
         ok(Math.round(Number(overworld.worldBorder.size)) === 175000, 'world border initialized to 175000 blocks');
         console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + advancement sync');
       } catch (err2) {

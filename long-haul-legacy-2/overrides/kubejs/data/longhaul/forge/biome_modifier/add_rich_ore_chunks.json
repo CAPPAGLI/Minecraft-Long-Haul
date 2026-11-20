@@ -1,0 +1,13 @@
+{
+  "type": "forge:add_features",
+  "biomes": "#minecraft:is_overworld",
+  "features": [
+    "longhaul:rich_coal_chunk",
+    "longhaul:rich_iron_chunk",
+    "longhaul:rich_copper_chunk",
+    "longhaul:rich_gold_chunk",
+    "longhaul:rich_redstone_chunk",
+    "longhaul:rich_diamond_chunk"
+  ],
+  "step": "underground_ores"
+}

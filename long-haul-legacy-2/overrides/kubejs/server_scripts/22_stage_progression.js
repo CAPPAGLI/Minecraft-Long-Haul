@@ -42,16 +42,25 @@ function lhStageRecompute(server, player) {
   ['plate_shift', 'food_shift', 'rail_shift'].forEach(function (k) {
     if (receipts[k]) timedCount++;
   });
-  var machines = sitesDb.sites && sitesDb.sites.machines;
+  var machine = sitesDb.sites && sitesDb.sites.machine;
   var hub = sitesDb.sites && sitesDb.sites.continental_hub;
   var archive = sitesDb.sites && sitesDb.sites.continental_archive;
-  var highTierReady = (machines && machines.commissioned) || (hub && hub.commissioned) || (archive && archive.commissioned);
+  var highTierReady = (machine && machine.commissioned) || (hub && hub.commissioned) || (archive && archive.commissioned);
 
   var unlocked = ['longhaul_stage_1'];
   if (commissioned >= 1 || restored >= 1) unlocked.push('longhaul_stage_2');
   if (commissioned >= 2 && (ccCount >= 1 || timedCount >= 1 || restored >= 2)) unlocked.push('longhaul_stage_3');
   if ((highTierReady && commissioned >= 3) || commissioned >= 4) unlocked.push('longhaul_stage_4');
   if (hub && (hub.producedTotal || 0) >= 1) unlocked.push('longhaul_finale');
+
+  if (player && typeof lhUnlock === 'function') {
+    lhUnlock(player, 'longhaul:story/01_left_for_bread');
+    if (unlocked.indexOf('longhaul_stage_2') !== -1 || receipts.plates) lhUnlock(player, 'longhaul:story/02_bakery_burned');
+    if (commissioned >= 2) lhUnlock(player, 'longhaul:story/03_dinner_telegram');
+    if (unlocked.indexOf('longhaul_stage_3') !== -1) lhUnlock(player, 'longhaul:story/04_snail_at_door');
+    if (unlocked.indexOf('longhaul_stage_4') !== -1) lhUnlock(player, 'longhaul:story/05_continental_bakery');
+    if (unlocked.indexOf('longhaul_finale') !== -1) lhUnlock(player, 'longhaul:story/06_forgot_the_milk');
+  }
 
   var prev = stDb.players[pid] || [];
   var added = [];
