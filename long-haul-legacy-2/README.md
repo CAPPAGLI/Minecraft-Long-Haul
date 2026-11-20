@@ -1,29 +1,28 @@
-# Long Haul Legacy 2.0 — Alpha 3 (`2.0-alpha.3`)
+# Long Haul Legacy 2.0 — Alpha 4 (`2.0-alpha.4`)
 
-**Расширенная серверно-проверенная альфа сборки, НЕ финальный релиз по полному ТЗ.** Импортируемый `.mrpack` предназначен для отдельного тестового профиля и нового обычного мира. Рабочая 1.1.1 не изменена. Исторические снимки прошлых альф сохранены в `history/alpha.1/` и `history/alpha.2/`.
+**Расширенная серверно-проверенная альфа сборки, НЕ финальный релиз по полному ТЗ.** Импортируемый `.mrpack` предназначен для отдельного тестового профиля и нового обычного мира. Рабочая 1.1.1 не изменена. Исторические снимки прошлых альф сохранены в `history/alpha.1/`, `history/alpha.2/` и `history/alpha.3/`.
 
-## Что находится в пакете (`2.0-alpha.3`)
+## Что нового в `2.0-alpha.4`
 
-- **Minecraft 1.20.1 / Forge 47.4.10 / Java 17.**
-- **266 внешних JAR (214 серверных / 52 клиентских) + 1 собственный `longhaul-runtime-1.20.1-0.1.0.jar`** (`600,945,061` байт внешних загрузок с Modrinth CDN, **291 объявленный mod ID** включая вложенные зависимости, 0 отсутствующих зависимостей, 0 конфликтов версий Maven).
-- **Транспорт и индустрия:** Create 6.0.8, Steam ’n’ Rails, Crafts & Additions, Enchantment Industry, Connected, Deco, Slice & Dice, Central Kitchen, Diesel Generators, Ore Excavation, New Age, Railways Navigator, Create: Metallurgy, Create: Goggles, Create Low-Heated, Create: Optical, Create: Garnished, Create: Bitterballen, Create: Tweaked Controllers, Numismatics, Create: Framed, Immersive Engineering + Immersive Petroleum + Immersive Geology, PneumaticCraft: Repressurized, Little Logistics, Railcraft Reborn, More Minecarts, Valkyrien Skies, Clockwork 0.5.6 (с Kelvin 0.5.0), Eureka, Trackwork, Automobility, AstikorCarts Redux, Immersive Aircraft, Man of Many Planes, Small Ships.
-- **Связь, автоматизация, съёмка:** CC: Tweaked, Advanced Peripherals, CC:C Bridge, Tom's Peripherals, Exposure + Expanded + Catalog + Polaroid, Simple Voice Chat + Voice Chat Recording + Walkie-Talkie, Zume.
-- **Мир 175 000 × 175 000:** Tectonic, Terralith, Biomes O' Plenty, Regions Unexplored, Atmospheric, Autumnity, Environmental, Ecologics, Upgrade Aquatic, Towns and Towers, IDAS, Dungeons and Taverns, Structory + Towers, Formations, Explorify, Repurposed Structures, Better Archeology, Bountiful, Alex's Mobs, Naturalist, полный набор структур YUNG, ChoiceTheorem's Overhauled Village. Waystones **отсутствуют** (телепортация исключена), граница `175000` блоков (`±87500` от центра `0,0`) выставляется автоматически при старте мира.
-- **Фермерство, строительство, QoL и производительность:** экосистема Farmer's Delight (Brewin' and Chewin', Farmer's Respite, Cultural Delights, Miner's Delight, Rustic Delight, Delightful, Corn Delight, Crabber's Delight, Fruits Delight, Collector's Reap, Ube's Delight, Chef's Delight, Aquaculture), Quark, Supplementaries (+ Squared, Amendments), FramedBlocks, Chipped, Rechiseled, Macaw's, Storage Drawers (шалкер-боксы, эндер-сундуки, `supplementaries:sack` и `supplementaries:safe` заблокированы), Embeddium, Oculus, ImmediatelyFast, EntityCulling, ModernFix, FerriteCore, Saturn, Noisium, JEI, EMI, Jade, Xaero's World Map & Minimap.
-- **Игровая механика Long Haul (KubeJS + `longhaul-runtime`):**
-  - **8 серверных контрактов приёмки** (включая временны́е испытания с окнами и кооперативный режим `/lh share <player>`).
-  - **10 детерминированных стратегических узлов** внутри `±84000` (8 производственных центров с собственными товарами `longhaul:*`, `continental_archive` и `continental_hub`).
-  - **6 восстанавливаемых промышленных объектов** (`/lh recovery <list|info|survey|restore>`): лесопилка, карьер, речной порт, сортировочный узел, энергостанция и обрушенный мост.
-  - **Полевые фотоотчёты Exposure и телеметрия CC: Tweaked:** `/lh photo <report|status>` (9 уникальных кадров без повторного использования) и `/lh cc <challenge|verify|status>` (8 задач мониторинга депо).
-  - **Разворачиваемый экспедиционный лагерь и анти-читовый учёт маршрутов:** `/lh camp deploy|pack|list`, `/lh route begin|gate|finish|start|list`, серверные накладные `/lh cargo issue|deliver`.
-  - **71 установленный квест Heracles** (6 групп) и **54 серверных advancement** в `kubejs/data/longhaul/advancements/`.
+- **337 внешних JAR (270 серверных / 67 только клиентских) + 1 собственный `longhaul-runtime-1.20.1-0.1.0.jar`** (`819,540,941` байт внешних загрузок с Modrinth CDN, **364 объявленных mod ID** включая вложенные зависимости, 0 отсутствующих зависимостей, 0 конфликтов версий Maven).
+- **Все 16 физических `.nbt` структур городов и объектов восстановления** (`DataVersion: 3465`, `9×6×9`, с реальной бочкой депо в центре `(4, 1, 4)`):
+  - `overrides/kubejs/data/longhaul/structures/sites/*.nbt` — все 10 стратегических узлов (`forest`, `mine`, `quarry`, `farm`, `glass`, `swamp`, `chemical`, `machines`, `continental_archive`, `continental_hub`), идемпотентно возводятся на поверхности при приближении игрока (`<= 144` блоков) или вводе в строй; `/lh site repair_archive` восстанавливает постройки `continental_archive` без повторных наград.
+  - `overrides/kubejs/data/longhaul/structures/recovery/*.nbt` — 6 разрушенных промышленных объектов (`sawmill`, `quarry_pit`, `river_port`, `sorting_yard`, `power_station`, `collapsed_bridge`), разворачиваются при `/lh recovery survey <id>`.
+- **Полная интеграция всех 240 спецификаций из `design/quest-catalog.*`:**
+  - **311 установленных квестов Heracles** (11 групп: 71 базовый квест + 240 заказов каталога across 4 стадии, 8 инженерных веток, 10 региональных линий, экспедиции, фотоотчёты Exposure и инфраструктуру CC: Tweaked).
+  - **294 серверных advancement** в `kubejs/data/longhaul/advancements/`.
+  - **Серверный верификатор каталога** (`startup_scripts/02_quest_catalog.js` + `server_scripts/19_catalog_orders.js`): `/lh catalog list|stage|info|verify` с честной проверкой сдачи предметов из бочки депо (без чтения инвентаря игрока), координат узлов, фото Exposure, маяков/периферии CC: Tweaked, маршрутов и этапов восстановления.
+- **Расширение модпака (+71 JAR относительно `alpha.3`):**
+  - **Транспорт, логистика, индустрия:** Create `6.0.8` + аддоны `6.0.6+` (`create-mechanical-extruder`, `create-sifting`, `create-big-cannons`, `create-deco-additions`), `ultimate-car-mod`, `super-factory-manager`, `modular-routers`, `integrated-dynamics`, `iron-chests`, `iron-barrels` (шалкеры, эндер-сундуки, `supplementaries:sack`, `supplementaries:safe` и `quark:backpack` заблокированы).
+  - **Мир, биомы и подземелья:** добавлены `alexs-caves`, `hopo-better-mineshaft`, `hopo-better-underwater-ruins`, `hopo-better-ruined-portals`, `stony-cliffs-are-cool`, `when-dungeons-arise`, `when-dungeons-arise-seven-seas`, `guard-villagers`, `illager-invasion`, `mutant-monsters`, `mowzies-mobs`, `the-conjurer`, `nether-depths-upgrade`, `snowy-spirit`, `immersive-weathering`, `snow-real-magic`, `snow-under-trees`.
+  - **Еда, строительство, боевые/QoL-инструменты и клиентские улучшения:** `enders-delight`, `collectors-reap`, `ubes-delight`, `chefs-delight`, `butchers-delight`, `pineapple-delight`, `casualness-delight`, `oceanic-delight`, `aquaculture-delight`, `productivebees`, `fruit-trees`, `culinary-construct`, `diet`, `buildersaddition`, `building-but-better`, `stoneworks`/`woodworks`/`clayworks`, `effortless-building`, `tetra` + `tetra-extras`, `simply-swords`, `immersive-armors`, `combat-roll`, `natures-compass`, `explorers-compass`, аддоны EMI/JEI/визуальные моды с пометкой `client_only`.
 - **Без космоса и температурных модов.** `DOOMED` не включён; инструкция по необязательной ручной установке находится в `DOOMED.md`.
 
-Профиль сборки: `profiles/alpha3.json` (динамически разрешаемый список и хэши в CI → артефакт `Long-Haul-Legacy-2.0-alpha.3.mrpack` и `alpha3-build-and-test-logs`). Подробности проверки: `TEST-REPORT.md`, машинный статус: `STATUS.json`.
+Профиль сборки: `profiles/alpha4.json` (динамически разрешаемый список и хэши в CI → артефакт `Long-Haul-Legacy-2.0-alpha.4.mrpack` и `Long-Haul-Legacy-2.0-alpha.4-Sources-and-Report.zip`). Подробности проверки: `TEST-REPORT.md`, машинный статус: `STATUS.json`.
 
 ## Установка тестового профиля
 
-1. Соберите или скачайте `Long-Haul-Legacy-2.0-alpha.3.mrpack` (артефакт CI или `python3 tools/assemble_alpha.py --profile profiles/alpha3.json` + `tools/package_alpha.py --version 2.0-alpha.3`). Не смешивайте с 1.1.1.
+1. Соберите или скачайте `Long-Haul-Legacy-2.0-alpha.4.mrpack` (артефакт CI `long-haul-legacy-2.0-alpha.4` или `python3 tools/assemble_alpha.py --profile profiles/alpha4.json` + `tools/package_alpha.py --version 2.0-alpha.4`). Не смешивайте с `1.1.1`.
 2. Импортируйте в Prism Launcher или совместимый лаунчер.
 3. Выберите **Java 17** и начните с **8–10 ГБ RAM** (на системе с 32 ГБ RAM; не выделяйте всю память).
 4. Создайте **новый обычный мир**.
@@ -32,35 +31,37 @@
 
 - `/lh help` — справка по командам.
 - `/lh terminal`, `/lh accept <id>`, `/lh status`, `/lh abort`, `/lh share <player>` — приёмка и кооперативные контракты.
-- `/lh sites`, `/lh site info <id>`, `/lh site commission <id>`, `/lh site produce <id> <bootstrap|industrial>`, `/lh site archive` — разведка, ввод в строй и локальное производство на 10 стратегических узлах.
+- `/lh catalog list|stage <1..4>|info <id>|verify <id>` — просмотр и серверная проверка 240 заказов каталога.
+- `/lh sites`, `/lh site info <id>`, `/lh site commission <id>`, `/lh site produce <id> <bootstrap|industrial>`, `/lh site archive`, `/lh site repair_archive` — разведка, ввод в строй, ремонт архива и локальное производство на 10 стратегических узлах.
 - `/lh recovery list|info|survey|restore` — обследование и восстановление 6 разрушенных объектов.
 - `/lh photo report|status`, `/lh cc challenge|verify|status` — полевые фотоотчёты Exposure и телеметрия CC: Tweaked.
 - `/lh camp deploy|pack|list`, `/lh route begin|gate|finish|start|list`, `/lh cargo issue|deliver` — лагеря, маршруты без телепортации и серверные грузовые накладные.
 
 ## Что ещё осталось до финального релиза
 
-| Требование | Состояние `2.0-alpha.3` |
+| Требование | Состояние `2.0-alpha.4` |
 |---|---|
-| ~500 полезных модов | В процессе: 266 внешних JAR / 291 mod ID (следующий этап расширения к ~500) |
+| ~500 полезных модов | В процессе: 337 внешних JAR / 364 mod ID (следующий этап расширения к ~500) |
 | Клиентское, графическое и транспортное тестирование | Не пройдено: проверен только headless Linux-сервер (void + обычный Overworld) |
-| Полная интеграция всех 240 спецификаций из `design/quest-catalog.*` | В Heracles собрано 71 квест (6 групп); остальные описаны в каталоге спецификаций |
-| Пользовательские NBT-структуры 8 городов и 6 объектов восстановления | Логика и координаты работают на сервере; уникальные NBT-постройки ещё не созданы |
+| Полная интеграция всех 240 спецификаций из `design/quest-catalog.*` | Реализовано в Heracles (311 квестов, 11 групп, 294 advancement) и сервере (`/lh catalog`) |
+| Физические NBT-структуры городов и объектов восстановления | Реализованы 16 `9×6×9` `.nbt` шаблонов + авторазмещение и ремонт архива |
 | Проверка физики поездов/кораблей VS в клиенте | Не проведена в графическом клиенте |
 
 ## Воспроизведение и CI
 
 ```bash
 node long-haul-legacy-2/tools/test_contracts.js
+python3 long-haul-legacy-2/tools/generate_structures.py
 python3 long-haul-legacy-2/tools/generate_alpha_quests.py
-python3 long-haul-legacy-2/tools/assemble_alpha.py --profile long-haul-legacy-2/profiles/alpha3.json
+python3 long-haul-legacy-2/tools/assemble_alpha.py --profile long-haul-legacy-2/profiles/alpha4.json
 python3 long-haul-legacy-2/tools/generate_modlist.py
 python3 long-haul-legacy-2/tools/prepare_server.py --mode void
 python3 long-haul-legacy-2/tools/build_runtime.py
 python3 long-haul-legacy-2/tools/inspect_alpha.py
-python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 360 --world-label "alpha3 void integration test"
-python3 long-haul-legacy-2/tools/prepare_server.py --mode normal
-python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 540 --world-label "alpha3 normal overworld test"
-python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.3
+python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 450 --world-label "alpha4 void integration test"
+python3 long-haul-legacy-2/tools/prepare_server.py --mode normal --skip-forge-install
+python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 600 --world-label "alpha4 normal overworld test"
+python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.4
 ```
 
 Срез выбора версий — **15.11.2026**. Полный цикл сборки и оба smoke-теста автоматизированы в `.github/workflows/ci.yml`.

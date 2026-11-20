@@ -1,18 +1,18 @@
 {
-  "version": "2.0-alpha.3",
+  "version": "2.0-alpha.4",
   "date_cutoff": "2026-11-15",
-  "status": "HEADLESS_CI_VERIFIED_ALPHA3_NOT_FULL_REQUEST",
+  "status": "HEADLESS_CI_VERIFIED_ALPHA4_NOT_FULL_REQUEST",
   "minecraft": "1.20.1",
   "forge": "47.4.10",
   "java": 17,
-  "external_jars": 266,
-  "server_jars": 214,
-  "client_only_jars": 52,
+  "external_jars": 337,
+  "server_jars": 270,
+  "client_only_jars": 67,
   "local_jars": 1,
-  "recursive_declared_mod_ids": 291,
-  "external_download_bytes": 600945061,
-  "ci_run_id": 44642411231,
-  "ci_verified_commit": "3383574",
+  "recursive_declared_mod_ids": 364,
+  "external_download_bytes": 819540941,
+  "ci_run_id": 44649879995,
+  "ci_verified_commit": "1859346",
   "server_smoke_test_void": {
     "ready": true,
     "exit_code": 0,
@@ -21,7 +21,7 @@
       "server_ready"
     ],
     "heap_mb": 4096,
-    "world": "alpha3 void integration test",
+    "world": "alpha4 void integration test",
     "client_tested": false,
     "integration_pass": true,
     "integration_fail": false,
@@ -35,22 +35,19 @@
       "server_ready"
     ],
     "heap_mb": 4096,
-    "world": "alpha3 normal overworld test",
+    "world": "alpha4 normal overworld test",
     "client_tested": false,
     "integration_pass": true,
     "integration_fail": false,
     "clean_exit": true
   },
-  "model_tests_passed": 16,
-  "installed_quests": 71,
-  "installed_advancements": 54,
+  "model_tests_passed": 17,
+  "installed_quests": 311,
+  "installed_advancements": 294,
+  "nbt_structures_generated": 16,
   "quest_breakdown": {
-    "manual_information": 6,
-    "inventory_tutorials": 12,
-    "receipt_contracts": 8,
-    "strategic_sites_and_production": 17,
-    "expedition_camp_and_routes": 5,
-    "recovery_and_field_reports": 23
+    "core_campaign_quests": 71,
+    "catalog_orders_implemented": 240
   },
   "recoverable_facilities_implemented": 6,
   "exposure_field_reports_implemented": 9,
@@ -61,7 +58,8 @@
   ],
   "timed_contracts_live_tested": true,
   "brigadier_commands_live_tested": true,
-  "quest_specifications_design_only": 240,
+  "catalog_orders_live_tested": true,
+  "nbt_structures_live_tested": true,
   "world_border_width": 175000,
   "world_guarantees_implemented": true,
   "specialized_renewable_cities_implemented": true,
@@ -76,5 +74,5 @@
   "new_installable_pack_created": true,
   "launcher_import_tested": false,
   "legacy_1_1_1_modified": false,
-  "limitations": "See README.md and TEST-REPORT.md. Headless Linux Forge integration verified for 266 external JARs + longhaul-runtime (void + normal Overworld); graphical client, vehicle physics in motion, custom city NBT schematics, and remaining expansion from 266 toward ~500 mods are not yet complete."
+  "limitations": "See README.md and TEST-REPORT.md. Headless Linux Forge integration verified for 337 external JARs + longhaul-runtime (void + normal Overworld), 16 NBT structures, and 311 Heracles quests (240 catalog + 71 core); graphical client, vehicle physics in motion, and remaining expansion from 337 toward ~500 mods are not yet complete."
 }
