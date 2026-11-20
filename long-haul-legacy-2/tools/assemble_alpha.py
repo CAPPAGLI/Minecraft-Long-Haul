@@ -53,6 +53,9 @@ def resolve_profile(profile_path: pathlib.Path):
         if slug == 'polymorph':
             # 0.49.11 requires beta JEI >= 15.57.0.207; 0.49.10 matches release JEI 15.56.0.205.
             v = json.loads((R / 'audit/polymorph-0.49.10.json').read_text(encoding='utf-8'))
+        if slug == 'ends-delight':
+            # create_central_kitchen and delightful require ends_delight >= 2.6.1 (tagged beta on Modrinth).
+            v = json.loads((R / 'audit/ends-delight-2.6.1.json').read_text(encoding='utf-8'))
         pid = v['project_id']
         if pid in known:
             continue

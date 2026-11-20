@@ -1,0 +1,44 @@
+{
+  "game_versions": [
+    "1.20.1"
+  ],
+  "loaders": [
+    "forge"
+  ],
+  "environment": "client_and_server",
+  "id": "FHVQqUkN",
+  "project_id": "yHN0njMr",
+  "author_id": "JVjjBYpB",
+  "featured": false,
+  "name": "End's Delight 2.6.1+forge.1.20.1",
+  "version_number": "2.6.1+forge.1.20.1",
+  "changelog": "Fixed an issue where the tooltips of some items could not display properly",
+  "changelog_url": null,
+  "date_published": "2026-08-18T06:30:50.138950Z",
+  "downloads": 76386,
+  "version_type": "beta",
+  "status": "listed",
+  "requested_status": null,
+  "files": [
+    {
+      "id": "4C3H77r8",
+      "hashes": {
+        "sha512": "c57faa63d9f016326be78c5ba286509bc29e752e594a47bb514607dbae44202640e7d767c437a1e5b480c4ff3f037c1ba1dd9833357866d0275c16126f1b932d",
+        "sha1": "92158881934f91b125a8d4699eb9e33317fc485b"
+      },
+      "url": "https://cdn.modrinth.com/data/yHN0njMr/versions/FHVQqUkN/ends_delight-2.6.1%2Bforge.1.20.1.jar",
+      "filename": "ends_delight-2.6.1+forge.1.20.1.jar",
+      "primary": true,
+      "size": 264014,
+      "file_type": null
+    }
+  ],
+  "dependencies": [
+    {
+      "version_id": null,
+      "project_id": "R2OftAxM",
+      "file_name": null,
+      "dependency_type": "required"
+    }
+  ]
+}
