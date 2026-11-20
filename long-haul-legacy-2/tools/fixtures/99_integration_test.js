@@ -285,7 +285,7 @@ function lhStartIntegrationSetup(server) {
           unlockAdvancement: function () {}
         };
         ok(lhCatVerify(server, catDelivActor, 'main_1_01') === 1, 'catalog controlled_production consumed 64 items from depot');
-        ok(lhCatVerify(server, siteActor, 'engineering_cc_01') === 1, 'catalog computer_challenge verified near CC computer');
+        ok(lhCatVerify(server, catDelivActor, 'engineering_cc_01') === 1, 'catalog computer_challenge verified near CC computer');
 
         // 11. Economy recipes & banned portable storage check
         var RL = Java.loadClass('net.minecraft.resources.ResourceLocation');

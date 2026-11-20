@@ -127,7 +127,8 @@ function lhCatVerify(server, player, qid) {
       return 0;
     }
   } else if (vt === 'computer_challenge') {
-    if (!lhHasNearbyComputer(player.level, Math.floor(player.x), Math.floor(player.y), Math.floor(player.z))) {
+    var compFound = lhFindNearbyComputer(player.level, { x: Math.floor(player.x), y: Math.floor(player.y), z: Math.floor(player.z) });
+    if (!compFound) {
       lhMsg(player, 'Рядом (<= 12 м) должен быть установлен компьютер CC: Tweaked.');
       return 0;
     }
