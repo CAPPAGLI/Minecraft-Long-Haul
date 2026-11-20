@@ -124,8 +124,14 @@ jobs:
                   lines.append(f'<details><summary>{label}</summary>\n\n```\n{txt}\n```\n</details>\n')
           sc = pathlib.Path('long-haul-legacy-2/server-test/smoke-console.log')
           if sc.exists():
-              errs = [l for l in sc.read_text(errors='replace').splitlines() if ('ERROR' in l or 'FATAL' in l or 'Exception' in l or 'LH_INTEGRATION' in l)]
-              lines.append(f'<details><summary>Console Errors/Highlights ({len(errs)})</summary>\n\n```\n' + '\n'.join(errs[-60:]) + '\n```\n</details>\n')
+              raw_lines = sc.read_text(errors='replace').splitlines()
+              errs = []
+              for idx, l in enumerate(raw_lines):
+                  if ('ERROR' in l or 'FATAL' in l or 'Exception' in l or 'LH_INTEGRATION' in l):
+                      errs.append(l)
+                      if 'Exception caught during firing event' in l or 'NullPointerException' in l:
+                          errs.extend(raw_lines[idx+1:idx+12])
+              lines.append(f'<details><summary>Console Errors/Highlights ({len(errs)})</summary>\n\n```\n' + '\n'.join(errs[-80:]) + '\n```\n</details>\n')
               tail = '\n'.join(sc.read_text(errors='replace').splitlines()[-60:])
               lines.append(f'<details><summary>Smoke Console Tail</summary>\n\n```\n{tail}\n```\n</details>\n')
           for cr in sorted(pathlib.Path('long-haul-legacy-2/server-test/crash-reports').glob('*.txt'))[:2]:
