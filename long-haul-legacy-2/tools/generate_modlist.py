@@ -3,7 +3,7 @@
 import json, pathlib
 
 R = pathlib.Path(__file__).resolve().parents[1]
-lock = json.loads((R / 'assembly/lock.json').read_text())
+lock = json.loads((R / 'assembly/lock.json').read_text(encoding='utf-8'))
 mods = sorted(lock['mods'], key=lambda m: m['title'].lower())
 version = lock.get('version', '2.0-alpha.2')
 
@@ -33,5 +33,5 @@ lines += [
     'JEI и EMI оставлены совместно как просмотрщик и совместимый слой рецептурных плагинов; это не два независимых пункта прогрессии. Не учитывать библиотеки и интеграционные слои как отдельные игровые системы.',
     '',
 ]
-(R / 'MODLIST.md').write_text('\n'.join(lines))
+(R / 'MODLIST.md').write_text('\n'.join(lines), encoding='utf-8')
 print(f'Generated MODLIST.md for {len(mods)} external mods ({version}).')

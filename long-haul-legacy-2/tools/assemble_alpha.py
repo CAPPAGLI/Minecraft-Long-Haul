@@ -3,7 +3,7 @@
 API pins are not blindly treated as version constraints; actual Forge jar dependencies
 are inspected separately via inspect_alpha.py and server smoke tests.
 """
-import argparse, concurrent.futures, hashlib, json, pathlib, urllib.request
+import argparse, concurrent.futures, hashlib, json, pathlib, time, urllib.request
 from audit_mods import get
 
 R = pathlib.Path(__file__).resolve().parents[1]
@@ -25,11 +25,11 @@ ferrite-core modernfix spark chunky xaeros-minimap xaeros-world-map'''.split()
 BASE_CLIENT = set('zume jei emi jade jade-addons-forge appleskin mouse-tweaks controlling configured catalogue xaeros-minimap xaeros-world-map'.split())
 
 def resolve_profile(profile_path: pathlib.Path):
-    profile = json.loads(profile_path.read_text())
+    profile = json.loads(profile_path.read_text(encoding='utf-8'))
     roots = list(BASE_ROOTS) + list(dict.fromkeys(s for group in profile['categories'].values() for s in group))
     client = set(BASE_CLIENT) | set(profile.get('client_only', []))
-    rows = json.loads((R / 'audit/candidates.json').read_text())
-    dg_projects = json.loads((R / 'audit/dependency-graph.json').read_text()).get('projects', [])
+    rows = json.loads((R / 'audit/candidates.json').read_text(encoding='utf-8'))
+    dg_projects = json.loads((R / 'audit/dependency-graph.json').read_text(encoding='utf-8')).get('projects', [])
     by_slug = {r['slug']: r for r in rows}
     by_pid = {r['project_id']: r for r in dg_projects}
     known = {}
@@ -49,10 +49,10 @@ def resolve_profile(profile_path: pathlib.Path):
         if slug == 'create-clockwork':
             # 0.5.7 removed bundled Kelvin without exposing an obtainable API dependency.
             # 0.5.6 contains Kelvin 0.5.0 as a proper Forge JarJar dependency.
-            v = json.loads((R / 'audit/clockwork-0.5.6.json').read_text())
+            v = json.loads((R / 'audit/clockwork-0.5.6.json').read_text(encoding='utf-8'))
         if slug == 'polymorph':
             # 0.49.11 requires beta JEI >= 15.57.0.207; 0.49.10 matches release JEI 15.56.0.205.
-            v = json.loads((R / 'audit/polymorph-0.49.10.json').read_text())
+            v = json.loads((R / 'audit/polymorph-0.49.10.json').read_text(encoding='utf-8'))
         pid = v['project_id']
         if pid in known:
             continue
@@ -79,14 +79,29 @@ def resolve_profile(profile_path: pathlib.Path):
                 work.append(dep)
     return profile.get('version', '2.0-alpha.2'), roots, list(known.values())
 
-def download_one(row):
+def select_file(row):
     files = [f for f in row['files'] if f['filename'].endswith('.jar')]
-    f = row.get('selected_file') or next((f for f in files if f.get('primary')), files[0])
+    return row.get('selected_file') or next((f for f in files if f.get('primary')), files[0])
+
+def download_one(row):
+    f = select_file(row)
     p = DIR / f['filename']
     if not p.exists():
-        req = urllib.request.Request(f['url'], headers={'User-Agent': 'LongHaulLegacy/2.0 assembler'})
-        with urllib.request.urlopen(req, timeout=120) as res:
-            p.write_bytes(res.read())
+        last_err = None
+        for attempt in range(1, 5):
+            try:
+                req = urllib.request.Request(f['url'], headers={'User-Agent': 'LongHaulLegacy/2.0 assembler'})
+                with urllib.request.urlopen(req, timeout=120) as res:
+                    p.write_bytes(res.read())
+                last_err = None
+                break
+            except Exception as exc:
+                last_err = exc
+                if p.exists():
+                    p.unlink()
+                time.sleep(1.5 * attempt)
+        if last_err is not None:
+            raise last_err
     b = p.read_bytes()
     assert hashlib.sha512(b).hexdigest() == f['hashes']['sha512'], p
     assert hashlib.sha1(b).hexdigest() == f['hashes']['sha1'], p
@@ -98,11 +113,12 @@ def download_one(row):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--from-lock', action='store_true', help='Download and verify directly from assembly/lock.json')
+    ap.add_argument('--lock-only', action='store_true', help='Resolve profile into assembly/lock.json without downloading JARs')
     ap.add_argument('--profile', default=str(R / 'profiles/alpha2.json'))
     args = ap.parse_args()
 
     if args.from_lock:
-        lock = json.loads((R / 'assembly/lock.json').read_text())
+        lock = json.loads((R / 'assembly/lock.json').read_text(encoding='utf-8'))
         version = lock.get('version', '2.0-alpha.2')
         roots = lock.get('roots', [])
         mods = lock['mods']
@@ -111,7 +127,13 @@ def main():
         version, roots, mods = resolve_profile(pathlib.Path(args.profile))
         status = 'ASSEMBLED_NOT_RUNTIME_TESTED'
 
-    out = list(concurrent.futures.ThreadPoolExecutor(max_workers=6).map(download_one, mods))
+    if args.lock_only:
+        out = []
+        for row in mods:
+            row['selected_file'] = select_file(row)
+            out.append(row)
+    else:
+        out = list(concurrent.futures.ThreadPoolExecutor(max_workers=3).map(download_one, mods))
     (R / 'assembly/lock.json').write_text(json.dumps({
         'version': version,
         'status': status,
@@ -119,8 +141,11 @@ def main():
         'forge': '47.4.10',
         'roots': roots,
         'mods': out,
-    }, ensure_ascii=False, indent=2) + '\n')
-    print('DOWNLOADED', len(out), 'verified SHA512 files; not yet a compatibility claim.')
+    }, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    if args.lock_only:
+        print('RESOLVED', len(out), 'mods into assembly/lock.json (no JAR downloads).')
+    else:
+        print('DOWNLOADED', len(out), 'verified SHA512 files; not yet a compatibility claim.')
 
 if __name__ == '__main__':
     main()

@@ -22,7 +22,7 @@
 
 ## Установка тестового профиля
 
-1. Соберите или скачайте `Long-Haul-Legacy-2.0-alpha.4.mrpack` (артефакт CI `long-haul-legacy-2.0-alpha.4` или `python3 tools/assemble_alpha.py --profile profiles/alpha4.json` + `tools/package_alpha.py --version 2.0-alpha.4`). Не смешивайте с `1.1.1`.
+1. Соберите или скачайте `Long-Haul-Legacy-2.0-alpha.4.mrpack` (артефакт CI `long-haul-legacy-2.0-alpha.4`, либо локально: `python tools/assemble_alpha.py --profile profiles/alpha4.json --lock-only && python tools/generate_modlist.py && python tools/package_alpha.py --version 2.0-alpha.4 --skip-jar-bytes-check`, либо без `--lock-only`/`--skip-jar-bytes-check` для полной локальной проверки SHA-512). Не смешивайте с `1.1.1`.
 2. Импортируйте в Prism Launcher или совместимый лаунчер.
 3. Выберите **Java 17** и начните с **8–10 ГБ RAM** (на системе с 32 ГБ RAM; не выделяйте всю память).
 4. Создайте **новый обычный мир**.

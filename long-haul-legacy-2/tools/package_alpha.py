@@ -16,7 +16,7 @@ def main():
     ap.add_argument('--skip-jar-bytes-check', action='store_true', help='Trust hashes in lock.json when assembly/mods is absent locally')
     args = ap.parse_args()
 
-    lock = json.loads((R / 'assembly/lock.json').read_text())
+    lock = json.loads((R / 'assembly/lock.json').read_text(encoding='utf-8'))
     version = args.version or lock.get('version', '2.0-alpha.2')
     mods = lock['mods']
     bad = FORBIDDEN.intersection(m['slug'] for m in mods)
@@ -57,7 +57,7 @@ def main():
         'files': files,
         'dependencies': {'minecraft': '1.20.1', 'forge': '47.4.10'},
     }
-    (R / 'assembly/modrinth.index.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
+    (R / 'assembly/modrinth.index.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
     mrpack = R.parent / f'Long-Haul-Legacy-{version}.mrpack'
     with zipfile.ZipFile(mrpack, 'w', zipfile.ZIP_DEFLATED) as z:
@@ -101,7 +101,7 @@ def main():
     }
     for p in [mrpack, source]:
         summary['archives'][p.name] = {'bytes': p.stat().st_size, 'sha512': hashlib.sha512(p.read_bytes()).hexdigest()}
-    (R / 'assembly/package-validation.json').write_text(json.dumps(summary, indent=2) + '\n')
+    (R / 'assembly/package-validation.json').write_text(json.dumps(summary, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(summary, indent=2))
 
 if __name__ == '__main__':
