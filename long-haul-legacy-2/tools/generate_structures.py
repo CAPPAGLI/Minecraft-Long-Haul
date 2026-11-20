@@ -289,6 +289,49 @@ RECOVERIES = {
     'collapsed_bridge': ('minecraft:stone_bricks', 'minecraft:mossy_stone_bricks', 'minecraft:stone_brick_wall', 'minecraft:stone_brick_slab', 'minecraft:cobblestone', 'minecraft:lantern', 'ruin_bridge', True),
 }
 
+def make_sky_island_template(beacon: bool) -> dict[tuple[int, int, int], tuple[str, dict[str, str] | None]]:
+    b: dict[tuple[int, int, int], tuple[str, dict[str, str] | None]] = {}
+    cx, cz = 7, 7
+    # Tapered floating island body (y=0..5 stone/deepslate, y=6 dirt, y=7 grass)
+    for y in range(0, 8):
+        rad = 1.5 + y * 0.85 if y < 6 else 6.3
+        for x in range(15):
+            for z in range(15):
+                dist = ((x - cx) ** 2 + (z - cz) ** 2) ** 0.5
+                if dist <= rad:
+                    if y <= 1:
+                        blk = 'minecraft:deepslate'
+                    elif y <= 5:
+                        blk = 'minecraft:iron_ore' if (y == 4 and (x + z) % 7 == 0) else ('minecraft:coal_ore' if (y == 3 and (x * 3 + z) % 8 == 0) else 'minecraft:stone')
+                    elif y == 6:
+                        blk = 'minecraft:dirt'
+                    else:
+                        blk = 'minecraft:grass_block'
+                    b[(x, y, z)] = (blk, None)
+
+    # Refuge shelter on top (y=8..12)
+    for x in range(4, 11):
+        for z in range(4, 11):
+            b[(x, 7, z)] = ('minecraft:oak_planks', None)
+    for px, pz in [(4, 4), (10, 4), (4, 10), (10, 10)]:
+        for y in range(8, 12):
+            b[(px, y, pz)] = ('minecraft:oak_log', {'axis': 'y'})
+    for x in range(4, 11):
+        for z in range(4, 11):
+            b[(x, 12, z)] = ('minecraft:spruce_slab', {'type': 'bottom'})
+    b[(7, 8, 7)] = ('minecraft:campfire', {'lit': 'true'})
+    b[(5, 8, 5)] = ('minecraft:barrel', {'facing': 'south'})
+    b[(9, 8, 5)] = ('minecraft:crafting_table', None)
+    b[(9, 8, 9)] = ('minecraft:furnace', {'facing': 'north'})
+    b[(5, 11, 5)] = ('minecraft:lantern', {'hanging': 'true'})
+    b[(9, 11, 9)] = ('minecraft:lantern', {'hanging': 'true'})
+    if beacon:
+        for y in range(8, 13):
+            b[(7, y, 4)] = ('minecraft:polished_andesite', None)
+        b[(7, 13, 4)] = ('minecraft:soul_lantern', {'hanging': 'false'})
+    return b
+
+
 def main():
     count = 0
     for folder, specs in [('sites', SITES), ('recovery', RECOVERIES)]:
@@ -302,7 +345,17 @@ def main():
             dv, sz, pal_n, blk_n = read_nbt_smoke(nbt)
             assert dv == 3465 and sz == (11, 7, 11) and pal_n >= 5 and blk_n > 500
             count += 1
-    print(f'Generated and verified {count} Minecraft 1.20.1 11x7x11 .nbt structures in {OUT}')
+    sky_dir = OUT / 'sky_islands'
+    sky_dir.mkdir(parents=True, exist_ok=True)
+    for name, is_beacon in [('sky_refuge_camp', False), ('sky_beacon_isle', True)]:
+        blocks = make_sky_island_template(is_beacon)
+        nbt = build_structure_nbt((15, 14, 15), blocks)
+        path = sky_dir / f'{name}.nbt'
+        path.write_bytes(nbt)
+        dv, sz, pal_n, blk_n = read_nbt_smoke(nbt)
+        assert dv == 3465 and sz == (15, 14, 15) and pal_n >= 5 and blk_n > 350
+        count += 1
+    print(f'Generated and verified {count} Minecraft 1.20.1 .nbt structures in {OUT}')
 
 if __name__ == '__main__':
     main()

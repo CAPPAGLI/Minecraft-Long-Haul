@@ -1,0 +1,41 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "read": {
+      "type": "heracles:check",
+      "title": "Прочитано (ручное подтверждение)"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": "{\"text\": \"Выброс при смерти, трупы и тотемы\"}",
+    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
+    "description": [
+      "Каждая настоящая смерть вызывает колоссальный взрыв (Voidout), как в Death Stranding — не стройте всё в одном месте.",
+      "Ваш инвентарь сохраняется в трупе (Corpse), но окружающие постройки будут разрушены. Собирайте Тотемы бессмертия перед редкими данжами и базами, чтобы пережить удар без взрыва!"
+    ],
+    "groups": {
+      "01 · Начало и правила": {
+        "position": [
+          -84,
+          108
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:totem_of_undying",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

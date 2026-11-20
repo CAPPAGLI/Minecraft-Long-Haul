@@ -91,7 +91,58 @@ def main():
         'features': [f'longhaul:{k}' for k in rich_chunks.keys()],
         'step': 'underground_ores',
     })
-    print(f'Generated {len(vanilla_overrides)} ore rebalance overrides and {len(rich_chunks)} rare rich-ore chunk features.')
+
+    # 3. Floating sky-island refuge structures above the seasonal toxic gas ceiling (Y=172..212)
+    lh_wg = DATA / 'longhaul/worldgen'
+    write_json(lh_wg / 'template_pool/sky_refuges.json', {
+        'fallback': 'minecraft:empty',
+        'elements': [
+            {
+                'weight': 2,
+                'element': {
+                    'element_type': 'minecraft:single_pool_element',
+                    'location': 'longhaul:sky_islands/sky_refuge_camp',
+                    'projection': 'rigid',
+                    'processors': 'minecraft:empty',
+                },
+            },
+            {
+                'weight': 1,
+                'element': {
+                    'element_type': 'minecraft:single_pool_element',
+                    'location': 'longhaul:sky_islands/sky_beacon_isle',
+                    'projection': 'rigid',
+                    'processors': 'minecraft:empty',
+                },
+            },
+        ],
+    })
+    write_json(lh_wg / 'structure/sky_refuges.json', {
+        'type': 'minecraft:jigsaw',
+        'biomes': '#minecraft:is_overworld',
+        'step': 'surface_structures',
+        'spawn_overrides': {},
+        'terrain_adaptation': 'none',
+        'start_pool': 'longhaul:sky_refuges',
+        'size': 1,
+        'start_height': {
+            'type': 'minecraft:uniform',
+            'min_inclusive': {'absolute': 172},
+            'max_inclusive': {'absolute': 212},
+        },
+        'max_distance_from_center': 80,
+        'use_expansion_hack': False,
+    })
+    write_json(lh_wg / 'structure_set/sky_refuges.json', {
+        'structures': [{'structure': 'longhaul:sky_refuges', 'weight': 1}],
+        'placement': {
+            'type': 'minecraft:random_spread',
+            'salt': 20941751,
+            'spacing': 28,
+            'separation': 12,
+        },
+    })
+    print(f'Generated {len(vanilla_overrides)} ore rebalance overrides, {len(rich_chunks)} rare rich-ore chunk features, and floating sky-island refuges.')
 
 
 if __name__ == '__main__':

@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "longhaul:sky_refuges",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 20941751,
+    "spacing": 28,
+    "separation": 12
+  }
+}

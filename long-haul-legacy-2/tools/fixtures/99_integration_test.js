@@ -508,6 +508,27 @@ function lhStartIntegrationSetup(server) {
         delete sDbClean.players[String(snailActor.uuid)];
         lhSnailSave(server);
 
+        // 16. Death Stranding Voidout queue + live createExplosion + seasonal rising toxic gas
+        var prevVoidoutCount = lhVoidoutRead(server).totalVoidouts || 0;
+        var vTotal = lhQueueVoidout(server, 'minecraft:overworld', 2000, 80, 2000, 'TestPlayer');
+        ok(vTotal === prevVoidoutCount + 1, 'voidout queued on death');
+        ok(lhProcessVoidoutQueue(server, true) === 0, 'voidout waits 3 ticks before detonating');
+        ok(lhProcessVoidoutQueue(server, true) === 0, 'voidout waits 2nd tick');
+        ok(lhProcessVoidoutQueue(server, true) === 1, 'voidout triggers on 3rd tick');
+        overworld.createExplosion(2000, 80, 2000).strength(8.0).explosionMode('none').explode();
+        var gasDb = lhGasRead(server);
+        var prevForced = gasDb.forcedPhase;
+        gasDb.forcedPhase = 2;
+        var gasPeak = lhGasComputeStatus(server);
+        ok(gasPeak.phase === 2 && gasPeak.ceilingY === 114, 'peak toxic gas season reaches Y=114');
+        var gasActorLow = { uuid: '00000000-0000-4000-8000-000000000012', level: overworld, y: 70, isCreative: function () { return false; }, isSpectator: function () { return false; } };
+        var gasActorSky = { uuid: '00000000-0000-4000-8000-000000000012', level: overworld, y: 175, isCreative: function () { return false; }, isSpectator: function () { return false; } };
+        ok(lhGasStepPlayer(server, gasActorLow, 20, true).inGas === true, 'lowland Y=70 is inside seasonal toxic gas');
+        ok(lhGasStepPlayer(server, gasActorSky, 20, true).inGas === false, 'flying island Y=175 is safe above toxic gas');
+        delete gasDb.players[String(gasActorLow.uuid)];
+        gasDb.forcedPhase = prevForced;
+        lhGasSave(server);
+
         ok(Math.round(Number(overworld.worldBorder.size)) === 175000, 'world border initialized to 175000 blocks');
         console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + advancement sync');
       } catch (err2) {
