@@ -1,26 +1,29 @@
-# Long Haul Legacy 2.0 — Alpha 8 (`2.0-alpha.8`)
+# Long Haul Legacy 2.0 — Alpha 9 (`2.0-alpha.9`)
 
-**Расширенная серверно-проверенная альфа сборки, НЕ финальный релиз по полному ТЗ.** Импортируемый `.mrpack` предназначен для отдельного тестового профиля и нового обычного мира. Рабочая 1.1.1 не изменена. Исторические снимки прошлых альф сохранены в `history/alpha.1/` – `history/alpha.7/`.
+**Расширенная серверно-проверенная альфа сборки, НЕ финальный релиз по полному ТЗ.** Импортируемый `.mrpack` предназначен для отдельного тестового профиля и нового обычного мира. Рабочая 1.1.1 не изменена. Исторические снимки прошлых альф сохранены в `history/alpha.1/` – `history/alpha.9/`.
 
-## Что нового в `2.0-alpha.8`
+## Что нового в `2.0-alpha.9`
 
-- **Честная серверная верификация всех 19 `verification_type` из `design/quest-catalog.json` (`19_catalog_orders.js`, `23_vehicle_telemetry.js`):**
-  - `vehicle_delivery` (28 заказов) и `vehicle_trial` (2 заказа) требуют реальный пробег нужного семейства транспорта (`rail`, `watercraft`, `aircraft_vs`, `cart`, `road_vehicle`, `mount`, включая `smallships:*`, `immersive_aircraft:*`, `man_of_many_planes:*`) в `23_vehicle_telemetry.js` + приёмку в бочке.
-  - `scheduled_train` (10 заказов) требует зафиксированный ЖД-пробег (`>= 100` м) или завершённый ЖД-рейс по маршруту + приёмку груза.
-  - `network_supply` (12 заказов) требует фактического ввода в строй нужного числа региональных узлов (`distinct_regions`), `sample_return` — подтверждённые фотоотчёты Exposure и активные узлы, `delivery`/`multi_input_supply` — разнообразие различных предметов (`distinct_inputs`), а `ration_delivery` — съедобные рационы.
-- **Усиленный контроль границы мира `175000` и запрет переносных хранилищ (`10_contracts.js`, `20_basics.js`, `smoke_server.py`):**
-  - Граница мира `175000 × 175000` выставляется напрямую через Java API `WorldBorder` (`setCenter(0, 0)`, `setSize(175000)`) и проверяется как в `99_integration_test.js`, так и в `smoke_server.py` (`world_border_175000: true`).
-  - В `20_basics.js` добавлен запрет установки (`BlockEvents.placed`) для `minecraft:ender_chest` и всех 17 `shulker_box`, а также использования (`ItemEvents.rightClicked`) для `quark:backpack` и `functionalstorage:ender_drawer`.
-- **Расширение и аудит совместимости модов (`370` внешних JAR / `439` mod ID):**
-  - Добавлены **`ends-delight`** (`2.6.1+forge.1.20.1`, закрывает опциональную совместимость с `create_central_kitchen` и `delightful`) и **`timeless-and-classics-zero`** (`1.2.0-hotfix`, TaCZ).
-  - При проверке на живом Forge отклонены `subtle-effects` (требует `forge >= 47.4.14`), `every-compat` (+18.8 тыс. рецептов и GC-перегрузка в 4 ГБ RAM) и `villager-recruits` (ломает ранний `CommandEvent` через `NullPointerException`).
-  - Без космоса и температурных модов (`DOOMED` не включён; инструкция в `DOOMED.md`).
+- **Паркур-мод `ParCool!` (`profiles/alpha9.json`, `assemble_alpha.py`):**
+  - Добавлен `parcool` (автоматически подбирается новейшая версия, совместимая с Forge `47.4.10`, совместно с `combat-roll`).
+- **Удаление саженцев и дефицит древесины (`20_basics.js`, `01_longhaul_tooltips.js`):**
+  - Саженцы (`#minecraft:saplings`, а также `azalea`/`flowering_azalea` из листвы) больше не выпадают и не сажаются в мире; дроп `#minecraft:logs` снижен на `40%`.
+  - Для добычи дерева теперь нужно путешествовать к новым лесам или запускать региональную Лесную Артель (`forest`).
+- **Ребаланс руд в 10 раз + редкие богатые рудные чанки (`tools/generate_worldgen.py`, `/lh prospect`):**
+  - Частота `17` ванильных рудных генераторов Overworld (включая уголь, железо, медь, золото, редстоун, лазурит, алмазы и изумруды) снижена ~в `10` раз.
+  - Через Forge biome modifier (`longhaul/forge/biome_modifier/add_rich_ore_chunks.json`) добавлены `6` редких монорудных жильных чанков (`rich_coal_chunk` `1/64`, `rich_iron_chunk` `1/72`, `rich_copper_chunk` `1/72`, `rich_gold_chunk` `1/96`, `rich_redstone_chunk` `1/96`, `rich_diamond_chunk` `1/160`).
+  - Добавлена команда `/lh prospect` для разведки рудной жилы в текущем чанке.
+- **Бессмертная Улитка (`24_immortal_snail.js`, `/lh snail status|wake`):**
+  - Не пробуждается сразу на старте (льготный период `15` минут / `18000` тиков, либо минимум `3` минуты и выход дальше `150` м от `(0,0)`), никогда не убивает игроков сразу на спауне.
+  - После пробуждения медленно и неумолимо ползёт сквозь любые блоки (`0.36–1.70` м/с), не получает урона, предупреждает при приближении к чанкам игрока и убивает при контакте (`<= 2.2` м), после чего уходит на перезарядку `120` с на дистанцию `80` м.
+- **Мемная сюжетная линия «Ушёл за хлебом» (`generate_alpha_quests.py`, `22_stage_progression.js`):**
+  - Добавлена новая стартовая группа квестов **`00 · Сюжет: Ушёл за хлебом`** (`6` глав, `317` квестов / `300` серверных advancement), развивающая историю о рождении сына и походе в магазин за хлебом по мере прохождения всех 4 промышленных стадий и встречи с Улиткой.
 
-Профиль сборки: `profiles/alpha8.json` (динамически разрешаемый список и хэши в CI → артефакт `Long-Haul-Legacy-2.0-alpha.8.mrpack` и `Long-Haul-Legacy-2.0-alpha.8-Sources-and-Report.zip`). Подробности проверки: `TEST-REPORT.md`, машинный статус: `STATUS.json`.
+Профиль сборки: `profiles/alpha9.json` (динамически разрешаемый список и хэши в CI → артефакт `Long-Haul-Legacy-2.0-alpha.9.mrpack` и `Long-Haul-Legacy-2.0-alpha.9-Sources-and-Report.zip`). Подробности проверки: `TEST-REPORT.md`, машинный статус: `STATUS.json`.
 
 ## Установка тестового профиля
 
-1. Соберите или скачайте `Long-Haul-Legacy-2.0-alpha.8.mrpack` (артефакт CI `long-haul-legacy-2.0-alpha.8`, либо локально: `python tools/assemble_alpha.py --profile profiles/alpha8.json --lock-only && python tools/generate_modlist.py && python tools/package_alpha.py --version 2.0-alpha.8 --skip-jar-bytes-check`, либо без `--lock-only`/`--skip-jar-bytes-check` для полной локальной проверки SHA-512). Не смешивайте с `1.1.1`.
+1. Соберите или скачайте `Long-Haul-Legacy-2.0-alpha.9.mrpack` (артефакт CI `long-haul-legacy-2.0-alpha.9`, либо локально: `python tools/assemble_alpha.py --profile profiles/alpha9.json --lock-only && python tools/generate_modlist.py && python tools/package_alpha.py --version 2.0-alpha.9 --skip-jar-bytes-check`, либо без `--lock-only`/`--skip-jar-bytes-check` для полной локальной проверки SHA-512). Не смешивайте с `1.1.1`.
 2. Импортируйте в Prism Launcher или совместимый лаунчер.
 3. Выберите **Java 17** и начните с **8–10 ГБ RAM** (на системе с 32 ГБ RAM; не выделяйте всю память).
 4. Создайте **новый обычный мир**.
@@ -28,6 +31,7 @@
 ## Основные команды `/lh`
 
 - `/lh help` — справка по командам.
+- `/lh prospect`, `/lh snail status` — геологоразведка редких рудных чанков и статус Бессмертной Улитки.
 - `/lh terminal`, `/lh accept <id>`, `/lh status`, `/lh abort`, `/lh team <join|leave> [имя]` — приёмка и кооперативные контракты.
 - `/lh stage`, `/lh vehicle status` — текущая промышленная стадия GameStages и одометр транспорта.
 - `/lh catalog list|stage <1..4>|info <id>|verify <id>` — просмотр и серверная проверка 240 заказов каталога.
@@ -38,11 +42,11 @@
 
 ## Что ещё осталось до финального релиза
 
-| Требование | Состояние `2.0-alpha.8` |
+| Требование | Состояние `2.0-alpha.9` |
 |---|---|
-| ~500 полезных модов | В процессе: 370 внешних JAR / 439 mod ID (расширение к ~500 за счёт новых совместимых модов) |
+| ~500 полезных модов | В процессе: 371 внешний JAR / 440 mod ID (расширение к ~500 за счёт новых совместимых модов, добавлен ParCool!) |
 | Клиентское, графическое и транспортное тестирование | Не пройдено: проверен только headless Linux-сервер (void + обычный Overworld) |
-| Полная интеграция всех 240 спецификаций из `design/quest-catalog.*` | Реализовано в Heracles (311 квестов, 11 групп, 294 advancement) и сервере (`/lh catalog`, все 19 `verification_type`) |
+| Полная интеграция всех 240 спецификаций из `design/quest-catalog.*` | Реализовано в Heracles (317 квестов, 12 групп, 300 advancement) и сервере (`/lh catalog`, все 19 `verification_type` + сюжет «Ушёл за хлебом») |
 | Физические NBT-структуры городов и объектов восстановления | Реализованы 16 ролевых `11×7×11` `.nbt` шаблонов + авторазмещение и ремонт архива |
 | Проверка физики поездов/кораблей VS в клиенте | Не проведена в графическом клиенте |
 
@@ -51,8 +55,9 @@
 ```bash
 node long-haul-legacy-2/tools/test_contracts.js
 python3 long-haul-legacy-2/tools/generate_structures.py
+python3 long-haul-legacy-2/tools/generate_worldgen.py
 python3 long-haul-legacy-2/tools/generate_alpha_quests.py
-python3 long-haul-legacy-2/tools/assemble_alpha.py --profile long-haul-legacy-2/profiles/alpha8.json
+python3 long-haul-legacy-2/tools/assemble_alpha.py --profile long-haul-legacy-2/profiles/alpha9.json
 python3 long-haul-legacy-2/tools/generate_modlist.py
 python3 long-haul-legacy-2/tools/prepare_server.py --mode void
 python3 long-haul-legacy-2/tools/build_runtime.py
