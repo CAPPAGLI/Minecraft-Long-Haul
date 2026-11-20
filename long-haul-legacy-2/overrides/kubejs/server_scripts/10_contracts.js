@@ -124,7 +124,7 @@ ServerEvents.commandRegistry(function (event) {
     var p = ctx.source.playerOrException;
     lhMsg(p, 'Контракты: /lh terminal, /lh accept <заказ>, /lh status, /lh abort, /lh team <join|leave> [имя]. Заказы: ' + Object.keys(global.LHContracts).join(', '));
     lhMsg(p, 'Регионы и объекты: /lh sites, /lh site <info|commission|produce|archive|repair_archive>, /lh recovery <list|info|survey|restore>, /lh photo <report|status>, /lh cc <challenge|verify|status>.');
-    lhMsg(p, 'Логистика: /lh camp <deploy|pack|list>, /lh route <begin|gate|finish|start|list>, /lh cargo <issue|deliver>, /lh catalog <list|stage|info|verify>.');
+    lhMsg(p, 'Логистика: /lh camp <deploy|pack|list>, /lh route <begin|gate|finish|start|list>, /lh cargo <issue|deliver>, /lh catalog <list|stage|info|verify>, /lh stage, /lh vehicle status.');
     return 1;
   }));
   root.then(C.literal('terminal').executes(function (ctx) { return lhRegister(ctx.source.server, ctx.source.playerOrException); }));

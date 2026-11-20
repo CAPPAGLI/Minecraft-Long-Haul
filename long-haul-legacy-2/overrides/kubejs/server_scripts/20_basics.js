@@ -15,6 +15,7 @@ ServerEvents.recipes(function (event) {
   event.remove({ output: 'supplementaries:safe' });
   event.remove({ output: 'quark:backpack' });
   event.remove({ output: 'functionalstorage:ender_drawer' });
+  event.remove({ output: /jetpack/ });
 });
 
 LootJS.modifiers(function (event) {

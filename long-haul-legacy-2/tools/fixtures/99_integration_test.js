@@ -292,6 +292,8 @@ function lhStartIntegrationSetup(server) {
         var rm = server.recipeManager;
         ok(rm.byKey(new RL('longhaul:expedition_bundle')).isPresent(), 'expedition_bundle recipe registered');
         ok(rm.byKey(new RL('longhaul:bulk_rail_from_sheets')).isPresent(), 'bulk_rail_from_sheets recipe registered');
+        ok(rm.byKey(new RL('longhaul:cure_leather_smoking')).isPresent(), 'cure_leather_smoking recipe registered');
+        ok(rm.byKey(new RL('longhaul:cure_leather_campfire')).isPresent(), 'cure_leather_campfire recipe registered');
         var regAccess = server.registryAccess();
         var bannedOuts = {
           'minecraft:ender_chest': true,
@@ -305,8 +307,34 @@ function lhStartIntegrationSetup(server) {
         while (iter.hasNext()) {
           var recObj = iter.next();
           var outId = String(recObj.getResultItem(regAccess).id);
-          ok(!bannedOuts[outId], 'banned portable/ender storage has live recipe: ' + outId + ' (' + recObj.getId() + ')');
+          ok(!bannedOuts[outId] && outId.indexOf('jetpack') === -1, 'banned storage/jetpack has live recipe: ' + outId + ' (' + recObj.getId() + ')');
         }
+
+        // 12. 4-stage progression & 1-Hz anti-teleport vehicle telemetry
+        var stRes = lhStageRecompute(server, siteActor);
+        ok(stRes.unlocked.indexOf('longhaul_stage_1') !== -1 && stRes.unlocked.indexOf('longhaul_stage_2') !== -1, 'stages 1-2 unlocked after commissioning site');
+        ok(stRes.unlocked.indexOf('longhaul_stage_3') !== -1, 'stage 3 unlocked with 2 commissioned sites + verified CC challenge');
+        var telActor = {
+          uuid: '00000000-0000-4000-8000-000000000009',
+          level: overworld,
+          x: 0, z: 0,
+          vehicle: { type: 'create:carriage_contraption' },
+          tell: function () {}
+        };
+        lhTelemetrySample(server, telActor);
+        var prevTick = Number(server.tickCount);
+        telActor.x = 50; // realistic 50m step -> accepted
+        var tRec = lhTelemetrySample(server, telActor);
+        ok((tRec.meters.rail || 0) === 50, 'vehicle telemetry recorded 50m rail travel: ' + JSON.stringify(tRec.meters));
+        telActor.x = 5000; // teleport jump -> rejected
+        tRec = lhTelemetrySample(server, telActor);
+        ok((tRec.meters.rail || 0) === 50 && (tRec.rejectedJumps || 0) >= 1, 'vehicle telemetry rejected teleport jump');
+        var stDb = lhStageRead(server);
+        delete stDb.players[String(siteActor.uuid)];
+        lhStageSave(server);
+        var telDb = lhTelemetryRead(server);
+        delete telDb.players[String(telActor.uuid)];
+        lhTelemetrySave(server);
 
         // Cleanup test artifacts
         var curDb = lhRead(server);

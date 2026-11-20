@@ -66,7 +66,7 @@ def main():
         shutil.copy2(local_jar, mods_dir / local_jar.name)
         server_count += 1
 
-    for sub in ['config', 'kubejs']:
+    for sub in ['config', 'kubejs', 'defaultconfigs']:
         dst = S / sub
         if dst.exists():
             shutil.rmtree(dst)

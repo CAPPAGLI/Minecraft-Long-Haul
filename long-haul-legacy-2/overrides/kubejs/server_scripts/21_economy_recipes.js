@@ -30,4 +30,8 @@ ServerEvents.recipes(function (event) {
     S: 'minecraft:stick',
     R: 'minecraft:redstone'
   }).id('longhaul:bulk_powered_rail_from_sheets');
+
+  // Anti-deadlock leather curing from rotten flesh for early bundles, carts, and Create belts
+  event.smoking('minecraft:leather', 'minecraft:rotten_flesh').id('longhaul:cure_leather_smoking');
+  event.campfireCooking('minecraft:leather', 'minecraft:rotten_flesh').id('longhaul:cure_leather_campfire');
 });
