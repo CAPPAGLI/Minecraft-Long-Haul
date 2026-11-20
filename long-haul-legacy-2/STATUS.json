@@ -1,7 +1,7 @@
 {
-  "version": "2.0-alpha.6",
+  "version": "2.0-alpha.7",
   "date_cutoff": "2026-11-19",
-  "status": "HEADLESS_CI_VERIFIED_ALPHA6_NOT_FULL_REQUEST",
+  "status": "HEADLESS_CI_VERIFIED_ALPHA7_NOT_FULL_REQUEST",
   "minecraft": "1.20.1",
   "forge": "47.4.10",
   "java": 17,
@@ -11,8 +11,8 @@
   "local_jars": 1,
   "recursive_declared_mod_ids": 436,
   "external_download_bytes": 879321974,
-  "ci_run_id": 44782816968,
-  "ci_verified_commit": "f047b7f",
+  "ci_run_id": 44790104903,
+  "ci_verified_commit": "f701b98",
   "server_smoke_test_void": {
     "ready": true,
     "exit_code": 0,
@@ -21,7 +21,7 @@
       "server_ready"
     ],
     "heap_mb": 4096,
-    "world": "alpha6 void integration test",
+    "world": "alpha7 void integration test",
     "client_tested": false,
     "integration_pass": true,
     "integration_fail": false,
@@ -35,13 +35,13 @@
       "server_ready"
     ],
     "heap_mb": 6144,
-    "world": "alpha6 normal overworld test",
+    "world": "alpha7 normal overworld test",
     "client_tested": false,
     "integration_pass": true,
     "integration_fail": false,
     "clean_exit": true
   },
-  "model_tests_passed": 17,
+  "model_tests_passed": 18,
   "installed_quests": 311,
   "installed_advancements": 294,
   "nbt_structures_generated": 16,
@@ -60,9 +60,12 @@
   "timed_contracts_live_tested": true,
   "brigadier_commands_live_tested": true,
   "catalog_orders_live_tested": true,
+  "route_trial_completion_enforced": true,
   "economy_recipes_live_tested": true,
   "game_stages_progression_live_tested": true,
+  "game_stages_auto_refresh_wired": true,
   "vehicle_telemetry_live_tested": true,
+  "client_tooltips_added": true,
   "banned_storage_and_jetpack_audit_passed": true,
   "nbt_structures_live_tested": true,
   "world_border_width": 175000,
@@ -79,5 +82,5 @@
   "new_installable_pack_created": true,
   "launcher_import_tested": false,
   "legacy_1_1_1_modified": false,
-  "limitations": "See README.md and TEST-REPORT.md. Headless Linux Forge integration verified for 368 external JARs + longhaul-runtime (436 mod IDs, void + normal Overworld), 16 role-specific 11x7x11 NBT structures, 311 Heracles quests (240 catalog + 71 core), GameStages 4-stage progression, 1-Hz anti-teleport vehicle telemetry, VS defaultconfigs, anti-deadlock recipes, and banned-storage/jetpack recipe audit; graphical client, vehicle physics in motion, and remaining expansion toward ~500 mods are not yet complete."
+  "limitations": "See README.md and TEST-REPORT.md. Headless Linux Forge integration verified for 368 external JARs + longhaul-runtime (436 mod IDs, void + normal Overworld), 16 role-specific 11x7x11 NBT structures, 311 Heracles quests (240 catalog + 71 core), real route_trial completion + anti-teleport check, automatic GameStages milestone refresh, client tooltips for all 9 regional products, 1-Hz anti-teleport vehicle telemetry, VS defaultconfigs, anti-deadlock recipes, and banned-storage/jetpack recipe audit; graphical client, vehicle physics in motion, and remaining expansion toward ~500 mods are not yet complete."
 }
