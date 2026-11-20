@@ -3,6 +3,13 @@ var LHSnailUUID = Java.loadClass('java.util.UUID');
 var LHSnailState = null;
 var LHSnailTick = 0;
 
+function lhSnailSqrt(v) {
+  if (!(v > 0)) return 0;
+  var g = v > 1 ? v * 0.5 : 1;
+  for (var i = 0; i < 24; i++) g = 0.5 * (g + v / g);
+  return g;
+}
+
 function lhSnailRead(server) {
   if (LHSnailState !== null) return LHSnailState;
   var raw = server.persistentData.getString('longhaul_snail_v1');
@@ -45,17 +52,16 @@ function lhSnailWake(server, player, forceNow) {
       return 0;
     }
   }
-  var tickVal = LHSnailTick;
-  if (server && typeof server.getTickCount === 'function') {
-    tickVal = Number(server.getTickCount());
-  }
-  if (!isFinite(tickVal)) tickVal = 45;
-  var angle = ((tickVal % 360) * Math.PI) / 180.0;
+  var tickVal = Number(LHSnailTick);
+  if (!(tickVal >= 0)) tickVal = 45;
+  var angle = ((tickVal % 360) * 3.141592653589793) / 180.0;
+  var cosA = global.LHWorldPlanner.cosRad(angle);
+  var sinA = global.LHWorldPlanner.sinRad(angle);
   rec.awake = true;
   rec.dim = String(player.level.dimension);
-  rec.x = Number(player.x) + Math.cos(angle) * 64.0;
+  rec.x = Number(player.x) + cosA * 64.0;
   rec.y = Number(player.y);
-  rec.z = Number(player.z) + Math.sin(angle) * 64.0;
+  rec.z = Number(player.z) + sinA * 64.0;
   rec.cooldownTicks = 0;
   rec.lastBand = 4;
   lhSnailSave(server);
@@ -134,7 +140,7 @@ function lhSnailStepPlayer(server, player, dtTicks, skipEntitySync) {
   var dx = Number(player.x) - rec.x;
   var dy = (Number(player.y) + 0.4) - rec.y;
   var dz = Number(player.z) - rec.z;
-  var dist3 = Math.sqrt(dx * dx + dy * dy + dz * dz);
+  var dist3 = lhSnailSqrt(dx * dx + dy * dy + dz * dz);
 
   // Speed scales gently with distance, phasing straight through solid blocks
   var speedBps = dist3 <= 64 ? 0.36 : (dist3 <= 256 ? 0.80 : 1.70);
