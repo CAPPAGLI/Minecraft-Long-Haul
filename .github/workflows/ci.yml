@@ -80,16 +80,18 @@ jobs:
           set -o pipefail
           mkdir -p /tmp/ci-logs
           python3 long-haul-legacy-2/tools/prepare_server.py --mode void --skip-forge-install
-          python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 450 --world-label "alpha4 void integration test" | tee /tmp/ci-logs/smoke-void.txt
-          cp long-haul-legacy-2/server-test/smoke-result.json /tmp/ci-logs/smoke-void-result.json
+          python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 450 --world-label "alpha4 void integration test" | tee /tmp/ci-logs/smoke-void.txt || EC=$?
+          cp long-haul-legacy-2/server-test/smoke-result.json /tmp/ci-logs/smoke-void-result.json || true
+          exit ${EC:-0}
 
       - name: Run Forge headless normal Overworld generation test (Terralith + Tectonic + BOP + RU + AlexsCaves + YUNG + Structures)
         run: |
           set -o pipefail
           mkdir -p /tmp/ci-logs
           python3 long-haul-legacy-2/tools/prepare_server.py --mode normal --skip-forge-install
-          python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 600 --world-label "alpha4 normal overworld test" | tee /tmp/ci-logs/smoke-normal.txt
-          cp long-haul-legacy-2/server-test/smoke-result.json /tmp/ci-logs/smoke-normal-result.json
+          python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 600 --world-label "alpha4 normal overworld test" | tee /tmp/ci-logs/smoke-normal.txt || EC=$?
+          cp long-haul-legacy-2/server-test/smoke-result.json /tmp/ci-logs/smoke-normal-result.json || true
+          exit ${EC:-0}
 
       - name: Package .mrpack and source bundle
         run: |
