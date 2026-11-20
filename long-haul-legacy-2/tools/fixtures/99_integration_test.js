@@ -336,6 +336,49 @@ function lhStartIntegrationSetup(server) {
         delete telDb.players[String(telActor.uuid)];
         lhTelemetrySave(server);
 
+        // 13. Route trial creation, completion gate check, anti-teleport, and catalog route_trial verification
+        var routeActor = {
+          uuid: '00000000-0000-4000-8000-000000000010',
+          level: overworld,
+          x: 0, y: 80, z: 0,
+          vehicle: { type: 'astikorcarts:supply_cart' },
+          tell: function () {},
+          isAdvancementDone: function () { return false; },
+          unlockAdvancement: function () {}
+        };
+        ok(lhRouteBegin(server, routeActor, 'lh_test_route') === 1, 'route begin placed gate A');
+        routeActor.x = 400;
+        ok(lhRouteGate(server, routeActor) === 1, 'route gate 2 placed at 400m');
+        routeActor.x = 800;
+        ok(lhRouteFinish(server, routeActor) === 1, 'route finished at 800m');
+        ok(lhCatVerify(server, routeActor, 'main_1_04') === 0, 'catalog route_trial blocked before completing an actual run');
+        routeActor.x = 0;
+        ok(lhRouteStart(server, routeActor, 'lh_test_route') === 1, 'route trial started at gate A');
+        // Force realistic elapsed time (20s -> 400m / 20s = 20 m/s <= 96 m/s)
+        var rldb = lhLogRead(server);
+        rldb.activeRuns[String(routeActor.uuid)].lastGateTick = Number(server.tickCount) - 400;
+        routeActor.x = 400;
+        ok(lhRouteStepPlayer(server, routeActor) === 1, 'route gate 2 passed at realistic speed');
+        rldb.activeRuns[String(routeActor.uuid)].lastGateTick = Number(server.tickCount) - 400;
+        routeActor.x = 800;
+        ok(lhRouteStepPlayer(server, routeActor) === 2, 'route trial completed with transport family tracking');
+        ok(rldb.routes.lh_test_route.completedCount === 1 && rldb.routes.lh_test_route.verifiedFamilies.cart === true, 'route recorded completedCount and cart family');
+        ok(lhCatVerify(server, routeActor, 'main_1_04') === 1, 'catalog route_trial verified after completing real trial');
+        // Verify anti-teleport speed cancellation on a second trial
+        routeActor.x = 0;
+        ok(lhRouteStart(server, routeActor, 'lh_test_route') === 1, 'second route trial started');
+        rldb.activeRuns[String(routeActor.uuid)].lastGateTick = Number(server.tickCount); // 1s elapsed for 400m -> 400 m/s -> rejected
+        routeActor.x = 400;
+        ok(lhRouteStepPlayer(server, routeActor) === -1, 'route trial cancelled on teleport speed');
+        delete rldb.routes.lh_test_route;
+        delete rldb.activeRuns[String(routeActor.uuid)];
+        lhLogSave(server);
+        delete catDb.completed[String(routeActor.uuid) + ':main_1_04'];
+        lhCatSave(server);
+        var stDb2 = lhStageRead(server);
+        delete stDb2.players[String(routeActor.uuid)];
+        lhStageSave(server);
+
         // Cleanup test artifacts
         var curDb = lhRead(server);
         delete curDb.players[String(actor.uuid)];

@@ -205,6 +205,7 @@ ServerEvents.tick(function (event) {
       var player = server.getPlayer(id);
       if (player) {
         lhSync(player, p, server);
+        if (typeof lhStageRecompute === 'function') lhStageRecompute(server, player);
         lhMsg(player, 'Заказ выполнен: ' + spec.title);
       }
     } else if (job.status === 'failed') {

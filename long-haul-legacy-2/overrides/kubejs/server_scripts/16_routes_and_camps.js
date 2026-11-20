@@ -155,9 +155,51 @@ function lhRouteStart(server, player, routeId) {
     lhMsg(player, 'Встаньте у стартовых ворот A [' + g0.x + ', ' + g0.z + '] (<= 20 м).');
     return 0;
   }
-  db.activeRuns[pid] = { routeId: routeId, nextIndex: 1, lastGateTick: Math.floor(server.tickCount), lastGate: g0, failed: false };
+  var startFam = (typeof lhClassifyVehicle === 'function') ? lhClassifyVehicle(player.vehicle) : 'foot';
+  var fams = {};
+  fams[startFam] = true;
+  db.activeRuns[pid] = { routeId: routeId, nextIndex: 1, lastGateTick: Math.floor(server.tickCount), lastGate: g0, families: fams, failed: false };
   lhLogSave(server);
   lhMsg(player, 'Испытание маршрута "' + routeId + '" начато! Пройдите все контрольные точки по порядку.');
+  return 1;
+}
+
+function lhRouteStepPlayer(server, player) {
+  var db = lhLogRead(server), pid = lhId(player), run = db.activeRuns[pid];
+  if (!run || run.failed) return 0;
+  var route = db.routes[run.routeId];
+  if (!route || String(player.level.dimension) !== 'minecraft:overworld') return 0;
+  var fam = (typeof lhClassifyVehicle === 'function') ? lhClassifyVehicle(player.vehicle) : 'foot';
+  if (!run.families) run.families = {};
+  run.families[fam] = true;
+  var gate = route.gates[run.nextIndex];
+  if (!gate) return 0;
+  if (global.LHWorldPlanner.dist2D(player.x, player.z, gate.x, gate.z) > 18) return 0;
+  var elapsed = Math.max(1, Math.round((Number(server.tickCount) - run.lastGateTick) / 20));
+  var check = global.LHRouteValidator.validateSegmentSpeed(run.lastGate, gate, elapsed);
+  if (!check.ok) {
+    delete db.activeRuns[pid];
+    lhLogSave(server);
+    lhMsg(player, 'Испытание маршрута отменено: аномальная скорость перемещения (' + check.speedBps + ' м/с). Телепортация запрещена.');
+    return -1;
+  }
+  run.lastGateTick = Number(server.tickCount);
+  run.lastGate = gate;
+  run.nextIndex++;
+  if (run.nextIndex >= route.gates.length) {
+    delete db.activeRuns[pid];
+    route.completedCount = (route.completedCount || 0) + 1;
+    if (!route.verifiedFamilies) route.verifiedFamilies = {};
+    Object.keys(run.families).forEach(function (fk) { route.verifiedFamilies[fk] = true; });
+    route.lastCompletedTick = Number(server.tickCount);
+    lhLogSave(server);
+    lhUnlock(player, 'longhaul:routes/first_route');
+    if (typeof lhStageRecompute === 'function') lhStageRecompute(server, player);
+    lhMsg(player, 'Маршрут "' + route.id + '" пройден (' + route.length + ' м, рейсов: ' + route.completedCount + ')! Выдано подтверждение.');
+    return 2;
+  }
+  lhLogSave(server);
+  lhMsg(player, 'Контрольная точка ' + run.nextIndex + '/' + route.gates.length + ' пройдена (' + check.speedBps + ' м/с).');
   return 1;
 }
 
@@ -197,6 +239,7 @@ function lhCargoDeliver(server, player) {
   held.count = held.count - 1;
   lhLogSave(server);
   lhUnlock(player, 'longhaul:routes/cargo_delivery');
+  if (typeof lhStageRecompute === 'function') lhStageRecompute(server, player);
   lhMsg(player, 'Партия ' + txId + ' принята в "' + dest.name + '"!');
   return 1;
 }
@@ -254,37 +297,9 @@ ServerEvents.commandRegistry(function (event) {
 
 ServerEvents.tick(function (event) {
   if (LHClock % 20 !== 0) return;
-  var server = event.server, db = lhLogRead(server), changed = false;
+  var server = event.server, db = lhLogRead(server);
   Object.keys(db.activeRuns).forEach(function (pid) {
-    var run = db.activeRuns[pid];
-    if (!run || run.failed) return;
     var player = server.getPlayer(pid);
-    var route = db.routes[run.routeId];
-    if (!player || !route) return;
-    if (String(player.level.dimension) !== 'minecraft:overworld') return;
-    var gate = route.gates[run.nextIndex];
-    if (!gate) return;
-    if (global.LHWorldPlanner.dist2D(player.x, player.z, gate.x, gate.z) <= 18) {
-      var elapsed = Math.max(1, Math.round((Number(server.tickCount) - run.lastGateTick) / 20));
-      var check = global.LHRouteValidator.validateSegmentSpeed(run.lastGate, gate, elapsed);
-      if (!check.ok) {
-        delete db.activeRuns[pid];
-        changed = true;
-        lhMsg(player, 'Испытание маршрута отменено: аномальная скорость перемещения (' + check.speedBps + ' м/с). Телепортация запрещена.');
-        return;
-      }
-      run.lastGateTick = Number(server.tickCount);
-      run.lastGate = gate;
-      run.nextIndex++;
-      changed = true;
-      if (run.nextIndex >= route.gates.length) {
-        delete db.activeRuns[pid];
-        lhUnlock(player, 'longhaul:routes/first_route');
-        lhMsg(player, 'Маршрут "' + route.id + '" пройден (' + route.length + ' м)! Выдано подтверждение.');
-      } else {
-        lhMsg(player, 'Контрольная точка ' + run.nextIndex + '/' + route.gates.length + ' пройдена (' + check.speedBps + ' м/с).');
-      }
-    }
+    if (player) lhRouteStepPlayer(server, player);
   });
-  if (changed) lhLogSave(server);
 });

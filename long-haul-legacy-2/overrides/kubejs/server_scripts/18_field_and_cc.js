@@ -126,6 +126,7 @@ function lhCCVerify(server, player, siteId) {
   db.ccVerified[siteId] = { computer: comp, item: ch.item, observed: have, tick: Number(server.tickCount) };
   lhFieldSave(server);
   lhUnlock(player, 'longhaul:cc/' + siteId);
+  if (typeof lhStageRecompute === 'function') lhStageRecompute(server, player);
   lhMsg(player, 'Телеметрия "' + site.name + '" подтверждена сервером: компьютер ' + comp + ', фактический запас ' + have + 'x ' + ch.item + '.');
   return 1;
 }

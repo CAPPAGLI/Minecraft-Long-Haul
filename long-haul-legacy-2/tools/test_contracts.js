@@ -73,11 +73,32 @@ test('quest catalog startup index exposes all 240 unique campaign/regional specs
   const cat = sandbox.global.LHQuestCatalog;
   assert(Array.isArray(cat) && cat.length === 240, 'expected 240 catalog entries, got ' + (cat && cat.length));
   const ids = new Set();
+  const vtypes = new Set();
   cat.forEach(q => {
     assert(q.id && q.title && q.chapter && q.verification_type && q.stage >= 1 && q.stage <= 4);
     assert(!ids.has(q.id), 'duplicate id ' + q.id);
     ids.add(q.id);
+    vtypes.add(q.verification_type);
   });
+  assert(vtypes.size >= 15, 'expected diverse verification types, got ' + vtypes.size);
+});
+
+test('all KubeJS startup/server/client scripts parse cleanly in ES5/Node', () => {
+  const path = require('path');
+  const dirs = [
+    path.join(__dirname, '../overrides/kubejs/startup_scripts'),
+    path.join(__dirname, '../overrides/kubejs/server_scripts'),
+    path.join(__dirname, '../overrides/kubejs/client_scripts'),
+    path.join(__dirname, 'fixtures')
+  ];
+  let count = 0;
+  dirs.forEach(d => {
+    fs.readdirSync(d).filter(f => f.endsWith('.js')).forEach(f => {
+      new vm.Script(fs.readFileSync(path.join(d, f), 'utf8'), { filename: f });
+      count++;
+    });
+  });
+  assert(count >= 15, 'expected at least 15 KubeJS/fixture scripts, got ' + count);
 });
 
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');

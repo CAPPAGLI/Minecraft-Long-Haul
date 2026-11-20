@@ -135,9 +135,13 @@ function lhCatVerify(server, player, qid) {
   } else if (vt === 'route_trial') {
     var rldb = lhLogRead(server);
     var minLen = Number(cond.minimum_distance_blocks || 750);
-    var hasRoute = Object.keys(rldb.routes).some(function (rid) { return rldb.routes[rid].length >= minLen; });
+    var reqTrips = Math.min(3, Math.max(1, Number(cond.successful_round_trips || 1)));
+    var hasRoute = Object.keys(rldb.routes).some(function (rid) {
+      var r = rldb.routes[rid];
+      return r.length >= minLen && (r.completedCount || 0) >= reqTrips;
+    });
     if (!hasRoute) {
-      lhMsg(player, 'Сначала разметьте и сохраните маршрут длиной >= ' + minLen + ' м (/lh route begin|gate|finish).');
+      lhMsg(player, 'Требуется завершённый рейс по маршруту длиной >= ' + minLen + ' м (рейсов >= ' + reqTrips + ': /lh route begin|gate|finish|start).');
       return 0;
     }
   } else if (vt === 'kit_check') {

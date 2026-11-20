@@ -113,6 +113,7 @@ function lhRecRestore(server, player, recId) {
   rec.machineryFound = mach;
   lhRecSave(server);
   lhUnlock(player, 'longhaul:recovery/' + recId);
+  if (typeof lhStageRecompute === 'function') lhStageRecompute(server, player);
   lhMsg(player, 'Объект "' + rec.name + '" восстановлен! Зафиксирован узел: ' + mach);
   return 1;
 }

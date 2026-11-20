@@ -127,6 +127,7 @@ function lhSiteCommission(server, player, siteId) {
   site.depot = depotPos;
   lhSitesSave(server);
   lhUnlock(player, 'longhaul:sites/' + siteId);
+  if (typeof lhStageRecompute === 'function') lhStageRecompute(server, player);
   lhMsg(player, 'Площадка "' + site.name + '" введена в строй на [' + site.x + ', ' + site.z + ']. Производство: /lh site produce ' + siteId + ' bootstrap');
   return 1;
 }
@@ -185,6 +186,7 @@ function lhSiteProduce(server, player, siteId, mode) {
   site.producedTotal = (site.producedTotal || 0) + outCount;
   lhSitesSave(server);
   lhUnlock(player, 'longhaul:production/' + siteId);
+  if (typeof lhStageRecompute === 'function') lhStageRecompute(server, player);
   lhMsg(player, 'Выпущено ' + outCount + 'x ' + spec.product + ' на площадке "' + site.name + '". Всего выпущено: ' + site.producedTotal);
   return 1;
 }
@@ -205,6 +207,7 @@ function lhSiteArchive(server, player) {
   site.commissioned = true;
   lhSitesSave(server);
   lhUnlock(player, 'longhaul:sites/continental_archive');
+  if (typeof lhStageRecompute === 'function') lhStageRecompute(server, player);
   lhMsg(player, firstTime ? 'Уникальный Центральный архив магистралей зафиксирован однократно по ID мира!' : 'Архив уже зафиксирован (повторные награды не выдаются).');
   return 1;
 }
