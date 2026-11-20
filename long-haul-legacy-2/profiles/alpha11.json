@@ -45,7 +45,11 @@
       "iron-furnaces",
       "torchmaster",
       "macaws-bridges",
-      "macaws-paths-and-pavings"
+      "macaws-paths-and-pavings",
+      "create-enchantment-industry",
+      "create-central-kitchen",
+      "create-deco",
+      "attributefix"
     ],
     "biomes": [
       "biomes-o-plenty",
@@ -92,7 +96,8 @@
       "embers-floating-islands",
       "create-sky-village",
       "aquamirae",
-      "lootr"
+      "lootr",
+      "obscure-api"
     ],
     "world": [
       "alexs-mobs",
@@ -159,7 +164,9 @@
       "woodworks",
       "clayworks",
       "effortless-building",
-      "quark"
+      "quark",
+      "macaws-biomes-o-plenty",
+      "macaws-stairs"
     ],
     "food": [
       "farmers-respite",
@@ -190,7 +197,8 @@
       "create-confectionery",
       "ends-delight",
       "nethers-delight",
-      "oceans-delight"
+      "oceans-delight",
+      "brewin-and-chewin"
     ],
     "performance": [
       "embeddium",
@@ -298,7 +306,10 @@
       "dynamic-lights",
       "entityculling",
       "sound-physics-remastered",
-      "presence-footsteps-forge"
+      "presence-footsteps-forge",
+      "jade-addons-forge",
+      "exposure",
+      "comforts"
     ],
     "arcane": [
       "primal-magick",
@@ -306,14 +317,14 @@
     ]
   },
   "reasons": {
-    "industrial": "Create 6.0.6-6.0.8 addons, IE/IP/IG heavy industry, road vehicles (Ultimate Car Mod), CC peripherals, SFM/Modular Routers/Integrated Dynamics, stationary chests/barrels, and Exposure expansions without AE2/Tom's Storage. Added Functional Storage stationary drawers (ender_drawer disabled). Added Create Stuff & Additions (jetpacks blocked) and Create Liquid Fuel. Added harsh environmental pollution and chimney venting (pollution-of-the-realms, advanced-chimneys).",
+    "industrial": "Create 6.0.6-6.0.8 addons, IE/IP/IG heavy industry, road vehicles (Ultimate Car Mod), CC peripherals, SFM/Modular Routers/Integrated Dynamics, stationary chests/barrels, and Exposure expansions without AE2/Tom's Storage. Added Functional Storage stationary drawers (ender_drawer disabled). Added Create Stuff & Additions (jetpacks blocked) and Create Liquid Fuel. Added harsh environmental pollution and chimney venting (pollution-of-the-realms, advanced-chimneys). Added Create 6.0.6+ Enchantment Industry, Central Kitchen, Create Deco, and AttributeFix.",
     "biomes": "Regions Unexplored + Biomes O' Plenty + Terralith + Tectonic + Alex's Caves + thematic sub-biomes with vanilla vertical limits.",
-    "structures": "YUNG full suite + Towns & Towers + IDAS + Dungeons and Taverns + Hopo + When Dungeons Arise + Structory + Formations + Archeology + Bountiful. Added Structurify density control and Easy NPC site dispatchers. Added floating sky islands and sky villages (embers-floating-islands, create-sky-village). Added Aquamirae and instanced Lootr dungeon chests.",
+    "structures": "YUNG full suite + Towns & Towers + IDAS + Dungeons and Taverns + Hopo + When Dungeons Arise + Structory + Formations + Archeology + Bountiful. Added Structurify density control and Easy NPC site dispatchers. Added floating sky islands and sky villages (embers-floating-islands, create-sky-village). Added Aquamirae and instanced Lootr dungeon chests. Added Obscure API for Aquamirae.",
     "world": "Ambient wildlife, bosses/encounters, weathering, snow physics, and client audiovisual atmosphere.",
-    "building": "Architecture, framing, chipped/rechiseled, Macaw suite, Quark, Sully's Mod, Immersive Paintings, and wood/stone/clay variants. Added Macaw's Bridges, Paths, Roofs, Doors, and Fences.",
-    "food": "Expanded Farmer's Delight ecosystem, Fruit Trees, Productive Bees, Culinary Construct, Diet, and Aquaculture without temperature locks. Added Create Confectionery. Added End's Delight. Added Farmer's Delight expansions (Nether's, Ocean's, Miner's, Cultural Delights).",
+    "building": "Architecture, framing, chipped/rechiseled, Macaw suite, Quark, Sully's Mod, Immersive Paintings, and wood/stone/clay variants. Added Macaw's Bridges, Paths, Roofs, Doors, and Fences. Added Macaw's Biomes O' Plenty and Macaw's Stairs.",
+    "food": "Expanded Farmer's Delight ecosystem, Fruit Trees, Productive Bees, Culinary Construct, Diet, and Aquaculture without temperature locks. Added Create Confectionery. Added End's Delight. Added Farmer's Delight expansions (Nether's, Ocean's, Miner's, Cultural Delights). Added Brewin' And Chewin' keg fermentation.",
     "performance": "Client/server optimization stack with Embeddium/Oculus/Saturn/Noisium/ModernFix/FastWorkbench/RyoamicLights (radium excluded due to Valkyrien Skies POI mixin conflict). Added FastFurnace and Does It Tick for 175k-world TPS stability. Added Smooth Boot Reloaded.",
-    "qol": "Compasses, Tetra+Extras, Combat Roll, JEI/EMI integrations, manuals, tooltips, UI polish, and voice chat addons without bulk backpacks or teleportation. Added Corpse, Better Spawner Control, Paxi, EntityJS, Game/Recipe/Item Stages, and FancyMenu/Drippy/ResourcePackOverrides/JustZoom client polish. Added Default Server Properties and Simple Discord RPC (client-only). Added Timeless and Classics Zero (TaCZ) industrial firearms. Added ParCool! parkour movement. Added corpse graves (corpse) to preserve items across Death Stranding voidout explosions. Added Map Atlases, Akashic Tome, Visual Workbench, TrashSlot, BetterF3, Dynamic Lights, Entity Culling, Sound Physics Remastered, and Presence Footsteps.",
+    "qol": "Compasses, Tetra+Extras, Combat Roll, JEI/EMI integrations, manuals, tooltips, UI polish, and voice chat addons without bulk backpacks or teleportation. Added Corpse, Better Spawner Control, Paxi, EntityJS, Game/Recipe/Item Stages, and FancyMenu/Drippy/ResourcePackOverrides/JustZoom client polish. Added Default Server Properties and Simple Discord RPC (client-only). Added Timeless and Classics Zero (TaCZ) industrial firearms. Added ParCool! parkour movement. Added corpse graves (corpse) to preserve items across Death Stranding voidout explosions. Added Map Atlases, Akashic Tome, Visual Workbench, TrashSlot, BetterF3, Dynamic Lights, Entity Culling, Sound Physics Remastered, and Presence Footsteps. Added Jade Addons, Exposure camera, Comforts sleeping bags, and Just Enough Resources.",
     "arcane": "Thaumcraft-inspired research, alchemy, primal essences, and arcane blocks compatible with Forge 1.20.1 (official Thaumcraft 6/7 is not released on 1.20.1 Forge)."
   },
   "client_only": [
