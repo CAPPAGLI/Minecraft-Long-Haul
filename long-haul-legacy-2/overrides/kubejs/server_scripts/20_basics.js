@@ -14,6 +14,7 @@ ServerEvents.recipes(function (event) {
   event.remove({ output: 'supplementaries:sack' });
   event.remove({ output: 'supplementaries:safe' });
   event.remove({ output: 'quark:backpack' });
+  event.remove({ output: 'functionalstorage:ender_drawer' });
 });
 
 LootJS.modifiers(function (event) {
@@ -25,10 +26,21 @@ LootJS.modifiers(function (event) {
   event.addLootTableModifier(/.*/).removeLoot('supplementaries:sack');
   event.addLootTableModifier(/.*/).removeLoot('supplementaries:safe');
   event.addLootTableModifier(/.*/).removeLoot('quark:backpack');
+  event.addLootTableModifier(/.*/).removeLoot('functionalstorage:ender_drawer');
 });
 
 BlockEvents.rightClicked('minecraft:ender_chest', function (event) {
   event.player.tell('[Long Haul] Эндер-сундуки отключены правилами логистики.');
+  event.cancel();
+});
+
+BlockEvents.rightClicked('functionalstorage:ender_drawer', function (event) {
+  event.player.tell('[Long Haul] Беспроводные эндер-ящики отключены правилами логистики.');
+  event.cancel();
+});
+
+BlockEvents.placed('functionalstorage:ender_drawer', function (event) {
+  event.player.tell('[Long Haul] Размещение беспроводных эндер-ящиков отключено правилами логистики.');
   event.cancel();
 });
 

@@ -145,6 +145,7 @@ function lhStartIntegrationSetup(server) {
         var fb = overworld.getBlock(forest.depot.x, forest.depot.y, forest.depot.z);
         ok(String(fb.id) === 'minecraft:barrel', 'NBT structure placed depot barrel at forest: ' + fb.id);
         ok(String(overworld.getBlock(forest.x - 1, forest.placedY, forest.z).id) === 'minecraft:spruce_planks', 'NBT structure placed spruce floor at forest');
+        ok(String(overworld.getBlock(forest.x - 3, forest.placedY + 1, forest.z - 3).id) === 'minecraft:spruce_log', '11x7x11 forest NBT placed timber stockpile');
         var finv = fb.inventory;
         for (var fs = 0; fs < finv.slots; fs++) finv.setStackInSlot(fs, Item.empty);
         finv.setStackInSlot(0, Item.of('minecraft:oak_log', 4));
@@ -165,6 +166,7 @@ function lhStartIntegrationSetup(server) {
         };
         ok(lhSiteArchive(server, archActor) === 1, 'continental_archive NBT placed and commissioned');
         ok(String(overworld.getBlock(arch.x - 1, arch.placedY, arch.z).id) === 'minecraft:polished_deepslate', 'archive monument deepslate floor verified');
+        ok(String(overworld.getBlock(arch.x - 1, arch.placedY + 1, arch.z - 3).id) === 'minecraft:lectern', '11x7x11 archive NBT placed lectern');
         overworld.getBlock(arch.x - 1, arch.placedY, arch.z).set('minecraft:air');
         ok(lhSiteRepairArchive(server, archActor) === 1, 'archive repaired idempotently');
         ok(String(overworld.getBlock(arch.x - 1, arch.placedY, arch.z).id) === 'minecraft:polished_deepslate', 'archive floor restored by repair_archive');
@@ -186,6 +188,7 @@ function lhStartIntegrationSetup(server) {
           unlockAdvancement: function () {}
         };
         ok(lhCampDeploy(server, campActor) === 1, 'camp deployed with equipment');
+        ok(lhCatVerify(server, campActor, 'expedition_02') === 1, 'catalog camp_visit verified with active camp at >= 750m');
         ok(lhCampPack(server, campActor, 'camp_1') === 0, 'camp pack blocked while barrel non-empty');
         campBarrel.inventory.setStackInSlot(0, Item.empty);
         ok(lhCampPack(server, campActor, 'camp_1') === 1, 'camp pack allowed when empty');
@@ -282,6 +285,28 @@ function lhStartIntegrationSetup(server) {
           unlockAdvancement: function () {}
         };
         ok(lhCatVerify(server, catDelivActor, 'main_1_01') === 1, 'catalog controlled_production consumed 64 items from depot');
+        ok(lhCatVerify(server, siteActor, 'engineering_cc_01') === 1, 'catalog computer_challenge verified near CC computer');
+
+        // 11. Economy recipes & banned portable storage check
+        var RL = Java.loadClass('net.minecraft.resources.ResourceLocation');
+        var rm = server.recipeManager;
+        ok(rm.byKey(new RL('longhaul:expedition_bundle')).isPresent(), 'expedition_bundle recipe registered');
+        ok(rm.byKey(new RL('longhaul:bulk_rail_from_sheets')).isPresent(), 'bulk_rail_from_sheets recipe registered');
+        var regAccess = server.registryAccess();
+        var bannedOuts = {
+          'minecraft:ender_chest': true,
+          'minecraft:shulker_box': true,
+          'supplementaries:sack': true,
+          'supplementaries:safe': true,
+          'quark:backpack': true,
+          'functionalstorage:ender_drawer': true
+        };
+        var iter = rm.getRecipes().iterator();
+        while (iter.hasNext()) {
+          var recObj = iter.next();
+          var outId = String(recObj.getResultItem(regAccess).id);
+          ok(!bannedOuts[outId], 'banned portable/ender storage has live recipe: ' + outId + ' (' + recObj.getId() + ')');
+        }
 
         // Cleanup test artifacts
         var curDb = lhRead(server);
@@ -319,6 +344,8 @@ function lhStartIntegrationSetup(server) {
         delete catDb.completed[String(siteActor.uuid) + ':region_forest_01'];
         delete catDb.completed[String(siteActor.uuid) + ':photo_forest_arrival'];
         delete catDb.completed[String(siteActor.uuid) + ':main_1_01'];
+        delete catDb.completed[String(siteActor.uuid) + ':engineering_cc_01'];
+        delete catDb.completed[String(campActor.uuid) + ':expedition_02'];
         lhCatSave(server);
         var ldb = lhLogRead(server);
         delete ldb.camps[String(campActor.uuid)];

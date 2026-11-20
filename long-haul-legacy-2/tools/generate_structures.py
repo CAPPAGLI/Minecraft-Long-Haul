@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Generate authentic Minecraft 1.20.1 gzipped NBT structure templates (.nbt)
-for the 10 strategic sites and 6 recoverable industrial facilities.
+for the 10 strategic sites and 6 recoverable industrial facilities (11x7x11).
+Center depot barrel is always at (5, 1, 5) -> aligns with (site.x, padY + 1, site.z).
 """
 import gzip, io, pathlib, struct
 
 R = pathlib.Path(__file__).resolve().parents[1]
 OUT = R / 'overrides/kubejs/data/longhaul/structures'
 
-# Big-endian NBT tag IDs
 TAG_END = 0
 TAG_INT = 3
 TAG_STRING = 8
@@ -118,87 +118,175 @@ def read_nbt_smoke(gz_bytes: bytes) -> tuple[int, tuple[int, int, int], int, int
     return root['DataVersion'], tuple(root['size']), len(root['palette']), len(root['blocks'])
 
 def make_station_template(floor_blk: str, accent_blk: str, pillar_blk: str, roof_blk: str,
-                          trim_blk: str, special_blk: str, is_ruin: bool = False,
-                          is_archive: bool = False, is_hub: bool = False) -> dict:
-    sx, sy, sz = 9, 6, 9
+                          trim_blk: str, special_blk: str, role: str, is_ruin: bool = False) -> dict:
+    sx, sy, sz = 11, 7, 11
     b: dict[tuple[int, int, int], tuple[str, dict[str, str] | None]] = {}
 
-    # Clear interior volume with air so terrain rubble doesn't overlap depot
+    # Platform floor & cleared air interior
     for x in range(sx):
         for z in range(sz):
-            b[(x, 0, z)] = (trim_blk if (x in (0, sx - 1) or z in (0, sz - 1)) else floor_blk, None)
+            is_border = (x in (0, sx - 1) or z in (0, sz - 1))
+            b[(x, 0, z)] = (trim_blk if is_border else floor_blk, None)
             for y in range(1, sy):
                 b[(x, y, z)] = ('minecraft:air', None)
 
-    # Corner pillars & overhead frame
-    corners = [(1, 1), (1, 7), (7, 1), (7, 7)]
+    # Corner pillars & mid-span supports
+    corners = [(1, 1), (1, 9), (9, 1), (9, 9)]
     for cx, cz in corners:
         h = 3 if (is_ruin and (cx + cz) % 4 == 2) else 4
         for y in range(1, h + 1):
             b[(cx, y, cz)] = (pillar_blk, None)
 
-    # Side low walls with central walk-in openings on all 4 sides
-    for i in (2, 3, 5, 6):
+    # Perimeter low walls with wide 3-block walk-in / rail entrances (x=4..6, z=4..6)
+    for i in (2, 3, 7, 8):
         b[(i, 1, 1)] = (accent_blk, None)
-        b[(i, 1, 7)] = (accent_blk, None)
+        b[(i, 1, 9)] = (accent_blk, None)
         b[(1, 1, i)] = (accent_blk, None)
-        b[(7, 1, i)] = (accent_blk, None)
+        b[(9, 1, i)] = (accent_blk, None)
+        if not is_ruin and i in (2, 8):
+            b[(i, 2, 1)] = ('minecraft:oak_fence' if 'oak' in pillar_blk else 'minecraft:iron_bars', None)
+            b[(i, 2, 9)] = ('minecraft:oak_fence' if 'oak' in pillar_blk else 'minecraft:iron_bars', None)
 
-    # Roof canopy (partially collapsed when ruin=True)
-    for x in range(1, 8):
-        for z in range(1, 8):
-            if is_ruin and ((x + z) % 3 == 0):
+    # Roof canopy (partially collapsed if is_ruin)
+    for x in range(1, 10):
+        for z in range(1, 10):
+            if is_ruin and ((x * 3 + z) % 3 == 0 or x == 5):
                 continue
             b[(x, 5, z)] = (roof_blk, None)
 
-    # Rails leading into depot from south edge
-    for z in range(5, 9):
-        b[(4, 1, z)] = ('minecraft:rail', {'shape': 'north_south'})
+    # Incoming spur track from south gate to depot
+    for z in range(6, 11):
+        b[(5, 1, z)] = ('minecraft:rail', {'shape': 'north_south'})
 
-    # Central depot barrel at (4, 1, 4) -> aligns exactly with (site.x, ground_y, site.z)
-    b[(4, 1, 4)] = ('minecraft:barrel', {'facing': 'south'})
-    b[(3, 1, 4)] = (special_blk, None)
-    b[(5, 1, 4)] = (special_blk, None)
+    # Central depot barrel at (5, 1, 5) -> aligns with (site.x, padY + 1, site.z)
+    b[(5, 1, 5)] = ('minecraft:barrel', {'facing': 'south'})
+    b[(4, 1, 5)] = (special_blk, None)
+    if not is_ruin:
+        b[(6, 1, 5)] = (special_blk, None)
 
-    # Warm lighting
+    # Base lighting
     b[(2, 2, 2)] = ('minecraft:lantern', {'hanging': 'false'})
-    b[(6, 2, 6)] = ('minecraft:lantern', {'hanging': 'false'})
+    b[(8, 2, 8)] = ('minecraft:lantern', {'hanging': 'false'})
+    if not is_ruin:
+        b[(5, 4, 5)] = ('minecraft:lantern', {'hanging': 'true'})
 
-    if is_archive:
-        # Archival bookshelves + lecterns + polished deepslate monument trim
-        for x in (2, 3, 5, 6):
+    # Role-specific architectural landmarks
+    if role == 'mine':
+        # Timber mine headframe & hoist chain over depot
+        for y in range(1, 6):
+            b[(3, y, 3)] = ('minecraft:oak_log', None)
+            b[(7, y, 3)] = ('minecraft:oak_log', None)
+        for x in range(3, 8):
+            b[(x, 5, 3)] = ('minecraft:cobblestone_wall', None)
+        b[(5, 4, 3)] = ('minecraft:chain', {'axis': 'y'})
+        b[(2, 1, 7)] = ('minecraft:raw_iron_block', None)
+    elif role == 'forest':
+        # Stacked timber stockpile & carpenter bench
+        for x in (2, 3):
+            b[(x, 1, 2)] = ('minecraft:spruce_log', {'axis': 'x'})
+            b[(x, 1, 3)] = ('minecraft:spruce_log', {'axis': 'x'})
+            b[(x, 2, 2)] = ('minecraft:spruce_log', {'axis': 'x'})
+        b[(8, 1, 2)] = ('minecraft:stonecutter', None)
+    elif role == 'farm':
+        # Hayloft bales & enclosed irrigation basin in floor
+        for x in (2, 3):
+            b[(x, 1, 2)] = ('minecraft:hay_block', {'axis': 'y'})
+        b[(2, 2, 2)] = ('minecraft:hay_block', {'axis': 'y'})
+        b[(8, 0, 2)] = ('minecraft:water', {'level': '0'})
+        b[(7, 0, 2)] = ('minecraft:farmland', {'moisture': '7'})
+        b[(7, 1, 2)] = ('minecraft:wheat', {'age': '7'})
+    elif role == 'port':
+        # Coastal beacon tower on NE corner
+        for y in range(1, 7):
+            b[(8, y, 2)] = ('minecraft:stone_bricks', None)
+        b[(8, 6, 2)] = ('minecraft:sea_lantern', None)
+        b[(2, 1, 2)] = ('minecraft:barrel', {'facing': 'east'})
+        b[(2, 1, 3)] = ('minecraft:barrel', {'facing': 'east'})
+    elif role == 'quarry':
+        # Quarry jib crane boom & terracotta stockpiles
+        for y in range(1, 7):
+            b[(2, y, 2)] = ('minecraft:cut_sandstone', None)
+        for x in range(3, 7):
+            b[(x, 6, 2)] = ('minecraft:oak_fence', None)
+        b[(6, 5, 2)] = ('minecraft:chain', {'axis': 'y'})
+        b[(8, 1, 2)] = ('minecraft:terracotta', None)
+    elif role == 'swamp':
+        # Elevated stilt chemical vats & tinted glass baffles
+        for x in (2, 8):
+            b[(x, 1, 2)] = ('minecraft:cauldron', None)
+            b[(x, 1, 8)] = ('minecraft:cauldron', None)
+        for x in range(3, 8):
+            b[(x, 2, 2)] = ('minecraft:green_stained_glass', None)
+    elif role == 'glass':
+        # Tall brick furnace chimney
+        for y in range(1, 7):
+            b[(2, y, 2)] = ('minecraft:bricks', None)
+            b[(3, y, 2)] = ('minecraft:bricks', None)
+        b[(2, 6, 2)] = ('minecraft:campfire', {'lit': 'true'})
+        b[(8, 1, 2)] = ('minecraft:glass', None)
+        b[(8, 2, 2)] = ('minecraft:glass', None)
+    elif role == 'machines':
+        # Steel gantry & copper/iron assembly bay
+        for x in range(2, 9):
+            b[(x, 4, 2)] = ('minecraft:iron_bars', None)
+        b[(2, 1, 2)] = ('minecraft:smithing_table', None)
+        b[(8, 1, 2)] = ('minecraft:crafting_table', None)
+        b[(5, 3, 2)] = ('minecraft:chain', {'axis': 'y'})
+    elif role == 'continental_archive':
+        # Monumental archive: bookshelf wings, twin lecterns, chandelier
+        for x in (2, 3, 7, 8):
             b[(x, 1, 2)] = ('minecraft:bookshelf', None)
             b[(x, 2, 2)] = ('minecraft:bookshelf', None)
+            b[(x, 3, 2)] = ('minecraft:bookshelf', None)
         b[(4, 1, 2)] = ('minecraft:lectern', {'facing': 'south'})
-        b[(4, 4, 4)] = ('minecraft:lantern', {'hanging': 'true'})
-    elif is_hub:
+        b[(6, 1, 2)] = ('minecraft:lectern', {'facing': 'south'})
+        b[(5, 1, 2)] = ('minecraft:chiseled_deepslate', None)
+        b[(5, 2, 2)] = ('minecraft:lantern', {'hanging': 'false'})
+        b[(5, 5, 5)] = ('minecraft:polished_deepslate', None)
+    elif role == 'continental_hub':
+        # Continental logistics dispatch arch
+        for y in range(1, 6):
+            b[(3, y, 2)] = ('minecraft:copper_block', None)
+            b[(7, y, 2)] = ('minecraft:copper_block', None)
+        for x in range(3, 8):
+            b[(x, 6, 2)] = ('minecraft:cut_copper', None)
+        b[(5, 1, 2)] = ('minecraft:lectern', {'facing': 'south'})
         b[(2, 1, 2)] = ('minecraft:crafting_table', None)
-        b[(6, 1, 2)] = ('minecraft:smithing_table', None)
-        b[(4, 1, 2)] = ('minecraft:lectern', {'facing': 'south'})
-        b[(4, 4, 4)] = ('minecraft:lantern', {'hanging': 'true'})
+        b[(8, 1, 2)] = ('minecraft:smithing_table', None)
+    elif role.startswith('ruin_'):
+        # Overgrown / collapsed industrial ruin clues
+        b[(2, 1, 2)] = ('minecraft:mossy_cobblestone', None)
+        b[(8, 1, 2)] = ('minecraft:cobweb', None)
+        b[(3, 2, 2)] = ('minecraft:chain', {'axis': 'y'})
+        if role == 'ruin_bridge':
+            for x in range(2, 9):
+                b[(x, 0, 5)] = ('minecraft:stone_bricks', None)
+                if x not in (4, 5, 6):
+                    b[(x, 1, 4)] = ('minecraft:stone_brick_wall', None)
+                    b[(x, 1, 6)] = ('minecraft:stone_brick_wall', None)
 
     return b
 
 SITES = {
-    'mine': ('minecraft:cobblestone', 'minecraft:stone_bricks', 'minecraft:oak_log', 'minecraft:deepslate_tile_slab', 'minecraft:andesite', 'minecraft:blast_furnace', False, False, False),
-    'forest': ('minecraft:spruce_planks', 'minecraft:stripped_spruce_log', 'minecraft:spruce_log', 'minecraft:spruce_slab', 'minecraft:cobblestone', 'minecraft:crafting_table', False, False, False),
-    'farm': ('minecraft:oak_planks', 'minecraft:bricks', 'minecraft:oak_log', 'minecraft:oak_slab', 'minecraft:cobblestone', 'minecraft:composter', False, False, False),
-    'port': ('minecraft:stone_bricks', 'minecraft:spruce_planks', 'minecraft:stripped_oak_log', 'minecraft:spruce_slab', 'minecraft:polished_andesite', 'minecraft:smoker', False, False, False),
-    'quarry': ('minecraft:smooth_sandstone', 'minecraft:terracotta', 'minecraft:cut_sandstone', 'minecraft:sandstone_slab', 'minecraft:cobblestone', 'minecraft:stonecutter', False, False, False),
-    'swamp': ('minecraft:dark_oak_planks', 'minecraft:mud_bricks', 'minecraft:dark_oak_log', 'minecraft:dark_oak_slab', 'minecraft:mossy_cobblestone', 'minecraft:cauldron', False, False, False),
-    'glass': ('minecraft:bricks', 'minecraft:terracotta', 'minecraft:brick_wall', 'minecraft:brick_slab', 'minecraft:smooth_stone', 'minecraft:furnace', False, False, False),
-    'machines': ('minecraft:polished_andesite', 'minecraft:iron_block', 'minecraft:deepslate_bricks', 'minecraft:polished_andesite_slab', 'minecraft:stone_bricks', 'minecraft:anvil', False, False, False),
-    'continental_archive': ('minecraft:polished_deepslate', 'minecraft:deepslate_bricks', 'minecraft:deepslate_brick_wall', 'minecraft:polished_deepslate_slab', 'minecraft:chiseled_deepslate', 'minecraft:bookshelf', False, True, False),
-    'continental_hub': ('minecraft:stone_bricks', 'minecraft:copper_block', 'minecraft:polished_andesite', 'minecraft:stone_brick_slab', 'minecraft:chiseled_stone_bricks', 'minecraft:blast_furnace', False, False, True),
+    'mine': ('minecraft:cobblestone', 'minecraft:stone_bricks', 'minecraft:oak_log', 'minecraft:deepslate_tile_slab', 'minecraft:andesite', 'minecraft:blast_furnace', 'mine', False),
+    'forest': ('minecraft:spruce_planks', 'minecraft:stripped_spruce_log', 'minecraft:spruce_log', 'minecraft:spruce_slab', 'minecraft:cobblestone', 'minecraft:crafting_table', 'forest', False),
+    'farm': ('minecraft:oak_planks', 'minecraft:bricks', 'minecraft:oak_log', 'minecraft:oak_slab', 'minecraft:cobblestone', 'minecraft:composter', 'farm', False),
+    'port': ('minecraft:stone_bricks', 'minecraft:spruce_planks', 'minecraft:stripped_oak_log', 'minecraft:spruce_slab', 'minecraft:polished_andesite', 'minecraft:smoker', 'port', False),
+    'quarry': ('minecraft:smooth_sandstone', 'minecraft:terracotta', 'minecraft:cut_sandstone', 'minecraft:sandstone_slab', 'minecraft:cobblestone', 'minecraft:stonecutter', 'quarry', False),
+    'swamp': ('minecraft:dark_oak_planks', 'minecraft:mud_bricks', 'minecraft:dark_oak_log', 'minecraft:dark_oak_slab', 'minecraft:mossy_cobblestone', 'minecraft:cauldron', 'swamp', False),
+    'glass': ('minecraft:bricks', 'minecraft:terracotta', 'minecraft:brick_wall', 'minecraft:brick_slab', 'minecraft:smooth_stone', 'minecraft:furnace', 'glass', False),
+    'machines': ('minecraft:polished_andesite', 'minecraft:iron_block', 'minecraft:deepslate_bricks', 'minecraft:polished_andesite_slab', 'minecraft:stone_bricks', 'minecraft:anvil', 'machines', False),
+    'continental_archive': ('minecraft:polished_deepslate', 'minecraft:deepslate_bricks', 'minecraft:deepslate_brick_wall', 'minecraft:polished_deepslate_slab', 'minecraft:chiseled_deepslate', 'minecraft:bookshelf', 'continental_archive', False),
+    'continental_hub': ('minecraft:stone_bricks', 'minecraft:copper_block', 'minecraft:polished_andesite', 'minecraft:stone_brick_slab', 'minecraft:chiseled_stone_bricks', 'minecraft:blast_furnace', 'continental_hub', False),
 }
 
 RECOVERIES = {
-    'sawmill': ('minecraft:oak_planks', 'minecraft:cobblestone', 'minecraft:oak_log', 'minecraft:oak_slab', 'minecraft:mossy_cobblestone', 'minecraft:stonecutter', True, False, False),
-    'quarry': ('minecraft:cobblestone', 'minecraft:andesite', 'minecraft:deepslate_bricks', 'minecraft:cobblestone_slab', 'minecraft:gravel', 'minecraft:blast_furnace', True, False, False),
-    'river_port': ('minecraft:spruce_planks', 'minecraft:mossy_stone_bricks', 'minecraft:spruce_log', 'minecraft:spruce_slab', 'minecraft:cobblestone', 'minecraft:smoker', True, False, False),
-    'sorting_yard': ('minecraft:polished_andesite', 'minecraft:bricks', 'minecraft:iron_bars', 'minecraft:polished_andesite_slab', 'minecraft:stone_bricks', 'minecraft:hopper', True, False, False),
-    'power_plant': ('minecraft:deepslate_bricks', 'minecraft:copper_block', 'minecraft:deepslate_brick_wall', 'minecraft:deepslate_brick_slab', 'minecraft:polished_deepslate', 'minecraft:blast_furnace', True, False, False),
-    'collapsed_bridge': ('minecraft:stone_bricks', 'minecraft:mossy_stone_bricks', 'minecraft:stone_brick_wall', 'minecraft:stone_brick_slab', 'minecraft:cobblestone', 'minecraft:lantern', True, False, False),
+    'sawmill': ('minecraft:oak_planks', 'minecraft:cobblestone', 'minecraft:oak_log', 'minecraft:oak_slab', 'minecraft:mossy_cobblestone', 'minecraft:stonecutter', 'ruin_sawmill', True),
+    'quarry': ('minecraft:cobblestone', 'minecraft:andesite', 'minecraft:deepslate_bricks', 'minecraft:cobblestone_slab', 'minecraft:gravel', 'minecraft:blast_furnace', 'ruin_quarry', True),
+    'river_port': ('minecraft:spruce_planks', 'minecraft:mossy_stone_bricks', 'minecraft:spruce_log', 'minecraft:spruce_slab', 'minecraft:cobblestone', 'minecraft:smoker', 'ruin_port', True),
+    'sorting_yard': ('minecraft:polished_andesite', 'minecraft:bricks', 'minecraft:iron_bars', 'minecraft:polished_andesite_slab', 'minecraft:stone_bricks', 'minecraft:hopper', 'ruin_yard', True),
+    'power_plant': ('minecraft:deepslate_bricks', 'minecraft:copper_block', 'minecraft:deepslate_brick_wall', 'minecraft:deepslate_brick_slab', 'minecraft:polished_deepslate', 'minecraft:blast_furnace', 'ruin_power', True),
+    'collapsed_bridge': ('minecraft:stone_bricks', 'minecraft:mossy_stone_bricks', 'minecraft:stone_brick_wall', 'minecraft:stone_brick_slab', 'minecraft:cobblestone', 'minecraft:lantern', 'ruin_bridge', True),
 }
 
 def main():
@@ -208,13 +296,13 @@ def main():
         d.mkdir(parents=True, exist_ok=True)
         for name, params in specs.items():
             blocks = make_station_template(*params)
-            nbt = build_structure_nbt((9, 6, 9), blocks)
+            nbt = build_structure_nbt((11, 7, 11), blocks)
             path = d / f'{name}.nbt'
             path.write_bytes(nbt)
             dv, sz, pal_n, blk_n = read_nbt_smoke(nbt)
-            assert dv == 3465 and sz == (9, 6, 9) and pal_n >= 4 and blk_n == 9 * 6 * 9 - (0 if params[6] else 0) or blk_n > 200
+            assert dv == 3465 and sz == (11, 7, 11) and pal_n >= 5 and blk_n > 500
             count += 1
-    print(f'Generated and verified {count} Minecraft 1.20.1 .nbt structures in {OUT}')
+    print(f'Generated and verified {count} Minecraft 1.20.1 11x7x11 .nbt structures in {OUT}')
 
 if __name__ == '__main__':
     main()

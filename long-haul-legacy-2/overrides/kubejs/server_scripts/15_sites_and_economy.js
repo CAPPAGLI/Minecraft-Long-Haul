@@ -70,8 +70,8 @@ function lhPlaceStructureAt(server, kind, entry, forceRepair) {
   var padY = (forceRepair && typeof entry.placedY === 'number') ? entry.placedY : lhFindSurfaceY(overworld, cx, cz);
   if (padY === null) return 0;
   // Stabilize foundation skirt below padY so structure never floats on slopes
-  for (var dx = -4; dx <= 4; dx++) {
-    for (var dz = -4; dz <= 4; dz++) {
+  for (var dx = -5; dx <= 5; dx++) {
+    for (var dz = -5; dz <= 5; dz++) {
       for (var dy = 1; dy <= 2; dy++) {
         var under = overworld.getBlock(cx + dx, padY - dy, cz + dz);
         var uid = String(under.id);
@@ -82,7 +82,7 @@ function lhPlaceStructureAt(server, kind, entry, forceRepair) {
     }
   }
   var tpl = 'longhaul:' + kind + '/' + entry.id;
-  server.runCommandSilent('place template ' + tpl + ' ' + (cx - 4) + ' ' + padY + ' ' + (cz - 4));
+  server.runCommandSilent('place template ' + tpl + ' ' + (cx - 5) + ' ' + padY + ' ' + (cz - 5));
   var depotY = padY + 1;
   var depotBlock = overworld.getBlock(cx, depotY, cz);
   if (String(depotBlock.id) !== 'minecraft:barrel') {
