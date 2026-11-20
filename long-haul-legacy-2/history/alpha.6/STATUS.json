@@ -1,0 +1,83 @@
+{
+  "version": "2.0-alpha.6",
+  "date_cutoff": "2026-11-19",
+  "status": "HEADLESS_CI_VERIFIED_ALPHA6_NOT_FULL_REQUEST",
+  "minecraft": "1.20.1",
+  "forge": "47.4.10",
+  "java": 17,
+  "external_jars": 368,
+  "server_jars": 296,
+  "client_only_jars": 72,
+  "local_jars": 1,
+  "recursive_declared_mod_ids": 436,
+  "external_download_bytes": 879321974,
+  "ci_run_id": 44782816968,
+  "ci_verified_commit": "f047b7f",
+  "server_smoke_test_void": {
+    "ready": true,
+    "exit_code": 0,
+    "timed_out": false,
+    "events": [
+      "server_ready"
+    ],
+    "heap_mb": 4096,
+    "world": "alpha6 void integration test",
+    "client_tested": false,
+    "integration_pass": true,
+    "integration_fail": false,
+    "clean_exit": true
+  },
+  "server_smoke_test_normal": {
+    "ready": true,
+    "exit_code": 0,
+    "timed_out": false,
+    "events": [
+      "server_ready"
+    ],
+    "heap_mb": 6144,
+    "world": "alpha6 normal overworld test",
+    "client_tested": false,
+    "integration_pass": true,
+    "integration_fail": false,
+    "clean_exit": true
+  },
+  "model_tests_passed": 17,
+  "installed_quests": 311,
+  "installed_advancements": 294,
+  "nbt_structures_generated": 16,
+  "nbt_structure_dimensions": "11x7x11",
+  "quest_breakdown": {
+    "core_campaign_quests": 71,
+    "catalog_orders_implemented": 240
+  },
+  "recoverable_facilities_implemented": 6,
+  "exposure_field_reports_implemented": 9,
+  "cc_telemetry_challenges_implemented": 8,
+  "live_contracts_tested": [
+    "plates",
+    "plate_shift"
+  ],
+  "timed_contracts_live_tested": true,
+  "brigadier_commands_live_tested": true,
+  "catalog_orders_live_tested": true,
+  "economy_recipes_live_tested": true,
+  "game_stages_progression_live_tested": true,
+  "vehicle_telemetry_live_tested": true,
+  "banned_storage_and_jetpack_audit_passed": true,
+  "nbt_structures_live_tested": true,
+  "world_border_width": 175000,
+  "world_guarantees_implemented": true,
+  "specialized_renewable_cities_implemented": true,
+  "camp_and_cargo_system_implemented": true,
+  "consortium_contract_sharing_implemented": true,
+  "client_tested": false,
+  "vehicles_functionally_tested": false,
+  "normal_world_generation_tested": true,
+  "quest_gui_tested": false,
+  "reconnect_restart_persistence_tested": true,
+  "target_approximately_500_fulfilled": false,
+  "new_installable_pack_created": true,
+  "launcher_import_tested": false,
+  "legacy_1_1_1_modified": false,
+  "limitations": "See README.md and TEST-REPORT.md. Headless Linux Forge integration verified for 368 external JARs + longhaul-runtime (436 mod IDs, void + normal Overworld), 16 role-specific 11x7x11 NBT structures, 311 Heracles quests (240 catalog + 71 core), GameStages 4-stage progression, 1-Hz anti-teleport vehicle telemetry, VS defaultconfigs, anti-deadlock recipes, and banned-storage/jetpack recipe audit; graphical client, vehicle physics in motion, and remaining expansion toward ~500 mods are not yet complete."
+}
