@@ -27,10 +27,11 @@ function lhClassifyVehicle(vehicle) {
   if (id.indexOf('astikorcarts:') !== -1) {
     return 'cart';
   }
-  if (id.indexOf('boat') !== -1 || id.indexOf('littlelogistics:') !== -1) {
+  if (id.indexOf('boat') !== -1 || id.indexOf('littlelogistics:') !== -1 || id.indexOf('smallships:') !== -1) {
     return 'watercraft';
   }
-  if (id.indexOf('clockwork:') !== -1 || id.indexOf('vs_eureka:') !== -1 || id.indexOf('valkyrienskies:') !== -1) {
+  if (id.indexOf('clockwork:') !== -1 || id.indexOf('vs_eureka:') !== -1 || id.indexOf('valkyrienskies:') !== -1 ||
+      id.indexOf('immersive_aircraft:') !== -1 || id.indexOf('man_of_many_planes:') !== -1) {
     return 'aircraft_vs';
   }
   if (id.indexOf('horse') !== -1 || id.indexOf('donkey') !== -1 || id.indexOf('mule') !== -1 || id.indexOf('camel') !== -1) {

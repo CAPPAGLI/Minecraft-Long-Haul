@@ -38,7 +38,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: long-haul-legacy-2/assembly/mods
-          key: modrinth-mods-${{ hashFiles('long-haul-legacy-2/profiles/alpha7.json', 'long-haul-legacy-2/assembly/lock.json') }}
+          key: modrinth-mods-${{ hashFiles('long-haul-legacy-2/profiles/alpha8.json', 'long-haul-legacy-2/assembly/lock.json') }}
           restore-keys: |
             modrinth-mods-
 
@@ -56,11 +56,11 @@ jobs:
           python3 long-haul-legacy-2/tools/generate_structures.py
           python3 long-haul-legacy-2/tools/generate_alpha_quests.py
 
-      - name: Resolve, download & verify pinned mods from profiles/alpha7.json
+      - name: Resolve, download & verify pinned mods from profiles/alpha8.json
         run: |
           set -o pipefail
           mkdir -p /tmp/ci-logs
-          python3 long-haul-legacy-2/tools/assemble_alpha.py --profile long-haul-legacy-2/profiles/alpha7.json | tee /tmp/ci-logs/assemble.txt
+          python3 long-haul-legacy-2/tools/assemble_alpha.py --profile long-haul-legacy-2/profiles/alpha8.json | tee /tmp/ci-logs/assemble.txt
           python3 long-haul-legacy-2/tools/generate_modlist.py
 
       - name: Prepare headless Forge 47.4.10 server (void fixture)
@@ -80,7 +80,7 @@ jobs:
           set -o pipefail
           mkdir -p /tmp/ci-logs
           python3 long-haul-legacy-2/tools/prepare_server.py --mode void --skip-forge-install
-          python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 450 --world-label "alpha7 void integration test" | tee /tmp/ci-logs/smoke-void.txt || EC=$?
+          python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 450 --world-label "alpha8 void integration test" | tee /tmp/ci-logs/smoke-void.txt || EC=$?
           cp long-haul-legacy-2/server-test/smoke-result.json /tmp/ci-logs/smoke-void-result.json || true
           exit ${EC:-0}
 
@@ -89,14 +89,14 @@ jobs:
           set -o pipefail
           mkdir -p /tmp/ci-logs
           python3 long-haul-legacy-2/tools/prepare_server.py --mode normal --skip-forge-install
-          python3 long-haul-legacy-2/tools/smoke_server.py --heap 6144 --timeout 780 --world-label "alpha7 normal overworld test" | tee /tmp/ci-logs/smoke-normal.txt || EC=$?
+          python3 long-haul-legacy-2/tools/smoke_server.py --heap 6144 --timeout 780 --world-label "alpha8 normal overworld test" | tee /tmp/ci-logs/smoke-normal.txt || EC=$?
           cp long-haul-legacy-2/server-test/smoke-result.json /tmp/ci-logs/smoke-normal-result.json || true
           exit ${EC:-0}
 
       - name: Package .mrpack and source bundle
         run: |
           set -o pipefail
-          python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.7 | tee /tmp/ci-logs/package.txt
+          python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.8 | tee /tmp/ci-logs/package.txt
 
       - name: Post diagnostic report to commit comment
         if: always()
@@ -146,10 +146,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: long-haul-legacy-2.0-alpha.7
+          name: long-haul-legacy-2.0-alpha.8
           path: |
-            Long-Haul-Legacy-2.0-alpha.7.mrpack
-            Long-Haul-Legacy-2.0-alpha.7-Sources-and-Report.zip
+            Long-Haul-Legacy-2.0-alpha.8.mrpack
+            Long-Haul-Legacy-2.0-alpha.8-Sources-and-Report.zip
             long-haul-legacy-2/assembly/lock.json
             long-haul-legacy-2/MODLIST.md
             long-haul-legacy-2/server-test/smoke-result.json

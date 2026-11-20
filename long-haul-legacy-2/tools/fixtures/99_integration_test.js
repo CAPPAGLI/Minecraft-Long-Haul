@@ -380,6 +380,49 @@ function lhStartIntegrationSetup(server) {
         delete stDb2.players[String(routeActor.uuid)];
         lhStageSave(server);
 
+        // 14. Multi-input delivery, watercraft vehicle_delivery telemetry gate, and network_supply region gate
+        finv.setStackInSlot(0, Item.of('minecraft:cobblestone', 64));
+        finv.setStackInSlot(1, Item.of('minecraft:cobblestone', 64));
+        ok(lhCatVerify(server, catDelivActor, 'main_1_02') === 0, 'delivery with distinct_inputs=2 blocked on single item type');
+        finv.setStackInSlot(1, Item.of('minecraft:oak_planks', 64));
+        ok(lhCatVerify(server, catDelivActor, 'main_1_02') === 1, 'delivery with distinct_inputs=2 verified with two distinct items');
+
+        finv.setStackInSlot(0, Item.of('minecraft:cobblestone', 64));
+        finv.setStackInSlot(1, Item.of('minecraft:cobblestone', 64));
+        finv.setStackInSlot(2, Item.of('minecraft:cobblestone', 64));
+        finv.setStackInSlot(3, Item.of('minecraft:cobblestone', 64));
+        ok(lhCatVerify(server, catDelivActor, 'main_2_02') === 0, 'vehicle_delivery (ship) blocked without watercraft telemetry');
+        var shipActor = {
+          uuid: siteActor.uuid, level: overworld,
+          x: 0, z: 0,
+          vehicle: { type: 'smallships:cog' },
+          tell: function () {}
+        };
+        lhTelemetrySample(server, shipActor);
+        shipActor.x = 60;
+        lhTelemetrySample(server, shipActor);
+        ok(lhCatVerify(server, catDelivActor, 'main_2_02') === 1, 'vehicle_delivery (ship) verified after 60m smallships telemetry + 256 depot items');
+
+        ok(lhCatVerify(server, catDelivActor, 'main_2_08') === 0, 'network_supply (distinct_regions=3) blocked when only 1 site commissioned');
+        sitesDb.sites.mine.commissioned = true;
+        sitesDb.sites.farm.commissioned = true;
+        finv.setStackInSlot(0, Item.of('minecraft:cobblestone', 32));
+        ok(lhCatVerify(server, catDelivActor, 'main_2_08') === 1, 'network_supply (distinct_regions=3) verified with 3 commissioned regions + depot items');
+        sitesDb.sites.mine.commissioned = false;
+        sitesDb.sites.farm.commissioned = false;
+        var catDb14 = lhCatRead(server);
+        delete catDb14.completed[String(siteActor.uuid) + ':main_1_02'];
+        delete catDb14.completed[String(siteActor.uuid) + ':main_2_02'];
+        delete catDb14.completed[String(siteActor.uuid) + ':main_2_08'];
+        lhCatSave(server);
+        var telDb14 = lhTelemetryRead(server);
+        delete telDb14.players[String(siteActor.uuid)];
+        lhTelemetrySave(server);
+        var stDb14 = lhStageRead(server);
+        delete stDb14.players[String(siteActor.uuid)];
+        lhStageSave(server);
+        for (var fs = 0; fs < finv.slots; fs++) finv.setStackInSlot(fs, Item.empty);
+
         // Cleanup test artifacts
         var curDb = lhRead(server);
         delete curDb.players[String(actor.uuid)];

@@ -49,22 +49,50 @@ function lhCatResolveTarget(server, player, cond) {
   return sdb.sites[ref] || null;
 }
 
-function lhCatConsumeAnyFromBarrel(inv, requiredCount) {
+function lhCatConsumeAnyFromBarrel(inv, requiredCount, minDistinctIds, requireEdible) {
   var total = 0;
+  var distinct = {};
   for (var s = 0; s < inv.slots; s++) {
     var st = inv.getStackInSlot(s);
-    if (!st.empty) total += Number(st.count);
+    if (st.empty) continue;
+    if (requireEdible && !(st.item && st.item.edible)) continue;
+    total += Number(st.count);
+    distinct[String(st.id)] = true;
   }
-  if (total < requiredCount) return { ok: false, have: total, need: requiredCount };
+  var distinctCount = Object.keys(distinct).length;
+  if (minDistinctIds && distinctCount < minDistinctIds) {
+    return { ok: false, have: total, need: requiredCount, distinctHave: distinctCount, distinctNeed: minDistinctIds };
+  }
+  if (total < requiredCount) return { ok: false, have: total, need: requiredCount, distinctHave: distinctCount, distinctNeed: minDistinctIds || 0 };
   var rem = requiredCount;
   for (var s2 = 0; s2 < inv.slots && rem > 0; s2++) {
     var st2 = inv.getStackInSlot(s2);
-    if (!st2.empty) {
-      var taken = inv.extractItem(s2, Math.min(rem, Number(st2.count)), false);
-      rem -= Number(taken.count);
-    }
+    if (st2.empty) continue;
+    if (requireEdible && !(st2.item && st2.item.edible)) continue;
+    var taken = inv.extractItem(s2, Math.min(rem, Number(st2.count)), false);
+    rem -= Number(taken.count);
   }
   return { ok: true };
+}
+
+function lhCatMapVehicleFamily(vf) {
+  var s = String(vf || '').toLowerCase();
+  if (s === 'train' || s === 'rail') return 'rail';
+  if (s === 'ship' || s === 'boat' || s === 'watercraft') return 'watercraft';
+  if (s === 'aircraft' || s === 'plane' || s === 'airship' || s === 'aircraft_vs') return 'aircraft_vs';
+  if (s === 'cart') return 'cart';
+  if (s === 'car' || s === 'truck' || s === 'road' || s === 'road_vehicle') return 'road_vehicle';
+  if (s === 'horse' || s === 'mount') return 'mount';
+  return null;
+}
+
+function lhCatCommissionedRegionCount(server) {
+  var sdb = lhSitesRead(server), cnt = 0;
+  Object.keys(sdb.sites).forEach(function (sid) {
+    if (sid === 'continental_archive' || sid === 'continental_hub') return;
+    if (sdb.sites[sid] && sdb.sites[sid].commissioned) cnt++;
+  });
+  return cnt;
 }
 
 function lhCatVerify(server, player, qid) {
@@ -136,12 +164,15 @@ function lhCatVerify(server, player, qid) {
     var rldb = lhLogRead(server);
     var minLen = Number(cond.minimum_distance_blocks || 750);
     var reqTrips = Math.min(3, Math.max(1, Number(cond.successful_round_trips || 1)));
+    var reqFam = lhCatMapVehicleFamily(cond.vehicle_family);
     var hasRoute = Object.keys(rldb.routes).some(function (rid) {
       var r = rldb.routes[rid];
-      return r.length >= minLen && (r.completedCount || 0) >= reqTrips;
+      if (r.length < minLen || (r.completedCount || 0) < reqTrips) return false;
+      if (reqFam && !(r.verifiedFamilies && r.verifiedFamilies[reqFam])) return false;
+      return true;
     });
     if (!hasRoute) {
-      lhMsg(player, 'Требуется завершённый рейс по маршруту длиной >= ' + minLen + ' м (рейсов >= ' + reqTrips + ': /lh route begin|gate|finish|start).');
+      lhMsg(player, 'Требуется завершённый рейс по маршруту длиной >= ' + minLen + ' м (рейсов >= ' + reqTrips + (reqFam ? ', транспорт: ' + reqFam : '') + ': /lh route begin|gate|finish|start).');
       return 0;
     }
   } else if (vt === 'kit_check') {
@@ -161,7 +192,69 @@ function lhCatVerify(server, player, qid) {
       return 0;
     }
   } else {
-    // Delivery / production / multi-input / vehicle fallback: requires real barrel depot + physical item consumption
+    // Delivery / production / multi-input / vehicle / train / network / ration verification:
+    // Enforces vehicle telemetry, multi-region commissioning, photo proofs, distinct input diversity, or edible rations + atomic barrel consumption.
+    if (vt === 'vehicle_delivery' || vt === 'vehicle_trial') {
+      var fam = lhCatMapVehicleFamily(cond.vehicle_family);
+      var tel = (typeof lhTelemetryRead === 'function') ? (lhTelemetryRead(server).players[pid] || null) : null;
+      var minMeters = (vt === 'vehicle_trial') ? 100 : 50;
+      var obsMeters = 0;
+      if (tel && tel.meters) {
+        if (fam) {
+          obsMeters = Math.round(tel.meters[fam] || 0);
+        } else {
+          Object.keys(tel.meters).forEach(function (fk) {
+            if (fk !== 'foot') obsMeters += Math.round(tel.meters[fk] || 0);
+          });
+        }
+      }
+      if (obsMeters < minMeters) {
+        lhMsg(player, 'Требуется зафиксированный пробег транспорта' + (fam ? ' (' + fam + ')' : '') + ' >= ' + minMeters + ' м (сейчас ' + obsMeters + ' м; /lh vehicle status).');
+        return 0;
+      }
+    } else if (vt === 'scheduled_train') {
+      var telTr = (typeof lhTelemetryRead === 'function') ? (lhTelemetryRead(server).players[pid] || null) : null;
+      var railMeters = (telTr && telTr.meters) ? Math.round(telTr.meters.rail || 0) : 0;
+      var rldbTr = lhLogRead(server);
+      var hasRailRoute = Object.keys(rldbTr.routes).some(function (rid) {
+        var r = rldbTr.routes[rid];
+        return (r.completedCount || 0) >= 1 && r.verifiedFamilies && r.verifiedFamilies.rail;
+      });
+      if (railMeters < 100 && !hasRailRoute) {
+        lhMsg(player, 'Для заказа расписания поездов требуется пробег по ЖД >= 100 м или завершённый ЖД-рейс (/lh vehicle status).');
+        return 0;
+      }
+    } else if (vt === 'network_supply') {
+      var reqReg = Math.min(4, Math.max(2, Number(cond.distinct_regions || 2)));
+      var commCount = lhCatCommissionedRegionCount(server);
+      if (commCount < reqReg) {
+        lhMsg(player, 'Для сетевой поставки нужно минимум ' + reqReg + ' введённых в строй региональных узлов (сейчас ' + commCount + ').');
+        return 0;
+      }
+    } else if (vt === 'sample_return') {
+      var reqPhotos = Math.min(6, Math.max(1, Number(cond.photos || 3)));
+      var reqSites = Math.min(6, Math.max(1, Number(cond.distinct_source_sites || 3)));
+      var fdbSr = lhFieldRead(server);
+      var photoCnt = Object.keys(fdbSr.photoClaims).length;
+      var siteCnt = lhCatCommissionedRegionCount(server);
+      if (photoCnt < reqPhotos || siteCnt < reqSites) {
+        lhMsg(player, 'Для возврата образцов нужно >= ' + reqPhotos + ' фотоотчётов узлов (сейчас ' + photoCnt + ') и >= ' + reqSites + ' запущенных узлов (сейчас ' + siteCnt + ').');
+        return 0;
+      }
+    }
+
+    if (vt === 'vehicle_trial') {
+      // Pure vehicle expedition trial verified by telemetry above; no cargo barrel consumption required unless batch_items set
+      if (!cond.batch_items) {
+        catDb.completed[key] = { by: pid, tick: Number(server.tickCount), type: vt };
+        lhCatSave(server);
+        lhUnlock(player, 'longhaul:catalog/' + qid);
+        if (typeof lhStageRecompute === 'function') lhStageRecompute(server, player);
+        lhMsg(player, 'Заказ каталога "' + q.title + '" [' + q.id + '] подтверждён сервером!');
+        return 1;
+      }
+    }
+
     var depotPos = (target && target.depot) ? target.depot : { dim: 'minecraft:overworld', x: Math.floor(player.x), y: Math.floor(player.y) - 1, z: Math.floor(player.z) };
     if (target && (String(player.level.dimension) !== 'minecraft:overworld' ||
         global.LHWorldPlanner.dist2D(player.x, player.z, target.x, target.z) > 192)) {
@@ -174,9 +267,17 @@ function lhCatVerify(server, player, qid) {
       return 0;
     }
     var reqAmt = Math.min(256, Math.max(16, Number(cond.batch_items || cond.minimum_output || cond.output_portions || cond.food_portions || 32)));
-    var cons = lhCatConsumeAnyFromBarrel(blk.inventory, reqAmt);
+    var minDistinct = (cond.distinct_inputs && Number(cond.distinct_inputs) > 1) ? Math.min(4, Number(cond.distinct_inputs)) : 0;
+    var needEdible = (vt === 'ration_delivery');
+    var cons = lhCatConsumeAnyFromBarrel(blk.inventory, reqAmt, minDistinct, needEdible);
     if (!cons.ok) {
-      lhMsg(player, 'В бочке-терминале недостаточно груза для приёмки (требуется >= ' + cons.need + ' ед., сейчас ' + cons.have + ').');
+      if (minDistinct && cons.distinctHave < cons.distinctNeed) {
+        lhMsg(player, 'Для комплексной поставки нужно >= ' + cons.distinctNeed + ' разных видов груза в бочке (сейчас ' + cons.distinctHave + ').');
+      } else if (needEdible) {
+        lhMsg(player, 'В бочке-терминале недостаточно съедобных рационов (требуется >= ' + cons.need + ' ед., сейчас ' + cons.have + ').');
+      } else {
+        lhMsg(player, 'В бочке-терминале недостаточно груза для приёмки (требуется >= ' + cons.need + ' ед., сейчас ' + cons.have + ').');
+      }
       return 0;
     }
   }

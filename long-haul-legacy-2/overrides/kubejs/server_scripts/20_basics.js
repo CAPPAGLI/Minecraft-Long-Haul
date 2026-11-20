@@ -35,6 +35,11 @@ BlockEvents.rightClicked('minecraft:ender_chest', function (event) {
   event.cancel();
 });
 
+BlockEvents.placed('minecraft:ender_chest', function (event) {
+  event.player.tell('[Long Haul] Размещение эндер-сундуков отключено правилами логистики.');
+  event.cancel();
+});
+
 BlockEvents.rightClicked('functionalstorage:ender_drawer', function (event) {
   event.player.tell('[Long Haul] Беспроводные эндер-ящики отключены правилами логистики.');
   event.cancel();
@@ -45,9 +50,18 @@ BlockEvents.placed('functionalstorage:ender_drawer', function (event) {
   event.cancel();
 });
 
+ItemEvents.rightClicked('functionalstorage:ender_drawer', function (event) {
+  event.player.tell('[Long Haul] Беспроводные эндер-ящики отключены правилами логистики.');
+  event.cancel();
+});
+
 LH_SHULKERS.forEach(function (id) {
   BlockEvents.rightClicked(id, function (event) {
     event.player.tell('[Long Haul] Шалкеровые ящики отключены; используйте транспорт и стационарные склады.');
+    event.cancel();
+  });
+  BlockEvents.placed(id, function (event) {
+    event.player.tell('[Long Haul] Размещение шалкеровых ящиков отключено правилами логистики.');
     event.cancel();
   });
 });
@@ -63,9 +77,11 @@ LH_SHULKERS.forEach(function (id) {
   });
 });
 
-ItemEvents.rightClicked('supplementaries:sack', function (event) {
-  event.player.tell('[Long Haul] Переносные мешки отключены правилами логистики.');
-  event.cancel();
+['supplementaries:sack', 'quark:backpack'].forEach(function (id) {
+  ItemEvents.rightClicked(id, function (event) {
+    event.player.tell('[Long Haul] Переносные сумки/рюкзаки отключены правилами логистики.');
+    event.cancel();
+  });
 });
 
 PlayerEvents.loggedIn(function (event) {
