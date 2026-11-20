@@ -497,10 +497,12 @@ function lhStartIntegrationSetup(server) {
         ok(lhSnailStepPlayer(server, snailActor, 20, true) === 0, 'snail does NOT awaken or kill on spawn');
         ok(lhSnailWake(server, snailActor, true) === 1, 'snail awakens on grace expiration');
         var sRec = lhSnailGetRecord(server, snailActor);
-        ok(sRec.awake === true && Math.round(global.LHWorldPlanner.dist2D(snailActor.x, snailActor.z, sRec.x, sRec.z)) === 64, 'snail spawns 64m away');
+        var dSnail1 = global.LHWorldPlanner.dist2D(snailActor.x, snailActor.z, sRec.x, sRec.z);
+        ok(sRec.awake === true && Math.round(dSnail1) === 64, 'snail spawns 64m away (d=' + dSnail1 + ', rec=' + JSON.stringify(sRec) + ')');
         sRec.x = snailActor.x + 2.0; sRec.y = snailActor.y; sRec.z = snailActor.z;
         ok(lhSnailStepPlayer(server, snailActor, 20, true) === 2 && snailActor.killed === true, 'snail strikes lethally on contact and resets');
-        ok(sRec.cooldownTicks === 2400 && Math.round(global.LHWorldPlanner.dist2D(snailActor.x, snailActor.z, sRec.x, sRec.z)) === 80, 'snail resets 80m away with 120s cooldown');
+        var dSnail2 = global.LHWorldPlanner.dist2D(snailActor.x, snailActor.z, sRec.x, sRec.z);
+        ok(sRec.cooldownTicks === 2400 && Math.round(dSnail2) === 80, 'snail resets 80m away with 120s cooldown (d=' + dSnail2 + ', rec=' + JSON.stringify(sRec) + ')');
         ok(lhProspectChunk(server, snailActor) === 1, 'chunk ore prospector scans without error');
         var sDbClean = lhSnailRead(server);
         delete sDbClean.players[String(snailActor.uuid)];
