@@ -373,7 +373,8 @@ function lhStartIntegrationSetup(server) {
         delete rldb.routes.lh_test_route;
         delete rldb.activeRuns[String(routeActor.uuid)];
         lhLogSave(server);
-        delete catDb.completed[String(routeActor.uuid) + ':main_1_04'];
+        var rCatDb = lhCatRead(server);
+        delete rCatDb.completed[String(routeActor.uuid) + ':main_1_04'];
         lhCatSave(server);
         var stDb2 = lhStageRead(server);
         delete stDb2.players[String(routeActor.uuid)];
