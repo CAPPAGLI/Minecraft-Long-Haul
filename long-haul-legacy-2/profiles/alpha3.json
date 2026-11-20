@@ -198,7 +198,7 @@
     "world": "Ambient wildlife, weathering, snow physics, and client audiovisual atmosphere.",
     "building": "Architecture, framing, chipped/rechiseled, Macaw suite, Quark, and wood/stone/clay variants.",
     "food": "Expanded Farmer's Delight ecosystem and aquaculture without temperature locks.",
-    "performance": "Client/server optimization stack with Oculus/Embeddium/Radium/Saturn/Noisium.",
+    "performance": "Client/server optimization stack with Embeddium/Oculus/Saturn/Noisium/ModernFix (radium excluded due to Valkyrien Skies POI mixin conflict).",
     "qol": "Compasses, JEI/EMI integrations, Tetra/equipment, tooltips, and voice chat addons without bulk backpacks or teleportation."
   },
   "client_only": [
