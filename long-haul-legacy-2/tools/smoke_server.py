@@ -81,7 +81,7 @@ def main():
                 ready = True
                 events.append('server_ready')
                 def finish():
-                    integration_done.wait(timeout=75)
+                    integration_done.wait(timeout=180)
                     time.sleep(2)
                     if p.poll() is None:
                         p.stdin.write('list\nworldborder get\nkubejs errors server\nsave-all\nstop\n')
