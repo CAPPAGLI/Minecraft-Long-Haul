@@ -1,6 +1,7 @@
 // Long Haul Legacy 2.0: Immortal Snail stalker + chunk ore prospecting (/lh snail, /lh prospect).
 var LHSnailUUID = Java.loadClass('java.util.UUID');
 var LHSnailState = null;
+var LHSnailTick = 0;
 
 function lhSnailRead(server) {
   if (LHSnailState !== null) return LHSnailState;
@@ -44,7 +45,12 @@ function lhSnailWake(server, player, forceNow) {
       return 0;
     }
   }
-  var angle = ((Number(server.tickCount) % 360) * Math.PI) / 180.0;
+  var tickVal = LHSnailTick;
+  if (server && typeof server.getTickCount === 'function') {
+    tickVal = Number(server.getTickCount());
+  }
+  if (!isFinite(tickVal)) tickVal = 45;
+  var angle = ((tickVal % 360) * Math.PI) / 180.0;
   rec.awake = true;
   rec.dim = String(player.level.dimension);
   rec.x = Number(player.x) + Math.cos(angle) * 64.0;
@@ -220,14 +226,15 @@ EntityEvents.hurt(function (event) {
 });
 
 ServerEvents.tick(function (event) {
+  LHSnailTick++;
+  if (LHSnailTick % 10 !== 0) return;
   var server = event.server;
-  if (Number(server.tickCount) % 10 !== 0) return;
   var plist = server.players;
   if (!plist) return;
   for (var i = 0; i < plist.length; i++) {
     lhSnailStepPlayer(server, plist[i], 10, false);
   }
-  if (Number(server.tickCount) % 200 === 0) {
+  if (LHSnailTick % 200 === 0) {
     lhSnailSave(server);
   }
 });
