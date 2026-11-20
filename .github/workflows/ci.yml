@@ -126,6 +126,8 @@ jobs:
               lines.append(f'<details><summary>Console Errors/Highlights ({len(errs)})</summary>\n\n```\n' + '\n'.join(errs[-60:]) + '\n```\n</details>\n')
               tail = '\n'.join(sc.read_text(errors='replace').splitlines()[-60:])
               lines.append(f'<details><summary>Smoke Console Tail</summary>\n\n```\n{tail}\n```\n</details>\n')
+          for cr in sorted(pathlib.Path('long-haul-legacy-2/server-test/crash-reports').glob('*.txt'))[:2]:
+              lines.append(f'<details><summary>Crash Report: {cr.name}</summary>\n\n```\n' + cr.read_text(errors='replace')[:4000] + '\n```\n</details>\n')
           body = '\n'.join(lines)[:60000]
           subprocess.run(['gh', 'api', f"repos/{os.environ['GITHUB_REPOSITORY']}/commits/{os.environ['GITHUB_SHA']}/comments", '-f', f'body={body}'], check=False)
           PY
