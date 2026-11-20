@@ -529,6 +529,13 @@ function lhStartIntegrationSetup(server) {
         gasDb.forcedPhase = prevForced;
         lhGasSave(server);
 
+        // 17. Active-route bounded chunk-loading quota (<= 2 anchors)
+        var qPid = '00000000-0000-4000-8000-000000000013';
+        var qRes = lhRouteQuotaSync(server, qPid, [{ x: 160, z: 160 }, { x: 320, z: 320 }, { x: 480, z: 480 }], true);
+        ok(qRes.length === 2 && lhRouteQuotaStatus(server, qPid).used === 2, 'route chunk quota caps anchors at 2');
+        lhRouteQuotaSync(server, qPid, [], true);
+        ok(lhRouteQuotaStatus(server, qPid).used === 0, 'route chunk quota releases cleanly on completion');
+
         ok(Math.round(Number(overworld.worldBorder.size)) === 175000, 'world border initialized to 175000 blocks');
         console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + advancement sync');
       } catch (err2) {

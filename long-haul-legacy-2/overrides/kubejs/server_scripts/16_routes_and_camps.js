@@ -12,8 +12,51 @@ function lhLogRead(server) {
   if (!LHLogisticsState.drafts) LHLogisticsState.drafts = {};
   if (!LHLogisticsState.activeRuns) LHLogisticsState.activeRuns = {};
   if (!LHLogisticsState.manifests) LHLogisticsState.manifests = {};
+  if (!LHLogisticsState.chunkAnchors) LHLogisticsState.chunkAnchors = {};
   if (!LHLogisticsState.nextTx) LHLogisticsState.nextTx = 1;
   return LHLogisticsState;
+}
+var LH_ROUTE_MAX_ANCHORS = 2;
+
+function lhRouteQuotaSync(server, pid, gateCoords, dryRun) {
+  var db = lhLogRead(server);
+  var prev = db.chunkAnchors[pid] || [];
+  var desired = [];
+  var seen = {};
+  (gateCoords || []).forEach(function (g) {
+    if (!g || desired.length >= LH_ROUTE_MAX_ANCHORS) return;
+    var cx = Math.floor(Number(g.x) / 16) * 16;
+    var cz = Math.floor(Number(g.z) / 16) * 16;
+    var key = cx + ',' + cz;
+    if (!seen[key]) {
+      seen[key] = true;
+      desired.push({ x: cx, z: cz, key: key });
+    }
+  });
+  if (!dryRun) {
+    prev.forEach(function (old) {
+      if (!seen[old.key]) {
+        server.runCommandSilent('forceload remove ' + old.x + ' ' + old.z);
+      }
+    });
+    var prevMap = {};
+    prev.forEach(function (old) { prevMap[old.key] = true; });
+    desired.forEach(function (cur) {
+      if (!prevMap[cur.key]) {
+        server.runCommandSilent('forceload add ' + cur.x + ' ' + cur.z);
+      }
+    });
+  }
+  if (desired.length) db.chunkAnchors[pid] = desired;
+  else delete db.chunkAnchors[pid];
+  lhLogSave(server);
+  return desired;
+}
+
+function lhRouteQuotaStatus(server, pid) {
+  var db = lhLogRead(server);
+  var list = db.chunkAnchors[pid] || [];
+  return { used: list.length, max: LH_ROUTE_MAX_ANCHORS, anchors: list };
 }
 function lhLogSave(server) {
   if (LHLogisticsState !== null) {
@@ -159,8 +202,9 @@ function lhRouteStart(server, player, routeId) {
   var fams = {};
   fams[startFam] = true;
   db.activeRuns[pid] = { routeId: routeId, nextIndex: 1, lastGateTick: Math.floor(server.tickCount), lastGate: g0, families: fams, failed: false };
+  lhRouteQuotaSync(server, pid, [g0, route.gates[1]], false);
   lhLogSave(server);
-  lhMsg(player, 'Испытание маршрута "' + routeId + '" начато! Пройдите все контрольные точки по порядку.');
+  lhMsg(player, 'Испытание маршрута "' + routeId + '" начато! Выделена квота чанков маршрута (<= 2).');
   return 1;
 }
 
@@ -179,6 +223,7 @@ function lhRouteStepPlayer(server, player) {
   var check = global.LHRouteValidator.validateSegmentSpeed(run.lastGate, gate, elapsed);
   if (!check.ok) {
     delete db.activeRuns[pid];
+    lhRouteQuotaSync(server, pid, [], false);
     lhLogSave(server);
     lhMsg(player, 'Испытание маршрута отменено: аномальная скорость перемещения (' + check.speedBps + ' м/с). Телепортация запрещена.');
     return -1;
@@ -188,6 +233,7 @@ function lhRouteStepPlayer(server, player) {
   run.nextIndex++;
   if (run.nextIndex >= route.gates.length) {
     delete db.activeRuns[pid];
+    lhRouteQuotaSync(server, pid, [], false);
     route.completedCount = (route.completedCount || 0) + 1;
     if (!route.verifiedFamilies) route.verifiedFamilies = {};
     Object.keys(run.families).forEach(function (fk) { route.verifiedFamilies[fk] = true; });
@@ -195,9 +241,10 @@ function lhRouteStepPlayer(server, player) {
     lhLogSave(server);
     lhUnlock(player, 'longhaul:routes/first_route');
     if (typeof lhStageRecompute === 'function') lhStageRecompute(server, player);
-    lhMsg(player, 'Маршрут "' + route.id + '" пройден (' + route.length + ' м, рейсов: ' + route.completedCount + ')! Выдано подтверждение.');
+    lhMsg(player, 'Маршрут "' + route.id + '" пройден (' + route.length + ' м, рейсов: ' + route.completedCount + ')! Квота чанков освобождена.');
     return 2;
   }
+  lhRouteQuotaSync(server, pid, [gate, route.gates[run.nextIndex]], false);
   lhLogSave(server);
   lhMsg(player, 'Контрольная точка ' + run.nextIndex + '/' + route.gates.length + ' пройдена (' + check.speedBps + ' м/с).');
   return 1;
@@ -271,6 +318,19 @@ ServerEvents.commandRegistry(function (event) {
   route.then(C.literal('list').executes(function (ctx) {
     var db = lhLogRead(ctx.source.server), p = ctx.source.playerOrException;
     lhMsg(p, 'Маршруты: ' + Object.keys(db.routes).join(', '));
+    return 1;
+  }));
+  route.then(C.literal('quota').executes(function (ctx) {
+    var p = ctx.source.playerOrException;
+    var q = lhRouteQuotaStatus(ctx.source.server, lhId(p));
+    lhMsg(p, 'Квота чанков активного маршрута: ' + q.used + '/' + q.max + ' -> ' + JSON.stringify(q.anchors));
+    return 1;
+  }));
+  route.then(C.literal('abort').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, pid = lhId(p), db = lhLogRead(server);
+    delete db.activeRuns[pid];
+    lhRouteQuotaSync(server, pid, [], false);
+    lhMsg(p, 'Активный рейс по маршруту прерван, квота чанков освобождена.');
     return 1;
   }));
   root.then(route);
