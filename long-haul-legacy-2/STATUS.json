@@ -1,18 +1,18 @@
 {
-  "version": "2.0-alpha.17",
+  "version": "2.0-alpha.18",
   "date_cutoff": "2026-11-19",
-  "status": "HEADLESS_CI_VERIFIED_ALPHA17_NOT_FULL_REQUEST",
+  "status": "HEADLESS_CI_VERIFIED_ALPHA18_NOT_FULL_REQUEST",
   "minecraft": "1.20.1",
   "forge": "47.4.10",
   "java": 17,
-  "external_jars": 438,
-  "server_jars": 357,
-  "client_only_jars": 81,
+  "external_jars": 452,
+  "server_jars": 365,
+  "client_only_jars": 87,
   "local_jars": 1,
-  "recursive_declared_mod_ids": 509,
-  "external_download_bytes": 1178021903,
-  "ci_run_id": 44949453172,
-  "ci_verified_commit": "c7d90b7",
+  "recursive_declared_mod_ids": 524,
+  "external_download_bytes": 1187768095,
+  "ci_run_id": 44961633776,
+  "ci_verified_commit": "37e6142",
   "server_smoke_test_void": {
     "ready": true,
     "exit_code": 0,
@@ -20,8 +20,8 @@
     "events": [
       "server_ready"
     ],
-    "heap_mb": 4096,
-    "world": "alpha17 void integration test",
+    "heap_mb": 5120,
+    "world": "alpha18 void integration test",
     "client_tested": false,
     "world_border_175000": true,
     "integration_pass": true,
@@ -36,7 +36,7 @@
       "server_ready"
     ],
     "heap_mb": 7168,
-    "world": "alpha17 normal overworld test",
+    "world": "alpha18 normal overworld test",
     "client_tested": false,
     "world_border_175000": true,
     "integration_pass": true,
@@ -107,5 +107,5 @@
   "new_installable_pack_created": true,
   "launcher_import_tested": false,
   "legacy_1_1_1_modified": false,
-  "limitations": "See README.md, DOOMED.md, optional-mods/README.md, and TEST-REPORT.md. Headless Linux Forge integration verified for 438 external JARs + longhaul-runtime (509 mod IDs, void + normal Overworld, 175000 worldborder verified): adds Ultimate Chess (ultimate-chess: Chess & Checkers, replacing removed Modrinth project chess-and-checks), [Let's Do] Vinery, Nyf's Spiders, Cull Leaves (+ MidnightLib), and Eating Animations (+ GroovyModLoader), plus optional-mods/ local CurseForge bundling support (--include-optional-mods). DOOMED remains optional/external per DOOMED.md (CurseForge-only, All Rights Reserved, WIP world-corruption warning). Graphical client and vehicle physics in motion are not yet tested."
+  "limitations": "See README.md, DOOMED.md, optional-mods/README.md, and TEST-REPORT.md. Headless Linux Forge integration verified for 452 external JARs + longhaul-runtime (524 mod IDs, void 5120 MB + normal Overworld 7168 MB, 175000 worldborder verified): adds Create Pattern Schematics, Create Additional Lights, Create Structures Arise, Villager Recruits, Straw Statues, Delightful Sandwiches, Mobtimizations, Subtle Effects, Entity Texture Features, Model Gap Fix, Jade VS (client_only), Shulker Box Tooltip, Overflowing Bars, and Raised; tuned inspect_alpha.py (MANIFEST.MF fallback + server->client_only dep guard), assemble_alpha.py (candidates.json Forge 47.4.10 check), and JEI/EMI storage ban tooltips; excluded Every Compat (VS MassDatapackResolver OOM) and Villager Workers (VillagerPriceTable mixin clash). Graphical client and vehicle physics in motion are not yet tested."
 }
