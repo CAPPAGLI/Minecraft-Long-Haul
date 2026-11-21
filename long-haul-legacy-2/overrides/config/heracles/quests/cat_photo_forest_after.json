@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Лесная артель: Предприятие после восстановления\"}",
-    "subtitle": "{\"text\": \"Этап 2 · Экспедиционная документация\"}",
+    "title": {
+      "text": "Лесная артель: Предприятие после восстановления"
+    },
+    "subtitle": {
+      "text": "Этап 2 · Экспедиционная документация"
+    },
     "description": [
       "Этап 2 · Тип: photo_evidence (опционально)",
       "Условия каталога: {\"site\": \"forest\", \"phase\": \"after\", \"distinct_server_photo_id\": true, \"capture_after_assignment\": true, \"image_semantics\": \"requires_Exposure_adapter_or_manual_review\", \"honest_fallback\": \"visit_plus_new_developed_film_report\"}",

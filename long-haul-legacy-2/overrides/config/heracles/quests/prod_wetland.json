@@ -13,8 +13,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Химический посёлок: Техническое масло\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
+    "title": {
+      "text": "Химический посёлок: Техническое масло"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
     "description": [
       "Выпустите партию Техническое масло непосредственно на площадке: /lh site produce wetland bootstrap (или industrial).",
       "Удалённое производство на домашней базе заблокировано сервером."

@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Самостоятельное топливо\"}",
-    "subtitle": "{\"text\": \"Этап 2 · Основная прогрессия\"}",
+    "title": {
+      "text": "Самостоятельное топливо"
+    },
+    "subtitle": {
+      "text": "Этап 2 · Основная прогрессия"
+    },
     "description": [
       "Этап 2 · Тип: controlled_production (основной заказ)",
       "Условия каталога: {\"product_family\": \"transport_fuel\", \"minimum_output\": 4000, \"unit\": \"mB\"}",

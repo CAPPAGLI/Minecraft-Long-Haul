@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Запуск лесной артели\"}",
-    "subtitle": "{\"text\": \"Этап 1 · Основная прогрессия\"}",
+    "title": {
+      "text": "Запуск лесной артели"
+    },
+    "subtitle": {
+      "text": "Этап 1 · Основная прогрессия"
+    },
     "description": [
       "Этап 1 · Тип: site_commission (основной заказ)",
       "Условия каталога: {\"site\": \"forest\", \"accepted_batches\": 2}",

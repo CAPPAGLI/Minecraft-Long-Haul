@@ -22,14 +22,14 @@ def adv(rel_path, xp=15):
         'rewards': {'experience': xp},
     })
 
-def quest(qid, title, group, pos, icon, tasks, desc, deps=None, subtitle='Long Haul Legacy 2.0 · Alpha 4'):
+def quest(qid, title, group, pos, icon, tasks, desc, deps=None, subtitle='Long Haul Legacy 2.0'):
     put(Q / (qid + '.json'), {
         'dependencies': deps or [],
         'tasks': tasks,
         'rewards': {},
         'display': {
-            'title': json.dumps({'text': title}, ensure_ascii=False),
-            'subtitle': json.dumps({'text': subtitle}, ensure_ascii=False),
+            'title': {'text': title},
+            'subtitle': {'text': subtitle},
             'description': desc,
             'groups': {group: {'position': pos}},
             'icon': {'type': 'heracles:item', 'item': {'id': icon, 'count': 1}},
@@ -93,6 +93,10 @@ intro = [
     ('alpha_pollution_arcane', 'Загрязнение среды и Первородная магия', 'minecraft:cauldron', [
         'Мод Pollution of the Realms настроен жёстко: выбросы углерода, серы и пыли вызывают смог, кислотные дожди и порчу почв — отводите дым через Advanced Chimneys.',
         'Для тайных исследований добавлены Primal Magick и Thaumon (на Forge 1.20.1 официальный Thaumcraft не выходил, его механику исследований и эссенций заменяет Primal Magick).',
+    ]),
+    ('alpha_eccentric_tome', 'Единая книга гайдов (Eccentric Tome)', 'eccentrictome:tome', [
+        'Все книги и справочники из модов (Immersive Engineering, Alex’s Caves, Primal Magick, Patchouli, Modonomicon и др.) можно объединить в один том — Eccentric Tome.',
+        'Просто положите Eccentric Tome и любые книги-гайды в верстак (или окно крафта). ПКМ открывает меню выбора книги, Shift+ЛКМ возвращает обратно в общий том.',
     ]),
 ]
 for i, (qid, title, icon, desc) in enumerate(intro):

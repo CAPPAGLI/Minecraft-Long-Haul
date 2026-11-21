@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Серверная грузовая накладная\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
+    "title": {
+      "text": "Серверная грузовая накладная"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
     "description": [
       "Получите накладную на одном узле (/lh cargo issue <откуда> <куда>), физически доставьте её в целевой узел и сдайте (/lh cargo deliver)."
     ],

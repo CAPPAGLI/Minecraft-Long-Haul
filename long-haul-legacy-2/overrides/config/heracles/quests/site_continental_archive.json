@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Центральный архив магистралей\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
+    "title": {
+      "text": "Центральный архив магистралей"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
     "description": [
       "Экспедиция к уникальному архиву (/lh site info continental_archive).",
       "Подойдите ближе 96 м и выполните /lh site archive. Для ремонта конструкции: /lh site repair_archive (повторные награды не выдаются)."

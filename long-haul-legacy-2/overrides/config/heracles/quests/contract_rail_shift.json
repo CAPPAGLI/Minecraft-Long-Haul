@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Снабжение магистрали\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
+    "title": {
+      "text": "Снабжение магистрали"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
     "description": [
       "Начало: /lh accept rail_shift",
       "32 рельса И 8 пластин за каждое из пяти окон по 60 секунд.",

@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Снабжение цеха: класс 3\"}",
-    "subtitle": "{\"text\": \"Этап 2 · Инженерные испытания\"}",
+    "title": {
+      "text": "Снабжение цеха: класс 3"
+    },
+    "subtitle": {
+      "text": "Этап 2 · Инженерные испытания"
+    },
     "description": [
       "Этап 2 · Тип: multi_input_supply (опционально)",
       "Условия каталога: {\"distinct_inputs\": 3, \"minimum_items_each_per_window\": 48, \"windows\": 5, \"window_seconds\": 120, \"max_starvation_seconds\": 30}",

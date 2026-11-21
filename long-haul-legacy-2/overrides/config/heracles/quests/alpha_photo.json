@@ -8,8 +8,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Фотодокументация\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
+    "title": {
+      "text": "Фотодокументация"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
     "description": [
       "Exposure добавлен: камера, плёнка, проявка и альбомы.",
       "Снимайте фабрики, лагеря и маршруты (/lh photo report <узел> и /lh catalog verify <id>). Уникальный токен снимка нельзя использовать дважды."

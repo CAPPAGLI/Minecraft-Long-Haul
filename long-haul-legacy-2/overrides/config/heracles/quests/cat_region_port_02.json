@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Морской порт: Местное сырьё\"}",
-    "subtitle": "{\"text\": \"Этап 1 · Региональные контракты\"}",
+    "title": {
+      "text": "Морской порт: Местное сырьё"
+    },
+    "subtitle": {
+      "text": "Этап 1 · Региональные контракты"
+    },
     "description": [
       "Этап 1 · Тип: controlled_production (опционально)",
       "Условия каталога: {\"site\": \"port\", \"product\": \"marine_reagent\", \"minimum_output\": 32}",

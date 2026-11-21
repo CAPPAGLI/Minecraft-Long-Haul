@@ -13,8 +13,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Телеметрия склада: Агрогород\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
+    "title": {
+      "text": "Телеметрия склада: Агрогород"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
     "description": [
       "Запустите /lh cc challenge farm, установите компьютер CC: Tweaked в 12 м от бочки узла и обеспечьте реальный запас продукции в бочке, затем /lh cc verify farm."
     ],

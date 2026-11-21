@@ -13,8 +13,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Карьер пустошей: Огнеупорная смесь\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
+    "title": {
+      "text": "Карьер пустошей: Огнеупорная смесь"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
     "description": [
       "Выпустите партию Огнеупорная смесь непосредственно на площадке: /lh site produce badlands bootstrap (или industrial).",
       "Удалённое производство на домашней базе заблокировано сервером."

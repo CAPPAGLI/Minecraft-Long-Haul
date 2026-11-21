@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Лесная артель: Вывоз первой партии\"}",
-    "subtitle": "{\"text\": \"Этап 2 · Региональные контракты\"}",
+    "title": {
+      "text": "Лесная артель: Вывоз первой партии"
+    },
+    "subtitle": {
+      "text": "Этап 2 · Региональные контракты"
+    },
     "description": [
       "Этап 2 · Тип: vehicle_delivery (опционально)",
       "Условия каталога: {\"origin\": \"forest\", \"destination\": \"mine\", \"product\": \"treated_timber\", \"batch_items\": 512}",

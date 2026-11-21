@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Производительность: класс 6\"}",
-    "subtitle": "{\"text\": \"Этап 3 · Инженерные испытания\"}",
+    "title": {
+      "text": "Производительность: класс 6"
+    },
+    "subtitle": {
+      "text": "Этап 3 · Инженерные испытания"
+    },
     "description": [
       "Этап 3 · Тип: controlled_production (опционально)",
       "Условия каталога: {\"minimum_per_minute\": 96, \"minute_windows\": 10, \"controlled_inputs\": true}",

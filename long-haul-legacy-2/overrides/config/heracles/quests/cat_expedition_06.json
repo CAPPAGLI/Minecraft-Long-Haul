@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Мост к лагерю\"}",
-    "subtitle": "{\"text\": \"Этап 2 · Лагеря и экспедиции\"}",
+    "title": {
+      "text": "Мост к лагерю"
+    },
+    "subtitle": {
+      "text": "Этап 2 · Лагеря и экспедиции"
+    },
     "description": [
       "Этап 2 · Тип: route_trial (опционально)",
       "Условия каталога: {\"route_feature\": \"bridge\", \"camp_destination\": true}",

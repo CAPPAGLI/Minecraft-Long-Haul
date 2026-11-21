@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Контрольная диспетчерская\"}",
-    "subtitle": "{\"text\": \"Этап 3 · Основная прогрессия\"}",
+    "title": {
+      "text": "Контрольная диспетчерская"
+    },
+    "subtitle": {
+      "text": "Этап 3 · Основная прогрессия"
+    },
     "description": [
       "Этап 3 · Тип: computer_challenge (основной заказ)",
       "Условия каталога: {\"verified_sensor_types\": 3, \"verified_actuations\": 2}",

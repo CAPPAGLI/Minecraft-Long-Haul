@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Дорожные испытания: класс 2\"}",
-    "subtitle": "{\"text\": \"Этап 1 · Инженерные испытания\"}",
+    "title": {
+      "text": "Дорожные испытания: класс 2"
+    },
+    "subtitle": {
+      "text": "Этап 1 · Инженерные испытания"
+    },
     "description": [
       "Этап 1 · Тип: route_trial (опционально)",
       "Условия каталога: {\"loaded_vehicle_passes\": 3, \"minimum_distance_blocks\": 1000, \"ordered_checkpoints\": 4, \"route_feature\": \"slope\"}",

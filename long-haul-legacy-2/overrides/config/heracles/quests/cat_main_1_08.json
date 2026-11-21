@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Локальная грузовая связь\"}",
-    "subtitle": "{\"text\": \"Этап 1 · Основная прогрессия\"}",
+    "title": {
+      "text": "Локальная грузовая связь"
+    },
+    "subtitle": {
+      "text": "Этап 1 · Основная прогрессия"
+    },
     "description": [
       "Этап 1 · Тип: delivery (основной заказ)",
       "Условия каталога: {\"distinct_sites\": 2, \"batch_items\": 512, \"vehicle_required\": true}",

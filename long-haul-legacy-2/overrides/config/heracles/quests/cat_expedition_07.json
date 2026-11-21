@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Склад на полпути\"}",
-    "subtitle": "{\"text\": \"Этап 2 · Лагеря и экспедиции\"}",
+    "title": {
+      "text": "Склад на полпути"
+    },
+    "subtitle": {
+      "text": "Этап 2 · Лагеря и экспедиции"
+    },
     "description": [
       "Этап 2 · Тип: depot_commission (опционально)",
       "Условия каталога: {\"route_fraction_min\": 0.3, \"route_fraction_max\": 0.7, \"supply_batches\": 3}",

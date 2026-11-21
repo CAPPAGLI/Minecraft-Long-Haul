@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Запуск разрушенного завода\"}",
-    "subtitle": "{\"text\": \"Этап 3 · Основная прогрессия\"}",
+    "title": {
+      "text": "Запуск разрушенного завода"
+    },
+    "subtitle": {
+      "text": "Этап 3 · Основная прогрессия"
+    },
     "description": [
       "Этап 3 · Тип: site_commission (основной заказ)",
       "Условия каталога: {\"site\": \"industrial_ruin\", \"continuous_seconds\": 600}",

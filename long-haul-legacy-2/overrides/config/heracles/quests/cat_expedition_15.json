@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Альбом дальнего маршрута\"}",
-    "subtitle": "{\"text\": \"Этап 4 · Лагеря и экспедиции\"}",
+    "title": {
+      "text": "Альбом дальнего маршрута"
+    },
+    "subtitle": {
+      "text": "Этап 4 · Лагеря и экспедиции"
+    },
     "description": [
       "Этап 4 · Тип: photo_evidence (опционально)",
       "Условия каталога: {\"ordered_route_sites\": 8, \"distinct_photos\": 8}",

@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Открытие новой магистрали\"}",
-    "subtitle": "{\"text\": \"Этап 4 · Основная прогрессия\"}",
+    "title": {
+      "text": "Открытие новой магистрали"
+    },
+    "subtitle": {
+      "text": "Этап 4 · Основная прогрессия"
+    },
     "description": [
       "Этап 4 · Тип: scheduled_train (основной заказ)",
       "Условия каталога: {\"successful_round_trips\": 6, \"distinct_stations\": 4, \"batch_items_total\": 16384}",

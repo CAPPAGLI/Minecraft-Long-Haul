@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Карьер с повреждённым подъездом\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
+    "title": {
+      "text": "Карьер с повреждённым подъездом"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
     "description": [
       "Обследуйте объект (/lh recovery list, /lh recovery survey quarry).",
       "Подайте 24 пластины, 32 рельса, 64 булыжника и смонтируйте бур/дробилку/станцию.",

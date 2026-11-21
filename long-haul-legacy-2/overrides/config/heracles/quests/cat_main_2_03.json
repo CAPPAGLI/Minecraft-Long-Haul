@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Региональный состав\"}",
-    "subtitle": "{\"text\": \"Этап 2 · Основная прогрессия\"}",
+    "title": {
+      "text": "Региональный состав"
+    },
+    "subtitle": {
+      "text": "Этап 2 · Основная прогрессия"
+    },
     "description": [
       "Этап 2 · Тип: vehicle_delivery (основной заказ)",
       "Условия каталога: {\"vehicle_family\": \"train\", \"batch_items\": 2048}",

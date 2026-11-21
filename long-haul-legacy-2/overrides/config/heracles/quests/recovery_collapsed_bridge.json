@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Магистральный мост\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
+    "title": {
+      "text": "Магистральный мост"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
     "description": [
       "Обследуйте объект (/lh recovery list, /lh recovery survey collapsed_bridge).",
       "Подайте 24 балки, 48 рельсов, 64 каменного кирпича и восстановите рельсовый переход.",

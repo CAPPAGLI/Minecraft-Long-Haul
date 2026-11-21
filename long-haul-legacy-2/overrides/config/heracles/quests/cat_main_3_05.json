@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Промышленный мост\"}",
-    "subtitle": "{\"text\": \"Этап 3 · Основная прогрессия\"}",
+    "title": {
+      "text": "Промышленный мост"
+    },
+    "subtitle": {
+      "text": "Этап 3 · Основная прогрессия"
+    },
     "description": [
       "Этап 3 · Тип: route_trial (основной заказ)",
       "Условия каталога: {\"feature\": \"bridge\", \"vehicle_family\": \"train\", \"successful_round_trips\": 3}",

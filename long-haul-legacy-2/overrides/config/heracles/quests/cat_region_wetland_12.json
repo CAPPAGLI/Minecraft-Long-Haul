@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Химический посёлок: Заказ консорциума\"}",
-    "subtitle": "{\"text\": \"Этап 3 · Региональные контракты\"}",
+    "title": {
+      "text": "Химический посёлок: Заказ консорциума"
+    },
+    "subtitle": {
+      "text": "Этап 3 · Региональные контракты"
+    },
     "description": [
       "Этап 3 · Тип: network_supply (опционально)",
       "Условия каталога: {\"origin\": \"wetland\", \"distinct_destinations\": 3, \"minimum_deliveries_each\": 3}",

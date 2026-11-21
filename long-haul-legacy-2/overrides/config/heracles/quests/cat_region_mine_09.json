@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Горный рудник: Промежуточный склад\"}",
-    "subtitle": "{\"text\": \"Этап 3 · Региональные контракты\"}",
+    "title": {
+      "text": "Горный рудник: Промежуточный склад"
+    },
+    "subtitle": {
+      "text": "Этап 3 · Региональные контракты"
+    },
     "description": [
       "Этап 3 · Тип: depot_commission (опционально)",
       "Условия каталога: {\"route_destination\": \"mine\", \"different_cargo_families\": 3, \"throughput_items\": 2048}",

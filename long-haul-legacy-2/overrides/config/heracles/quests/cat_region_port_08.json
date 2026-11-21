@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Морской порт: Расширение цеха\"}",
-    "subtitle": "{\"text\": \"Этап 2 · Региональные контракты\"}",
+    "title": {
+      "text": "Морской порт: Расширение цеха"
+    },
+    "subtitle": {
+      "text": "Этап 2 · Региональные контракты"
+    },
     "description": [
       "Этап 2 · Тип: controlled_production (опционально)",
       "Условия каталога: {\"site\": \"port\", \"product\": \"marine_reagent\", \"minimum_per_minute\": 32, \"minute_windows\": 10}",

@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Фотоотчёт: Машиностроительный центр\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
+    "title": {
+      "text": "Фотоотчёт: Машиностроительный центр"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
     "description": [
       "Сделайте снимок Exposure на месте (<= 160 м от узла) и выполните /lh photo report machine.",
       "Один снимок нельзя использовать для двух разных узлов."

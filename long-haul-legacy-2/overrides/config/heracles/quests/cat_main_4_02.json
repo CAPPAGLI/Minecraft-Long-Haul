@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Резервный маршрут\"}",
-    "subtitle": "{\"text\": \"Этап 4 · Основная прогрессия\"}",
+    "title": {
+      "text": "Резервный маршрут"
+    },
+    "subtitle": {
+      "text": "Этап 4 · Основная прогрессия"
+    },
     "description": [
       "Этап 4 · Тип: route_trial (основной заказ)",
       "Условия каталога: {\"independent_routes_to_same_destination\": 2}",

@@ -13,8 +13,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Морской порт: Морской реагент\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
+    "title": {
+      "text": "Морской порт: Морской реагент"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
     "description": [
       "Выпустите партию Морской реагент непосредственно на площадке: /lh site produce port bootstrap (или industrial).",
       "Удалённое производство на домашней базе заблокировано сервером."

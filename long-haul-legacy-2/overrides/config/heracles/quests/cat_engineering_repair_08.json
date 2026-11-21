@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Восстановление: класс 8\"}",
-    "subtitle": "{\"text\": \"Этап 4 · Инженерные испытания\"}",
+    "title": {
+      "text": "Восстановление: класс 8"
+    },
+    "subtitle": {
+      "text": "Этап 4 · Инженерные испытания"
+    },
     "description": [
       "Этап 4 · Тип: site_commission (опционально)",
       "Условия каталога: {\"site_template_tier\": 8, \"test_seconds\": 780, \"distinct_inputs\": 4, \"requires_output_acceptance\": true}",

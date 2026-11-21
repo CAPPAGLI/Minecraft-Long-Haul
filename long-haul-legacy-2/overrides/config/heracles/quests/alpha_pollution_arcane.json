@@ -8,8 +8,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Загрязнение среды и Первородная магия\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
+    "title": {
+      "text": "Загрязнение среды и Первородная магия"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
     "description": [
       "Мод Pollution of the Realms настроен жёстко: выбросы углерода, серы и пыли вызывают смог, кислотные дожди и порчу почв — отводите дым через Advanced Chimneys.",
       "Для тайных исследований добавлены Primal Magick и Thaumon (на Forge 1.20.1 официальный Thaumcraft не выходил, его механику исследований и эссенций заменяет Primal Magick)."

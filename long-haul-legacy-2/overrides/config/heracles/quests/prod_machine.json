@@ -13,8 +13,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Машиностроительный центр: Прецизионные узлы\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
+    "title": {
+      "text": "Машиностроительный центр: Прецизионные узлы"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
     "description": [
       "Выпустите партию Прецизионные узлы непосредственно на площадке: /lh site produce machine bootstrap (или industrial).",
       "Удалённое производство на домашней базе заблокировано сервером."

@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Горный рудник: Восстановленный подъезд\"}",
-    "subtitle": "{\"text\": \"Этап 3 · Региональные контракты\"}",
+    "title": {
+      "text": "Горный рудник: Восстановленный подъезд"
+    },
+    "subtitle": {
+      "text": "Этап 3 · Региональные контракты"
+    },
     "description": [
       "Этап 3 · Тип: route_trial (опционально)",
       "Условия каталога: {\"destination\": \"mine\", \"damaged_route_repaired\": true, \"loaded_vehicle_passes\": 3}",

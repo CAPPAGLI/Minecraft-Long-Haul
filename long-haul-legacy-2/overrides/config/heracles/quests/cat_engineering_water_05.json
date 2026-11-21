@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Речная логистика: класс 5\"}",
-    "subtitle": "{\"text\": \"Этап 3 · Инженерные испытания\"}",
+    "title": {
+      "text": "Речная логистика: класс 5"
+    },
+    "subtitle": {
+      "text": "Этап 3 · Инженерные испытания"
+    },
     "description": [
       "Этап 3 · Тип: vehicle_delivery (опционально)",
       "Условия каталога: {\"vehicle_family\": \"ship\", \"batch_items\": 1280, \"minimum_distance_blocks\": 5000, \"single_trip\": true}",

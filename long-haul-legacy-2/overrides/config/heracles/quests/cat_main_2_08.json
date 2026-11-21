@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Сеть трёх регионов\"}",
-    "subtitle": "{\"text\": \"Этап 2 · Основная прогрессия\"}",
+    "title": {
+      "text": "Сеть трёх регионов"
+    },
+    "subtitle": {
+      "text": "Этап 2 · Основная прогрессия"
+    },
     "description": [
       "Этап 2 · Тип: network_supply (основной заказ)",
       "Условия каталога: {\"distinct_regions\": 3, \"minimum_deliveries_each\": 3}",

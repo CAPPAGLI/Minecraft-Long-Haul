@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Автоматическое снабжение\"}",
-    "subtitle": "{\"text\": \"Этап 3 · Основная прогрессия\"}",
+    "title": {
+      "text": "Автоматическое снабжение"
+    },
+    "subtitle": {
+      "text": "Этап 3 · Основная прогрессия"
+    },
     "description": [
       "Этап 3 · Тип: multi_input_supply (основной заказ)",
       "Условия каталога: {\"distinct_inputs\": 3, \"test_seconds\": 600, \"max_starvation_seconds\": 60}",

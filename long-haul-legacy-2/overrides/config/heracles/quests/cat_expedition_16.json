@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Защищённый торговый тракт\"}",
-    "subtitle": "{\"text\": \"Этап 4 · Лагеря и экспедиции\"}",
+    "title": {
+      "text": "Защищённый торговый тракт"
+    },
+    "subtitle": {
+      "text": "Этап 4 · Лагеря и экспедиции"
+    },
     "description": [
       "Этап 4 · Тип: route_trial (опционально)",
       "Условия каталога: {\"loaded_vehicle_passes\": 5, \"cargo_loss_allowed\": 0, \"minimum_distance_blocks\": 5000}",

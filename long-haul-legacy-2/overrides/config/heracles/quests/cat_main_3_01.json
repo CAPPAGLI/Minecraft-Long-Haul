@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Сортировочная станция\"}",
-    "subtitle": "{\"text\": \"Этап 3 · Основная прогрессия\"}",
+    "title": {
+      "text": "Сортировочная станция"
+    },
+    "subtitle": {
+      "text": "Этап 3 · Основная прогрессия"
+    },
     "description": [
       "Этап 3 · Тип: scheduled_train (основной заказ)",
       "Условия каталога: {\"distinct_cargo_families\": 3, \"successful_round_trips\": 4}",

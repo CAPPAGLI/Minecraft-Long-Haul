@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Груз через горы\"}",
-    "subtitle": "{\"text\": \"Этап 3 · Основная прогрессия\"}",
+    "title": {
+      "text": "Груз через горы"
+    },
+    "subtitle": {
+      "text": "Этап 3 · Основная прогрессия"
+    },
     "description": [
       "Этап 3 · Тип: vehicle_delivery (основной заказ)",
       "Условия каталога: {\"vehicle_family\": \"airship\", \"batch_items\": 2048, \"mountain_route\": true}",

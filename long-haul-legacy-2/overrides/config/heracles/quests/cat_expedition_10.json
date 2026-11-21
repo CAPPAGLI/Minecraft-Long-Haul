@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Фургон полевой мастерской\"}",
-    "subtitle": "{\"text\": \"Этап 3 · Лагеря и экспедиции\"}",
+    "title": {
+      "text": "Фургон полевой мастерской"
+    },
+    "subtitle": {
+      "text": "Этап 3 · Лагеря и экспедиции"
+    },
     "description": [
       "Этап 3 · Тип: vehicle_trial (опционально)",
       "Условия каталога: {\"vehicle_family\": \"road\", \"roles\": [\"sleep\", \"food\", \"repair\"], \"storage_cap_test\": true}",

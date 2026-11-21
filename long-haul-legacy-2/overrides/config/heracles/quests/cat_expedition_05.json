@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Маршрут до лагеря\"}",
-    "subtitle": "{\"text\": \"Этап 2 · Лагеря и экспедиции\"}",
+    "title": {
+      "text": "Маршрут до лагеря"
+    },
+    "subtitle": {
+      "text": "Этап 2 · Лагеря и экспедиции"
+    },
     "description": [
       "Этап 2 · Тип: route_trial (опционально)",
       "Условия каталога: {\"ordered_checkpoints\": 3, \"loaded_vehicle_passes\": 1}",

@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Архив старой магистрали\"}",
-    "subtitle": "{\"text\": \"Этап 4 · Основная прогрессия\"}",
+    "title": {
+      "text": "Архив старой магистрали"
+    },
+    "subtitle": {
+      "text": "Этап 4 · Основная прогрессия"
+    },
     "description": [
       "Этап 4 · Тип: unique_site_visit (основной заказ)",
       "Условия каталога: {\"unique_site_id\": \"continental_archive\", \"required_copies\": 1}",

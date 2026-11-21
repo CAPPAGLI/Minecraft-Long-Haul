@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Дорожные испытания: класс 5\"}",
-    "subtitle": "{\"text\": \"Этап 3 · Инженерные испытания\"}",
+    "title": {
+      "text": "Дорожные испытания: класс 5"
+    },
+    "subtitle": {
+      "text": "Этап 3 · Инженерные испытания"
+    },
     "description": [
       "Этап 3 · Тип: route_trial (опционально)",
       "Условия каталога: {\"loaded_vehicle_passes\": 3, \"minimum_distance_blocks\": 2500, \"ordered_checkpoints\": 7, \"route_feature\": \"tunnel\"}",

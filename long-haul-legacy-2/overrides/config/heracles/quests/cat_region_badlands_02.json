@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Карьер пустошей: Местное сырьё\"}",
-    "subtitle": "{\"text\": \"Этап 1 · Региональные контракты\"}",
+    "title": {
+      "text": "Карьер пустошей: Местное сырьё"
+    },
+    "subtitle": {
+      "text": "Этап 1 · Региональные контракты"
+    },
     "description": [
       "Этап 1 · Тип: controlled_production (опционально)",
       "Условия каталога: {\"site\": \"badlands\", \"product\": \"refractory_mix\", \"minimum_output\": 32}",

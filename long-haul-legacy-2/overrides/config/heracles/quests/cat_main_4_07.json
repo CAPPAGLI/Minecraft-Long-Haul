@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Континентальное снабжение\"}",
-    "subtitle": "{\"text\": \"Этап 4 · Основная прогрессия\"}",
+    "title": {
+      "text": "Континентальное снабжение"
+    },
+    "subtitle": {
+      "text": "Этап 4 · Основная прогрессия"
+    },
     "description": [
       "Этап 4 · Тип: network_supply (основной заказ)",
       "Условия каталога: {\"distinct_regions\": 8, \"minimum_uptime_fraction\": 0.9, \"test_seconds\": 1200}",

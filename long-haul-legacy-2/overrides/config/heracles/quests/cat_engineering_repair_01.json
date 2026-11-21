@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Восстановление: класс 1\"}",
-    "subtitle": "{\"text\": \"Этап 1 · Инженерные испытания\"}",
+    "title": {
+      "text": "Восстановление: класс 1"
+    },
+    "subtitle": {
+      "text": "Этап 1 · Инженерные испытания"
+    },
     "description": [
       "Этап 1 · Тип: site_commission (опционально)",
       "Условия каталога: {\"site_template_tier\": 1, \"test_seconds\": 360, \"distinct_inputs\": 2, \"requires_output_acceptance\": true}",

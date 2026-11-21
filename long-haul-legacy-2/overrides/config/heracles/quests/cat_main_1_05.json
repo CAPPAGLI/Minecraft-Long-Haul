@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Первые рационы\"}",
-    "subtitle": "{\"text\": \"Этап 1 · Основная прогрессия\"}",
+    "title": {
+      "text": "Первые рационы"
+    },
+    "subtitle": {
+      "text": "Этап 1 · Основная прогрессия"
+    },
     "description": [
       "Этап 1 · Тип: controlled_production (основной заказ)",
       "Условия каталога: {\"food_groups\": 3, \"output_portions\": 32}",

@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Морской порт: Вывоз первой партии\"}",
-    "subtitle": "{\"text\": \"Этап 2 · Региональные контракты\"}",
+    "title": {
+      "text": "Морской порт: Вывоз первой партии"
+    },
+    "subtitle": {
+      "text": "Этап 2 · Региональные контракты"
+    },
     "description": [
       "Этап 2 · Тип: vehicle_delivery (опционально)",
       "Условия каталога: {\"origin\": \"port\", \"destination\": \"farm\", \"product\": \"marine_reagent\", \"batch_items\": 512}",

@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Восстановление лесопилки\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
+    "title": {
+      "text": "Восстановление лесопилки"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
     "description": [
       "Обследуйте объект (/lh recovery list, /lh recovery survey sawmill).",
       "Подайте 16 железа, 16 андезитового сплава, 32 бревна и установите пилу/водяное колесо.",

@@ -83,6 +83,18 @@ test('quest catalog startup index exposes all 240 unique campaign/regional specs
   assert(vtypes.size >= 15, 'expected diverse verification types, got ' + vtypes.size);
 });
 
+test('all Heracles quest display titles and subtitles use Component objects (not double-encoded strings)', () => {
+  const path = require('path');
+  const qDir = path.join(__dirname, '../overrides/config/heracles/quests');
+  const qFiles = fs.readdirSync(qDir).filter(f => f.endsWith('.json'));
+  assert(qFiles.length >= 320, 'expected >= 320 quests, got ' + qFiles.length);
+  qFiles.forEach(f => {
+    const q = JSON.parse(fs.readFileSync(path.join(qDir, f), 'utf8'));
+    assert(q.display && typeof q.display.title === 'object' && typeof q.display.title.text === 'string', f + ' invalid display.title');
+    assert(q.display && typeof q.display.subtitle === 'object' && typeof q.display.subtitle.text === 'string', f + ' invalid display.subtitle');
+  });
+});
+
 test('all KubeJS startup/server/client scripts parse cleanly in ES5/Node', () => {
   const path = require('path');
   const dirs = [

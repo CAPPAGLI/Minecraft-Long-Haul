@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Горный рудник: Расширение цеха\"}",
-    "subtitle": "{\"text\": \"Этап 2 · Региональные контракты\"}",
+    "title": {
+      "text": "Горный рудник: Расширение цеха"
+    },
+    "subtitle": {
+      "text": "Этап 2 · Региональные контракты"
+    },
     "description": [
       "Этап 2 · Тип: controlled_production (опционально)",
       "Условия каталога: {\"site\": \"mine\", \"product\": \"ore_concentrate\", \"minimum_per_minute\": 32, \"minute_windows\": 10}",

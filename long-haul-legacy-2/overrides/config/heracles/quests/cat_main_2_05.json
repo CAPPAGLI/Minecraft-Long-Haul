@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Регулярное питание\"}",
-    "subtitle": "{\"text\": \"Этап 2 · Основная прогрессия\"}",
+    "title": {
+      "text": "Регулярное питание"
+    },
+    "subtitle": {
+      "text": "Этап 2 · Основная прогрессия"
+    },
     "description": [
       "Этап 2 · Тип: scheduled_supply (основной заказ)",
       "Условия каталога: {\"food_portions_per_window\": 16, \"windows\": 5, \"window_seconds\": 120}",

@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Диспетчеризация CC: класс 4\"}",
-    "subtitle": "{\"text\": \"Этап 2 · Инженерные испытания\"}",
+    "title": {
+      "text": "Диспетчеризация CC: класс 4"
+    },
+    "subtitle": {
+      "text": "Этап 2 · Инженерные испытания"
+    },
     "description": [
       "Этап 2 · Тип: computer_challenge (опционально)",
       "Условия каталога: {\"server_challenge\": true, \"verified_sensor_types\": 2, \"verified_actuations\": 2, \"repeated_challenges\": 4}",

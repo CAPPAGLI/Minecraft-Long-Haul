@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Морской порт: ввод в строй\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
+    "title": {
+      "text": "Морской порт: ввод в строй"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
     "description": [
       "Найдите площадку через /lh sites и /lh site info port.",
       "Встаньте НА бочку в радиусе 128 м от координат узла и выполните /lh site commission port."

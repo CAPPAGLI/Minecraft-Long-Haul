@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Лесная артель: Местное сырьё\"}",
-    "subtitle": "{\"text\": \"Этап 1 · Региональные контракты\"}",
+    "title": {
+      "text": "Лесная артель: Местное сырьё"
+    },
+    "subtitle": {
+      "text": "Этап 1 · Региональные контракты"
+    },
     "description": [
       "Этап 1 · Тип: controlled_production (опционально)",
       "Условия каталога: {\"site\": \"forest\", \"product\": \"treated_timber\", \"minimum_output\": 32}",

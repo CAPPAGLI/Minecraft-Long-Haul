@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Лагерь за первой рекой\"}",
-    "subtitle": "{\"text\": \"Этап 1 · Лагеря и экспедиции\"}",
+    "title": {
+      "text": "Лагерь за первой рекой"
+    },
+    "subtitle": {
+      "text": "Этап 1 · Лагеря и экспедиции"
+    },
     "description": [
       "Этап 1 · Тип: camp_visit (опционально)",
       "Условия каталога: {\"minimum_distance_from_home\": 1000, \"safe_sleep_setup\": true}",

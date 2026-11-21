@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Экспедиционный вагон\"}",
-    "subtitle": "{\"text\": \"Этап 3 · Лагеря и экспедиции\"}",
+    "title": {
+      "text": "Экспедиционный вагон"
+    },
+    "subtitle": {
+      "text": "Этап 3 · Лагеря и экспедиции"
+    },
     "description": [
       "Этап 3 · Тип: vehicle_trial (опционально)",
       "Условия каталога: {\"vehicle_family\": \"train\", \"roles\": [\"sleep\", \"food\", \"repair\", \"photo\"], \"storage_cap_test\": true}",

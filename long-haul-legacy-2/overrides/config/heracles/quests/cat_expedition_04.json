@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Запас на три перехода\"}",
-    "subtitle": "{\"text\": \"Этап 1 · Лагеря и экспедиции\"}",
+    "title": {
+      "text": "Запас на три перехода"
+    },
+    "subtitle": {
+      "text": "Этап 1 · Лагеря и экспедиции"
+    },
     "description": [
       "Этап 1 · Тип: ration_delivery (опционально)",
       "Условия каталога: {\"food_portions\": 48, \"different_food_groups\": 3}",

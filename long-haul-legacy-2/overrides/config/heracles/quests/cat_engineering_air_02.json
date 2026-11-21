@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Воздушная доставка: класс 2\"}",
-    "subtitle": "{\"text\": \"Этап 1 · Инженерные испытания\"}",
+    "title": {
+      "text": "Воздушная доставка: класс 2"
+    },
+    "subtitle": {
+      "text": "Этап 1 · Инженерные испытания"
+    },
     "description": [
       "Этап 1 · Тип: vehicle_delivery (опционально)",
       "Условия каталога: {\"vehicle_family\": \"aircraft_or_airship\", \"batch_items\": 256, \"minimum_distance_blocks\": 4000, \"refuel_stops_max\": 0}",

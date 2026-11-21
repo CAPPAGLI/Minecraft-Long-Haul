@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Доставка на дальний узел\"}",
-    "subtitle": "{\"text\": \"Этап 4 · Основная прогрессия\"}",
+    "title": {
+      "text": "Доставка на дальний узел"
+    },
+    "subtitle": {
+      "text": "Этап 4 · Основная прогрессия"
+    },
     "description": [
       "Этап 4 · Тип: vehicle_delivery (основной заказ)",
       "Условия каталога: {\"minimum_distance_blocks\": 40000, \"batch_items\": 8192}",

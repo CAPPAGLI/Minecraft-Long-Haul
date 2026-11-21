@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Грузовой поезд: класс 2\"}",
-    "subtitle": "{\"text\": \"Этап 1 · Инженерные испытания\"}",
+    "title": {
+      "text": "Грузовой поезд: класс 2"
+    },
+    "subtitle": {
+      "text": "Этап 1 · Инженерные испытания"
+    },
     "description": [
       "Этап 1 · Тип: scheduled_train (опционально)",
       "Условия каталога: {\"vehicle_family\": \"train\", \"batch_items_total\": 1024, \"successful_round_trips\": 4, \"max_interval_seconds\": 300}",

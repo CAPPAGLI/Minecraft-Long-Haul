@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Мастерская у реки\"}",
-    "subtitle": "{\"text\": \"Этап 1 · Основная прогрессия\"}",
+    "title": {
+      "text": "Мастерская у реки"
+    },
+    "subtitle": {
+      "text": "Этап 1 · Основная прогрессия"
+    },
     "description": [
       "Этап 1 · Тип: site_commission (основной заказ)",
       "Условия каталога: {\"site\": \"starter_workshop\", \"test_seconds\": 120}",

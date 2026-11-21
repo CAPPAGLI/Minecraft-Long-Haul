@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Восстановление речного порта\"}",
-    "subtitle": "{\"text\": \"Long Haul Legacy 2.0 · Alpha 4\"}",
+    "title": {
+      "text": "Восстановление речного порта"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
     "description": [
       "Обследуйте объект (/lh recovery list, /lh recovery survey river_port).",
       "Подайте 64 доски, 16 железа, 2 интерфейса и смонтируйте перегрузочный узел.",

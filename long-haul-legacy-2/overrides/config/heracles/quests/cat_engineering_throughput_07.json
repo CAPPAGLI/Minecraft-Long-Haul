@@ -11,8 +11,12 @@
   },
   "rewards": {},
   "display": {
-    "title": "{\"text\": \"Производительность: класс 7\"}",
-    "subtitle": "{\"text\": \"Этап 4 · Инженерные испытания\"}",
+    "title": {
+      "text": "Производительность: класс 7"
+    },
+    "subtitle": {
+      "text": "Этап 4 · Инженерные испытания"
+    },
     "description": [
       "Этап 4 · Тип: controlled_production (опционально)",
       "Условия каталога: {\"minimum_per_minute\": 112, \"minute_windows\": 10, \"controlled_inputs\": true}",
