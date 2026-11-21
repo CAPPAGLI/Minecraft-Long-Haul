@@ -1,28 +1,21 @@
-# Long Haul Legacy 2.0 — Alpha 14 (`2.0-alpha.14`)
+# Long Haul Legacy 2.0 — Alpha 15 (`2.0-alpha.15`)
 
-**Расширенная серверно-проверенная альфа сборки, НЕ финальный релиз по полному ТЗ.** Импортируемый `.mrpack` предназначен для отдельного тестового профиля и нового обычного мира. Рабочая 1.1.1 не изменена. Исторические снимки прошлых альф сохранены в `history/alpha.1/` – `history/alpha.14/`.
+**Расширенная серверно-проверенная альфа сборки, НЕ финальный релиз по полному ТЗ.** Импортируемый `.mrpack` предназначен для отдельного тестового профиля и нового обычного мира. Рабочая 1.1.1 не изменена. Исторические снимки прошлых альф сохранены в `history/alpha.1/` – `history/alpha.15/`.
 
-## Что нового в `2.0-alpha.14`
+## Что нового в `2.0-alpha.15`
 
-- **Исправлено форматирование квестбука Heracles (все 321 квест):**
-  - В `tools/generate_alpha_quests.py` поля `display.title` и `display.subtitle` переведены с двойной сериализации `json.dumps({'text': ...})` на настоящие JSON-объекты `{'text': ...}` (как требует `ExtraCodecs.COMPONENT` в `QuestDisplay.java` для Heracles `1.20.1`), чтобы в подсказках квестов не выводился сырой текст `{"text": "..."}`.
-  - В `tools/test_contracts.js` добавлена автоматическая проверка всех `.json` квестов.
-- **Единая книга гайдов на старте (`Eccentric Tome`):**
-  - Удалён дубликат `akashic-tome`; оставлен актуальный **`Eccentric Tome`** (`eccentrictome:tome`).
-  - В `kubejs/server_scripts/20_basics.js` при первом входе вместе с `heracles:quest_book` сразу выдаётся **`eccentrictome:tome`**, а в разделе `01 · Начало и правила` добавлен квест `alpha_eccentric_tome` с инструкцией (положить `Eccentric Tome` и любые книги модов в верстак — ПКМ выбирает книгу, Shift+ЛКМ возвращает в том).
-- **Расширение сборки до `418` внешних JAR (`487` mod ID включая вложенные):**
-  - **Create 6.0.8 и логистика:** `create-encased`, `create-vibrant-vaults`, `create_factory_logistics`, `escalated`, `create-6.0.8-backported-fixes`.
-  - **Биомы, данжи и структуры:** `yungs-cave-biomes`, `mes-moogs-end-structures`, `mns-moogs-nether-structures`, `mss-moogs-soaring-structures`, `ct-overhaul-village`, `l_enders-cataclysm` (+ зависимости).
-  - **Стабильность, оптимизация и клиент:** `neruina`, `lmd` (Let Me Despawn), `no-chat-reports`, `rubidium-extra` (Embeddium Extra, client-only).
-  - В `tools/smoke_server.py` поднят лимит `-XX:MaxMetaspaceSize=1024m` для стабильной работы с `487` mod ID.
-- *(Унаследовано из `2.0-alpha.13` и более ранних)* `MVS - Moog's Voyager Structures`, `17` ванильных + `12` модовых оверрайдов снижения руд, `17` редких монорудных чанков (`/lh prospect`), `Smart Mobs`, квота чанклоадинга активного маршрута (`<= 2`), выбросы Death Stranding Voidout + `Corpse`, летающие острова (`Y=172..212`) + сезонный токсичный газ (`Y=114`), `AdPother` + `Advanced Chimneys`, `Primal Magick` + `Thaumon`, `ParCool!`, Бессмертная Улитка и 240 заказов каталога в 321 квесте Heracles.
+- **Исправлено предупреждение загрузки клиента (`failed to load a valid ResourcePackInfo`):**
+  - В `runtime-mod/src/main/resources/pack.mcmeta` добавлен валидный `pack.mcmeta` (`"pack_format": 15` для Minecraft `1.20.1`) и пересобран `overrides/mods/longhaul-runtime-1.20.1-0.1.0.jar`.
+  - Устранено клиентское предупреждение `Missing metadata in pack mod:longhaul_runtime` → `File Mod File: ... longhaul-runtime-1.20.1-0.1.0.jar failed to load a valid ResourcePackInfo`, из-за которого открывался экран `LoadingErrorScreen` («1 warning has occurred during loading») и срабатывал Crash Assistant.
+  - В `tools/inspect_alpha.py` и `tools/test_contracts.js` добавлены автоматические проверки наличия `pack.mcmeta` (`pack_format: 15`) в локальном моде.
+- *(Унаследовано из `2.0-alpha.14` и более ранних)* Исправленный JSON-формат Heracles (`ExtraCodecs.COMPONENT` для всех 321 квеста), стартовый `Eccentric Tome` (`eccentrictome:tome`, дубликат `akashic-tome` удалён), `418` внешних JAR (`487` mod ID) с `create-encased`, `create-vibrant-vaults`, `create_factory_logistics`, `escalated`, `create-6.0.8-backported-fixes`, `yungs-cave-biomes`, `mes/mns/mss/mvs`, `ct-overhaul-village`, `l_enders-cataclysm`, `neruina`, `lmd`, `no-chat-reports`, `rubidium-extra`, `17` монорудных чанков (`/lh prospect`), `Smart Mobs`, Death Stranding Voidout + `Corpse`, летающие острова (`Y=172..212`) + сезонный токсичный газ (`Y=114`), `AdPother`, `Primal Magick`, `ParCool!`, Бессмертная Улитка и 240 заказов каталога.
 
-Профиль сборки: `profiles/alpha14.json` (динамически разрешаемый список и хэши в CI → артефакт `Long-Haul-Legacy-2.0-alpha.14.mrpack` и `Long-Haul-Legacy-2.0-alpha.14-Sources-and-Report.zip`). Подробности проверки: `TEST-REPORT.md`, машинный статус: `STATUS.json`.
+Профиль сборки: `profiles/alpha15.json` (динамически разрешаемый список и хэши в CI → артефакт `Long-Haul-Legacy-2.0-alpha.15.mrpack` и `Long-Haul-Legacy-2.0-alpha.15-Sources-and-Report.zip`). Подробности проверки: `TEST-REPORT.md`, машинный статус: `STATUS.json`.
 
-## Установка тестового профиля (ВАЖНО: только Minecraft 1.20.1 / Forge 47.4.10 / Java 17!)
+## Установка тестового профиля (ВАЖНО: чистый профиль Minecraft 1.20.1 / Forge 47.4.10 / Java 17!)
 
-1. Скачайте `Long-Haul-Legacy-2.0-alpha.14.mrpack` (артефакт CI `long-haul-legacy-2.0-alpha.14`). **Не запускайте в профиле Forge 1.21.1, Java 21 или Java 25 — сборка строго для Minecraft `1.20.1`, Forge `47.4.10` и Java `17`!**
-2. Импортируйте `.mrpack` как **новый отдельный профиль** в Prism Launcher / Modrinth App (лаунчер автоматически поставит Minecraft `1.20.1` и Forge `47.4.10`).
+1. Скачайте `Long-Haul-Legacy-2.0-alpha.15.mrpack` (артефакт CI `long-haul-legacy-2.0-alpha.15`). **Не запускайте в профиле Forge 1.21.1, Java 21 или Java 25 — сборка строго для Minecraft `1.20.1`, Forge `47.4.10` и Java `17`!**
+2. Импортируйте `.mrpack` как **новый чистый отдельный профиль** в Prism Launcher / Modrinth App (или очистите старую папку `mods/` перед обновлением, чтобы не оставался удалённый `AkashicTome-1.7-27.jar` и старые версии модов).
 3. Выберите **Java 17** и выделите **8–10 ГБ RAM** (`-Xms4096M -Xmx8192M` или `10240M` на системе с 32 ГБ RAM; не ставьте `-Xmx24G`).
 4. Создайте **новый обычный мир**.
 
@@ -40,7 +33,7 @@
 
 ## Что ещё осталось до финального релиза
 
-| Требование | Состояние `2.0-alpha.14` |
+| Требование | Состояние `2.0-alpha.15` |
 |---|---|
 | ~500 полезных модов | В процессе: 418 внешних JAR (+1 runtime = 419 JAR / 487 mod ID; осталось ~80 JAR к ~500) |
 | Клиентское, графическое и транспортное тестирование | Не пройдено: проверен только headless Linux-сервер (void + обычный Overworld) |
@@ -55,13 +48,13 @@ node long-haul-legacy-2/tools/test_contracts.js
 python3 long-haul-legacy-2/tools/generate_structures.py
 python3 long-haul-legacy-2/tools/generate_worldgen.py
 python3 long-haul-legacy-2/tools/generate_alpha_quests.py
-python3 long-haul-legacy-2/tools/assemble_alpha.py --profile long-haul-legacy-2/profiles/alpha14.json
+python3 long-haul-legacy-2/tools/assemble_alpha.py --profile long-haul-legacy-2/profiles/alpha15.json
 python3 long-haul-legacy-2/tools/generate_modlist.py
 python3 long-haul-legacy-2/tools/prepare_server.py --mode void
 python3 long-haul-legacy-2/tools/build_runtime.py
 python3 long-haul-legacy-2/tools/inspect_alpha.py
-python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 450 --world-label "alpha14 void integration test"
+python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 450 --world-label "alpha15 void integration test"
 python3 long-haul-legacy-2/tools/prepare_server.py --mode normal --skip-forge-install
-python3 long-haul-legacy-2/tools/smoke_server.py --heap 6144 --timeout 780 --world-label "alpha14 normal overworld test"
-python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.14
+python3 long-haul-legacy-2/tools/smoke_server.py --heap 6144 --timeout 780 --world-label "alpha15 normal overworld test"
+python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.15
 ```
