@@ -25,6 +25,22 @@ ferrite-core modernfix spark chunky xaeros-minimap xaeros-world-map'''.split()
 
 BASE_CLIENT = set('zume jei emi jade jade-addons-forge appleskin mouse-tweaks controlling configured catalogue xaeros-minimap xaeros-world-map'.split())
 
+def supports_forge_47410(cand):
+    jf = next((f for f in cand['files'] if f['filename'].endswith('.jar') and f.get('primary')), next(f for f in cand['files'] if f['filename'].endswith('.jar')))
+    cached = DIR / jf['filename']
+    if cached.exists():
+        zdata = cached.read_bytes()
+    else:
+        req = urllib.request.Request(jf['url'], headers={'User-Agent': 'LongHaulLegacy/2.0 assembler'})
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            zdata = resp.read()
+    with zipfile.ZipFile(io.BytesIO(zdata)) as zf:
+        if 'META-INF/mods.toml' in zf.namelist():
+            mt = tomllib.loads(zf.read('META-INF/mods.toml').decode(errors='replace'))
+            deps = [d for dl in mt.get('dependencies', {}).values() for d in dl if d.get('modId') == 'forge']
+            return all(fits('47.4.10', d.get('versionRange', '')) is not False for d in deps)
+    return True
+
 def resolve_profile(profile_path: pathlib.Path):
     profile = json.loads(profile_path.read_text(encoding='utf-8'))
     roots = list(BASE_ROOTS) + list(dict.fromkeys(s for group in profile['categories'].values() for s in group))
@@ -38,9 +54,12 @@ def resolve_profile(profile_path: pathlib.Path):
     while work:
         slug = work.pop(0)
         row = by_slug.get(slug) or by_pid.get(slug)
+        v = None
         if row and row.get('status') == 'candidate':
-            v = {'project_id': row['project_id'], 'id': row['version_id'], 'version_number': row['version'], 'dependencies': row['dependencies'], 'files': row['files']}
-        else:
+            cand_row = {'project_id': row['project_id'], 'id': row['version_id'], 'version_number': row['version'], 'dependencies': row['dependencies'], 'files': row['files']}
+            if slug in ('create-clockwork', 'polymorph', 'ends-delight') or supports_forge_47410(cand_row):
+                v = cand_row
+        if v is None:
             vs = get('project/' + slug + '/version?loaders=%5B%22forge%22%5D&game_versions=%5B%221.20.1%22%5D') or []
             vs = [v for v in vs if v['date_published'] <= '2026-11-15T15:59:59Z' and any(f['filename'].endswith('.jar') for f in v['files'])]
             if not vs:
@@ -55,21 +74,10 @@ def resolve_profile(profile_path: pathlib.Path):
                     cands = safe_dh
             if slug not in ('create-clockwork', 'polymorph', 'ends-delight'):
                 picked = None
-                for cand in cands[:8]:
-                    jf = next((f for f in cand['files'] if f['filename'].endswith('.jar') and f.get('primary')), next(f for f in cand['files'] if f['filename'].endswith('.jar')))
-                    req = urllib.request.Request(jf['url'], headers={'User-Agent': 'LongHaulLegacy/2.0 assembler'})
-                    with urllib.request.urlopen(req, timeout=60) as resp:
-                        zdata = resp.read()
-                    with zipfile.ZipFile(io.BytesIO(zdata)) as zf:
-                        if 'META-INF/mods.toml' in zf.namelist():
-                            mt = tomllib.loads(zf.read('META-INF/mods.toml').decode(errors='replace'))
-                            deps = [d for dl in mt.get('dependencies', {}).values() for d in dl if d.get('modId') == 'forge']
-                            if all(fits('47.4.10', d.get('versionRange', '')) is not False for d in deps):
-                                picked = cand
-                                break
-                        else:
-                            picked = cand
-                            break
+                for cand in cands[:24]:
+                    if supports_forge_47410(cand):
+                        picked = cand
+                        break
                 if not picked:
                     raise RuntimeError('No version compatible with Forge 47.4.10 for ' + slug)
                 v = picked
