@@ -1,18 +1,18 @@
 {
-  "version": "2.0-alpha.13",
+  "version": "2.0-alpha.14",
   "date_cutoff": "2026-11-19",
-  "status": "HEADLESS_CI_VERIFIED_ALPHA13_NOT_FULL_REQUEST",
+  "status": "HEADLESS_CI_VERIFIED_ALPHA14_NOT_FULL_REQUEST",
   "minecraft": "1.20.1",
   "forge": "47.4.10",
   "java": 17,
-  "external_jars": 401,
-  "server_jars": 327,
-  "client_only_jars": 74,
+  "external_jars": 418,
+  "server_jars": 343,
+  "client_only_jars": 75,
   "local_jars": 1,
-  "recursive_declared_mod_ids": 468,
-  "external_download_bytes": 996771559,
-  "ci_run_id": 44867383564,
-  "ci_verified_commit": "ac8c0c7",
+  "recursive_declared_mod_ids": 487,
+  "external_download_bytes": 1116417216,
+  "ci_run_id": 44882776129,
+  "ci_verified_commit": "ba1aa3e",
   "server_smoke_test_void": {
     "ready": true,
     "exit_code": 0,
@@ -21,7 +21,7 @@
       "server_ready"
     ],
     "heap_mb": 4096,
-    "world": "alpha13 void integration test",
+    "world": "alpha14 void integration test",
     "client_tested": false,
     "world_border_175000": true,
     "integration_pass": true,
@@ -36,23 +36,25 @@
       "server_ready"
     ],
     "heap_mb": 6144,
-    "world": "alpha13 normal overworld test",
+    "world": "alpha14 normal overworld test",
     "client_tested": false,
     "world_border_175000": true,
     "integration_pass": true,
     "integration_fail": false,
     "clean_exit": true
   },
+  "heracles_component_format_fixed": true,
+  "eccentric_tome_starter_enabled": true,
   "mvs_structures_included": true,
   "smart_mobs_included": true,
   "route_chunk_quota_enforced": true,
-  "model_tests_passed": 18,
-  "installed_quests": 320,
+  "model_tests_passed": 19,
+  "installed_quests": 321,
   "installed_advancements": 300,
   "nbt_structures_generated": 18,
   "quest_breakdown": {
     "story_bread_chapters": 6,
-    "core_campaign_quests": 80,
+    "core_campaign_quests": 81,
     "catalog_orders_implemented": 240
   },
   "worldgen_ore_overrides": 29,
@@ -100,5 +102,5 @@
   "new_installable_pack_created": true,
   "launcher_import_tested": false,
   "legacy_1_1_1_modified": false,
-  "limitations": "See README.md and TEST-REPORT.md. Headless Linux Forge integration verified for 378 external JARs + longhaul-runtime (447 mod IDs, void + normal Overworld, 175000 worldborder verified): ParCool parkour, sapling removal + 40% log drop reduction, 10x ore reduction + 6 rare rich-ore chunk modifiers (/lh prospect), delayed Immortal Snail (/lh snail), Death Stranding voidout explosion + corpse graves + Totem protection, flying sky-island mods + custom jigsaw sky refuges (Y=172..212), seasonal rising toxic gas (/lh gas, peak Y=114), harsh Pollution of the Realms + Advanced Chimneys, Primal Magick + Thaumon (no official Thaumcraft exists for Forge 1.20.1), and 320 Heracles quests (240 catalog + 80 core). Graphical client, vehicle physics in motion, and remaining expansion toward ~500 mods are not yet complete."
+  "limitations": "See README.md and TEST-REPORT.md. Headless Linux Forge integration verified for 418 external JARs + longhaul-runtime (487 mod IDs, void + normal Overworld, 175000 worldborder verified): Heracles display.title/subtitle Component JSON formatting fixed across all 321 quests, Eccentric Tome unified guidebook issued at spawn (duplicate akashic-tome removed), Create 6.0.8 expansions/fixes + YUNG's Cave Biomes + MES/MNS/MSS + CTOV + L_Ender's Cataclysm + Neruina + Let Me Despawn + No Chat Reports + Embeddium Extra added. Graphical client, vehicle physics in motion, and remaining expansion toward ~500 mods are not yet complete."
 }

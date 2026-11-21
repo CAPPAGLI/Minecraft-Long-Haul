@@ -1,16 +1,16 @@
-# Long Haul Legacy 2.0 — Alpha 13 — протокол проверки
+# Long Haul Legacy 2.0 — Alpha 14 — протокол проверки
 
 ## Итог
 
-**Оба headless-теста на выделенном сервере Forge 47.4.10 (`void` и обычный Overworld с Terralith + Tectonic + BOP + RU + Alex's Caves + YUNG's + Aquamirae + Repurposed Structures + MVS - Moog's Voyager Structures + Lootr + Smart Mobs + 17 монорудными чанками) пройдены в GitHub Actions (run `44867383564`, commit `ac8c0c7`, `18m43s`). Графический клиент и физика транспорта в движении ещё не проверены.**
+**Оба headless-теста на выделенном сервере Forge 47.4.10 (`void` и обычный Overworld с Terralith + Tectonic + BOP + RU + Alex's Caves + YUNG's + YUNG's Cave Biomes + Aquamirae + Repurposed Structures + MVS/MES/MNS/MSS + CTOV + L_Ender's Cataclysm + Lootr + Smart Mobs + 17 монорудными чанками) пройдены в GitHub Actions (run `44882776129`, commit `ba1aa3e`, `13m22s`). Графический клиент и физика транспорта в движении ещё не проверены.**
 
-Финальные результаты из CI (`44867383564`):
+Финальные результаты из CI (`44882776129`):
 
-- **Inspect JARs:** `401` внешний JAR (`327` серверных / `74` только клиентских) + `1` собственный `longhaul-runtime-1.20.1-0.1.0.jar` (`402` JAR всего), `468` mod ID включая вложенные зависимости, **`Missing: 0`**, **`Range mismatches: 0`**.
+- **Inspect JARs:** `418` внешних JAR (`343` серверных / `75` только клиентских) + `1` собственный `longhaul-runtime-1.20.1-0.1.0.jar` (`419` JAR всего), `487` mod ID включая вложенные зависимости, **`Missing: 0`**, **`Range mismatches: 0`**.
 - **Void integration test (`--heap 4096`):** `ready: true, exit_code: 0, world_border_175000: true, integration_pass: true, integration_fail: false, clean_exit: true`.
 - **Normal Overworld generation test (`--heap 6144`):** `ready: true, exit_code: 0, world_border_175000: true, integration_pass: true, integration_fail: false, clean_exit: true`.
-- **KubeJS:** `3/3` startup-скриптов и `13/13` server-скриптов загружены с `0` ошибок и `0` предупреждений; `client_scripts/01_longhaul_tooltips.js` проверен синтаксическим разбором в Node/VM (`test_contracts.js` — `18/18` тестов).
-- **Упаковка:** `Long-Haul-Legacy-2.0-alpha.13.mrpack` (`582,859` байт, `996,771,559` байт внешних загрузок), `Long-Haul-Legacy-2.0-alpha.13-Sources-and-Report.zip` (`1,203,074` байт).
+- **KubeJS:** `3/3` startup-скриптов и `13/13` server-скриптов загружены с `0` ошибок и `0` предупреждений; `client_scripts/01_longhaul_tooltips.js` и все `321` квест Heracles проверены в `test_contracts.js` (`19/19` тестов).
+- **Упаковка:** `Long-Haul-Legacy-2.0-alpha.14.mrpack` (`584,323` байт, `1,116,417,216` байт внешних загрузок), `Long-Haul-Legacy-2.0-alpha.14-Sources-and-Report.zip` (`1,222,884` байт).
 
 Строка интеграционной проверки в обоих режимах:
 
@@ -21,20 +21,21 @@ LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structu
 ## Среда и состав проверки
 
 - Minecraft `1.20.1`, Forge `47.4.10`, Java `17` (Temurin), Linux x86_64 (GitHub Actions runner).
-- **401 внешний JAR + 1 собственный `longhaul-runtime-1.20.1-0.1.0.jar`** (`468` mod ID включая вложенные).
-- **18/18 чистых JS-тестов** (`node long-haul-legacy-2/tools/test_contracts.js`).
-- **18 `.nbt` структур** (`16` узлов/руин `11×7×11` + `2` небесных острова-убежища `15×14×15`), **29 worldgen-оверрайдов руд (`17` ванильных + `12` модовых) + 17 монорудных богатых чанков (`6` ванильных + `11` модовых) + `longhaul:sky_refuges`**, **320 квестов Heracles** + **300 серверных advancement**.
+- **418 внешних JAR + 1 собственный `longhaul-runtime-1.20.1-0.1.0.jar`** (`487` mod ID включая вложенные).
+- **19/19 чистых JS-тестов** (`node long-haul-legacy-2/tools/test_contracts.js`), включая проверку формата `display.title` / `display.subtitle` во всех 321 квесте Heracles.
+- **18 `.nbt` структур** (`16` узлов/руин `11×7×11` + `2` небесных острова-убежища `15×14×15`), **29 worldgen-оверрайдов руд (`17` ванильных + `12` модовых) + 17 монорудных богатых чанков (`6` ванильных + `11` модовых) + `longhaul:sky_refuges`**, **321 квест Heracles** + **300 серверных advancement**.
 
-## Что нового проверено в живом Forge 47.4.10 (`alpha.13`)
+## Что нового проверено в живом Forge 47.4.10 (`alpha.14`)
 
 | Проверка | Результат |
 |---|---|
-| Интеграция `MVS - Moog's Voyager Structures` (`moogs-voyager-structures`) + `Moog's Structure Lib` (`moogs-structure-lib`) | Оба мода загружены и проверены на Forge `47.4.10` (`Missing: 0, Range mismatches: 0`); генерация `normal` Overworld завершилась чисто |
-| Превышение планки в 400+ внешних JAR (`401` внешних + `1` runtime = `402` JAR, `468` mod ID) | Все версии и зависимости проверены на Forge `47.4.10` |
+| Исправление JSON-формата `display.title` / `display.subtitle` квестов Heracles | Все `321` квестов используют нативные JSON-объекты `{"text": "..."}` (`ExtraCodecs.COMPONENT`), проверено автотестом в `test_contracts.js` |
+| Выдача `eccentrictome:tome` на старте + удаление дубликата `akashic-tome` | Предмет `eccentrictome:tome` подтверждён в живом реестре Forge (`Block 19` в `99_integration_test.js`); добавлен стартовый квест `alpha_eccentric_tome` |
+| Расширение до `418` внешних JAR (`487` mod ID): `create-encased`, `create-vibrant-vaults`, `create_factory_logistics`, `escalated`, `create-6.0.8-backported-fixes`, `yungs-cave-biomes`, `mes-moogs-end-structures`, `mns-moogs-nether-structures`, `mss-moogs-soaring-structures`, `ct-overhaul-village`, `l_enders-cataclysm`, `neruina`, `lmd`, `no-chat-reports`, `rubidium-extra` | Все зависимости и диапазоны версий на Forge `47.4.10` + Create `6.0.8` проверены (`Missing: 0, Range mismatches: 0`); после поднятия `-XX:MaxMetaspaceSize=1024m` оба запуска (`void` и `normal`) завершились чисто |
 
 ## Что этот тест НЕ подтверждает
 
-- Запуск графического клиента (включая клиентский рендер, GUI Heracles и JEI/JER), импорт `.mrpack` в Prism Launcher.
+- Запуск графического клиента (включая клиентский рендер, визуальную отрисовку GUI Heracles после правки и JEI/JER), импорт `.mrpack` в лаунчере.
 - Физику и управление поездами Create, кораблями Valkyrien Skies/Eureka/Clockwork и самолётами в движении.
 - Официальный `Thaumcraft` (отсутствует в виде нативного релиза для Forge `1.20.1`; заменён на `Primal Magick` + `Thaumon`).
-- Финальное расширение с 401 до ~500 модов.
+- Финальное расширение с 418 до ~500 модов.
