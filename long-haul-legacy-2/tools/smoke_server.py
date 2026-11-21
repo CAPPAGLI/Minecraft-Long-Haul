@@ -31,8 +31,8 @@ def main():
         java,
         f'-Xms512m',
         f'-Xmx{args.heap}m',
-        '-XX:MaxMetaspaceSize=512m',
-        '-XX:ReservedCodeCacheSize=128m',
+        '-XX:MaxMetaspaceSize=1024m',
+        '-XX:ReservedCodeCacheSize=192m',
         '@libraries/net/minecraftforge/forge/1.20.1-47.4.10/unix_args.txt',
         'nogui',
     ]
