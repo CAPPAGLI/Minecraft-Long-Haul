@@ -35,7 +35,7 @@
     "events": [
       "server_ready"
     ],
-    "heap_mb": 6144,
+    "heap_mb": 7168,
     "world": "alpha16 normal overworld test",
     "client_tested": false,
     "world_border_175000": true,

@@ -61,6 +61,6 @@ python3 long-haul-legacy-2/tools/build_runtime.py
 python3 long-haul-legacy-2/tools/inspect_alpha.py
 python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 450 --world-label "alpha16 void integration test"
 python3 long-haul-legacy-2/tools/prepare_server.py --mode normal --skip-forge-install
-python3 long-haul-legacy-2/tools/smoke_server.py --heap 6144 --timeout 780 --world-label "alpha16 normal overworld test"
+python3 long-haul-legacy-2/tools/smoke_server.py --heap 7168 --timeout 960 --world-label "alpha16 normal overworld test"
 python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.16
 ```

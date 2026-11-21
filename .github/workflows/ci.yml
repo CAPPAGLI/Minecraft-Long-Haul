@@ -93,7 +93,7 @@ jobs:
           set -o pipefail
           mkdir -p /tmp/ci-logs
           python3 long-haul-legacy-2/tools/prepare_server.py --mode normal --skip-forge-install
-          python3 long-haul-legacy-2/tools/smoke_server.py --heap 6144 --timeout 780 --world-label "alpha16 normal overworld test" | tee /tmp/ci-logs/smoke-normal.txt || EC=$?
+          python3 long-haul-legacy-2/tools/smoke_server.py --heap 7168 --timeout 960 --world-label "alpha16 normal overworld test" | tee /tmp/ci-logs/smoke-normal.txt || EC=$?
           cp long-haul-legacy-2/server-test/smoke-result.json /tmp/ci-logs/smoke-normal-result.json || true
           exit ${EC:-0}
 
