@@ -1,29 +1,21 @@
-# Long Haul Legacy 2.0 — Alpha 12 (`2.0-alpha.12`)
+# Long Haul Legacy 2.0 — Alpha 13 (`2.0-alpha.13`)
 
-**Расширенная серверно-проверенная альфа сборки, НЕ финальный релиз по полному ТЗ.** Импортируемый `.mrpack` предназначен для отдельного тестового профиля и нового обычного мира. Рабочая 1.1.1 не изменена. Исторические снимки прошлых альф сохранены в `history/alpha.1/` – `history/alpha.12/`.
+**Расширенная серверно-проверенная альфа сборки, НЕ финальный релиз по полному ТЗ.** Импортируемый `.mrpack` предназначен для отдельного тестового профиля и нового обычного мира. Рабочая 1.1.1 не изменена. Исторические снимки прошлых альф сохранены в `history/alpha.1/` – `history/alpha.13/`.
 
-## Что нового в `2.0-alpha.12`
+## Что нового в `2.0-alpha.13`
 
-- **Модовые монорудные чанки и ребаланс модовых руд (`tools/generate_worldgen.py`, `24_immortal_snail.js`):**
-  - Помимо `17` ванильных оверрайдов руд добавлены **`12` оверрайдов снижения генерации для модовых руд**: `Create` (`zinc_ore`, `striated_ores_overworld`), `Immersive Engineering` (`bauxite`, `lead`, `silver`, `nickel`, `deep_nickel`, `uranium`) и `Primal Magick` (`ore_rock_salt_upper/lower`, `ore_quartz_upper/lower`).
-  - К `6` ванильным монорудным богатым чанкам (`coal`, `iron`, `copper`, `gold`, `redstone`, `diamond`) добавлены **`11` модовых монорудных чанков** (`longhaul:rich_*_chunk`):
-    - `rich_zinc_chunk` (`create:zinc_ore`),
-    - `rich_bauxite_chunk` (`immersiveengineering:ore_aluminum`), `rich_lead_chunk`, `rich_silver_chunk`, `rich_nickel_chunk`, `rich_uranium_chunk`,
-    - `rich_thorium_chunk` (`create_new_age:thorium_ore`),
-    - `rich_tin_chunk` (`railcraft:tin_ore`), `rich_sulfur_chunk` (`railcraft:sulfur_ore`),
-    - `rich_rock_salt_chunk` (`primalmagick:ore_rock_salt`), `rich_quartz_chunk` (`primalmagick:ore_quartz`).
-  - Команда `/lh prospect` теперь сканирует и распознаёт все **`17` типов монорудных жил** (как ванильные, так и модовые).
-- **Добавлен мод `Smart Mobs` (`smart-mobs`):**
-  - В профиль `profiles/alpha12.json` добавлен **`Smart Mobs`** (`399` внешних Modrinth JAR + `longhaul-runtime` = **`400` JAR всего**, `466` mod ID): зомби ломают блоки, строят мосты и столбы; скелеты ведут прицельный снайперский огонь на упреждение; криперы пробивают препятствия и оставляют напалм; пауки стреляют паутиной; эндермены телепортируют цели.
-- *(Унаследовано из `2.0-alpha.11` и `alpha.10`)* Квота чанклоадинга активного маршрута (`<= 2` чанков через `/lh route quota|abort`), выбросы Death Stranding Voidout + трупы `Corpse`, летающие острова (`Y=172..212`) и сезонный поднимающийся токсичный газ (`Y=114`), жёсткий `AdPother` + `Advanced Chimneys`, `Primal Magick` + `Thaumon`, `ParCool!`, запрет саженцев, Бессмертная Улитка и 320 квестов Heracles.
+- **Добавлен `MVS - Moog's Voyager Structures` (`moogs-voyager-structures` + `moogs-structure-lib`):**
+  - В профиль `profiles/alpha13.json` добавлен **`MVS - Moog's Voyager Structures`** с автоматической зависимостью **`Moog's Structure Lib`**.
+  - Сборка перешагнула отметку **`401` внешний Modrinth JAR** (`327` серверных / `74` только клиентских) + `1` собственный `longhaul-runtime-1.20.1-0.1.0.jar` = **`402` JAR всего (`468` mod ID включая вложенные)**.
+- *(Унаследовано из `2.0-alpha.12` и более ранних)* `17` ванильных + `12` модовых оверрайдов снижения руд, `17` редких монорудных чанков (`6` ванильных + `11` модовых: цинк, боксит/алюминий, свинец, серебро, никель, уран, торий, олово, сера, каменная соль, кварц) с `/lh prospect`, `Smart Mobs`, квота чанклоадинга активного маршрута (`<= 2`), выбросы Death Stranding Voidout + `Corpse`, летающие острова (`Y=172..212`) + сезонный токсичный газ (`Y=114`), `AdPother` + `Advanced Chimneys`, `Primal Magick` + `Thaumon`, `ParCool!`, Бессмертная Улитка и 320 квестов Heracles.
 
-Профиль сборки: `profiles/alpha12.json` (динамически разрешаемый список и хэши в CI → артефакт `Long-Haul-Legacy-2.0-alpha.12.mrpack` и `Long-Haul-Legacy-2.0-alpha.12-Sources-and-Report.zip`). Подробности проверки: `TEST-REPORT.md`, машинный статус: `STATUS.json`.
+Профиль сборки: `profiles/alpha13.json` (динамически разрешаемый список и хэши в CI → артефакт `Long-Haul-Legacy-2.0-alpha.13.mrpack` и `Long-Haul-Legacy-2.0-alpha.13-Sources-and-Report.zip`). Подробности проверки: `TEST-REPORT.md`, машинный статус: `STATUS.json`.
 
-## Установка тестового профиля
+## Установка тестового профиля (ВАЖНО: только Minecraft 1.20.1 / Forge 47.4.10 / Java 17!)
 
-1. Соберите или скачайте `Long-Haul-Legacy-2.0-alpha.12.mrpack` (артефакт CI `long-haul-legacy-2.0-alpha.12`, либо локально: `python tools/assemble_alpha.py --profile profiles/alpha12.json --lock-only && python tools/generate_modlist.py && python tools/package_alpha.py --version 2.0-alpha.12 --skip-jar-bytes-check`, либо без `--lock-only`/`--skip-jar-bytes-check` для полной локальной проверки SHA-512). Не смешивайте с `1.1.1`.
-2. Импортируйте в Prism Launcher или совместимый лаунчер.
-3. Выберите **Java 17** и начните с **8–10 ГБ RAM** (на системе с 32 ГБ RAM; не выделяйте всю память).
+1. Скачайте `Long-Haul-Legacy-2.0-alpha.13.mrpack` (артефакт CI `long-haul-legacy-2.0-alpha.13`). **Не запускайте в профиле Forge 1.21.1 / Java 21 — сборка строго для Minecraft `1.20.1`, Forge `47.4.10` и Java `17`!**
+2. Импортируйте `.mrpack` как **новый отдельный профиль** в Prism Launcher / Modrinth App (лаунчер автоматически поставит Minecraft `1.20.1` и Forge `47.4.10`).
+3. Выберите **Java 17** и выделите **8–10 ГБ RAM** (на системе с 32 ГБ RAM).
 4. Создайте **новый обычный мир**.
 
 ## Основные команды `/lh`
@@ -40,9 +32,9 @@
 
 ## Что ещё осталось до финального релиза
 
-| Требование | Состояние `2.0-alpha.12` |
+| Требование | Состояние `2.0-alpha.13` |
 |---|---|
-| ~500 полезных модов | В процессе: 399 внешних JAR (+1 runtime = 400 JAR / 466 mod ID; расширение к ~500) |
+| ~500 полезных модов | В процессе: 401 внешний JAR (+1 runtime = 402 JAR / 468 mod ID; расширение к ~500) |
 | Клиентское, графическое и транспортное тестирование | Не пройдено: проверен только headless Linux-сервер (void + обычный Overworld) |
 | Полная интеграция всех 240 спецификаций из `design/quest-catalog.*` | Реализовано в Heracles (320 квестов, 12 групп, 300 advancement) и сервере (`/lh catalog`, все 19 `verification_type` + сюжет «Ушёл за хлебом») |
 | Физические NBT-структуры городов и объектов восстановления | Реализованы 18 `.nbt` шаблонов (16 узлов/руин `11×7×11` + 2 летающих острова `15×14×15`) + авторазмещение и ремонт архива |
@@ -55,15 +47,15 @@ node long-haul-legacy-2/tools/test_contracts.js
 python3 long-haul-legacy-2/tools/generate_structures.py
 python3 long-haul-legacy-2/tools/generate_worldgen.py
 python3 long-haul-legacy-2/tools/generate_alpha_quests.py
-python3 long-haul-legacy-2/tools/assemble_alpha.py --profile long-haul-legacy-2/profiles/alpha12.json
+python3 long-haul-legacy-2/tools/assemble_alpha.py --profile long-haul-legacy-2/profiles/alpha13.json
 python3 long-haul-legacy-2/tools/generate_modlist.py
 python3 long-haul-legacy-2/tools/prepare_server.py --mode void
 python3 long-haul-legacy-2/tools/build_runtime.py
 python3 long-haul-legacy-2/tools/inspect_alpha.py
-python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 450 --world-label "alpha12 void integration test"
+python3 long-haul-legacy-2/tools/smoke_server.py --heap 4096 --timeout 450 --world-label "alpha13 void integration test"
 python3 long-haul-legacy-2/tools/prepare_server.py --mode normal --skip-forge-install
-python3 long-haul-legacy-2/tools/smoke_server.py --heap 6144 --timeout 780 --world-label "alpha12 normal overworld test"
-python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.12
+python3 long-haul-legacy-2/tools/smoke_server.py --heap 6144 --timeout 780 --world-label "alpha13 normal overworld test"
+python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.13
 ```
 
 Срез выбора версий — **19.11.2026**. Полный цикл сборки и оба smoke-теста автоматизированы в `.github/workflows/ci.yml`.
