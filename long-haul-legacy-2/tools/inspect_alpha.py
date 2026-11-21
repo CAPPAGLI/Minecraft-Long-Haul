@@ -70,6 +70,12 @@ def main():
         f = mod['selected_file']['filename']
         inspect((R / 'assembly/mods' / f).read_bytes(), f, mod['client_only'])
     for jar in sorted((R / 'overrides/mods').glob('*.jar')):
+        with zipfile.ZipFile(jar) as z:
+            if 'pack.mcmeta' not in z.namelist():
+                raise RuntimeError(f'Missing pack.mcmeta in local mod JAR: {jar.name}')
+            pack_meta = json.loads(z.read('pack.mcmeta').decode('utf-8'))
+            if pack_meta.get('pack', {}).get('pack_format') != 15:
+                raise RuntimeError(f'Expected pack_format 15 in {jar.name}, got {pack_meta}')
         inspect(jar.read_bytes(), 'overrides/mods/' + jar.name, False)
 
     # Built-in baseline versions for range checking

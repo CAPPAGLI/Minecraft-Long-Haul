@@ -95,6 +95,13 @@ test('all Heracles quest display titles and subtitles use Component objects (not
   });
 });
 
+test('longhaul-runtime includes valid pack.mcmeta for Minecraft 1.20.1 (pack_format 15)', () => {
+  const path = require('path');
+  const meta = JSON.parse(fs.readFileSync(path.join(__dirname, '../runtime-mod/src/main/resources/pack.mcmeta'), 'utf8'));
+  assert.equal(meta.pack && meta.pack.pack_format, 15);
+  assert(typeof meta.pack.description === 'string' && meta.pack.description.length > 0);
+});
+
 test('all KubeJS startup/server/client scripts parse cleanly in ES5/Node', () => {
   const path = require('path');
   const dirs = [
