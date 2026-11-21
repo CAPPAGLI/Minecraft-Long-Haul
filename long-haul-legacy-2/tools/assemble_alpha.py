@@ -47,6 +47,12 @@ def resolve_profile(profile_path: pathlib.Path):
                 raise RuntimeError('No supported version for ' + slug)
             stable = [v for v in vs if v['version_type'] == 'release']
             cands = stable or vs
+            if slug == 'distanthorizons':
+                # 3.3.3+ crashes on server chunk load when Chunky is installed (DH #1329: ChunkyAccessor.bindOnGenerationProgressEvent).
+                # Prefer 3.3.0..3.3.2 (Oculus depth & floating-island lighting fixes without the Chunky startup hook).
+                safe_dh = [cand for cand in cands if cand['version_number'].startswith(('3.3.2', '3.3.1', '3.3.0'))]
+                if safe_dh:
+                    cands = safe_dh
             if slug not in ('create-clockwork', 'polymorph', 'ends-delight'):
                 picked = None
                 for cand in cands[:8]:
