@@ -2,7 +2,7 @@
 """Inspect actual Forge mods.toml + nested jarjar metadata across all lock-selected JARs.
 Checks missing required mod IDs, Maven version ranges (when specified), and forbidden mods.
 """
-import io, json, pathlib, re, sys, tomllib, zipfile
+import argparse, io, json, pathlib, re, sys, tomllib, zipfile
 
 R = pathlib.Path(__file__).resolve().parents[1]
 FORBIDDEN = {
@@ -38,6 +38,10 @@ def fits(v, r):
     return ok_low and ok_hi
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--include-optional-mods', action='store_true', help='Also inspect JARs in optional-mods/')
+    args = ap.parse_args()
+
     lock = json.loads((R / 'assembly/lock.json').read_text())
     bad_slugs = FORBIDDEN.intersection(m['slug'] for m in lock['mods'])
     if bad_slugs:
@@ -69,14 +73,23 @@ def main():
     for mod in lock['mods']:
         f = mod['selected_file']['filename']
         inspect((R / 'assembly/mods' / f).read_bytes(), f, mod['client_only'])
-    for jar in sorted((R / 'overrides/mods').glob('*.jar')):
-        with zipfile.ZipFile(jar) as z:
-            if 'pack.mcmeta' not in z.namelist():
-                raise RuntimeError(f'Missing pack.mcmeta in local mod JAR: {jar.name}')
-            pack_meta = json.loads(z.read('pack.mcmeta').decode('utf-8'))
-            if pack_meta.get('pack', {}).get('pack_format') != 15:
-                raise RuntimeError(f'Expected pack_format 15 in {jar.name}, got {pack_meta}')
+    local_jars = sorted((R / 'overrides/mods').glob('*.jar'))
+    runtime_jars = [j for j in local_jars if j.name.startswith('longhaul-runtime-')]
+    if not runtime_jars:
+        raise RuntimeError('Missing longhaul-runtime-*.jar in overrides/mods/')
+    for jar in local_jars:
+        if jar.name.startswith('longhaul-runtime-'):
+            with zipfile.ZipFile(jar) as z:
+                if 'pack.mcmeta' not in z.namelist():
+                    raise RuntimeError(f'Missing pack.mcmeta in local mod JAR: {jar.name}')
+                pack_meta = json.loads(z.read('pack.mcmeta').decode('utf-8'))
+                if pack_meta.get('pack', {}).get('pack_format') != 15:
+                    raise RuntimeError(f'Expected pack_format 15 in {jar.name}, got {pack_meta}')
         inspect(jar.read_bytes(), 'overrides/mods/' + jar.name, False)
+
+    optional_jars = sorted((R / 'optional-mods').glob('*.jar')) if args.include_optional_mods and (R / 'optional-mods').exists() else []
+    for jar in optional_jars:
+        inspect(jar.read_bytes(), 'optional-mods/' + jar.name, False)
 
     # Built-in baseline versions for range checking
     baseline = {'minecraft': '1.20.1', 'forge': '47.4.10'}
@@ -102,7 +115,8 @@ def main():
     out = {
         'status': 'JAR_IDS_AND_RANGES_CHECKED',
         'top_level_jars': len(lock['mods']),
-        'local_jars': len(list((R / 'overrides/mods').glob('*.jar'))),
+        'local_jars': len(local_jars),
+        'optional_jars': len(optional_jars),
         'mod_ids_including_embedded': len(registry),
         'registry': registry,
         'missing_required_ids': missing,

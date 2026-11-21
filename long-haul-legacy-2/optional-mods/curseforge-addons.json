@@ -1,0 +1,23 @@
+{
+  "minecraft": "1.20.1",
+  "loader": "forge",
+  "forge_version": "47.4.10",
+  "note": "CurseForge-only optional addons cannot be redistributed in Git due to license/API limits. Drop legally downloaded Forge 1.20.1 JARs into this folder and pass --include-optional-mods, or copy them into your launcher's mods/ directory.",
+  "addons": [
+    {
+      "name": "DOOMED | UNKNOWN CASUALTY - Difficult Health System",
+      "curseforge_project_id": 1589967,
+      "url": "https://www.curseforge.com/minecraft/mc-mods/doomed-casualty-unknown-difficult-health-system",
+      "license": "All Rights Reserved",
+      "side": "client_and_server",
+      "notes": "Author marks WIP ('EXPECT WORLD CORRUPTION AND ITEM LOSSES'). Use on a separate backed-up world; /doom enables, /doom off disables."
+    },
+    {
+      "name": "Doomed: Guns",
+      "curseforge_companion_for": 1589967,
+      "url": "https://www.curseforge.com/minecraft/mc-mods/doomed-casualty-unknown-difficult-health-system/relations/dependencies",
+      "side": "client_and_server",
+      "notes": "Listed as a required companion dependency in DOOMED 0.3.7+ builds."
+    }
+  ]
+}

@@ -40,6 +40,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--mode', choices=['void', 'normal'], default='void')
     ap.add_argument('--skip-forge-install', action='store_true')
+    ap.add_argument('--include-optional-mods', action='store_true', help='Also copy JARs from optional-mods/ into server-test/mods/')
     args = ap.parse_args()
 
     if not args.skip_forge_install:
@@ -65,6 +66,11 @@ def main():
     for local_jar in sorted((R / 'overrides/mods').glob('*.jar')):
         shutil.copy2(local_jar, mods_dir / local_jar.name)
         server_count += 1
+
+    if args.include_optional_mods and (R / 'optional-mods').exists():
+        for opt_jar in sorted((R / 'optional-mods').glob('*.jar')):
+            shutil.copy2(opt_jar, mods_dir / opt_jar.name)
+            server_count += 1
 
     for sub in ['config', 'kubejs', 'defaultconfigs']:
         dst = S / sub

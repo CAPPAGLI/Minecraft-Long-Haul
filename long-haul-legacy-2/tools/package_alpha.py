@@ -14,6 +14,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--version', default=None, help='Override pack version (defaults to lock.json version or 2.0-alpha.2)')
     ap.add_argument('--skip-jar-bytes-check', action='store_true', help='Trust hashes in lock.json when assembly/mods is absent locally')
+    ap.add_argument('--include-optional-mods', action='store_true', help='Bundle local JARs from optional-mods/ into overrides/mods/ inside .mrpack')
     args = ap.parse_args()
 
     lock = json.loads((R / 'assembly/lock.json').read_text(encoding='utf-8'))
@@ -46,14 +47,19 @@ def main():
 
     quest_files = sorted((R / 'overrides/config/heracles/quests').glob('*.json'))
     local_jars = sorted((R / 'overrides/mods').glob('*.jar'))
-    assert len(local_jars) == 1, f'Expected exactly 1 local runtime jar, got {local_jars}'
+    assert any(j.name.startswith('longhaul-runtime-') for j in local_jars), f'Missing longhaul-runtime-*.jar in {local_jars}'
+    optional_jars = []
+    if args.include_optional_mods and (R / 'optional-mods').exists():
+        existing_names = {j.name for j in local_jars}
+        optional_jars = [j for j in sorted((R / 'optional-mods').glob('*.jar')) if j.name not in existing_names]
+    total_local_jars = len(local_jars) + len(optional_jars)
 
     manifest = {
         'formatVersion': 1,
         'game': 'minecraft',
         'versionId': version,
         'name': f'Long Haul Legacy {version}',
-        'summary': f'Industrial logistics prototype ({len(files)} external JARs + runtime, {len(quest_files)} quests). New test world only.',
+        'summary': f'Industrial logistics prototype ({len(files)} external JARs + {total_local_jars} local JAR(s), {len(quest_files)} quests). New test world only.',
         'files': files,
         'dependencies': {'minecraft': '1.20.1', 'forge': '47.4.10'},
     }
@@ -66,6 +72,8 @@ def main():
             if p.is_file():
                 assert '99_integration' not in p.name and p.suffix not in {'.log', '.dat'}, p
                 z.write(p, p.relative_to(R))
+        for opt_jar in optional_jars:
+            z.write(opt_jar, f'overrides/mods/{opt_jar.name}')
         for name in ['README.md', 'TEST-REPORT.md', 'DOOMED.md', 'MODLIST.md', 'STATUS.json']:
             z.write(R / name, 'overrides/longhaul-docs/' + name)
 
@@ -73,7 +81,7 @@ def main():
         assert z.testzip() is None
         names = z.namelist()
         assert len([n for n in names if n.startswith('overrides/config/heracles/quests/') and n.endswith('.json')]) == len(quest_files)
-        assert len([n for n in names if n.endswith('.jar')]) == 1
+        assert len([n for n in names if n.endswith('.jar')]) == total_local_jars
         assert not any('server.properties' in n or 'server-test' in n or 'runtime/zulu' in n for n in names)
 
     source = R.parent / f'Long-Haul-Legacy-{version}-Sources-and-Report.zip'
@@ -95,7 +103,7 @@ def main():
         'version': version,
         'external_downloads': len(files),
         'external_download_bytes': sum(f['fileSize'] for f in files),
-        'local_mods': len(local_jars),
+        'local_mods': total_local_jars,
         'installed_quests': len(quest_files),
         'archives': {},
     }
