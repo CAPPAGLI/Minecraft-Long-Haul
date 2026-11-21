@@ -536,6 +536,9 @@ function lhStartIntegrationSetup(server) {
         lhRouteQuotaSync(server, qPid, [], true);
         ok(lhRouteQuotaStatus(server, qPid).used === 0, 'route chunk quota releases cleanly on completion');
 
+        // 18. Prospecting scan executes cleanly across vanilla + modded ore blocks
+        ok(lhProspectChunk(server, actor) === 1, 'prospecting scans vanilla and modded mono-ore chunks');
+
         ok(Math.round(Number(overworld.worldBorder.size)) === 175000, 'world border initialized to 175000 blocks');
         console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + advancement sync');
       } catch (err2) {

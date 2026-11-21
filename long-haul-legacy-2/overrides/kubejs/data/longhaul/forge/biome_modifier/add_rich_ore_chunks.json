@@ -7,7 +7,18 @@
     "longhaul:rich_copper_chunk",
     "longhaul:rich_gold_chunk",
     "longhaul:rich_redstone_chunk",
-    "longhaul:rich_diamond_chunk"
+    "longhaul:rich_diamond_chunk",
+    "longhaul:rich_zinc_chunk",
+    "longhaul:rich_bauxite_chunk",
+    "longhaul:rich_lead_chunk",
+    "longhaul:rich_silver_chunk",
+    "longhaul:rich_nickel_chunk",
+    "longhaul:rich_uranium_chunk",
+    "longhaul:rich_thorium_chunk",
+    "longhaul:rich_tin_chunk",
+    "longhaul:rich_sulfur_chunk",
+    "longhaul:rich_rock_salt_chunk",
+    "longhaul:rich_quartz_chunk"
   ],
   "step": "underground_ores"
 }

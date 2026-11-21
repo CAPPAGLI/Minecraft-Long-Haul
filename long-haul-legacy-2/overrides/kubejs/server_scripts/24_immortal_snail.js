@@ -195,7 +195,11 @@ function lhProspectChunk(server, player) {
   var level = player.level;
   var cx = Math.floor(Number(player.x) / 16) * 16;
   var cz = Math.floor(Number(player.z) / 16) * 16;
-  var counts = { coal: 0, iron: 0, copper: 0, gold: 0, redstone: 0, diamond: 0, zinc: 0 };
+  var counts = {
+    coal: 0, iron: 0, copper: 0, gold: 0, redstone: 0, diamond: 0,
+    zinc: 0, bauxite: 0, lead: 0, silver: 0, nickel: 0, uranium: 0,
+    thorium: 0, tin: 0, sulfur: 0, rock_salt: 0, quartz: 0
+  };
   for (var x = cx; x < cx + 16; x++) {
     for (var z = cz; z < cz + 16; z++) {
       for (var y = -64; y <= 144; y += 2) {
@@ -207,6 +211,16 @@ function lhProspectChunk(server, player) {
         else if (bid.indexOf('redstone_ore') !== -1) counts.redstone++;
         else if (bid.indexOf('diamond_ore') !== -1) counts.diamond++;
         else if (bid.indexOf('zinc_ore') !== -1) counts.zinc++;
+        else if (bid.indexOf('ore_aluminum') !== -1 || bid.indexOf('bauxite') !== -1) counts.bauxite++;
+        else if (bid.indexOf('lead_ore') !== -1 || bid.indexOf('ore_lead') !== -1) counts.lead++;
+        else if (bid.indexOf('silver_ore') !== -1 || bid.indexOf('ore_silver') !== -1) counts.silver++;
+        else if (bid.indexOf('nickel_ore') !== -1 || bid.indexOf('ore_nickel') !== -1) counts.nickel++;
+        else if (bid.indexOf('uranium_ore') !== -1 || bid.indexOf('ore_uranium') !== -1) counts.uranium++;
+        else if (bid.indexOf('thorium_ore') !== -1) counts.thorium++;
+        else if (bid.indexOf('tin_ore') !== -1) counts.tin++;
+        else if (bid.indexOf('sulfur_ore') !== -1) counts.sulfur++;
+        else if (bid.indexOf('rock_salt_ore') !== -1) counts.rock_salt++;
+        else if (bid.indexOf('primalmagick:quartz_ore') !== -1) counts.quartz++;
       }
     }
   }
@@ -217,8 +231,21 @@ function lhProspectChunk(server, player) {
   if (counts.gold >= 12) rich.push('ЗОЛОТАЯ ЖИЛА');
   if (counts.redstone >= 12) rich.push('РЕДСТОУН-ЖИЛА');
   if (counts.diamond >= 8) rich.push('АЛМАЗНАЯ ЖИЛА');
+  if (counts.zinc >= 16) rich.push('ЦИНКОВАЯ ЖИЛА');
+  if (counts.bauxite >= 14) rich.push('БОКСИТОВАЯ ЖИЛА');
+  if (counts.lead >= 12) rich.push('СВИНЦОВАЯ ЖИЛА');
+  if (counts.silver >= 12) rich.push('СЕРЕБРЯНАЯ ЖИЛА');
+  if (counts.nickel >= 10) rich.push('НИКЕЛЕВАЯ ЖИЛА');
+  if (counts.uranium >= 8) rich.push('УРАНОВАЯ ЖИЛА');
+  if (counts.thorium >= 8) rich.push('ТОРИЕВАЯ ЖИЛА');
+  if (counts.tin >= 14) rich.push('ОЛОВЯННАЯ ЖИЛА');
+  if (counts.sulfur >= 12) rich.push('СЕРНАЯ ЖИЛА');
+  if (counts.rock_salt >= 12) rich.push('ЖИЛА КАМЕННОЙ СОЛИ');
+  if (counts.quartz >= 12) rich.push('КВАРЦЕВАЯ ЖИЛА');
+  var nonZero = {};
+  Object.keys(counts).forEach(function (k) { if (counts[k] > 0) nonZero[k] = counts[k]; });
   lhMsg(player, 'Чанк [' + (cx >> 4) + ', ' + (cz >> 4) + '] (выборка 50% по Y): ' +
-    JSON.stringify(counts) + (rich.length ? ' -> §aРЕДКИЙ ЧАНК: ' + rich.join(', ') : ' -> обычный бедный чанк.'));
+    JSON.stringify(nonZero) + (rich.length ? ' -> §aРЕДКИЙ ЧАНК: ' + rich.join(', ') : ' -> обычный бедный чанк.'));
   return 1;
 }
 
