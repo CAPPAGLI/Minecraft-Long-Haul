@@ -117,6 +117,9 @@ def main():
                 if is_mand:
                     missing.append({'parent': mod['id'], 'dependency': d})
                 continue
+            if is_mand and not mod['client_only'] and all(x.get('client_only') for x in registry[dep_id]):
+                missing.append({'parent': mod['id'], 'dependency': d, 'reason': 'server mod requires client_only dependency'})
+                continue
             versions = [x.get('version') for x in registry[dep_id]]
             if vr and all(fits(v, vr) is False for v in versions):
                 range_mismatches.append({'parent': mod['id'], 'dependency': dep_id, 'mandatory': is_mand, 'range': vr, 'actual': versions})
