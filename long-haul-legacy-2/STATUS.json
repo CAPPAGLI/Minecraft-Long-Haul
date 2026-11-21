@@ -1,18 +1,18 @@
 {
-  "version": "2.0-alpha.16",
+  "version": "2.0-alpha.17",
   "date_cutoff": "2026-11-19",
-  "status": "HEADLESS_CI_VERIFIED_ALPHA16_NOT_FULL_REQUEST",
+  "status": "HEADLESS_CI_VERIFIED_ALPHA17_NOT_FULL_REQUEST",
   "minecraft": "1.20.1",
   "forge": "47.4.10",
   "java": 17,
-  "external_jars": 432,
-  "server_jars": 353,
-  "client_only_jars": 79,
+  "external_jars": 438,
+  "server_jars": 357,
+  "client_only_jars": 81,
   "local_jars": 1,
-  "recursive_declared_mod_ids": 501,
-  "external_download_bytes": 1163362627,
-  "ci_run_id": 44939657123,
-  "ci_verified_commit": "77754ce",
+  "recursive_declared_mod_ids": 509,
+  "external_download_bytes": 1178021903,
+  "ci_run_id": 44949453172,
+  "ci_verified_commit": "c7d90b7",
   "server_smoke_test_void": {
     "ready": true,
     "exit_code": 0,
@@ -21,7 +21,7 @@
       "server_ready"
     ],
     "heap_mb": 4096,
-    "world": "alpha16 void integration test",
+    "world": "alpha17 void integration test",
     "client_tested": false,
     "world_border_175000": true,
     "integration_pass": true,
@@ -36,13 +36,15 @@
       "server_ready"
     ],
     "heap_mb": 7168,
-    "world": "alpha16 normal overworld test",
+    "world": "alpha17 normal overworld test",
     "client_tested": false,
     "world_border_175000": true,
     "integration_pass": true,
     "integration_fail": false,
     "clean_exit": true
   },
+  "ultimate_chess_included": true,
+  "optional_mods_workflow_supported": true,
   "distant_horizons_included": true,
   "doomed_curseforge_only_documented": true,
   "runtime_pack_mcmeta_included": true,
@@ -105,5 +107,5 @@
   "new_installable_pack_created": true,
   "launcher_import_tested": false,
   "legacy_1_1_1_modified": false,
-  "limitations": "See README.md, DOOMED.md, and TEST-REPORT.md. Headless Linux Forge integration verified for 432 external JARs + longhaul-runtime (501 mod IDs, void + normal Overworld, 175000 worldborder verified): includes Distant Horizons (distanthorizons 3.3.0..3.3.2 avoiding the 3.3.3 Chunky startup crash), Create: Radars, Create: Hypertubes, Create: Mobile Packages, Friends&Foes (+ Flowery Mooblooms & Beekeeper Hut), It Takes a Pillage, Villager Names, [Let's Do] HerbalBrews, 3D Skin Layers, Not Enough Animations, Extreme Sound Muffler, and Just Enough Breeding. DOOMED remains optional/external per DOOMED.md (CurseForge-only, All Rights Reserved, WIP world-corruption warning). Graphical client and vehicle physics in motion are not yet tested."
+  "limitations": "See README.md, DOOMED.md, optional-mods/README.md, and TEST-REPORT.md. Headless Linux Forge integration verified for 438 external JARs + longhaul-runtime (509 mod IDs, void + normal Overworld, 175000 worldborder verified): adds Ultimate Chess (ultimate-chess: Chess & Checkers, replacing removed Modrinth project chess-and-checks), [Let's Do] Vinery, Nyf's Spiders, Cull Leaves (+ MidnightLib), and Eating Animations (+ GroovyModLoader), plus optional-mods/ local CurseForge bundling support (--include-optional-mods). DOOMED remains optional/external per DOOMED.md (CurseForge-only, All Rights Reserved, WIP world-corruption warning). Graphical client and vehicle physics in motion are not yet tested."
 }
