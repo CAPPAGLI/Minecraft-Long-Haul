@@ -53,12 +53,21 @@ def main():
     def inspect(data, source, side):
         with zipfile.ZipFile(io.BytesIO(data)) as z:
             names = z.namelist()
+            jar_impl_ver = None
+            if 'META-INF/MANIFEST.MF' in names:
+                for line in z.read('META-INF/MANIFEST.MF').decode(errors='replace').splitlines():
+                    if line.lower().startswith('implementation-version:'):
+                        jar_impl_ver = line.split(':', 1)[1].strip()
+                        break
             if 'META-INF/mods.toml' in names:
                 m = tomllib.loads(z.read('META-INF/mods.toml').decode(errors='replace'))
                 for mod in m.get('mods', []):
+                    ver = mod.get('version')
+                    if ver == '${file.jarVersion}' and jar_impl_ver:
+                        ver = jar_impl_ver
                     obj = {
                         'id': mod['modId'],
-                        'version': mod.get('version'),
+                        'version': ver,
                         'source': source,
                         'client_only': side,
                         'deps': m.get('dependencies', {}).get(mod['modId'], []),

@@ -25,5 +25,10 @@ ItemEvents.tooltip(function (event) {
 
   event.add('minecraft:bundle', Text.green('Этап I: походный узелок (до телег и грузовых поездов).'));
   event.add('functionalstorage:ender_drawer', Text.red('Отключено правилами Long Haul: портальные сети запрещены.'));
+  event.add('minecraft:ender_chest', Text.red('Отключено правилами Long Haul: эндер-сундуки запрещены.'));
+  event.add('supplementaries:sack', Text.red('Отключено правилами Long Haul: переносные мешки запрещены.'));
+  event.add('supplementaries:safe', Text.red('Отключено правилами Long Haul: переносные сейфы запрещены.'));
+  event.add('quark:backpack', Text.red('Отключено правилами Long Haul: рюкзаки запрещены.'));
+  event.add('#minecraft:shulker_boxes', Text.red('Отключено правилами Long Haul: шалкеровые ящики запрещены.'));
   event.add('#minecraft:saplings', Text.red('Посадка отключена: добывайте лес в экспедициях и через Лесную артель.'));
 });
