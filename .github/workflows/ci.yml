@@ -38,7 +38,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: long-haul-legacy-2/assembly/mods
-          key: modrinth-mods-${{ hashFiles('long-haul-legacy-2/profiles/alpha18.json', 'long-haul-legacy-2/assembly/lock.json') }}
+          key: modrinth-mods-${{ hashFiles('long-haul-legacy-2/profiles/alpha19.json', 'long-haul-legacy-2/assembly/lock.json') }}
           restore-keys: |
             modrinth-mods-
 
@@ -58,11 +58,11 @@ jobs:
           python3 long-haul-legacy-2/tools/generate_alpha_quests.py
           python3 -m py_compile long-haul-legacy-2/tools/*.py
 
-      - name: Resolve, download & verify pinned mods from profiles/alpha18.json
+      - name: Resolve, download & verify pinned mods from profiles/alpha19.json
         run: |
           set -o pipefail
           mkdir -p /tmp/ci-logs
-          python3 long-haul-legacy-2/tools/assemble_alpha.py --profile long-haul-legacy-2/profiles/alpha18.json | tee /tmp/ci-logs/assemble.txt
+          python3 long-haul-legacy-2/tools/assemble_alpha.py --profile long-haul-legacy-2/profiles/alpha19.json | tee /tmp/ci-logs/assemble.txt
           python3 long-haul-legacy-2/tools/generate_modlist.py
 
       - name: Prepare headless Forge 47.4.10 server (void fixture)
@@ -82,9 +82,9 @@ jobs:
           set -o pipefail
           mkdir -p /tmp/ci-logs
           python3 long-haul-legacy-2/tools/prepare_server.py --mode void --skip-forge-install
-          python3 long-haul-legacy-2/tools/smoke_server.py --heap 5120 --timeout 450 --world-label "alpha18 void integration test" | tee /tmp/ci-logs/smoke-void.txt || EC=$?
+          python3 long-haul-legacy-2/tools/smoke_server.py --heap 5120 --timeout 450 --world-label "alpha19 void integration test" | tee /tmp/ci-logs/smoke-void.txt || EC=$?
           cp long-haul-legacy-2/server-test/smoke-result.json /tmp/ci-logs/smoke-void-result.json || true
-          find long-haul-legacy-2/server-test/config long-haul-legacy-2/server-test/smoke-void/serverconfig -maxdepth 4 \( -iname '*adpother*' -o -iname '*smartmob*' -o -iname '*mvs*' -o -iname '*primal*' -o -iname '*distant*' \) > /tmp/ci-logs/new-mod-configs.txt 2>/dev/null || true
+          find long-haul-legacy-2/server-test/config long-haul-legacy-2/server-test/smoke-void/serverconfig -maxdepth 4 \( -iname '*adpother*' -o -iname '*smartmob*' -o -iname '*mvs*' -o -iname '*primal*' -o -iname '*distant*' -o -iname '*modernfix*' \) > /tmp/ci-logs/new-mod-configs.txt 2>/dev/null || true
           for f in $(cat /tmp/ci-logs/new-mod-configs.txt); do if [ -f "$f" ]; then echo "=== $f ==="; head -n 200 "$f"; fi; done > /tmp/ci-logs/new-mod-config-heads.txt 2>/dev/null || true
           exit ${EC:-0}
 
@@ -93,14 +93,14 @@ jobs:
           set -o pipefail
           mkdir -p /tmp/ci-logs
           python3 long-haul-legacy-2/tools/prepare_server.py --mode normal --skip-forge-install
-          python3 long-haul-legacy-2/tools/smoke_server.py --heap 7168 --timeout 960 --world-label "alpha18 normal overworld test" | tee /tmp/ci-logs/smoke-normal.txt || EC=$?
+          python3 long-haul-legacy-2/tools/smoke_server.py --heap 7168 --timeout 960 --world-label "alpha19 normal overworld test" | tee /tmp/ci-logs/smoke-normal.txt || EC=$?
           cp long-haul-legacy-2/server-test/smoke-result.json /tmp/ci-logs/smoke-normal-result.json || true
           exit ${EC:-0}
 
       - name: Package .mrpack and source bundle
         run: |
           set -o pipefail
-          python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.18 | tee /tmp/ci-logs/package.txt
+          python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.19 | tee /tmp/ci-logs/package.txt
 
       - name: Post diagnostic report to commit comment
         if: always()
@@ -151,10 +151,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: long-haul-legacy-2.0-alpha.18
+          name: long-haul-legacy-2.0-alpha.19
           path: |
-            Long-Haul-Legacy-2.0-alpha.18.mrpack
-            Long-Haul-Legacy-2.0-alpha.18-Sources-and-Report.zip
+            Long-Haul-Legacy-2.0-alpha.19.mrpack
+            Long-Haul-Legacy-2.0-alpha.19-Sources-and-Report.zip
             long-haul-legacy-2/assembly/lock.json
             long-haul-legacy-2/MODLIST.md
             long-haul-legacy-2/server-test/smoke-result.json

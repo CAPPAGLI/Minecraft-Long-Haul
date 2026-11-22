@@ -1,0 +1,42 @@
+# Pre-tuned Distant Horizons 3.3.x defaults for Long Haul Legacy 2.0
+# Prevents 1-2s G1GC / CPU stutters caused by background chunk worldgen and 256-chunk LOD mesh churn.
+# Players can raise LOD radius or enable distant generation in the DH menu if using Shenandoah/ZGC.
+_version = 4
+
+[client]
+showDhOptionsButtonInMinecraftUi = true
+
+[client.advanced.graphics]
+enableSsao = false
+overrideVanillaGraphicsSettings = true
+
+[client.advanced.graphics.quality]
+lodChunkRenderDistanceRadius = 96
+horizontalQuality = "MEDIUM"
+maxHorizontalResolution = "TWO_BLOCKS"
+verticalQuality = "MEDIUM"
+transparency = "FAKE"
+blocksToIgnore = "NON_COLLIDING"
+tintWithAvoidedBlocks = true
+lodShading = "AUTO"
+grassSideRendering = "FADE_TO_DIRT"
+ditherDhFade = true
+vanillaFadeMode = "SINGLE_PASS"
+dhFadeFarClipPlane = true
+lodBiomeBlending = 0
+
+[common.worldGenerator]
+enableDistantGeneration = true
+distantGeneratorMode = "PRE_EXISTING_ONLY"
+showGenerationProgress = "DISABLED"
+
+[common.lodBuilding]
+worldCompression = "VISUALLY_EQUAL"
+
+[common.multiThreading]
+numberOfThreads = 2
+threadRunTimeRatio = "0.5"
+
+[common.logging.warning]
+showLowMemoryWarningOnStart = false
+showGarbageCollectorWarning = true
