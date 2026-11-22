@@ -1,30 +1,41 @@
-# Long Haul Legacy 2.0 — Alpha 18 (`2.0-alpha.18`)
+# Long Haul Legacy 2.0 — Alpha 19 (`2.0-alpha.19`)
 
-**Расширенная серверно-проверенная альфа сборки, НЕ финальный релиз по полному ТЗ.** Импортируемый `.mrpack` предназначен для отдельного тестового профиля и нового обычного мира. Рабочая 1.1.1 не изменена. Исторические снимки прошлых альф сохранены в `history/alpha.1/` – `history/alpha.18/`.
+**Стабилизированная по клиентским фризам и серверно-проверенная альфа сборки, НЕ финальный релиз по полному ТЗ.** Импортируемый `.mrpack` предназначен для отдельного тестового профиля и нового обычного мира. Рабочая 1.1.1 не изменена. Исторические снимки прошлых альф сохранены в `history/alpha.1/` – `history/alpha.19/`.
 
-## Что нового в `2.0-alpha.18`
+## Что исправлено в `2.0-alpha.19` (против периодических 1–2 с фризов каждые 2–15 с)
 
-- **Расширение до `452` внешних JAR (`453` JAR всего с учётом `longhaul-runtime`, `524` mod ID с учётом встроенных зависимостей):**
-  - **Create и структуры:** `Create: Pattern Schematics` (`create-pattern-schematics`), `Create: Additional Lights` (`create-additional-lights`), `Create: Structures Arise` (`create-structures-arise`, Create `6.0.4+`).
-  - **Мир, строительство и кулинария:** `Villager Recruits` (`villager-recruits`, наёмная охрана караванов и баз), `Straw Statues` (`straw-statues`), `Delightful Sandwiches` (`delightful-sandwiches`).
-  - **Оптимизация и клиентский визуал (`performance` / `client_only`):** `Mobtimizations` (`mobtimizations`), `Subtle Effects` (`subtle-effects`, с автоподбором версии под Forge `47.4.10`), `[ETF] Entity Texture Features` (`entitytexturefeatures`), `Model Gap Fix` (`modelfix`), `Jade VS` (`jade-vs`, отмечен как `client_only`), `Shulker Box Tooltip` (`shulkerboxtooltip`), `Overflowing Bars` (`overflowing-bars`, + `Puzzles Lib`), `Raised` (`raised`).
-- **Тюнинг и отловленные в CI конфликты:**
-  - **Защита `MassDatapackResolver` (Valkyrien Skies 2.4.11):** исключён `every-compat` (`Every Compat`), вызывавший `OutOfMemoryError` на старте сервера из-за комбинаторного взрыва blockstates по всем модам биомов и декора; выделенный heap `smoke-void` повышен с `4096` до `5120 MB`.
-  - **Исключён `villager-workers`:** его стартовая генерация таблицы цен (`VillagerPriceTable.build`) вызывала `EmeraldsForVillagerTypeItem` с конфликтом миксинов `Forgified Fabric API` + `MoreJS`.
-  - **Усилен `tools/inspect_alpha.py`:** добавлен разбор `Implementation-Version` из `META-INF/MANIFEST.MF` при `${file.jarVersion}` и проверка обязательных `BOTH`/`SERVER`-зависимостей серверных модов на `client_only` моды (предотвращает краши вроде `jade_vs -> jade`).
-  - **Усилен `tools/assemble_alpha.py`:** версии из `audit/candidates.json` теперь также проверяются на совместимость с Forge `47.4.10` (что автоматически переключило `subtle-effects` с версии под `47.4.14+` на совместимую с `47.4.10`).
-  - **Подсказки в JEI/EMI (`client_scripts/01_longhaul_tooltips.js`):** добавлены явные красные предупреждения об отключении на `minecraft:ender_chest`, `supplementaries:sack`, `supplementaries:safe`, `quark:backpack` и `#minecraft:shulker_boxes` (синхронизировано с серверным запретом в `20_basics.js`).
-- *(Унаследовано из `2.0-alpha.17` и более ранних)* `Ultimate Chess` (`ultimate-chess` — шахматы и шашки), папка `optional-mods/` и флаг `--include-optional-mods` для локальных CurseForge `.jar`, `Distant Horizons` (`3.3.0..3.3.2`), `Create 6.0.8+`, `pack.mcmeta` (`pack_format: 15`), `321` квест Heracles, `Eccentric Tome`, `17` монорудных чанков, `Smart Mobs`, `Nyf's Spiders`, `[Let's Do] Vinery` и `HerbalBrews`, Voidout + `Corpse`, летающие острова + сезонный токсичный газ, `AdPother`, `Primal Magick`, `ParCool!`, Бессмертная Улитка и 240 заказов каталога.
+1. **Предустановленный конфиг `overrides/config/DistantHorizons.toml`:**
+   - По умолчанию Distant Horizons генерирует полноценные чанки (`INTERNAL_SERVER`/`FEATURES`) на 8 потоках и держит радиус `256` чанков, что на 440+ модах вызывает постоянную нагрузку на CPU и сотни МБ/с временных аллокаций (→ паузы G1GC по 1–2 с).
+   - Теперь по умолчанию выставлены: `distantGeneratorMode = "PRE_EXISTING_ONLY"` (LOD строятся без фоновой генерации новых чанков во время игры), `lodChunkRenderDistanceRadius = 96`, `maxHorizontalResolution = "TWO_BLOCKS"`, `transparency = "FAKE"`, `vanillaFadeMode = "SINGLE_PASS"`, `enableSsao = false`, `lodBiomeBlending = 0`, `numberOfThreads = 2`, `threadRunTimeRatio = "0.5"`.
+2. **Безопасная настройка `overrides/config/modernfix-mixins.properties`:**
+   - Включены безопасные оптимизации памяти и ресурсов (`deduplicate_location=true`, `deduplicate_climate_parameters=true`, `compact_bit_storage=true`, `cache_strongholds=true`, `dynamic_sounds=true`, `packet_leak=true`).
+   - Осознанно оставлены отключёнными `dynamic_resources=false` и `faster_item_rendering=false` (для совместимости с `Athena`/`Chipped` и рендером предметов `Clockwork`/`Valkyrien Skies`).
+3. **Снижена частота пересканирования текстур ресурспаков в `overrides/config/entity_texture_features.json`:**
+   - `textureUpdateFrequency_V2` переведён с `"Fast"` на `"Slow"` (`3–5 с`), что снижает нагрузку на главный рендер-поток при активных ресурспаках.
+4. **Удалены дублирующие/конфликтные моды из `profiles/alpha19.json`:**
+   - Убран `dynamic-lights` (дублировал `ryoamiclights` и делал лишние серверные сканы).
+   - Убран `fps-reducer` (дублировал `dynamic-fps`).
+   - Убран `saturn` (дублировал `ModernFix` + `FerriteCore` и перезаписывал миксины `ModernFix`).
+   - Убран `does-it-tick` (вызывал блокировку выхода с сидений кораблей Valkyrien Skies / Eureka / Clockwork).
+   - Убраны дубли-клоны `better-f3` (оставлен `betterf3`) и `trash-slot` (оставлен `trashslot`), а также повторы слагов в категориях.
 
-Профиль сборки: `profiles/alpha18.json` (динамически разрешаемый список и хэши в CI → артефакт `Long-Haul-Legacy-2.0-alpha.18.mrpack` и `Long-Haul-Legacy-2.0-alpha.18-Sources-and-Report.zip`). Подробности проверки: `TEST-REPORT.md`, машинный статус: `STATUS.json`.
+Профиль сборки: `profiles/alpha19.json` (`444` внешних JAR + `longhaul-runtime` = `445` JAR всего, `477` mod ID, `321` квест Heracles).
 
-## Установка тестового профиля (ВАЖНО: чистый профиль Minecraft 1.20.1 / Forge 47.4.10 / Java 17!)
+## Установка и JVM-флаги (ВАЖНО против GC-фризов с ресурспаками!)
 
-1. Скачайте `Long-Haul-Legacy-2.0-alpha.18.mrpack` (артефакт CI `long-haul-legacy-2.0-alpha.18`). **Не запускайте в профиле Forge 1.21.1, Java 21 или Java 25 — сборка строго для Minecraft `1.20.1`, Forge `47.4.10` и Java `17`!**
-2. Импортируйте `.mrpack` как **новый чистый отдельный профиль** в Prism Launcher / Modrinth App (или очистите старую папку `mods/` перед обновлением, чтобы не оставался удалённый `AkashicTome-1.7-27.jar` и старые версии модов).
-3. Выберите **Java 17** и выделите **8–10 ГБ RAM** (`-Xms4096M -Xmx8192M` или `10240M` на системе с 32 ГБ RAM; не ставьте `-Xmx24G`).
-4. Создайте **новый обычный мир**.
-5. *(Опционально, на свой риск)* Если нужен `DOOMED`, установите его вручную с CurseForge в папку `mods/` отдельного профиля (или через `optional-mods/` и `--include-optional-mods`, см. `DOOMED.md` и `optional-mods/README.md`).
+1. Скачайте `Long-Haul-Legacy-2.0-alpha.19.mrpack` (артефакт CI `long-haul-legacy-2.0-alpha.19`). **Сборка строго для Minecraft `1.20.1`, Forge `47.4.10` и Java `17`!**
+2. Импортируйте `.mrpack` как **новый чистый отдельный профиль** в Prism Launcher / Modrinth App.
+3. Выберите **Java 17 (Eclipse Temurin или Azul Zulu)** и выделите **8–10 ГБ RAM** (или **10–12 ГБ** с тяжёлыми ресурспаками 64x+). **Не используйте 14+ ГБ с дефолтным G1GC** — при росте кучи без конкурентного GC паузы Stop-The-World только удлиняются.
+4. **Обязательно замените аргументы JVM на Shenandoah GC (убирает паузы G1GC по 1–2 с при Distant Horizons и ресурспаках):**
+   ```text
+   -Xms6G -Xmx10G -XX:+UnlockExperimentalVMOptions -XX:+UseShenandoahGC -XX:ShenandoahGCMode=iu -XX:+AlwaysPreTouch -XX:+DisableExplicitGC
+   ```
+   *(Если ваш JDK 17 — Oracle HotSpot без Shenandoah, используйте низкопаузный G1GC:)*
+   ```text
+   -Xms6G -Xmx10G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=50 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=32M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1
+   ```
+5. Если после этого с конкретным ресурспаком всё равно остаётся единичный пик, снимите 30-секундный профиль встроенным `spark`: `/sparkc profiler start --only-ticks-over 150 --timeout 30`.
+6. *(Опционально, на свой риск)* `DOOMED` устанавливается вручную с CurseForge в `mods/` отдельного профиля (или через `optional-mods/` и `--include-optional-mods`, см. `DOOMED.md` и `optional-mods/README.md`).
 
 ## Основные команды `/lh`
 
@@ -38,16 +49,6 @@
 - `/lh photo report|status`, `/lh cc challenge|verify|status` — полевые фотоотчёты Exposure и телеметрия CC: Tweaked.
 - `/lh camp deploy|pack|list`, `/lh route begin|gate|finish|start|abort|quota|list`, `/lh cargo issue|deliver` — лагеря, маршруты без телепортации с квотой чанклоадинга (`<= 2`) и серверные грузовые накладные.
 
-## Что ещё осталось до финального релиза
-
-| Требование | Состояние `2.0-alpha.18` |
-|---|---|
-| ~500 полезных модов | В процессе: 452 внешних JAR (+1 runtime = 453 JAR / 524 mod ID включая встроенные) |
-| Клиентское, графическое и транспортное тестирование | Не проведено: проверен только headless Linux-сервер (void + обычный Overworld) |
-| Полная интеграция всех 240 спецификаций из `design/quest-catalog.*` | Реализовано в Heracles (321 квест, 12 групп, 300 advancement) и сервере (`/lh catalog`, все 19 `verification_type` + сюжет «Ушёл за хлебом») |
-| Физические NBT-структуры городов и объектов восстановления | Реализованы 18 `.nbt` шаблонов (16 узлов/руин `11×7×11` + 2 летающих острова `15×14×15`) + авторазмещение и ремонт архива |
-| Проверка физики поездов/кораблей VS в клиенте | Не проведена в графическом клиенте |
-
 ## Воспроизведение и CI
 
 ```bash
@@ -55,13 +56,13 @@ node long-haul-legacy-2/tools/test_contracts.js
 python3 long-haul-legacy-2/tools/generate_structures.py
 python3 long-haul-legacy-2/tools/generate_worldgen.py
 python3 long-haul-legacy-2/tools/generate_alpha_quests.py
-python3 long-haul-legacy-2/tools/assemble_alpha.py --profile long-haul-legacy-2/profiles/alpha18.json
+python3 long-haul-legacy-2/tools/assemble_alpha.py --profile long-haul-legacy-2/profiles/alpha19.json
 python3 long-haul-legacy-2/tools/generate_modlist.py
 python3 long-haul-legacy-2/tools/prepare_server.py --mode void
 python3 long-haul-legacy-2/tools/build_runtime.py
 python3 long-haul-legacy-2/tools/inspect_alpha.py
-python3 long-haul-legacy-2/tools/smoke_server.py --heap 5120 --timeout 450 --world-label "alpha18 void integration test"
+python3 long-haul-legacy-2/tools/smoke_server.py --heap 5120 --timeout 450 --world-label "alpha19 void integration test"
 python3 long-haul-legacy-2/tools/prepare_server.py --mode normal --skip-forge-install
-python3 long-haul-legacy-2/tools/smoke_server.py --heap 7168 --timeout 960 --world-label "alpha18 normal overworld test"
-python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.18
+python3 long-haul-legacy-2/tools/smoke_server.py --heap 7168 --timeout 960 --world-label "alpha19 normal overworld test"
+python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.19
 ```
