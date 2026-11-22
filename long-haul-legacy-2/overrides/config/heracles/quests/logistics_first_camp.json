@@ -1,5 +1,8 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "tutorial_cookpot",
+    "contract_provisions"
+  ],
   "tasks": {
     "verified": {
       "type": "heracles:advancement",
@@ -18,7 +21,7 @@
       "text": "Long Haul Legacy 2.0"
     },
     "description": [
-      "Отойдите минимум на 750 м от (0,0), поставьте костёр и спальник Comforts (<= 6 м) и выполните /lh camp deploy."
+      "Отойдите минимум на 750 м от (0,0) (откроется при расширении границы <= 2 закрытых глав), поставьте костёр и спальник Comforts (<= 6 м) и выполните /lh camp deploy."
     ],
     "groups": {
       "05 · Маршруты и лагеря": {

@@ -1,0 +1,46 @@
+{
+  "dependencies": [
+    "doomed_03_blood_and_shock"
+  ],
+  "tasks": {
+    "check": {
+      "type": "heracles:check",
+      "title": "Опциональная отметка DOOMED"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "Огнестрельная защита (Doomed: Guns / TaCZ)"
+    },
+    "subtitle": {
+      "text": "Опциональный профиль CurseForge"
+    },
+    "description": [
+      "Соберите лёгкое огнестрельное вооружение из Doomed: Guns или TaCZ для дистанционного боя без ближнего контакта и лишних переломов."
+    ],
+    "groups": {
+      "13 · DOOMED: Хардкор-выживание (Опционально)": {
+        "position": [
+          -96,
+          42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:crossbow",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "contract_provisions"
+  ],
   "tasks": {
     "receipt": {
       "type": "heracles:advancement",

@@ -508,16 +508,28 @@ function lhStartIntegrationSetup(server) {
         delete sDbClean.players[String(snailActor.uuid)];
         lhSnailSave(server);
 
-        // 16. Death Stranding Voidout queue + live createExplosion + seasonal rising toxic gas
-        var prevVoidoutCount = lhVoidoutRead(server).totalVoidouts || 0;
+        // 16. Death Stranding Voidout queue (doubling power per death) + live createExplosion + seasonal rising toxic gas
+        var vDb = lhVoidoutRead(server);
+        var prevVoidoutCount = vDb.totalVoidouts || 0;
+        var prevDeathCount = vDb.deathCount || 0;
+        var prevLastPower = vDb.lastPower || 0;
         var vTotal = lhQueueVoidout(server, 'minecraft:overworld', 2000, 80, 2000, 'TestPlayer');
         ok(vTotal === prevVoidoutCount + 1, 'voidout queued on death');
+        var pwr1 = vDb.lastPower;
+        var vTotal2 = lhQueueVoidout(server, 'minecraft:overworld', 2000, 80, 2000, 'TestPlayer');
+        ok(vTotal2 === prevVoidoutCount + 2 && vDb.lastPower === pwr1 * 2, 'voidout doubles power after death (' + pwr1 + ' -> ' + vDb.lastPower + ')');
         ok(lhProcessVoidoutQueue(server, true) === 0, 'voidout waits 3 ticks before detonating');
         ok(lhProcessVoidoutQueue(server, true) === 0, 'voidout waits 2nd tick');
-        ok(lhProcessVoidoutQueue(server, true) === 1, 'voidout triggers on 3rd tick');
+        ok(lhProcessVoidoutQueue(server, true) === 2, 'voidout triggers on 3rd tick');
+        vDb.totalVoidouts = prevVoidoutCount;
+        vDb.deathCount = prevDeathCount;
+        vDb.lastPower = prevLastPower;
+        lhVoidoutSave(server);
         overworld.createExplosion(2000, 80, 2000).strength(8.0).explosionMode('none').explode();
         var gasDb = lhGasRead(server);
         var prevForced = gasDb.forcedPhase;
+        gasDb.forcedPhase = -1;
+        ok(lhGasComputeStatus(server).ceilingY <= -60, 'toxic gas stays clear while locked in progression');
         gasDb.forcedPhase = 2;
         var gasPeak = lhGasComputeStatus(server);
         ok(gasPeak.phase === 2 && gasPeak.ceilingY === 114, 'peak toxic gas season reaches Y=114');
@@ -542,8 +554,31 @@ function lhStartIntegrationSetup(server) {
         // 19. Eccentric Tome item registered for unified mod guidebooks
         ok(!Item.of('eccentrictome:tome').isEmpty(), 'eccentrictome:tome registered');
 
-        ok(Math.round(Number(overworld.worldBorder.size)) === 175000, 'world border initialized to 175000 blocks');
-        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + advancement sync');
+        // 20. Chapter-based territory border scaling (175000^(1/x), x = 2 - 1/locked) + Casino Wheel hard-feature unlocking + Chapter 00 story
+        ok(Math.round(Number(overworld.worldBorder.size)) === 724, 'initial world border starts at 724 blocks when 6 gates locked');
+        var pDb = lhProgRead(server);
+        var savedProg = JSON.stringify(pDb);
+        ok(lhUnlockChapter(server, 'ch00', true, true) === true, 'Chapter 00 unlocks and queues Casino Wheel spin');
+        ok(lhTerritoryCounts(server).size === 818, '1 unlocked gate expands border to 818 blocks');
+        lhUnlockChapter(server, 'ch01', true, true);
+        lhUnlockChapter(server, 'ch02', true, true);
+        lhUnlockChapter(server, 'ch03', true, true);
+        ok(lhTerritoryCounts(server).size === 3129, '4 unlocked gates (locked=2) expands border to 3129 blocks');
+        lhUnlockChapter(server, 'ch05', true, true);
+        ok(lhTerritoryCounts(server).size === 175000 && Math.round(Number(overworld.worldBorder.size)) === 175000, '5 unlocked gates (locked=1) expands border to 175000 blocks');
+        var spun = lhCasinoResolveImmediate(server, true);
+        ok(spun.length === 5 && Object.keys(pDb.hardFeatures).length === 5, 'Casino Wheel resolved 5 distinct randomized hard features (' + spun.join(',') + ')');
+        ok(server.getAdvancement('longhaul:story/01_left_for_bread') !== null && server.getAdvancement('longhaul:story/06_forgot_the_milk') !== null, 'Chapter 00 story advancements exist');
+        ok(server.getAdvancement('longhaul:nuclear/verified') !== null && server.getAdvancement('longhaul:doomed/checked') !== null, 'Nuclear & DOOMED advancements exist');
+        LHProgState = JSON.parse(savedProg);
+        lhProgSave(server);
+        lhApplyTerritoryBorder(server, false);
+
+        // 21. Draconic Evolution & Nuclear mods loaded cleanly
+        ok(!Item.of('draconicevolution:draconium_ingot').isEmpty(), 'draconicevolution:draconium_ingot registered');
+        ok(!Item.of('electrodynamics:ingoturanium').isEmpty() || !Item.of('nuclearcraft:uranium_ingot').isEmpty(), 'Nuclear uranium ingot registered');
+
+        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_doubling + nuclear + draconic');
       } catch (err2) {
         console.error('LH_INTEGRATION_FAIL: live adapter ' + err2);
       }

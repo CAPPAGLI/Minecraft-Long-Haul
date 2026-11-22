@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "photo_machine"
+  ],
   "tasks": {
     "catalog_verified": {
       "type": "heracles:advancement",

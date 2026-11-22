@@ -1,6 +1,7 @@
 {
   "dependencies": [
-    "site_badlands"
+    "site_badlands",
+    "tutorial_computer"
   ],
   "tasks": {
     "telemetry": {

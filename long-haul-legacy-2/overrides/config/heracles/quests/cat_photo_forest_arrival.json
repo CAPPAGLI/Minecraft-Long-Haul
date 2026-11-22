@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "photo_forest"
+  ],
   "tasks": {
     "catalog_verified": {
       "type": "heracles:advancement",

@@ -1,0 +1,47 @@
+{
+  "dependencies": [
+    "nuclear_02_electrodynamics"
+  ],
+  "tasks": {
+    "read": {
+      "type": "heracles:check",
+      "title": "Этап освоен (отметка инженера)"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "Ядерные реакторы и турбины"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0 · Поздняя энергетика"
+    },
+    "description": [
+      "Спроектируйте многоблочный реактор деления (NuclearCraft Neoteric, Nuclear Science или Extreme Reactors) с контролем охлаждения и паровой турбиной.",
+      "Для автоматического мониторинга используйте порт CC: Tweaked."
+    ],
+    "groups": {
+      "12 · Ядерная энергетика и Драконик": {
+        "position": [
+          96,
+          -42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:steam_engine",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "dependencies": [
+    "nuclear_01_geiger"
+  ],
+  "tasks": {
+    "read": {
+      "type": "heracles:check",
+      "title": "Этап освоен (отметка инженера)"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "Электродинамика и обогащение топлива"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0 · Поздняя энергетика"
+    },
+    "description": [
+      "Постройте линии переработки из Electrodynamics и NuclearCraft Neoteric для получения урана/тория и конструкционных сплавов.",
+      "Не забудьте отводить промышленный дым и защищаться от радиационного фона."
+    ],
+    "groups": {
+      "12 · Ядерная энергетика и Драконик": {
+        "position": [
+          0,
+          -42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:blast_furnace",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

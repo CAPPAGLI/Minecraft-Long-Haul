@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "cat_region_badlands_11"
+  ],
   "tasks": {
     "catalog_verified": {
       "type": "heracles:advancement",

@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "prod_machine"
+  ],
   "tasks": {
     "archive": {
       "type": "heracles:advancement",

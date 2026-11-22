@@ -1,0 +1,47 @@
+{
+  "dependencies": [
+    "tutorial_precision"
+  ],
+  "tasks": {
+    "read": {
+      "type": "heracles:check",
+      "title": "Этап освоен (отметка инженера)"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "Радиационная разведка и дозиметрия (HBM / Nuclear)"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0 · Поздняя энергетика"
+    },
+    "description": [
+      "Собраны ядерные индустриальные моды: HBM’s Nuclear Tech (1.20.1 Port), NuclearCraft Neoteric, Electrodynamics, Nuclear Science, Extreme Reactors и Ballistix.",
+      "Начните с изучения урановых/ториевых жил (/lh prospect), защиты и счётчика Гейгера в JEI."
+    ],
+    "groups": {
+      "12 · Ядерная энергетика и Драконик": {
+        "position": [
+          -96,
+          -42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:compass",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

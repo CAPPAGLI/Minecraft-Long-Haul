@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "cat_region_farm_09"
+  ],
   "tasks": {
     "catalog_verified": {
       "type": "heracles:advancement",

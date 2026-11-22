@@ -1,0 +1,47 @@
+{
+  "dependencies": [
+    "doomed_02_first_aid"
+  ],
+  "tasks": {
+    "check": {
+      "type": "heracles:check",
+      "title": "Опциональная отметка DOOMED"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "Контроль травм, кровотечений и шока"
+    },
+    "subtitle": {
+      "text": "Опциональный профиль CurseForge"
+    },
+    "description": [
+      "Активируйте режим через /doom и проведите первый бой/разведку, отслеживая состояние конечностей и крови.",
+      "На движущихся кораблях Valkyrien Skies сначала протестируйте получение урона на безопасной высоте."
+    ],
+    "groups": {
+      "13 · DOOMED: Хардкор-выживание (Опционально)": {
+        "position": [
+          96,
+          -42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:potion",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

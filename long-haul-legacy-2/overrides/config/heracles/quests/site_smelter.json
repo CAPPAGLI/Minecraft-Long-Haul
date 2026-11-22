@@ -1,5 +1,8 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "prod_mine",
+    "prod_badlands"
+  ],
   "tasks": {
     "commission": {
       "type": "heracles:advancement",

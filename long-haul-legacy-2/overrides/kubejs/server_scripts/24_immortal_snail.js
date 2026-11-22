@@ -44,6 +44,9 @@ function lhSnailGetRecord(server, player) {
 }
 
 function lhSnailWake(server, player, forceNow) {
+  if (!forceNow && typeof lhHardIsActive === 'function' && !lhHardIsActive(server, 'immortal_snail')) {
+    return 0;
+  }
   var rec = lhSnailGetRecord(server, player);
   if (rec.awake) return 0;
   if (!forceNow) {
@@ -114,10 +117,13 @@ function lhSnailSyncEntity(level, rec, dist3) {
 }
 
 function lhSnailStepPlayer(server, player, dtTicks, skipEntitySync) {
+  if (!skipEntitySync && typeof lhHardIsActive === 'function' && !lhHardIsActive(server, 'immortal_snail')) {
+    return 0;
+  }
   var rec = lhSnailGetRecord(server, player);
   rec.activeTicks += dtTicks;
   if (!rec.awake) {
-    lhSnailWake(server, player, false);
+    lhSnailWake(server, player, !!skipEntitySync ? false : false);
     return 0;
   }
   if (rec.cooldownTicks > 0) {
@@ -278,6 +284,10 @@ ServerEvents.commandRegistry(function (event) {
   var snail = C.literal('snail');
   snail.then(C.literal('status').executes(function (ctx) {
     var server = ctx.source.server, p = ctx.source.playerOrException;
+    if (typeof lhHardIsActive === 'function' && !lhHardIsActive(server, 'immortal_snail')) {
+      lhMsg(p, 'Бессмертная Улитка ещё заперта (откроется через Колесо Угроз при прохождении глав).');
+      return 1;
+    }
     var rec = lhSnailGetRecord(server, p);
     if (!rec.awake) {
       var secLeft = Math.max(0, Math.round((18000 - rec.activeTicks) / 20));

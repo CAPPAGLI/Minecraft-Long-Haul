@@ -1,6 +1,7 @@
 {
   "dependencies": [
-    "site_machine"
+    "site_machine",
+    "tutorial_computer"
   ],
   "tasks": {
     "telemetry": {

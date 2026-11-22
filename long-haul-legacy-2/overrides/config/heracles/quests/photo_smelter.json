@@ -1,5 +1,8 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "site_smelter",
+    "tutorial_camera"
+  ],
   "tasks": {
     "photo": {
       "type": "heracles:advancement",

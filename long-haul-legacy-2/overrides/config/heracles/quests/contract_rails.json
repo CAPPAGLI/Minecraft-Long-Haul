@@ -1,5 +1,8 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "contract_plates",
+    "tutorial_track"
+  ],
   "tasks": {
     "receipt": {
       "type": "heracles:advancement",

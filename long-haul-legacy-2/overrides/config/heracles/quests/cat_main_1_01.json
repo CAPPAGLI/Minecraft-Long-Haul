@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "contract_plates"
+  ],
   "tasks": {
     "catalog_verified": {
       "type": "heracles:advancement",

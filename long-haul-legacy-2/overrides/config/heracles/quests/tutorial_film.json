@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "tutorial_camera"
+  ],
   "tasks": {
     "item": {
       "type": "heracles:item",

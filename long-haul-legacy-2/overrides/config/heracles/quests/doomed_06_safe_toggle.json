@@ -1,0 +1,50 @@
+{
+  "dependencies": [
+    "doomed_05_field_expedition"
+  ],
+  "tasks": {
+    "doomed_ok": {
+      "type": "heracles:advancement",
+      "title": "Проверка (/lh doomed verify)",
+      "advancements": [
+        "longhaul:doomed/checked"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "Протокол отката и серверная отметка (/lh doomed verify)"
+    },
+    "subtitle": {
+      "text": "Опциональный профиль CurseForge"
+    },
+    "description": [
+      "При необходимости выключить режим используйте /doom off.",
+      "Выполните /lh doomed verify, чтобы зафиксировать опциональную главу DOOMED (работает безопасно даже без установленного JAR)."
+    ],
+    "groups": {
+      "13 · DOOMED: Хардкор-выживание (Опционально)": {
+        "position": [
+          96,
+          42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:shield",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

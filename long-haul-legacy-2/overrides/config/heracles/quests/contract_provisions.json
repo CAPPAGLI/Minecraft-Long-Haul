@@ -1,5 +1,8 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "alpha_terminal",
+    "tutorial_cookpot"
+  ],
   "tasks": {
     "receipt": {
       "type": "heracles:advancement",

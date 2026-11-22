@@ -30,5 +30,8 @@ ItemEvents.tooltip(function (event) {
   event.add('supplementaries:safe', Text.red('Отключено правилами Long Haul: переносные сейфы запрещены.'));
   event.add('quark:backpack', Text.red('Отключено правилами Long Haul: рюкзаки запрещены.'));
   event.add('#minecraft:shulker_boxes', Text.red('Отключено правилами Long Haul: шалкеровые ящики запрещены.'));
-  event.add('#minecraft:saplings', Text.red('Посадка отключена: добывайте лес в экспедициях и через Лесную артель.'));
+  event.add('draconicevolution:dislocator', Text.red('Отключено правилами Long Haul: телепортация запрещена.'));
+  event.add('draconicevolution:advanced_dislocator', Text.red('Отключено правилами Long Haul: телепортация запрещена.'));
+  event.add('draconicevolution:dislocator_receptacle', Text.red('Отключено правилами Long Haul: телепортация запрещена.'));
+  event.add('#minecraft:saplings', Text.red('При активной угрозе «Дефицит леса» посадка саженцев отключается.'));
 });

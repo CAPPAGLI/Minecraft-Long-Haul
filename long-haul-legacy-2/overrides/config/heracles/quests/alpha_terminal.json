@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "alpha_welcome"
+  ],
   "tasks": {
     "read": {
       "type": "heracles:check",
@@ -23,7 +25,7 @@
       "01 · Начало и правила": {
         "position": [
           0,
-          -36
+          -72
         ]
       }
     },

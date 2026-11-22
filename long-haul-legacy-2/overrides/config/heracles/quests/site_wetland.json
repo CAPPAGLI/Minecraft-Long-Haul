@@ -1,5 +1,8 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "prod_port",
+    "prod_badlands"
+  ],
   "tasks": {
     "commission": {
       "type": "heracles:advancement",

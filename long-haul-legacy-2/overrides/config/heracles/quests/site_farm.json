@@ -1,5 +1,8 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "contract_provisions",
+    "logistics_three_camps"
+  ],
   "tasks": {
     "commission": {
       "type": "heracles:advancement",

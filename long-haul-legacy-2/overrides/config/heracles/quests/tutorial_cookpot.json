@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "tutorial_waterwheel"
+  ],
   "tasks": {
     "item": {
       "type": "heracles:item",

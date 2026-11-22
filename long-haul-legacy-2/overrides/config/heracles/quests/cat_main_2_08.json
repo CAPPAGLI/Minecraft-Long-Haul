@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "cat_main_2_07"
+  ],
   "tasks": {
     "catalog_verified": {
       "type": "heracles:advancement",

@@ -47,6 +47,21 @@ function lhStageRecompute(server, player) {
   var archive = sitesDb.sites && sitesDb.sites.continental_archive;
   var highTierReady = (machine && machine.commissioned) || (hub && hub.commissioned) || (archive && archive.commissioned);
 
+  var hasTerminal = !!(prof && prof.terminal);
+  var hasBread = false, hasMilk = false, hasPress = false, hasCompass = false;
+  if (player && player.inventory) {
+    var inv = player.inventory;
+    for (var si = 0; si < inv.slots; si++) {
+      var st = inv.getStackInSlot(si);
+      if (!st || st.empty) continue;
+      var sid = String(st.id);
+      if (sid === 'minecraft:bread') hasBread = true;
+      else if (sid === 'minecraft:milk_bucket') hasMilk = true;
+      else if (sid === 'create:mechanical_press') hasPress = true;
+      else if (sid === 'minecraft:compass') hasCompass = true;
+    }
+  }
+
   var unlocked = ['longhaul_stage_1'];
   if (commissioned >= 1 || restored >= 1) unlocked.push('longhaul_stage_2');
   if (commissioned >= 2 && (ccCount >= 1 || timedCount >= 1 || restored >= 2)) unlocked.push('longhaul_stage_3');
@@ -55,11 +70,22 @@ function lhStageRecompute(server, player) {
 
   if (player && typeof lhUnlock === 'function') {
     lhUnlock(player, 'longhaul:story/01_left_for_bread');
-    if (unlocked.indexOf('longhaul_stage_2') !== -1 || receipts.plates) lhUnlock(player, 'longhaul:story/02_bakery_burned');
-    if (commissioned >= 2) lhUnlock(player, 'longhaul:story/03_dinner_telegram');
-    if (unlocked.indexOf('longhaul_stage_3') !== -1) lhUnlock(player, 'longhaul:story/04_snail_at_door');
-    if (unlocked.indexOf('longhaul_stage_4') !== -1) lhUnlock(player, 'longhaul:story/05_continental_bakery');
-    if (unlocked.indexOf('longhaul_finale') !== -1) lhUnlock(player, 'longhaul:story/06_forgot_the_milk');
+    var s2Done = hasBread || unlocked.indexOf('longhaul_stage_2') !== -1 || !!receipts.plates;
+    if (s2Done) lhUnlock(player, 'longhaul:story/02_bakery_burned');
+    var s3Done = hasTerminal || commissioned >= 1;
+    if (s3Done) lhUnlock(player, 'longhaul:story/03_dinner_telegram');
+    var s4Done = hasMilk || unlocked.indexOf('longhaul_stage_3') !== -1;
+    if (s4Done) lhUnlock(player, 'longhaul:story/04_snail_at_door');
+    var s5Done = !!receipts.plates || hasPress || unlocked.indexOf('longhaul_stage_4') !== -1;
+    if (s5Done) lhUnlock(player, 'longhaul:story/05_continental_bakery');
+    if ((hasCompass || unlocked.indexOf('longhaul_finale') !== -1) &&
+        typeof player.isAdvancementDone === 'function' &&
+        player.isAdvancementDone('longhaul:story/02_bakery_burned') &&
+        player.isAdvancementDone('longhaul:story/03_dinner_telegram') &&
+        player.isAdvancementDone('longhaul:story/04_snail_at_door') &&
+        player.isAdvancementDone('longhaul:story/05_continental_bakery')) {
+      lhUnlock(player, 'longhaul:story/06_forgot_the_milk');
+    }
   }
 
   var prev = stDb.players[pid] || [];
@@ -98,6 +124,7 @@ ServerEvents.commandRegistry(function (event) {
   root.then(C.literal('stage').executes(function (ctx) {
     var p = ctx.source.playerOrException;
     var res = lhStageRecompute(ctx.source.server, p);
+    if (typeof lhProgressionRecompute === 'function') lhProgressionRecompute(ctx.source.server, p, false);
     lhMsg(p, 'Открытые этапы (' + res.unlocked.length + '/5): ' + res.unlocked.join(', '));
     lhMsg(p, 'Сводка: узлы=' + res.commissioned + ', восстановлено=' + res.restored + ', CC=' + res.ccCount + ', ритм-контракты=' + res.timedCount);
     return 1;

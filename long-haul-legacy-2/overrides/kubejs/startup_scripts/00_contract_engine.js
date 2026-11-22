@@ -456,3 +456,57 @@ global.LHEconomyGraph = (function () {
 
   return { BASE_ITEMS: BASE_ITEMS, checkReachability: checkReachability };
 })();
+
+global.LHTerritoryMath = (function () {
+  var TOTAL_GATES = 6;
+  var MAX_BORDER = 175000;
+
+  function computeBorder(totalGates, unlockedCount) {
+    var total = totalGates > 0 ? totalGates : TOTAL_GATES;
+    var unlocked = unlockedCount > 0 ? unlockedCount : 0;
+    var locked = total - unlocked;
+    if (locked < 0) locked = 0;
+    if (locked <= 1) {
+      return { total: total, unlocked: unlocked, locked: locked, x: 1.0, size: MAX_BORDER };
+    }
+    var x = 2.0 - (1.0 / locked);
+    var size = Math.round(Math.pow(MAX_BORDER, 1.0 / x));
+    return { total: total, unlocked: unlocked, locked: locked, x: x, size: size };
+  }
+
+  return { TOTAL_GATES: TOTAL_GATES, MAX_BORDER: MAX_BORDER, computeBorder: computeBorder };
+})();
+
+global.LHVoidoutMath = (function () {
+  var BASE_STRENGTH = 12.0;
+  var MAX_PRIMARY_STRENGTH = 96.0;
+
+  function computePower(deathCount) {
+    if (!(deathCount >= 1)) {
+      return { deathCount: 0, raw: 0, primary: 0, shockwaves: 0 };
+    }
+    var raw = BASE_STRENGTH * Math.pow(2, deathCount - 1);
+    var primary = raw > MAX_PRIMARY_STRENGTH ? MAX_PRIMARY_STRENGTH : raw;
+    var shockwaves = raw > MAX_PRIMARY_STRENGTH
+      ? Math.min(6, Math.floor(Math.log(raw / MAX_PRIMARY_STRENGTH) / Math.log(2)) * 2)
+      : 0;
+    return { deathCount: deathCount, raw: raw, primary: primary, shockwaves: shockwaves };
+  }
+
+  return { BASE_STRENGTH: BASE_STRENGTH, MAX_PRIMARY_STRENGTH: MAX_PRIMARY_STRENGTH, computePower: computePower };
+})();
+
+global.LHHardFeatureCatalog = [
+  { id: 'ore_scarcity', name: 'Рудный голод', icon: '⛏', color: 'gold', summary: 'Руды вне богатых жил теряют 50% добычи без Шёлкового касания — ищите жилы через /lh prospect и буры.' },
+  { id: 'wood_scarcity', name: 'Дефицит леса', icon: '🪓', color: 'dark_green', summary: 'Саженцы отключены, а 40% срубленных брёвен рассыпается — стройте линии в новые леса.' },
+  { id: 'smarter_mobs', name: 'Тактический ИИ мобов', icon: '🧠', color: 'red', summary: 'Враждебные мобы получают ускорение, усиленное чутьё и тактические баффы.' },
+  { id: 'immortal_snail', name: 'Бессмертная Улитка', icon: '🐌', color: 'dark_red', summary: 'Неуязвимая Улитка пробуждается и бесконечно ползёт к вам сквозь стены (/lh snail status).' },
+  { id: 'voidout_explosion', name: 'Сингулярный выброс', icon: '💥', color: 'dark_purple', summary: 'Каждая смерть вызывает взрыв Voidout, сила которого УДВАИВАЕТСЯ с каждой смертью.' },
+  { id: 'toxic_gas', name: 'Сезонный токсичный газ', icon: '☣', color: 'green', summary: 'Раз в 4 дня ядовитый туман поднимается до Y=114 — спасайтесь на горах и летающих островах.' },
+  { id: 'acid_pollution', name: 'Кислотный смог', icon: '🌫', color: 'gray', summary: 'Тяжёлый дым промышленных зон и открытый огонь вызывают удушье без защиты головы/дымоходов.' },
+  { id: 'hostile_nights', name: 'Кровавые ночи', icon: '🌙', color: 'dark_red', summary: 'Ночные монстры на поверхности появляются с Силой и огнестойкостью — обустраивайте укрытия.' },
+  { id: 'hunger_exhaustion', name: 'Экспедиционный голод', icon: '🍖', color: 'yellow', summary: 'Долгий бег ускоряет расход сытости; сырая пища ослабляет — переходите на рационы.' },
+  { id: 'tool_wear', name: 'Хрупкость инструментов', icon: '⚒', color: 'aqua', summary: 'Вдали от дома (>400 м) кустарные инструменты изнашиваются быстрее — используйте Tetra и Create.' },
+  { id: 'radiation_fallout', name: 'Радиационный фон', icon: '☢', color: 'light_purple', summary: 'Глубокие шахты (Y<24) накапливают радиационную усталость без защитной брони.' }
+];
+

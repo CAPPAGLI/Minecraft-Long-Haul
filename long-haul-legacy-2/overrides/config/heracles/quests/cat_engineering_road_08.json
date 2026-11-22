@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "cat_engineering_road_07"
+  ],
   "tasks": {
     "catalog_verified": {
       "type": "heracles:advancement",

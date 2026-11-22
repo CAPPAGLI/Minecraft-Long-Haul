@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "photo_wetland"
+  ],
   "tasks": {
     "catalog_verified": {
       "type": "heracles:advancement",

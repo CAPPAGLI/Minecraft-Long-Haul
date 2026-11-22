@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "tutorial_brass"
+  ],
   "tasks": {
     "item": {
       "type": "heracles:item",

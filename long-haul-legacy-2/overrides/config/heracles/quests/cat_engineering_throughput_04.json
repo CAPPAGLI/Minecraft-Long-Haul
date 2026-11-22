@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "cat_engineering_throughput_03"
+  ],
   "tasks": {
     "catalog_verified": {
       "type": "heracles:advancement",

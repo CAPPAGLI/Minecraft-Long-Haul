@@ -1,5 +1,8 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "prod_forest",
+    "prod_farm"
+  ],
   "tasks": {
     "commission": {
       "type": "heracles:advancement",

@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "cat_photo_smelter_arrival"
+  ],
   "tasks": {
     "catalog_verified": {
       "type": "heracles:advancement",

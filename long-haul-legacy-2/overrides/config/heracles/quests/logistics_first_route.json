@@ -1,5 +1,8 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "tutorial_station",
+    "contract_rails"
+  ],
   "tasks": {
     "verified": {
       "type": "heracles:advancement",

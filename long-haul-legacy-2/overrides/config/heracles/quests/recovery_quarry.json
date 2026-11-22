@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "site_mine"
+  ],
   "tasks": {
     "restored": {
       "type": "heracles:advancement",

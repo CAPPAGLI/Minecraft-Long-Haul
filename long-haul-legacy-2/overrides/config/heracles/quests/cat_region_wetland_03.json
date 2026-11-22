@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "cat_region_wetland_02"
+  ],
   "tasks": {
     "catalog_verified": {
       "type": "heracles:advancement",

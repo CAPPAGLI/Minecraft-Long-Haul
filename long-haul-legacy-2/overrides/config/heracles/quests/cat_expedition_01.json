@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "logistics_first_camp"
+  ],
   "tasks": {
     "catalog_verified": {
       "type": "heracles:advancement",

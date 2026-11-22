@@ -1,0 +1,47 @@
+{
+  "dependencies": [
+    "doomed_01_intro"
+  ],
+  "tasks": {
+    "check": {
+      "type": "heracles:check",
+      "title": "Опциональная отметка DOOMED"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "Полевая медицина перед активацией /doom"
+    },
+    "subtitle": {
+      "text": "Опциональный профиль CurseForge"
+    },
+    "description": [
+      "Перед включением режима (/doom) подготовьте запас бинтов, антисептиков, еды Farmer’s Delight и золотых яблок.",
+      "Глава полностью опциональна и не влияет на открытие территории."
+    ],
+    "groups": {
+      "13 · DOOMED: Хардкор-выживание (Опционально)": {
+        "position": [
+          0,
+          -42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:golden_apple",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

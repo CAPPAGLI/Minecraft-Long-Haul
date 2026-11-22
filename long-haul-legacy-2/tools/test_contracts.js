@@ -120,4 +120,58 @@ test('all KubeJS startup/server/client scripts parse cleanly in ES5/Node', () =>
   assert(count >= 15, 'expected at least 15 KubeJS/fixture scripts, got ' + count);
 });
 
+test('territory border follows 175000^(1/x) where x = 2 - 1/locked and opens 175000 at locked <= 1', () => {
+  const tm = sandbox.global.LHTerritoryMath;
+  assert.equal(tm.computeBorder(6, 0).size, 724);
+  assert.equal(tm.computeBorder(6, 1).size, 818);
+  assert.equal(tm.computeBorder(6, 2).size, 991);
+  assert.equal(tm.computeBorder(6, 3).size, 1399);
+  assert.equal(tm.computeBorder(6, 4).size, 3129);
+  assert.equal(tm.computeBorder(6, 5).size, 175000);
+  assert.equal(tm.computeBorder(6, 6).size, 175000);
+});
+
+test('voidout power strictly doubles after every death with safe primary cap + shockwaves', () => {
+  const vm2 = sandbox.global.LHVoidoutMath;
+  assert.equal(vm2.computePower(1).raw, 12);
+  assert.equal(vm2.computePower(2).raw, 24);
+  assert.equal(vm2.computePower(3).raw, 48);
+  assert.equal(vm2.computePower(4).raw, 96);
+  const p5 = vm2.computePower(5);
+  assert.equal(p5.raw, 192);
+  assert.equal(p5.primary, 96);
+  assert(p5.shockwaves >= 2);
+});
+
+test('hard-feature catalog covers all 6 core threats plus additional threats', () => {
+  const ids = new Set((sandbox.global.LHHardFeatureCatalog || []).map(f => f.id));
+  ['ore_scarcity', 'wood_scarcity', 'smarter_mobs', 'immortal_snail', 'voidout_explosion', 'toxic_gas'].forEach(k => {
+    assert(ids.has(k), 'missing hard feature ' + k);
+  });
+  assert(ids.size >= 10, 'expected >= 10 hard features');
+});
+
+test('all Heracles quests form an acyclic DAG with zero dangling dependencies and include Chapter 12 + DOOMED Chapter 13', () => {
+  const path = require('path');
+  const qDir = path.join(__dirname, '../overrides/config/heracles/quests');
+  const map = {};
+  fs.readdirSync(qDir).filter(f => f.endsWith('.json')).forEach(f => {
+    map[f.replace(/\.json$/, '')] = JSON.parse(fs.readFileSync(path.join(qDir, f), 'utf8'));
+  });
+  const state = {};
+  function dfs(u) {
+    state[u] = 1;
+    (map[u].dependencies || []).forEach(v => {
+      assert(map[v], 'dangling dep ' + u + ' -> ' + v);
+      assert.notEqual(state[v], 1, 'cycle at ' + u + ' -> ' + v);
+      if (!state[v]) dfs(v);
+    });
+    state[u] = 2;
+  }
+  Object.keys(map).forEach(k => { if (!state[k]) dfs(k); });
+  assert(map.story_01_left_for_bread && map.story_06_forgot_the_milk, 'Chapter 00 quests present');
+  assert(map.nuclear_01_geiger && map.nuclear_06_fusion_core, 'Chapter 12 Nuclear/Draconic quests present');
+  assert(map.doomed_01_intro && map.doomed_06_safe_toggle, 'Chapter 13 DOOMED quests present');
+});
+
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');

@@ -65,6 +65,8 @@ function lhRegister(server, player) {
   if (!block.inventory.isEmpty()) { lhMsg(player, 'Перед регистрацией опустошите бочку.'); return 0; }
   p.terminal = t;
   lhSave(server);
+  lhUnlock(player, 'longhaul:story/03_dinner_telegram');
+  if (typeof lhProgressionRecompute === 'function') lhProgressionRecompute(server, player, false);
   lhMsg(player, 'Терминал зарегистрирован. /lh help — список команд.');
   return 1;
 }
@@ -156,11 +158,8 @@ ServerEvents.commandRegistry(function (event) {
 
 ServerEvents.loaded(function (event) {
   lhRead(event.server);
-  if (!event.server.persistentData.getBoolean('longhaul_border_initialized')) {
-    var wb = event.server.overworld().worldBorder;
-    wb.setCenter(0, 0);
-    wb.setSize(175000);
-    event.server.persistentData.putBoolean('longhaul_border_initialized', true);
+  if (typeof lhApplyTerritoryBorder === 'function') {
+    lhApplyTerritoryBorder(event.server, false);
   }
   console.info('[LH] 8 intake contracts + consortium sharing loaded.');
 });
@@ -208,6 +207,7 @@ ServerEvents.tick(function (event) {
       if (player) {
         lhSync(player, p, server);
         if (typeof lhStageRecompute === 'function') lhStageRecompute(server, player);
+        if (typeof lhProgressionRecompute === 'function') lhProgressionRecompute(server, player, false);
         lhMsg(player, 'Заказ выполнен: ' + spec.title);
       }
     } else if (job.status === 'failed') {

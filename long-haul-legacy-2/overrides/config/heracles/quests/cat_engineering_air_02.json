@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "cat_engineering_air_01"
+  ],
   "tasks": {
     "catalog_verified": {
       "type": "heracles:advancement",

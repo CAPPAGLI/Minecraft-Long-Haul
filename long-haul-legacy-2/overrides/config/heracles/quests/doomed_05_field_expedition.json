@@ -1,0 +1,46 @@
+{
+  "dependencies": [
+    "doomed_04_guns_and_ballistics"
+  ],
+  "tasks": {
+    "check": {
+      "type": "heracles:check",
+      "title": "Опциональная отметка DOOMED"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "Экспедиционный рейд в условиях DOOMED"
+    },
+    "subtitle": {
+      "text": "Опциональный профиль CurseForge"
+    },
+    "description": [
+      "Преодолейте полевой маршрут до лагеря или узла с включённым режимом травм и вернитесь живым без срабатывания Voidout."
+    ],
+    "groups": {
+      "13 · DOOMED: Хардкор-выживание (Опционально)": {
+        "position": [
+          0,
+          42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:compass",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

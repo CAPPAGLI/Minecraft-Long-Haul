@@ -1,5 +1,8 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "site_forest",
+    "logistics_first_route"
+  ],
   "tasks": {
     "verified": {
       "type": "heracles:advancement",

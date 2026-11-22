@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "cat_photo_port_after"
+  ],
   "tasks": {
     "catalog_verified": {
       "type": "heracles:advancement",

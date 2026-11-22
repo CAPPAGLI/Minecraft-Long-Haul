@@ -1,0 +1,50 @@
+{
+  "dependencies": [
+    "nuclear_05_draconium"
+  ],
+  "tasks": {
+    "nuclear_done": {
+      "type": "heracles:advancement",
+      "title": "Подтверждение (/lh nuclear verify)",
+      "advancements": [
+        "longhaul:nuclear/verified"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "Слияние (Fusion Crafting) и Энергоядро"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0 · Поздняя энергетика"
+    },
+    "description": [
+      "Соберите Ядро слияния (Fusion Crafting Core) и Энергетическое ядро Draconic Evolution для питания континентального комплекса.",
+      "Для фиксации завершения технологической ветки выполните /lh nuclear verify с изделиями ядерного или драконического этапа в инвентаре."
+    ],
+    "groups": {
+      "12 · Ядерная энергетика и Драконик": {
+        "position": [
+          96,
+          42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:beacon",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

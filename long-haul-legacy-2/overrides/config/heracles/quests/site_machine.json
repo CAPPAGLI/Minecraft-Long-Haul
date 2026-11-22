@@ -1,5 +1,8 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "prod_smelter",
+    "prod_wetland"
+  ],
   "tasks": {
     "commission": {
       "type": "heracles:advancement",

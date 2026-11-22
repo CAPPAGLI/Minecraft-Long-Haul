@@ -1,6 +1,7 @@
 {
   "dependencies": [
-    "site_wetland"
+    "site_wetland",
+    "tutorial_computer"
   ],
   "tasks": {
     "telemetry": {

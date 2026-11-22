@@ -1,5 +1,8 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "prod_machine",
+    "site_continental_archive"
+  ],
   "tasks": {
     "hub": {
       "type": "heracles:advancement",

@@ -1,5 +1,7 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "alpha_world"
+  ],
   "tasks": {
     "read": {
       "type": "heracles:check",
@@ -21,8 +23,8 @@
     "groups": {
       "01 · Начало и правила": {
         "position": [
-          84,
-          36
+          -84,
+          72
         ]
       }
     },

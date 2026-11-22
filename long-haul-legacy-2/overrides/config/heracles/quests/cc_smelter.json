@@ -1,6 +1,7 @@
 {
   "dependencies": [
-    "site_smelter"
+    "site_smelter",
+    "tutorial_computer"
   ],
   "tasks": {
     "telemetry": {

@@ -15,6 +15,9 @@ ServerEvents.recipes(function (event) {
   event.remove({ output: 'supplementaries:safe' });
   event.remove({ output: 'quark:backpack' });
   event.remove({ output: 'functionalstorage:ender_drawer' });
+  event.remove({ output: 'draconicevolution:dislocator' });
+  event.remove({ output: 'draconicevolution:advanced_dislocator' });
+  event.remove({ output: 'draconicevolution:dislocator_receptacle' });
   event.remove({ output: /jetpack/ });
 });
 
@@ -28,23 +31,23 @@ LootJS.modifiers(function (event) {
   event.addLootTableModifier(/.*/).removeLoot('supplementaries:safe');
   event.addLootTableModifier(/.*/).removeLoot('quark:backpack');
   event.addLootTableModifier(/.*/).removeLoot('functionalstorage:ender_drawer');
-  // Sapling & log scarcity: no local tree farms; explore forests & commission the Forestry Guild.
-  event.addLootTableModifier(/.*/).removeLoot('#minecraft:saplings');
+  // Note: 40% log loss & sapling planting lock are gated behind the 'wood_scarcity' hard feature in 26_hard_features_and_territory.js.
   event.addBlockLootModifier('#minecraft:leaves').removeLoot('minecraft:azalea');
   event.addBlockLootModifier('#minecraft:leaves').removeLoot('minecraft:flowering_azalea');
-  event.addBlockLootModifier('#minecraft:logs').randomChance(0.4).removeLoot('#minecraft:logs');
 });
 
 BlockEvents.placed(function (event) {
   if (event.block && event.block.hasTag('minecraft:saplings')) {
-    if (event.player) event.player.tell('[Long Haul] Посадка саженцев отключена: добывайте дерево в экспедициях по новым лесам или через Лесную Артель.');
+    if (typeof lhHardIsActive === 'function' && !lhHardIsActive(event.server, 'wood_scarcity')) return;
+    if (event.player) event.player.tell('[Long Haul] Посадка саженцев отключена (активна угроза «Дефицит леса»): добывайте дерево в экспедициях.');
     event.cancel();
   }
 });
 
 ItemEvents.rightClicked(function (event) {
   if (event.item && event.item.hasTag('minecraft:saplings')) {
-    if (event.player) event.player.tell('[Long Haul] Посадка саженцев отключена: добывайте дерево в экспедициях по новым лесам.');
+    if (typeof lhHardIsActive === 'function' && !lhHardIsActive(event.server, 'wood_scarcity')) return;
+    if (event.player) event.player.tell('[Long Haul] Посадка саженцев отключена (активна угроза «Дефицит леса»).');
     event.cancel();
   }
 });

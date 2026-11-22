@@ -1,0 +1,47 @@
+{
+  "dependencies": [
+    "nuclear_03_reactors"
+  ],
+  "tasks": {
+    "read": {
+      "type": "heracles:check",
+      "title": "Этап освоен (отметка инженера)"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "Баллистика и тяжёлые заряды (Ballistix / HBM)"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0 · Поздняя энергетика"
+    },
+    "description": [
+      "Освойте пусковые шахты Ballistix и детонаторы/заряды HBM’s Nuclear Tech (используйте строго на удалённых полигонах!).",
+      "Помните: взрывы в жилых узлах вызывают загрязнение среды и разрушение инфраструктуры."
+    ],
+    "groups": {
+      "12 · Ядерная энергетика и Драконик": {
+        "position": [
+          -96,
+          42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:tnt",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

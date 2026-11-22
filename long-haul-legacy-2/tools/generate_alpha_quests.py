@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Generate real Heracles 1.20.1 quests + server-only receipt/progression advancements.
-Includes the 71 core Alpha mechanics quests (groups 01..06) PLUS all 240 campaign/regional
-specifications from design/quest-catalog.json (groups 07..11), each bound to a server-only
-advancement and verified via /lh catalog verify <id> (never fake check buttons).
+Includes connected dependency chains across all chapters (00..13), completable Chapter 00
+opening story, Nuclear/Draconic chapter, optional DOOMED chapter, and all 240 catalog specs.
 """
 import json, pathlib
 
@@ -51,82 +50,33 @@ if ADV_ROOT.exists():
     for old in ADV_ROOT.rglob('*.json'):
         old.unlink()
 
-intro = [
-    ('alpha_welcome', 'Прототип промышленной сети', 'minecraft:book', [
-        'Это расширяемая alpha-сборка Long Haul Legacy 2.0 (на пути к полной кампании).',
-        'Включены: 8 специализированных экономических центров (реальные .nbt площадки), 6 объектов восстановления, лагеря, маршрутные испытания, серверные накладные и 240 заказов каталога.',
-        'Подтверждение чтения — ручное; это не инженерное испытание.',
-    ]),
-    ('alpha_terminal', 'Как зарегистрировать терминал', 'minecraft:barrel', [
-        'Поставьте пустую обычную бочку. Встаньте на неё и выполните /lh terminal.',
-        'Посмотрите /lh help, затем /lh accept plates. Заказ начнётся только при пустой бочке.',
-        'Подводите товары воронкой или средствами Create. Принятые товары РАСХОДУЮТСЯ без возврата.',
-    ]),
-    ('alpha_windows', 'Что измеряют испытания', 'minecraft:clock', [
-        'Контракты с суффиксом _shift считают норму в КАЖДОМ окне по 60 игровых секунд. Один полный сундук не завершает испытание мгновенно.',
-        'Выгрузка чанка приостанавливает часы. Серверный прогресс сохраняется; /lh status показывает детали.',
-        'При пропуске нормы испытание проваливается. /lh abort останавливает заказ; уже потреблённые товары не возвращаются.',
-        'Пока это доказательство ритма ПРИЁМКИ, а не изготовления на месте. Можно снабжать из запаса.',
-    ]),
-    ('alpha_limits', 'Честные границы прототипа', 'minecraft:comparator', [
-        'Проверка реального train ID, расхода топлива и семантики содержимого фотографии на уровне Java-адаптера ещё не подключена.',
-        'Шалкеры, эндер-сундуки, мешки и сейфы Supplementaries отключены в крафте, луте и при взаимодействии. Выездные лагеря проверяют пустоту контейнеров перед сворачиванием.',
-        'Для кооператива доступен общий консорциум: /lh team join <имя>.',
-    ]),
-    ('alpha_world', 'Мир и региональные узлы', 'minecraft:compass', [
-        'Natural Temperature и Cold Sweat отсутствуют. Фермерство не заперто в старых климатических поясах.',
-        'Граница обычного мира: 175000 блоков, центр 0,0. Планировщик размещает 8 экономических центров, Архив и Узел консорциума внутри ±84000.',
-        'Посмотреть направления: /lh sites и /lh site info <id>.',
-    ]),
-    ('alpha_photo', 'Фотодокументация', 'exposure:camera', [
-        'Exposure добавлен: камера, плёнка, проявка и альбомы.',
-        'Снимайте фабрики, лагеря и маршруты (/lh photo report <узел> и /lh catalog verify <id>). Уникальный токен снимка нельзя использовать дважды.',
-    ]),
-    ('alpha_voidout', 'Выброс при смерти, трупы и тотемы', 'minecraft:totem_of_undying', [
-        'Каждая настоящая смерть вызывает колоссальный взрыв (Voidout), как в Death Stranding — не стройте всё в одном месте.',
-        'Ваш инвентарь сохраняется в трупе (Corpse), но окружающие постройки будут разрушены. Собирайте Тотемы бессмертия перед редкими данжами и базами, чтобы пережить удар без взрыва!',
-    ]),
-    ('alpha_toxic_gas_sky', 'Сезонный токсичный газ и летающие острова', 'minecraft:campfire', [
-        'По сезонам снизу поднимается токсичный газ — на пике прилива уровень достигает Y=114, затапливая равнины и долины (/lh gas status).',
-        'Ищите и обустраивайте временные базы в высоких горах (Y>114) и на летающих островах в небе.',
-    ]),
-    ('alpha_pollution_arcane', 'Загрязнение среды и Первородная магия', 'minecraft:cauldron', [
-        'Мод Pollution of the Realms настроен жёстко: выбросы углерода, серы и пыли вызывают смог, кислотные дожди и порчу почв — отводите дым через Advanced Chimneys.',
-        'Для тайных исследований добавлены Primal Magick и Thaumon (на Forge 1.20.1 официальный Thaumcraft не выходил, его механику исследований и эссенций заменяет Primal Magick).',
-    ]),
-    ('alpha_eccentric_tome', 'Единая книга гайдов (Eccentric Tome)', 'eccentrictome:tome', [
-        'Все книги и справочники из модов (Immersive Engineering, Alex’s Caves, Primal Magick, Patchouli, Modonomicon и др.) можно объединить в один том — Eccentric Tome.',
-        'Просто положите Eccentric Tome и любые книги-гайды в верстак (или окно крафта). ПКМ открывает меню выбора книги, Shift+ЛКМ возвращает обратно в общий том.',
-    ]),
-]
-for i, (qid, title, icon, desc) in enumerate(intro):
-    quest(qid, title, '01 · Начало и правила', [(i % 3 - 1) * 84, (i // 3) * 72 - 36], icon,
-          {'read': {'type': 'heracles:check', 'title': 'Прочитано (ручное подтверждение)'}}, desc)
-
+# ---------------------------------------------------------------------------
+# 00 · Сюжет: Ушёл за хлебом (100% completable opening story chain)
+# ---------------------------------------------------------------------------
 story_chapters = [
     ('story_01_left_for_bread', 'Глава I: Ушёл в магазин за хлебом', 'minecraft:bread', [
         'Поздравляем — у вас родился сын! Жена попросила сходить в ближайшую лавку за свежей буханкой хлеба и бутылкой молока.',
-        'Маленькая проблема: ближайшая пекарня закрыта, саженцев нет, уголь в мире реже в 10 раз, а через пару тысяч блоков начинается ваш долгий путь через весь континент.',
+        'Задача главы: выйти в мир (выдаётся автоматически при входе в мир; если не засчиталось — выполните /lh stage).',
     ], []),
-    ('story_02_bakery_burned', 'Глава II: Пекарня сгорела — нужен пропитанный брус', 'longhaul:field_rations', [
-        'Местный пекарь объяснил, что печь без угля не топит, а ближайший лес — за перевалом.',
-        '«Дорогая, я уже у витрины! Просто быстро запущу лесопилку и найду редкую угольную жилу (/lh prospect)».',
+    ('story_02_bakery_burned', 'Глава II: Пекарня сгорела — нужен свой хлеб', 'minecraft:wheat', [
+        'Ближайшая пекарня оказалась закрыта на переучёт, так что придётся раздобыть или испечь первую буханку хлеба самостоятельно.',
+        'Задача: держите в инвентаре буханку хлеба (minecraft:bread) — сервер автоматически засчитает этап.',
     ], ['story_01_left_for_bread']),
-    ('story_03_dinner_telegram', 'Глава III: Обещал вернуться к ужину… прошлого месяца', 'minecraft:writable_book', [
-        'Сыну уже 2 года. Из дома пришла телеграмма: «Ты где? Хлеб можно уже не тёплый».',
-        'Ты стоишь по колено в мазуте, тянешь 800 метров рельсов и объясняешь себе, что без двух запущенных городов в соседних регионах муку не привезти.',
+    ('story_03_dinner_telegram', 'Глава III: Обещал вернуться к ужину…', 'minecraft:barrel', [
+        'Из дома пришла телеграмма: «Ты где? Хлеб можно уже не тёплый». Без собственного приёмного терминала заказы не оформить.',
+        'Задача: поставьте пустую обычную бочку (minecraft:barrel), встаньте на неё и выполните /lh terminal.',
     ], ['story_02_bakery_burned']),
-    ('story_04_snail_at_door', 'Глава IV: Почему за тобой ползёт Бессмертная Улитка?', 'minecraft:slime_ball', [
-        'Ты всё-таки вышел далеко за пределы двора, и старое проклятие проснулось: Бессмертная Улитка медленно ползёт сквозь камень, стены и океаны прямо в твою сторону.',
-        'Убить её невозможно — остаётся строить быстрые поезда, суда, дирижабли и паркурить через завалы (/lh snail status).',
+    ('story_04_snail_at_door', 'Глава IV: Заодно и молоко', 'minecraft:milk_bucket', [
+        'Пока вы возились с бумагами, вспомнили про вторую половину просьбы — ведро свежего молока.',
+        'Задача: наберите ведро молока (minecraft:milk_bucket) в инвентарь (сервер зачтёт этап автоматически).',
     ], ['story_03_dinner_telegram']),
-    ('story_05_continental_bakery', 'Глава V: Почти на кассе, просто настраиваю НПЗ', 'create:precision_mechanism', [
-        'Сыну скоро в школу. У тебя уже есть сортировочная станция, три региональных завода, телеметрия CC: Tweaked и фотоальбом «Я правда искал хлебозавод».',
-        'Осталось запустить Континентальный узел консорциума, чтобы наконец испечь Ту Самую Буханку.',
+    ('story_05_continental_bakery', 'Глава V: Первая штамповка для пекарни', 'create:mechanical_press', [
+        'Чтобы открыть путь дальше в окрестности, пора перейти от ручной работы к первому механизму Create или стартовой поставке.',
+        'Задача: скрафтите Механический пресс (create:mechanical_press) ИЛИ закройте контракт /lh accept plates (64 железные пластины).',
     ], ['story_04_snail_at_door']),
-    ('story_06_forgot_the_milk', 'Эпилог: Легендарная буханка… а молоко?', 'minecraft:milk_bucket', [
-        'Континентальный комплекс запущен! Ты триумфально приземляешься на грузовом дирижабле прямо у родного порога с идеальной тёплой буханкой хлеба.',
-        'Дверь открывает восемнадцатилетний сын, смотрит на твой железнодорожный консорциум, берёт хлеб и спрашивает: «Пап, супер… а молоко ты тоже забыл?»',
+    ('story_06_forgot_the_milk', 'Эпилог пролога: Долгая дорога начинается', 'minecraft:compass', [
+        'Хлеб и молоко собраны, терминал работает, а граница мира готова к первому расширению!',
+        'Задача: скрафтите Компас (minecraft:compass) и выполните /lh stage. Завершение Главы 00 расширяет территорию и запускает Колесо Угроз!',
     ], ['story_05_continental_bakery']),
 ]
 for i, (qid, title, icon, desc, deps) in enumerate(story_chapters):
@@ -134,60 +84,135 @@ for i, (qid, title, icon, desc, deps) in enumerate(story_chapters):
     adv(adv_name, 30 + i * 20)
     quest(qid, title, '00 · Сюжет: Ушёл за хлебом', [(i % 3 - 1) * 96, (i // 3) * 84 - 42], icon,
           {'story': {'type': 'heracles:advancement', 'title': 'Хроника «Ушёл за хлебом»', 'advancements': ['longhaul:' + adv_name]}},
-          desc, deps=deps, subtitle='Long Haul Legacy 2.0 · История')
+          desc, deps=deps, subtitle='Long Haul Legacy 2.0 · Пролог')
 
-items = [
-    ('waterwheel', 'Источник кинетики', 'create:water_wheel', 'Водяное колесо — начало механической мастерской.'),
-    ('press', 'Обработка металла', 'create:mechanical_press', 'Пресс штампует пластины. Далее используйте их для заказов терминала.'),
-    ('mixer', 'Сплавы', 'create:mechanical_mixer', 'Миксер смешивает сплавы; продумайте подачу ингредиентов и подогрев.'),
-    ('brass', 'Латунная мастерская', 'create:brass_ingot', 'Латунь открывает точные механизмы и новую автоматизацию.'),
-    ('precision', 'Точная сборка', 'create:precision_mechanism', 'Механизм нужен для промышленного оборудования. Изучите последовательную сборку в JEI.'),
-    ('track', 'Железнодорожный путь', 'create:track', 'Рельсы — только начало линии. Инвентарное задание НЕ доказывает наличие дороги.'),
-    ('station', 'Грузовая станция', 'create:track_station', 'Спроектируйте погрузку и разгрузку. Проверка рейсов конкретного поезда появится отдельно.'),
-    ('computer', 'Промышленный компьютер', 'computercraft:computer_normal', 'CC: Tweaked — локальная автоматизация. Программа longhaul_depot следит за запасом склада.'),
-    ('camera', 'Камера экспедиции', 'exposure:camera', 'Фотографируйте открытия; берите запас плёнки.'),
-    ('film', 'Запас плёнки', 'exposure:black_and_white_film', 'Чёрно-белая плёнка нужна для первых полевых снимков.'),
-    ('album', 'Альбом маршрута', 'exposure:album', 'Соберите фотографии городов, мостов и этапов фабрики.'),
-    ('cookpot', 'Походное снабжение', 'farmersdelight:cooking_pot', 'Farmer’s Delight связывает урожай и готовку. Держите запас для длительных рейсов.'),
+# ---------------------------------------------------------------------------
+# 01 · Начало и правила (connected rule chain + territory/casino guide)
+# ---------------------------------------------------------------------------
+intro = [
+    ('alpha_welcome', 'Прототип промышленной сети', 'minecraft:book', [
+        'Это расширяемая сборка Long Haul Legacy 2.0: 8 экономических центров (реальные .nbt площадки), 6 объектов восстановления, лагеря, маршрутные испытания, ядерная энергетика, Draconic Evolution и 240 заказов каталога.',
+        'Подтверждение чтения — ручное; в конце цепочки подтвердите устав через /lh rules confirm.',
+    ], ['story_01_left_for_bread']),
+    ('alpha_terminal', 'Как зарегистрировать терминал', 'minecraft:barrel', [
+        'Поставьте пустую обычную бочку. Встаньте на неё и выполните /lh terminal.',
+        'Посмотрите /lh help, затем /lh accept plates. Заказ начнётся только при пустой бочке.',
+        'Подводите товары воронкой или средствами Create. Принятые товары РАСХОДУЮТСЯ без возврата.',
+    ], ['alpha_welcome']),
+    ('alpha_windows', 'Что измеряют испытания', 'minecraft:clock', [
+        'Контракты с суффиксом _shift считают норму в КАЖДОМ окне по 60 игровых секунд. Один полный сундук не завершает испытание мгновенно.',
+        'Выгрузка чанка приостанавливает часы. Серверный прогресс сохраняется; /lh status показывает детали.',
+        'При пропуске нормы испытание проваливается. /lh abort останавливает заказ; уже потреблённые товары не возвращаются.',
+    ], ['alpha_terminal']),
+    ('alpha_limits', 'Честные границы прототипа', 'minecraft:comparator', [
+        'Шалкеры, эндер-сундуки, мешки, сейфы Supplementaries, джетпаки и дислокаторы телепортации отключены в крафте, луте и при взаимодействии.',
+        'Выездные лагеря проверяют пустоту контейнеров перед сворачиванием.',
+        'Для кооператива доступен общий консорциум: /lh team join <имя>.',
+    ], ['alpha_windows']),
+    ('alpha_world', 'Мир и региональные узлы', 'minecraft:compass', [
+        'Natural Temperature и Cold Sweat отсутствуют. Фермерство не заперто в старых климатических поясах.',
+        'Полная граница обычного мира: 175000 блоков (центр 0,0), но открывается она по мере завершения глав! Планировщик размещает 8 центров, Архив и Узел консорциума внутри ±84000.',
+        'Посмотреть направления: /lh sites и /lh site info <id>.',
+    ], ['alpha_limits']),
+    ('alpha_territory_casino', 'Территория и Колесо Угроз', 'minecraft:nether_star', [
+        'Граница мира расширяется по формуле 175000^(1/x), где x = 2 - (1 / закрытые_главы). Пока закрыто <= 1 ключевой главы, открывается полный мир 175000 блоков (/lh territory).',
+        'Завершение каждой главы крутит визуальное Колесо Угроз и случайно активирует одно из усложнений: дефицит руды, дефицит леса, умные мобы, Бессмертную Улитку, выброс Voidout, токсичный газ и другие (/lh casino status).',
+    ], ['alpha_world']),
+    ('alpha_photo', 'Фотодокументация', 'exposure:camera', [
+        'Exposure добавлен: камера, плёнка, проявка и альбомы.',
+        'Снимайте фабрики, лагеря и маршруты (/lh photo report <узел> и /lh catalog verify <id>). Уникальный токен снимка нельзя использовать дважды.',
+    ], ['alpha_world']),
+    ('alpha_voidout', 'Выброс при смерти (Voidout), трупы и тотемы', 'minecraft:totem_of_undying', [
+        'Когда Колесо Угроз активирует Voidout, каждая настоящая смерть вызывает взрыв, мощность которого УДВАИВАЕТСЯ после каждой новой смерти (12 -> 24 -> 48 -> 96 -> ...)!',
+        'Ваш инвентарь сохраняется в трупе (Corpse), а Тотем бессмертия спасает от детонации (/lh voidout status).',
+    ], ['alpha_territory_casino']),
+    ('alpha_toxic_gas_sky', 'Сезонный токсичный газ и летающие острова', 'minecraft:campfire', [
+        'Когда в Колесе выпадает токсичный газ, он поднимается и спадает циклами по 4 игровых дня (на пике достигая Y=114, затем снова отступая в Чистый сезон, /lh gas status).',
+        'Ищите и обустраивайте временные базы в высоких горах (Y>114) и на летающих островах в небе.',
+    ], ['alpha_voidout']),
+    ('alpha_eccentric_tome', 'Единая книга гайдов (Eccentric Tome)', 'eccentrictome:tome', [
+        'Все книги и справочники из модов (Immersive Engineering, Alex’s Caves, Primal Magick, Draconic, Patchouli и др.) можно объединить в один том — Eccentric Tome.',
+        'Положите Eccentric Tome и любые книги-гайды в крафт. ПКМ открывает выбор книги, Shift+ЛКМ возвращает обратно.',
+    ], ['alpha_welcome']),
+    ('alpha_pollution_arcane', 'Загрязнение среды и Первородная магия', 'minecraft:cauldron', [
+        'Pollution of the Realms создаёт выбросы дыма и пыли, которые поднимаются вверх и со временем рассеиваются или портят почву — отводите дым через Advanced Chimneys.',
+        'Для тайных исследований добавлены Primal Magick и Thaumon.',
+    ], ['alpha_eccentric_tome']),
 ]
-for i, (qid, title, item, desc) in enumerate(items):
+for i, (qid, title, icon, desc, deps) in enumerate(intro):
+    quest(qid, title, '01 · Начало и правила', [(i % 3 - 1) * 84, (i // 3) * 72 - 72], icon,
+          {'read': {'type': 'heracles:check', 'title': 'Прочитано (ручное подтверждение)'}}, desc, deps=deps)
+
+adv('rules/confirmed', 25)
+quest('alpha_rules_confirm', 'Подтвердить устав консорциума', '01 · Начало и правила', [0, 216], 'minecraft:writable_book',
+      {'confirmed': {'type': 'heracles:advancement', 'title': 'Подтверждение (/lh rules confirm)', 'advancements': ['longhaul:rules/confirmed']}},
+      ['Прочитайте основные правила, зарегистрируйте бочку (/lh terminal) и выполните команду /lh rules confirm.',
+       'Эта веха завершает Главу 01, расширяет границу мира и запускает Колесо Угроз.'],
+      deps=['alpha_territory_casino'])
+
+# ---------------------------------------------------------------------------
+# 02 · Мастерская и экспедиция (connected engineering + expedition gear)
+# ---------------------------------------------------------------------------
+items = [
+    ('waterwheel', 'Источник кинетики', 'create:water_wheel', 'Водяное колесо — начало механической мастерской.', ['story_02_bakery_burned']),
+    ('press', 'Обработка металла', 'create:mechanical_press', 'Пресс штампует пластины. Далее используйте их для заказов терминала.', ['tutorial_waterwheel']),
+    ('mixer', 'Сплавы', 'create:mechanical_mixer', 'Миксер смешивает сплавы; продумайте подачу ингредиентов и подогрев.', ['tutorial_press']),
+    ('brass', 'Латунная мастерская', 'create:brass_ingot', 'Латунь открывает точные механизмы и новую автоматизацию.', ['tutorial_mixer']),
+    ('precision', 'Точная сборка', 'create:precision_mechanism', 'Механизм нужен для промышленного оборудования. Изучите последовательную сборку в JEI.', ['tutorial_brass']),
+    ('track', 'Железнодорожный путь', 'create:track', 'Рельсы — только начало линии. Инвентарное задание НЕ доказывает наличие дороги.', ['tutorial_brass']),
+    ('station', 'Грузовая станция', 'create:track_station', 'Спроектируйте погрузку и разгрузку. Проверка рейсов конкретного поезда появится отдельно.', ['tutorial_track']),
+    ('computer', 'Промышленный компьютер', 'computercraft:computer_normal', 'CC: Tweaked — локальная автоматизация. Программа longhaul_depot следит за запасом склада.', ['tutorial_precision']),
+    ('camera', 'Камера экспедиции', 'exposure:camera', 'Фотографируйте открытия; берите запас плёнки.', ['alpha_photo']),
+    ('film', 'Запас плёнки', 'exposure:black_and_white_film', 'Чёрно-белая плёнка нужна для первых полевых снимков.', ['tutorial_camera']),
+    ('album', 'Альбом маршрута', 'exposure:album', 'Соберите фотографии городов, мостов и этапов фабрики.', ['tutorial_film']),
+    ('cookpot', 'Походное снабжение', 'farmersdelight:cooking_pot', 'Farmer’s Delight связывает урожай и готовку. Держите запас для длительных рейсов.', ['tutorial_waterwheel']),
+]
+for i, (qid, title, item, desc, deps) in enumerate(items):
     quest('tutorial_' + qid, title, '02 · Мастерская и экспедиция', [(i % 4) * 84 - 126, (i // 4) * 72 - 72], item,
           {'item': {'type': 'heracles:item', 'item': item, 'amount': 1, 'collection': 'AUTOMATIC'}},
-          ['Учебная веха: обнаружение предмета, НЕ испытание работающего предприятия.', desc])
+          ['Учебная веха: обнаружение предмета, НЕ испытание работающего предприятия.', desc], deps=deps)
 
+# ---------------------------------------------------------------------------
+# 03 · Контрольные поставки (connected home barrel contracts)
+# ---------------------------------------------------------------------------
 contracts = [
-    ('plates', 'Первая партия пластин', 'create:iron_sheet', '64 железные пластины.'),
-    ('brass', 'Латунный заказ', 'create:brass_ingot', '32 латунных слитка.'),
-    ('rails', 'Снабжение путейцев', 'create:track', '128 рельсов Create.'),
-    ('provisions', 'Продовольственный склад', 'minecraft:bread', '32 хлеба И 32 печёные картофелины.'),
-    ('mechanisms', 'Приборы для депо', 'create:precision_mechanism', '8 точных механизмов.'),
-    ('plate_shift', 'Ритм поставки пластин', 'create:iron_sheet', '16 пластин за каждое из трёх окон по 60 секунд.'),
-    ('food_shift', 'Регулярное снабжение', 'minecraft:baked_potato', '8 хлеба И 8 печёных картофелин за каждое из трёх окон по 60 секунд.'),
-    ('rail_shift', 'Снабжение магистрали', 'create:track', '32 рельса И 8 пластин за каждое из пяти окон по 60 секунд.'),
+    ('plates', 'Первая партия пластин', 'create:iron_sheet', '64 железные пластины.', ['alpha_terminal', 'tutorial_press']),
+    ('brass', 'Латунный заказ', 'create:brass_ingot', '32 латунных слитка.', ['contract_plates', 'tutorial_brass']),
+    ('rails', 'Снабжение путейцев', 'create:track', '128 рельсов Create.', ['contract_plates', 'tutorial_track']),
+    ('provisions', 'Продовольственный склад', 'minecraft:bread', '32 хлеба И 32 печёные картофелины.', ['alpha_terminal', 'tutorial_cookpot']),
+    ('mechanisms', 'Приборы для депо', 'create:precision_mechanism', '8 точных механизмов.', ['contract_brass', 'tutorial_precision']),
+    ('plate_shift', 'Ритм поставки пластин', 'create:iron_sheet', '16 пластин за каждое из трёх окон по 60 секунд.', ['contract_plates']),
+    ('food_shift', 'Регулярное снабжение', 'minecraft:baked_potato', '8 хлеба И 8 печёных картофелин за каждое из трёх окон по 60 секунд.', ['contract_provisions']),
+    ('rail_shift', 'Снабжение магистрали', 'create:track', '32 рельса И 8 пластин за каждое из пяти окон по 60 секунд.', ['contract_rails']),
 ]
-for i, (qid, title, icon, detail) in enumerate(contracts):
+for i, (qid, title, icon, detail, deps) in enumerate(contracts):
     adv('contracts/' + qid, 15)
     quest('contract_' + qid, title, '03 · Контрольные поставки', [(i % 4) * 84 - 126, (i // 4) * 72 - 36], icon,
           {'receipt': {'type': 'heracles:advancement', 'title': 'Подтверждение серверной приёмки', 'advancements': ['longhaul:contracts/' + qid]}},
-          ['Начало: /lh accept ' + qid, detail, 'Нужно реально передать товары в зарегистрированную бочку после принятия заказа. Наличие предметов в инвентаре не завершает этот квест.', 'Товары расходуются. Статус: /lh status.'])
+          ['Начало: /lh accept ' + qid, detail, 'Нужно реально передать товары в зарегистрированную бочку после принятия заказа. Наличие предметов в инвентаре не завершает этот квест.', 'Товары расходуются. Статус: /lh status.'],
+          deps=deps)
 
+# ---------------------------------------------------------------------------
+# 04 · Экономические центры (tiered dependency chain T1 -> T2 -> T3 -> T4)
+# ---------------------------------------------------------------------------
 sites = [
-    ('forest', 'Лесная артель', 'longhaul:treated_timber', 'Пропитанная древесина'),
-    ('farm', 'Речной агрогород', 'longhaul:field_rations', 'Экспедиционные рационы'),
-    ('mine', 'Горный рудник', 'longhaul:ore_concentrate', 'Рудный концентрат'),
-    ('port', 'Морской порт', 'longhaul:marine_reagent', 'Морской реагент'),
-    ('badlands', 'Карьер пустошей', 'longhaul:refractory_mix', 'Огнеупорная смесь'),
-    ('smelter', 'Стекольная долина', 'longhaul:technical_glass', 'Техническое стекло'),
-    ('wetland', 'Химический посёлок', 'longhaul:technical_oil', 'Техническое масло'),
-    ('machine', 'Машиностроительный центр', 'longhaul:machine_parts', 'Прецизионные узлы'),
+    ('forest', 'Лесная артель', 'longhaul:treated_timber', 'Пропитанная древесина', ['contract_rails', 'logistics_three_camps']),
+    ('farm', 'Речной агрогород', 'longhaul:field_rations', 'Экспедиционные рационы', ['contract_provisions', 'logistics_three_camps']),
+    ('mine', 'Горный рудник', 'longhaul:ore_concentrate', 'Рудный концентрат', ['contract_rails', 'logistics_first_route']),
+    ('port', 'Морской порт', 'longhaul:marine_reagent', 'Морской реагент', ['prod_forest', 'prod_farm']),
+    ('badlands', 'Карьер пустошей', 'longhaul:refractory_mix', 'Огнеупорная смесь', ['prod_mine']),
+    ('smelter', 'Стекольная долина', 'longhaul:technical_glass', 'Техническое стекло', ['prod_mine', 'prod_badlands']),
+    ('wetland', 'Химический посёлок', 'longhaul:technical_oil', 'Техническое масло', ['prod_port', 'prod_badlands']),
+    ('machine', 'Машиностроительный центр', 'longhaul:machine_parts', 'Прецизионные узлы', ['prod_smelter', 'prod_wetland']),
 ]
-for i, (sid, title, prod, prod_name) in enumerate(sites):
+for i, (sid, title, prod, prod_name, sdeps) in enumerate(sites):
     adv('sites/' + sid, 20)
     adv('production/' + sid, 30)
     quest('site_' + sid, title + ': ввод в строй', '04 · Экономические центры', [(i % 4) * 84 - 126, (i // 4) * 144 - 72],
           'minecraft:barrel',
           {'commission': {'type': 'heracles:advancement', 'title': 'Регистрация площадки на месте', 'advancements': ['longhaul:sites/' + sid]}},
-          ['Найдите площадку через /lh sites и /lh site info ' + sid + '.', 'Встаньте НА бочку в радиусе 128 м от координат узла и выполните /lh site commission ' + sid + '.'])
+          ['Найдите площадку через /lh sites и /lh site info ' + sid + '.', 'Встаньте НА бочку в радиусе 128 м от координат узла и выполните /lh site commission ' + sid + '.'],
+          deps=sdeps)
     quest('prod_' + sid, title + ': ' + prod_name, '04 · Экономические центры', [(i % 4) * 84 - 126, (i // 4) * 144],
           prod,
           {'produce': {'type': 'heracles:advancement', 'title': 'Местный выпуск продукции', 'advancements': ['longhaul:production/' + sid]}},
@@ -197,23 +222,32 @@ for i, (sid, title, prod, prod_name) in enumerate(sites):
 adv('sites/continental_archive', 50)
 quest('site_continental_archive', 'Центральный архив магистралей', '04 · Экономические центры', [-42, 216], 'minecraft:writable_book',
       {'archive': {'type': 'heracles:advancement', 'title': 'Однократная фиксация уникального объекта', 'advancements': ['longhaul:sites/continental_archive']}},
-      ['Экспедиция к уникальному архиву (/lh site info continental_archive).', 'Подойдите ближе 96 м и выполните /lh site archive. Для ремонта конструкции: /lh site repair_archive (повторные награды не выдаются).'])
+      ['Экспедиция к уникальному архиву (/lh site info continental_archive).', 'Подойдите ближе 96 м и выполните /lh site archive. Для ремонта конструкции: /lh site repair_archive (повторные награды не выдаются).'],
+      deps=['prod_machine'])
 
 adv('sites/continental_hub', 40)
 adv('production/continental_hub', 100)
 quest('site_continental_hub', 'Континентальный узел консорциума', '04 · Экономические центры', [42, 216], 'longhaul:continental_module',
       {'hub': {'type': 'heracles:advancement', 'title': 'Запуск финального узла', 'advancements': ['longhaul:production/continental_hub']}},
-      ['Зарегистрируйте Континентальный узел (/lh site commission continental_hub) и соберите Континентальный модуль из продукции всех 8 центров (/lh site produce continental_hub industrial).'])
+      ['Зарегистрируйте Континентальный узел (/lh site commission continental_hub) и соберите Континентальный модуль из продукции всех 8 центров (/lh site produce continental_hub industrial).'],
+      deps=['prod_machine', 'site_continental_archive'])
 
+# ---------------------------------------------------------------------------
+# 05 · Маршруты и лагеря (fits inside ±1564 border before 175k continent opens)
+# ---------------------------------------------------------------------------
 logistics = [
     ('expedition/first_camp', 'Первый полевой лагерь', 'minecraft:campfire',
-     ['Отойдите минимум на 750 м от (0,0), поставьте костёр и спальник Comforts (<= 6 м) и выполните /lh camp deploy.'], []),
+     ['Отойдите минимум на 750 м от (0,0) (откроется при расширении границы <= 2 закрытых глав), поставьте костёр и спальник Comforts (<= 6 м) и выполните /lh camp deploy.'],
+     ['tutorial_cookpot', 'contract_provisions']),
     ('expedition/three_camps', 'Сеть из трёх лагерей', 'comforts:sleeping_bag_red',
-     ['Разверните 3 активных полевых лагеря на расстоянии >= 500 м друг от друга.'], ['logistics_first_camp']),
+     ['Разверните 3 активных полевых лагеря на расстоянии >= 500 м друг от друга.'],
+     ['logistics_first_camp']),
     ('routes/first_route', 'Испытание маршрута', 'minecraft:rail',
-     ['Разметьте маршрут длиной >= 750 м: /lh route begin <имя>, добавьте контрольные точки (/lh route gate), завершите (/lh route finish) и пройдите на транспорте (/lh route start <имя>).', 'Аномальная скорость (> 85 м/с, телепорт) отменяет испытание.'], []),
+     ['Разметьте маршрут длиной >= 750 м: /lh route begin <имя>, добавьте контрольные точки (/lh route gate), завершите (/lh route finish) и пройдите на транспорте (/lh route start <имя>).', 'Аномальная скорость (> 85 м/с, телепорт) отменяет испытание.'],
+     ['tutorial_station', 'contract_rails']),
     ('routes/cargo_delivery', 'Серверная грузовая накладная', 'longhaul:cargo_manifest',
-     ['Получите накладную на одном узле (/lh cargo issue <откуда> <куда>), физически доставьте её в целевой узел и сдайте (/lh cargo deliver).'], []),
+     ['Получите накладную на одном узле (/lh cargo issue <откуда> <куда>), физически доставьте её в целевой узел и сдайте (/lh cargo deliver).'],
+     ['site_forest', 'logistics_first_route']),
 ]
 for i, (adv_id, title, icon, desc, deps) in enumerate(logistics):
     adv(adv_id, 25)
@@ -222,19 +256,23 @@ for i, (adv_id, title, icon, desc, deps) in enumerate(logistics):
           {'verified': {'type': 'heracles:advancement', 'title': 'Серверное подтверждение', 'advancements': ['longhaul:' + adv_id]}},
           desc, deps=deps)
 
+# ---------------------------------------------------------------------------
+# 06 · Восстановление и полевые отчёты
+# ---------------------------------------------------------------------------
 recoveries = [
-    ('sawmill', 'Восстановление лесопилки', 'create:mechanical_saw', 'Подайте 16 железа, 16 андезитового сплава, 32 бревна и установите пилу/водяное колесо.'),
-    ('quarry', 'Карьер с повреждённым подъездом', 'create:mechanical_drill', 'Подайте 24 пластины, 32 рельса, 64 булыжника и смонтируйте бур/дробилку/станцию.'),
-    ('river_port', 'Восстановление речного порта', 'create:portable_storage_interface', 'Подайте 64 доски, 16 железа, 2 интерфейса и смонтируйте перегрузочный узел.'),
-    ('sorting_yard', 'Сортировочная станция', 'create:brass_funnel', 'Подайте 64 рельса, 16 латуни, 8 лент и смонтируйте станцию/сортировку.'),
-    ('power_plant', 'Восстановление энергоузла', 'create:steam_engine', 'Подайте 32 меди, 16 латуни, 48 угля и установите паровую/генераторную установку.'),
-    ('collapsed_bridge', 'Магистральный мост', 'create:metal_girder', 'Подайте 24 балки, 48 рельсов, 64 каменного кирпича и восстановите рельсовый переход.'),
+    ('sawmill', 'Восстановление лесопилки', 'create:mechanical_saw', 'Подайте 16 железа, 16 андезитового сплава, 32 бревна и установите пилу/водяное колесо.', ['site_forest']),
+    ('quarry', 'Карьер с повреждённым подъездом', 'create:mechanical_drill', 'Подайте 24 пластины, 32 рельса, 64 булыжника и смонтируйте бур/дробилку/станцию.', ['site_mine']),
+    ('river_port', 'Восстановление речного порта', 'create:portable_storage_interface', 'Подайте 64 доски, 16 железа, 2 интерфейса и смонтируйте перегрузочный узел.', ['site_port']),
+    ('sorting_yard', 'Сортировочная станция', 'create:brass_funnel', 'Подайте 64 рельса, 16 латуни, 8 лент и смонтируйте станцию/сортировку.', ['site_badlands']),
+    ('power_plant', 'Восстановление энергоузла', 'create:steam_engine', 'Подайте 32 меди, 16 латуни, 48 угля и установите паровую/генераторную установку.', ['site_smelter']),
+    ('collapsed_bridge', 'Магистральный мост', 'create:metal_girder', 'Подайте 24 балки, 48 рельсов, 64 каменного кирпича и восстановите рельсовый переход.', ['site_machine']),
 ]
-for i, (rid, title, icon, detail) in enumerate(recoveries):
+for i, (rid, title, icon, detail, rdeps) in enumerate(recoveries):
     adv('recovery/' + rid, 40)
     quest('recovery_' + rid, title, '06 · Восстановление и полевые отчёты', [(i % 3) * 84 - 84, (i // 3) * 72 - 108], icon,
           {'restored': {'type': 'heracles:advancement', 'title': 'Серверное восстановление объекта', 'advancements': ['longhaul:recovery/' + rid]}},
-          ['Обследуйте объект (/lh recovery list, /lh recovery survey ' + rid + ').', detail, 'Встаньте на ремонтную бочку и выполните /lh recovery restore ' + rid + '.'])
+          ['Обследуйте объект (/lh recovery list, /lh recovery survey ' + rid + ').', detail, 'Встаньте на ремонтную бочку и выполните /lh recovery restore ' + rid + '.'],
+          deps=rdeps)
 
 photo_sites = [
     ('forest', 'Фотоотчёт: Лесная артель'),
@@ -251,7 +289,8 @@ for i, (sid, title) in enumerate(photo_sites):
     adv('photo/' + sid, 20)
     quest('photo_' + sid, title, '06 · Восстановление и полевые отчёты', [(i % 5) * 84 - 168, (i // 5) * 72 + 54], 'exposure:photograph',
           {'photo': {'type': 'heracles:advancement', 'title': 'Уникальный полевой снимок', 'advancements': ['longhaul:photo/' + sid]}},
-          ['Сделайте снимок Exposure на месте (<= 160 м от узла) и выполните /lh photo report ' + sid + '.', 'Один снимок нельзя использовать для двух разных узлов.'])
+          ['Сделайте снимок Exposure на месте (<= 160 м от узла) и выполните /lh photo report ' + sid + '.', 'Один снимок нельзя использовать для двух разных узлов.'],
+          deps=['site_' + sid, 'tutorial_camera'])
 
 cc_sites = [
     ('forest', 'Телеметрия склада: Лесная артель'),
@@ -268,9 +307,11 @@ for i, (sid, title) in enumerate(cc_sites):
     quest('cc_' + sid, title, '06 · Восстановление и полевые отчёты', [(i % 4) * 84 - 126, (i // 4) * 72 + 210], 'computercraft:computer_normal',
           {'telemetry': {'type': 'heracles:advancement', 'title': 'Подтверждение телеметрии и запаса', 'advancements': ['longhaul:cc/' + sid]}},
           ['Запустите /lh cc challenge ' + sid + ', установите компьютер CC: Tweaked в 12 м от бочки узла и обеспечьте реальный запас продукции в бочке, затем /lh cc verify ' + sid + '.'],
-          deps=['site_' + sid])
+          deps=['site_' + sid, 'tutorial_computer'])
 
-# Full 240-spec catalog from design/quest-catalog.json -> groups 07..11
+# ---------------------------------------------------------------------------
+# 07..11 · Full 240-spec catalog with connected dependency chains
+# ---------------------------------------------------------------------------
 CHAPTER_GROUPS = {
     'Основная прогрессия': '07 · Кампания: Основная прогрессия',
     'Региональные контракты': '08 · Кампания: Региональные контракты',
@@ -304,6 +345,53 @@ TYPE_ICONS = {
 UNTRACKED_VEHICLE_TYPES = {'vehicle_delivery', 'scheduled_train', 'vehicle_trial'}
 
 catalog = json.loads((R / 'design/quest-catalog.json').read_text())['quests']
+catalog_ids = {q['id'] for q in catalog}
+
+def catalog_deps(q):
+    qid = q['id']
+    # Main progression: chain main_1_01..08 -> main_2_01..08 -> main_3_01..08 -> main_4_01..08
+    if qid.startswith('main_'):
+        parts = qid.split('_')
+        stg, num = int(parts[1]), int(parts[2])
+        if num > 1:
+            return [f'cat_main_{stg}_{num-1:02d}']
+        if stg > 1:
+            return [f'cat_main_{stg-1}_08']
+        return ['contract_plates']
+    # Regional contracts: region_<site>_01..12
+    if qid.startswith('region_'):
+        parts = qid.split('_')
+        site, num = '_'.join(parts[1:-1]), int(parts[-1])
+        if num > 1:
+            return [f'cat_region_{site}_{num-1:02d}']
+        return ['site_' + site] if ('site_' + site) else ['contract_rails']
+    # Engineering trials: engineering_<subcat>_01..08
+    if qid.startswith('engineering_'):
+        parts = qid.split('_')
+        sub, num = '_'.join(parts[1:-1]), int(parts[-1])
+        if num > 1:
+            return [f'cat_engineering_{sub}_{num-1:02d}']
+        return ['tutorial_precision']
+    # Photo docs: photo_<site>_{arrival,before,after,route}
+    if qid.startswith('photo_'):
+        parts = qid.split('_')
+        site, phase = '_'.join(parts[1:-1]), parts[-1]
+        order = ['arrival', 'before', 'after', 'route']
+        if phase in order:
+            idx = order.index(phase)
+            if idx > 0:
+                prev_id = f'photo_{site}_{order[idx-1]}'
+                if prev_id in catalog_ids:
+                    return ['cat_' + prev_id]
+        return ['photo_' + site] if site != 'continental_archive' else ['photo_continental_archive']
+    # Expedition: expedition_01..16
+    if qid.startswith('expedition_'):
+        num = int(qid.split('_')[1])
+        if num > 1:
+            return [f'cat_expedition_{num-1:02d}']
+        return ['logistics_first_camp']
+    return []
+
 group_indices = {g: 0 for g in CHAPTER_GROUPS.values()}
 compact_catalog = []
 
@@ -334,6 +422,7 @@ for q in catalog:
         icon,
         {'catalog_verified': {'type': 'heracles:advancement', 'title': 'Серверная проверка заказа', 'advancements': ['longhaul:catalog/' + qid]}},
         desc,
+        deps=catalog_deps(q),
         subtitle=f"Этап {q['stage']} · {q['chapter']}",
     )
     compact_catalog.append({
@@ -345,6 +434,80 @@ for q in catalog:
         'optional': bool(q.get('optional')),
         'conditions': q['conditions'],
     })
+
+# ---------------------------------------------------------------------------
+# 12 · Ядерная энергетика и Драконик (Electrodynamics, NuclearCraft, HBM, Ballistix, Draconic Evolution)
+# ---------------------------------------------------------------------------
+adv('nuclear/verified', 60)
+nuclear_quests = [
+    ('nuclear_01_geiger', 'Радиационная разведка и дозиметрия (HBM / Nuclear)', 'minecraft:compass', [
+        'Собраны ядерные индустриальные моды: HBM’s Nuclear Tech (1.20.1 Port), NuclearCraft Neoteric, Electrodynamics, Nuclear Science, Extreme Reactors и Ballistix.',
+        'Начните с изучения урановых/ториевых жил (/lh prospect), защиты и счётчика Гейгера в JEI.',
+    ], ['tutorial_precision']),
+    ('nuclear_02_electrodynamics', 'Электродинамика и обогащение топлива', 'minecraft:blast_furnace', [
+        'Постройте линии переработки из Electrodynamics и NuclearCraft Neoteric для получения урана/тория и конструкционных сплавов.',
+        'Не забудьте отводить промышленный дым и защищаться от радиационного фона.',
+    ], ['nuclear_01_geiger']),
+    ('nuclear_03_reactors', 'Ядерные реакторы и турбины', 'create:steam_engine', [
+        'Спроектируйте многоблочный реактор деления (NuclearCraft Neoteric, Nuclear Science или Extreme Reactors) с контролем охлаждения и паровой турбиной.',
+        'Для автоматического мониторинга используйте порт CC: Tweaked.',
+    ], ['nuclear_02_electrodynamics']),
+    ('nuclear_04_ballistix_hbm', 'Баллистика и тяжёлые заряды (Ballistix / HBM)', 'minecraft:tnt', [
+        'Освойте пусковые шахты Ballistix и детонаторы/заряды HBM’s Nuclear Tech (используйте строго на удалённых полигонах!).',
+        'Помните: взрывы в жилых узлах вызывают загрязнение среды и разрушение инфраструктуры.',
+    ], ['nuclear_03_reactors']),
+    ('nuclear_05_draconium', 'Дракониум и Ядро Виверны (Draconic Evolution)', 'minecraft:glowstone_dust', [
+        'Добудьте пыль/слитки дракониума из Draconic Evolution и скрафтите Ядро Виверны.',
+        'Примечание: дислокаторы телепортации отключены правилами логистики — перемещение остаётся за поездами, судами и дирижаблями.',
+    ], ['nuclear_03_reactors']),
+    ('nuclear_06_fusion_core', 'Слияние (Fusion Crafting) и Энергоядро', 'minecraft:beacon', [
+        'Соберите Ядро слияния (Fusion Crafting Core) и Энергетическое ядро Draconic Evolution для питания континентального комплекса.',
+        'Для фиксации завершения технологической ветки выполните /lh nuclear verify с изделиями ядерного или драконического этапа в инвентаре.',
+    ], ['nuclear_05_draconium']),
+]
+for i, (qid, title, icon, desc, deps) in enumerate(nuclear_quests):
+    if qid == 'nuclear_06_fusion_core':
+        tasks = {'nuclear_done': {'type': 'heracles:advancement', 'title': 'Подтверждение (/lh nuclear verify)', 'advancements': ['longhaul:nuclear/verified']}}
+    else:
+        tasks = {'read': {'type': 'heracles:check', 'title': 'Этап освоен (отметка инженера)'}}
+    quest(qid, title, '12 · Ядерная энергетика и Драконик', [(i % 3 - 1) * 96, (i // 3) * 84 - 42], icon,
+          tasks, desc, deps=deps, subtitle='Long Haul Legacy 2.0 · Поздняя энергетика')
+
+# ---------------------------------------------------------------------------
+# 13 · DOOMED: Хардкор-выживание (Опционально — не блокирует прогрессию)
+# ---------------------------------------------------------------------------
+adv('doomed/checked', 30)
+doomed_quests = [
+    ('doomed_01_intro', 'Опционально: Установка DOOMED и бэкап мира', 'minecraft:paper', [
+        'DOOMED | UNKNOWN CASUALTY — опциональный мод с CurseForge (ID 1589967), не входящий в .mrpack по лицензии.',
+        'Если хотите сыграть с ним: поместите JAR Forge 1.20.1 (и Doomed: Guns) в optional-mods/ (см. DOOMED.md), обязательно сделайте резервную копию мира и проверьте статус через /lh doomed status.',
+    ], []),
+    ('doomed_02_first_aid', 'Полевая медицина перед активацией /doom', 'minecraft:golden_apple', [
+        'Перед включением режима (/doom) подготовьте запас бинтов, антисептиков, еды Farmer’s Delight и золотых яблок.',
+        'Глава полностью опциональна и не влияет на открытие территории.',
+    ], ['doomed_01_intro']),
+    ('doomed_03_blood_and_shock', 'Контроль травм, кровотечений и шока', 'minecraft:potion', [
+        'Активируйте режим через /doom и проведите первый бой/разведку, отслеживая состояние конечностей и крови.',
+        'На движущихся кораблях Valkyrien Skies сначала протестируйте получение урона на безопасной высоте.',
+    ], ['doomed_02_first_aid']),
+    ('doomed_04_guns_and_ballistics', 'Огнестрельная защита (Doomed: Guns / TaCZ)', 'minecraft:crossbow', [
+        'Соберите лёгкое огнестрельное вооружение из Doomed: Guns или TaCZ для дистанционного боя без ближнего контакта и лишних переломов.',
+    ], ['doomed_03_blood_and_shock']),
+    ('doomed_05_field_expedition', 'Экспедиционный рейд в условиях DOOMED', 'minecraft:compass', [
+        'Преодолейте полевой маршрут до лагеря или узла с включённым режимом травм и вернитесь живым без срабатывания Voidout.',
+    ], ['doomed_04_guns_and_ballistics']),
+    ('doomed_06_safe_toggle', 'Протокол отката и серверная отметка (/lh doomed verify)', 'minecraft:shield', [
+        'При необходимости выключить режим используйте /doom off.',
+        'Выполните /lh doomed verify, чтобы зафиксировать опциональную главу DOOMED (работает безопасно даже без установленного JAR).',
+    ], ['doomed_05_field_expedition']),
+]
+for i, (qid, title, icon, desc, deps) in enumerate(doomed_quests):
+    if qid == 'doomed_06_safe_toggle':
+        tasks = {'doomed_ok': {'type': 'heracles:advancement', 'title': 'Проверка (/lh doomed verify)', 'advancements': ['longhaul:doomed/checked']}}
+    else:
+        tasks = {'check': {'type': 'heracles:check', 'title': 'Опциональная отметка DOOMED'}}
+    quest(qid, title, '13 · DOOMED: Хардкор-выживание (Опционально)', [(i % 3 - 1) * 96, (i // 3) * 84 - 42], icon,
+          tasks, desc, deps=deps, subtitle='Опциональный профиль CurseForge')
 
 (O / 'kubejs/startup_scripts/02_quest_catalog.js').write_text(
     '// Auto-generated from design/quest-catalog.json by tools/generate_alpha_quests.py\n'
@@ -364,6 +527,8 @@ for q in catalog:
     '09 · Кампания: Инженерные испытания\n'
     '10 · Кампания: Фотодокументация\n'
     '11 · Кампания: Лагеря и экспедиции\n'
+    '12 · Ядерная энергетика и Драконик\n'
+    '13 · DOOMED: Хардкор-выживание (Опционально)\n'
 )
 total_q = len(list(Q.glob('*.json')))
 total_adv = len(list(ADV_ROOT.rglob('*.json')))
