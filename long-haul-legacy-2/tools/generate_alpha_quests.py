@@ -440,8 +440,8 @@ for q in catalog:
 # ---------------------------------------------------------------------------
 adv('nuclear/verified', 60)
 nuclear_quests = [
-    ('nuclear_01_geiger', 'Радиационная разведка и дозиметрия (HBM / Nuclear)', 'minecraft:compass', [
-        'Собраны ядерные индустриальные моды: HBM’s Nuclear Tech (1.20.1 Port), NuclearCraft Neoteric, Electrodynamics, Nuclear Science, Extreme Reactors и Ballistix.',
+    ('nuclear_01_geiger', 'Радиационная разведка и дозиметрия (Nuclear / Ballistix)', 'minecraft:compass', [
+        'Собраны ядерные индустриальные моды: NuclearCraft Neoteric, Electrodynamics, Nuclear Science, Extreme Reactors и Ballistix (атомная энергетика, ускорители частиц, радиация и МБР в духе HBM).',
         'Начните с изучения урановых/ториевых жил (/lh prospect), защиты и счётчика Гейгера в JEI.',
     ], ['tutorial_precision']),
     ('nuclear_02_electrodynamics', 'Электродинамика и обогащение топлива', 'minecraft:blast_furnace', [
@@ -452,8 +452,8 @@ nuclear_quests = [
         'Спроектируйте многоблочный реактор деления (NuclearCraft Neoteric, Nuclear Science или Extreme Reactors) с контролем охлаждения и паровой турбиной.',
         'Для автоматического мониторинга используйте порт CC: Tweaked.',
     ], ['nuclear_02_electrodynamics']),
-    ('nuclear_04_ballistix_hbm', 'Баллистика и тяжёлые заряды (Ballistix / HBM)', 'minecraft:tnt', [
-        'Освойте пусковые шахты Ballistix и детонаторы/заряды HBM’s Nuclear Tech (используйте строго на удалённых полигонах!).',
+    ('nuclear_04_ballistix_hbm', 'Баллистика и тяжёлые заряды (Ballistix / Nuclear Science)', 'minecraft:tnt', [
+        'Освойте пусковые шахты Ballistix, ракеты и тяжёлые заряды Nuclear Science (используйте строго на удалённых полигонах!).',
         'Помните: взрывы в жилых узлах вызывают загрязнение среды и разрушение инфраструктуры.',
     ], ['nuclear_03_reactors']),
     ('nuclear_05_draconium', 'Дракониум и Ядро Виверны (Draconic Evolution)', 'minecraft:glowstone_dust', [

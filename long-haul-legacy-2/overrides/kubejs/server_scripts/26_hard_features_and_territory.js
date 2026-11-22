@@ -342,7 +342,7 @@ function lhScanWorkshopItems(server, player) {
     }
     if (sid.indexOf('draconicevolution:') === 0 || sid.indexOf('nuclearcraft:') === 0 ||
         sid.indexOf('electrodynamics:') === 0 || sid.indexOf('nuclearscience:') === 0 ||
-        sid.indexOf('ballistix:') === 0 || sid.indexOf('hbmsntm:') === 0 || sid.indexOf('bigreactors:') === 0) {
+        sid.indexOf('ballistix:') === 0 || sid.indexOf('bigreactors:') === 0) {
       if (!db.nuclearVerified) {
         db.nuclearVerified = true;
         changed = true;

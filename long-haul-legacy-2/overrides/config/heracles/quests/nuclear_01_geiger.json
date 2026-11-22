@@ -11,13 +11,13 @@
   "rewards": {},
   "display": {
     "title": {
-      "text": "Радиационная разведка и дозиметрия (HBM / Nuclear)"
+      "text": "Радиационная разведка и дозиметрия (Nuclear / Ballistix)"
     },
     "subtitle": {
       "text": "Long Haul Legacy 2.0 · Поздняя энергетика"
     },
     "description": [
-      "Собраны ядерные индустриальные моды: HBM’s Nuclear Tech (1.20.1 Port), NuclearCraft Neoteric, Electrodynamics, Nuclear Science, Extreme Reactors и Ballistix.",
+      "Собраны ядерные индустриальные моды: NuclearCraft Neoteric, Electrodynamics, Nuclear Science, Extreme Reactors и Ballistix (атомная энергетика, ускорители частиц, радиация и МБР в духе HBM).",
       "Начните с изучения урановых/ториевых жил (/lh prospect), защиты и счётчика Гейгера в JEI."
     ],
     "groups": {
