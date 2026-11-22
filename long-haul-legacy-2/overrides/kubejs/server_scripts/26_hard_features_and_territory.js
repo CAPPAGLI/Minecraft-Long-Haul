@@ -115,9 +115,15 @@ function lhApplyTerritoryBorder(server, announce) {
 function lhLockedHardFeatures(server) {
   var db = lhProgRead(server);
   var pool = global.LHHardFeatureCatalog || [];
+  var pending = {};
+  if (LHActiveSpin && LHActiveSpin.winnerId) pending[LHActiveSpin.winnerId] = true;
+  for (var q = 0; q < LHSpinQueue.length; q++) {
+    if (LHSpinQueue[q] && LHSpinQueue[q].winnerId) pending[LHSpinQueue[q].winnerId] = true;
+  }
   var out = [];
   for (var i = 0; i < pool.length; i++) {
-    if (!db.hardFeatures[pool[i].id]) out.push(pool[i]);
+    var fid = pool[i].id;
+    if (!db.hardFeatures[fid] && !pending[fid]) out.push(pool[i]);
   }
   return out;
 }
