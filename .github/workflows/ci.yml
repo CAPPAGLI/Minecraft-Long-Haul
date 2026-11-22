@@ -151,10 +151,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: long-haul-legacy-2.0-alpha.19
+          name: long-haul-legacy-2.0-alpha.20
           path: |
-            Long-Haul-Legacy-2.0-alpha.19.mrpack
-            Long-Haul-Legacy-2.0-alpha.19-Sources-and-Report.zip
+            Long-Haul-Legacy-2.0-alpha.20.mrpack
+            Long-Haul-Legacy-2.0-alpha.20-Sources-and-Report.zip
             long-haul-legacy-2/assembly/lock.json
             long-haul-legacy-2/MODLIST.md
             long-haul-legacy-2/server-test/smoke-result.json
