@@ -508,16 +508,15 @@ function lhStartIntegrationSetup(server) {
         delete sDbClean.players[String(snailActor.uuid)];
         lhSnailSave(server);
 
-        // 16. Death Stranding Voidout queue (doubling power per death) + live createExplosion + seasonal rising toxic gas
+        // 16. Death Stranding Voidout queue (1.0 * k, uncapped) + difficulty coefficient + live createExplosion + seasonal rising toxic gas
         var vDb = lhVoidoutRead(server);
         var prevVoidoutCount = vDb.totalVoidouts || 0;
         var prevDeathCount = vDb.deathCount || 0;
         var prevLastPower = vDb.lastPower || 0;
-        var vTotal = lhQueueVoidout(server, 'minecraft:overworld', 2000, 80, 2000, 'TestPlayer');
-        ok(vTotal === prevVoidoutCount + 1, 'voidout queued on death');
-        var pwr1 = vDb.lastPower;
-        var vTotal2 = lhQueueVoidout(server, 'minecraft:overworld', 2000, 80, 2000, 'TestPlayer');
-        ok(vTotal2 === prevVoidoutCount + 2 && vDb.lastPower === pwr1 * 2, 'voidout doubles power after death (' + pwr1 + ' -> ' + vDb.lastPower + ')');
+        var vTotal = lhQueueVoidout(server, 'minecraft:overworld', 2000, 80, 2000, 'TestPlayer', 1.0);
+        ok(vTotal === prevVoidoutCount + 1 && vDb.lastPower === 1.0, 'voidout starts at base 1.0 * k (k=1 -> power=1.0)');
+        var vTotal2 = lhQueueVoidout(server, 'minecraft:overworld', 2000, 80, 2000, 'TestPlayer', 140.0);
+        ok(vTotal2 === prevVoidoutCount + 2 && vDb.lastPower === 140.0, 'voidout scales uncapped by difficulty coeff (k=140 -> power=140.0)');
         ok(lhProcessVoidoutQueue(server, true) === 0, 'voidout waits 3 ticks before detonating');
         ok(lhProcessVoidoutQueue(server, true) === 0, 'voidout waits 2nd tick');
         ok(lhProcessVoidoutQueue(server, true) === 2, 'voidout triggers on 3rd tick');
@@ -574,11 +573,38 @@ function lhStartIntegrationSetup(server) {
         lhProgSave(server);
         lhApplyTerritoryBorder(server, false);
 
-        // 21. Draconic Evolution & Nuclear mods loaded cleanly
+        // 21. Difficulty coefficient + Random Respawn (20203 @ k=96) + Death Item Loss + Draconic & Nuclear mods
+        var dSaved = JSON.stringify(lhProgRead(server));
+        var pMock1 = { uuid: '00000000-0000-4000-8000-000000000021' };
+        var pMock2 = { uuid: '00000000-0000-4000-8000-000000000022' };
+        for (var di = 0; di < 63; di++) lhRecordPlayerDeath(server, pMock1);
+        var dOne = lhDifficultyStatus(server, [pMock1]);
+        var dTwo = lhDifficultyStatus(server, [pMock1, pMock2]);
+        ok(dOne.coeff > 94.0 && dOne.coeff < 97.0, 'difficulty coeff near 96 at 63 deaths solo (' + dOne.coeff + ')');
+        ok(dTwo.coeff < dOne.coeff, 'difficulty coeff inversely depends on online players (' + dTwo.coeff + ' < ' + dOne.coeff + ')');
+        var rEnd = lhComputeRandomRespawnTarget(server, 0, 0, 96.0, 0.25, 1.0);
+        ok(rEnd.radius === 20203 && Math.abs(rEnd.x) <= 362 && Math.abs(rEnd.z) <= 362, 'random respawn radius hits 20203 at k=96 and clamps cleanly within current worldborder');
+        var mockInv = {
+          slots: 5,
+          items: [
+            { id: 'minecraft:iron_ingot', count: 16, empty: false },
+            { id: 'minecraft:cobblestone', count: 32, empty: false },
+            { id: 'create:brass_ingot', count: 8, empty: false },
+            { id: 'heracles:quest_book', count: 1, empty: false },
+            { id: 'eccentrictome:tome', count: 1, empty: false }
+          ],
+          getStackInSlot: function (idx) { return this.items[idx]; },
+          extractItem: function (idx) { this.items[idx] = { id: 'minecraft:air', count: 0, empty: true }; }
+        };
+        var lossRes = lhApplyDeathItemLoss(server, { inventory: mockInv }, 96.0, true);
+        ok(lossRes.lostStacks >= 1 && !mockInv.items[3].empty && !mockInv.items[4].empty, 'death_item_loss deletes random items while sparing quest book & tome');
+        LHProgState = JSON.parse(dSaved);
+        lhProgSave(server);
+
         ok(!Item.of('draconicevolution:draconium_ingot').isEmpty(), 'draconicevolution:draconium_ingot registered');
         ok(!Item.of('electrodynamics:ingoturanium').isEmpty() || !Item.of('nuclearcraft:uranium_ingot').isEmpty(), 'Nuclear uranium ingot registered');
 
-        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_doubling + nuclear + draconic');
+        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic');
       } catch (err2) {
         console.error('LH_INTEGRATION_FAIL: live adapter ' + err2);
       }

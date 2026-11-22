@@ -477,23 +477,47 @@ global.LHTerritoryMath = (function () {
   return { TOTAL_GATES: TOTAL_GATES, MAX_BORDER: MAX_BORDER, computeBorder: computeBorder };
 })();
 
-global.LHVoidoutMath = (function () {
-  var BASE_STRENGTH = 12.0;
-  var MAX_PRIMARY_STRENGTH = 96.0;
+global.LHDifficultyMath = (function () {
+  // Time-weighted end-of-run target average deaths per online player:
+  // (23*0.90 + 63*0.75 + 3*90*0.45) / (0.90 + 0.75 + 3*0.45) = 189.45 / 3.00 = 63.15
+  var TARGET_AVG_DEATHS = 63.15;
+  var RANDOM_SPAWN_AT_END = 20203;
+  var END_COEFF = 96.0;
 
-  function computePower(deathCount) {
-    if (!(deathCount >= 1)) {
-      return { deathCount: 0, raw: 0, primary: 0, shockwaves: 0 };
-    }
-    var raw = BASE_STRENGTH * Math.pow(2, deathCount - 1);
-    var primary = raw > MAX_PRIMARY_STRENGTH ? MAX_PRIMARY_STRENGTH : raw;
-    var shockwaves = raw > MAX_PRIMARY_STRENGTH
-      ? Math.min(6, Math.floor(Math.log(raw / MAX_PRIMARY_STRENGTH) / Math.log(2)) * 2)
-      : 0;
-    return { deathCount: deathCount, raw: raw, primary: primary, shockwaves: shockwaves };
+  function compute(onlineDeathsSum, onlinePlayerCount, targetAvg) {
+    var n = Number(onlinePlayerCount || 0);
+    var d = Number(onlineDeathsSum || 0);
+    var t = Number(targetAvg || TARGET_AVG_DEATHS);
+    if (!(n > 0) || !(t > 0) || !(d > 0)) return 1.0;
+    return 1.0 + 95.0 * (d / n) / t;
   }
 
-  return { BASE_STRENGTH: BASE_STRENGTH, MAX_PRIMARY_STRENGTH: MAX_PRIMARY_STRENGTH, computePower: computePower };
+  function randomRespawnRadius(coeff) {
+    var k = Number(coeff || 1.0);
+    if (!(k > 0)) k = 1.0;
+    return Math.round(RANDOM_SPAWN_AT_END * (k / END_COEFF));
+  }
+
+  return {
+    TARGET_AVG_DEATHS: TARGET_AVG_DEATHS,
+    RANDOM_SPAWN_AT_END: RANDOM_SPAWN_AT_END,
+    END_COEFF: END_COEFF,
+    compute: compute,
+    randomRespawnRadius: randomRespawnRadius
+  };
+})();
+
+global.LHVoidoutMath = (function () {
+  var BASE_STRENGTH = 1.0;
+
+  function computePower(difficultyCoeff) {
+    var k = Number(difficultyCoeff || 1.0);
+    if (!(k >= 1.0)) k = 1.0;
+    var power = BASE_STRENGTH * k;
+    return { coeff: k, base: BASE_STRENGTH, raw: power, primary: power };
+  }
+
+  return { BASE_STRENGTH: BASE_STRENGTH, computePower: computePower };
 })();
 
 global.LHHardFeatureCatalog = [
@@ -501,12 +525,21 @@ global.LHHardFeatureCatalog = [
   { id: 'wood_scarcity', name: 'Дефицит леса', icon: '🪓', color: 'dark_green', summary: 'Саженцы отключены, а 40% срубленных брёвен рассыпается — стройте линии в новые леса.' },
   { id: 'smarter_mobs', name: 'Тактический ИИ мобов', icon: '🧠', color: 'red', summary: 'Враждебные мобы получают ускорение, усиленное чутьё и тактические баффы.' },
   { id: 'immortal_snail', name: 'Бессмертная Улитка', icon: '🐌', color: 'dark_red', summary: 'Неуязвимая Улитка пробуждается и бесконечно ползёт к вам сквозь стены (/lh snail status).' },
-  { id: 'voidout_explosion', name: 'Сингулярный выброс', icon: '💥', color: 'dark_purple', summary: 'Каждая смерть вызывает взрыв Voidout, сила которого УДВАИВАЕТСЯ с каждой смертью.' },
+  { id: 'voidout_explosion', name: 'Сингулярный выброс', icon: '💥', color: 'dark_purple', summary: 'Каждая смерть вызывает взрыв Voidout силой 1.0 * k (растёт от коэффициента сложности без капа).' },
   { id: 'toxic_gas', name: 'Сезонный токсичный газ', icon: '☣', color: 'green', summary: 'Раз в 4 дня ядовитый туман поднимается до Y=114 — спасайтесь на горах и летающих островах.' },
-  { id: 'acid_pollution', name: 'Кислотный смог', icon: '🌫', color: 'gray', summary: 'Тяжёлый дым промышленных зон и открытый огонь вызывают удушье без защиты головы/дымоходов.' },
+  { id: 'random_respawn', name: 'Случайный спаун', icon: '🧭', color: 'aqua', summary: 'После смерти вы возрождаетесь в случайной точке вокруг спауна (радиус = 20203 * k / 96).' },
+  { id: 'death_item_loss', name: 'Распад инвентаря', icon: '🗑', color: 'dark_red', summary: 'После гибели случайная часть предметов в инвентаре безвозвратно исчезает (доля растёт с k).' },
+  { id: 'acid_pollution', name: 'Кислотный смог', icon: '🌫', color: 'gray', summary: 'Тяжёлый дым промышленных зон и низин (Y<92) вызывает слабость без шлема и дымоходов.' },
   { id: 'hostile_nights', name: 'Кровавые ночи', icon: '🌙', color: 'dark_red', summary: 'Ночные монстры на поверхности появляются с Силой и огнестойкостью — обустраивайте укрытия.' },
-  { id: 'hunger_exhaustion', name: 'Экспедиционный голод', icon: '🍖', color: 'yellow', summary: 'Долгий бег ускоряет расход сытости; сырая пища ослабляет — переходите на рационы.' },
-  { id: 'tool_wear', name: 'Хрупкость инструментов', icon: '⚒', color: 'aqua', summary: 'Вдали от дома (>400 м) кустарные инструменты изнашиваются быстрее — используйте Tetra и Create.' },
-  { id: 'radiation_fallout', name: 'Радиационный фон', icon: '☢', color: 'light_purple', summary: 'Глубокие шахты (Y<24) накапливают радиационную усталость без защитной брони.' }
+  { id: 'hunger_exhaustion', name: 'Экспедиционный голод', icon: '🍖', color: 'yellow', summary: 'Долгий бег ускоряет расход сытости — используйте транспорт, поезда и рационы.' },
+  { id: 'tool_wear', name: 'Хрупкость инструментов', icon: '⚒', color: 'aqua', summary: 'Вдали от дома (>400 м) инструменты изнашиваются быстрее — переходите на механизмы Create.' },
+  { id: 'radiation_fallout', name: 'Радиационный фон', icon: '☢', color: 'light_purple', summary: 'Глубокие шахты (Y<20) накапливают усталость без защитного нагрудника.' },
+  { id: 'overload_encumbrance', name: 'Гравитационный перегруз', icon: '🪨', color: 'gold', summary: 'Более 24 занятых слотов в инвентаре замедляют шаг — возите грузы вагонетками и транспортом!' },
+  { id: 'cold_altitude_frost', name: 'Высотный мороз', icon: '❄', color: 'aqua', summary: 'На высоте Y>=120 без полной брони или тепла в руке накапливается обморожение.' },
+  { id: 'machine_sabotage_lightning', name: 'Магнитные грозы', icon: '⚡', color: 'yellow', summary: 'Во время грозы и дождя под открытым небом бьют молнии — стройте крыши и громоотводы.' },
+  { id: 'abyssal_pressure', name: 'Глубинная баротравма', icon: '🕳', color: 'dark_gray', summary: 'Ниже Y=0 без источника света в руках накатывает Тьма и давление недр.' },
+  { id: 'toxic_rain_corrosion', name: 'Кислотные осадки', icon: '🌧', color: 'dark_green', summary: 'Дождь под открытым небом разъедает броню и наносит слабый урон — стройте навесы и кабины.' },
+  { id: 'spore_spoilage', name: 'Брожение провианта', icon: '🍄', color: 'green', summary: 'В сырых низинах (Y<68) при уроне сырая еда портится — готовьте полноценные блюда и консервы.' },
+  { id: 'insomnia_ambush', name: 'Сингулярная бессонница', icon: '👁', color: 'dark_purple', summary: 'Ночью под открытым небом к одиноким путникам притягиваются засады фантомов и нежити.' }
 ];
 

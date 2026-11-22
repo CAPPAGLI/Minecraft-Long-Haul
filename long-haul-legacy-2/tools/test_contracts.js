@@ -131,24 +131,39 @@ test('territory border follows 175000^(1/x) where x = 2 - 1/locked and opens 175
   assert.equal(tm.computeBorder(6, 6).size, 175000);
 });
 
-test('voidout power strictly doubles after every death with safe primary cap + shockwaves', () => {
-  const vm2 = sandbox.global.LHVoidoutMath;
-  assert.equal(vm2.computePower(1).raw, 12);
-  assert.equal(vm2.computePower(2).raw, 24);
-  assert.equal(vm2.computePower(3).raw, 48);
-  assert.equal(vm2.computePower(4).raw, 96);
-  const p5 = vm2.computePower(5);
-  assert.equal(p5.raw, 192);
-  assert.equal(p5.primary, 96);
-  assert(p5.shockwaves >= 2);
+test('difficulty coefficient scales with online deaths / online players (target 63.15 -> 96) with no cap and drives random respawn radius 20203', () => {
+  const dm = sandbox.global.LHDifficultyMath;
+  assert.equal(dm.compute(0, 5), 1.0);
+  assert.equal(dm.compute(10, 0), 1.0);
+  assert(Math.abs(dm.compute(63.15 * 3, 3) - 96.0) < 1e-9);
+  assert(dm.compute(200, 2) > dm.compute(200, 4));
+  assert(Math.abs(dm.compute(126.3 * 2, 2) - 191.0) < 1e-9);
+  assert.equal(dm.randomRespawnRadius(96.0), 20203);
+  assert.equal(dm.randomRespawnRadius(1.0), 210);
+  assert(dm.randomRespawnRadius(191.0) > 20203);
 });
 
-test('hard-feature catalog covers all 6 core threats plus additional threats', () => {
+test('voidout power equals 1.0 * difficulty coefficient with no safe cap', () => {
+  const vm2 = sandbox.global.LHVoidoutMath;
+  assert.equal(vm2.BASE_STRENGTH, 1.0);
+  assert.equal(vm2.computePower(1.0).primary, 1.0);
+  assert.equal(vm2.computePower(12.5).primary, 12.5);
+  assert.equal(vm2.computePower(96.0).primary, 96.0);
+  assert.equal(vm2.computePower(250.0).primary, 250.0);
+  assert.equal(vm2.computePower(250.0).raw, 250.0);
+});
+
+test('hard-feature catalog covers all core + new casino threats (random_respawn, death_item_loss, overload, etc.)', () => {
   const ids = new Set((sandbox.global.LHHardFeatureCatalog || []).map(f => f.id));
-  ['ore_scarcity', 'wood_scarcity', 'smarter_mobs', 'immortal_snail', 'voidout_explosion', 'toxic_gas'].forEach(k => {
+  [
+    'ore_scarcity', 'wood_scarcity', 'smarter_mobs', 'immortal_snail',
+    'voidout_explosion', 'toxic_gas', 'random_respawn', 'death_item_loss',
+    'overload_encumbrance', 'cold_altitude_frost', 'machine_sabotage_lightning',
+    'abyssal_pressure', 'toxic_rain_corrosion', 'spore_spoilage', 'insomnia_ambush'
+  ].forEach(k => {
     assert(ids.has(k), 'missing hard feature ' + k);
   });
-  assert(ids.size >= 10, 'expected >= 10 hard features');
+  assert(ids.size >= 20, 'expected >= 20 hard features, got ' + ids.size);
 });
 
 test('all Heracles quests form an acyclic DAG with zero dangling dependencies and include Chapter 12 + DOOMED Chapter 13', () => {

@@ -1,10 +1,15 @@
 // Long Haul Legacy 2.0: Chapter-gated territory expansion (175000^(1/x), x = 2 - 1/locked),
-// randomized hard-feature unlocking with animated Casino Wheel visual, and chapter completion sync.
+// randomized hard-feature unlocking with animated Casino Wheel visual, global death difficulty k,
+// random respawn scatter, random death item loss, and chapter completion sync.
+var LHBlockPos = Java.loadClass('net.minecraft.core.BlockPos');
+var LHDiffArgStr = Java.loadClass('com.mojang.brigadier.arguments.StringArgumentType');
 var LHProgState = null;
 var LHProgTick = 0;
 var LHActiveSpin = null;
 var LHSpinQueue = [];
 var LHBossbarTimer = 0;
+var LHRespawnScatterQueue = [];
+var LHLightningWarnings = [];
 
 var LH_WORKSHOP_ITEMS = [
   'create:water_wheel', 'create:mechanical_press', 'create:mechanical_mixer',
@@ -39,6 +44,8 @@ function lhProgRead(server) {
     hardFeatures: {},
     featureOrder: [],
     workshopItems: {},
+    deathsByPlayer: {},
+    targetAvgDeaths: 63.15,
     rulesConfirmed: false,
     nuclearVerified: false,
     doomedVerified: false,
@@ -48,6 +55,8 @@ function lhProgRead(server) {
   if (!LHProgState.hardFeatures) LHProgState.hardFeatures = {};
   if (!LHProgState.featureOrder) LHProgState.featureOrder = [];
   if (!LHProgState.workshopItems) LHProgState.workshopItems = {};
+  if (!LHProgState.deathsByPlayer) LHProgState.deathsByPlayer = {};
+  if (!(LHProgState.targetAvgDeaths > 0)) LHProgState.targetAvgDeaths = 63.15;
   return LHProgState;
 }
 
@@ -55,6 +64,162 @@ function lhProgSave(server) {
   if (LHProgState !== null) {
     server.persistentData.putString('longhaul_progression_v1', JSON.stringify(LHProgState));
   }
+}
+
+function lhRecordPlayerDeath(server, player) {
+  if (!server || !player) return 0;
+  var db = lhProgRead(server);
+  var pid = lhId(player);
+  db.deathsByPlayer[pid] = (db.deathsByPlayer[pid] || 0) + 1;
+  lhProgSave(server);
+  return db.deathsByPlayer[pid];
+}
+
+function lhDifficultyStatus(server, overridePlayers) {
+  var db = lhProgRead(server);
+  var plist = overridePlayers || (server ? server.players : null) || [];
+  var onlineCount = plist.length || 0;
+  var onlineDeaths = 0;
+  for (var i = 0; i < onlineCount; i++) {
+    var pid = lhId(plist[i]);
+    onlineDeaths += (db.deathsByPlayer[pid] || 0);
+  }
+  var target = Number(db.targetAvgDeaths || global.LHDifficultyMath.TARGET_AVG_DEATHS);
+  var coeff = global.LHDifficultyMath.compute(onlineDeaths, onlineCount, target);
+  var respawnRadius = global.LHDifficultyMath.randomRespawnRadius(coeff);
+  var voidoutPower = global.LHVoidoutMath.computePower(coeff).raw;
+  return {
+    onlineDeaths: onlineDeaths,
+    onlinePlayers: onlineCount,
+    targetAvgDeaths: target,
+    coeff: coeff,
+    respawnRadius: respawnRadius,
+    voidoutPower: voidoutPower
+  };
+}
+
+function lhGetPlayerSpawnCenter(server, player) {
+  try {
+    if (player && typeof player.getRespawnPosition === 'function') {
+      var rPos = player.getRespawnPosition();
+      var rDim = typeof player.getRespawnDimension === 'function' ? player.getRespawnDimension() : null;
+      var dimStr = rDim && typeof rDim.location === 'function' ? String(rDim.location()) : String(rDim || 'minecraft:overworld');
+      if (rPos && dimStr === 'minecraft:overworld') {
+        return { x: Number(rPos.x), z: Number(rPos.z) };
+      }
+    }
+  } catch (eR) {}
+  try {
+    var ow = server.getLevel('minecraft:overworld');
+    if (ow && typeof ow.getSharedSpawnPos === 'function') {
+      var sp = ow.getSharedSpawnPos();
+      if (sp) return { x: Number(sp.x), z: Number(sp.z) };
+    }
+  } catch (eS) {}
+  return { x: 0, z: 0 };
+}
+
+function lhComputeRandomRespawnTarget(server, centerX, centerZ, coeff, rngA, rngB) {
+  var radius = global.LHDifficultyMath.randomRespawnRadius(coeff);
+  var ow = server ? server.getLevel('minecraft:overworld') : null;
+  var borderSize = (ow && ow.worldBorder && Number(ow.worldBorder.size) > 0) ? Number(ow.worldBorder.size) : 724;
+  var halfBorder = Math.max(16, Math.floor(borderSize / 2) - 8);
+  var a = typeof rngA === 'number' ? rngA : Math.random();
+  var b = typeof rngB === 'number' ? rngB : Math.random();
+  var theta = a * 6.283185307179586;
+  var dist = radius * Math.sqrt(Math.max(0, Math.min(1, b)));
+  var tx = Math.round(Number(centerX || 0) + Math.cos(theta) * dist);
+  var tz = Math.round(Number(centerZ || 0) + Math.sin(theta) * dist);
+  if (tx > halfBorder) tx = halfBorder;
+  if (tx < -halfBorder) tx = -halfBorder;
+  if (tz > halfBorder) tz = halfBorder;
+  if (tz < -halfBorder) tz = -halfBorder;
+  return {
+    radius: radius,
+    x: tx,
+    z: tz,
+    centerX: Math.round(Number(centerX || 0)),
+    centerZ: Math.round(Number(centerZ || 0)),
+    halfBorder: halfBorder
+  };
+}
+
+function lhFindSafeRespawnY(overworld, tx, tz) {
+  try {
+    overworld.getChunk(tx >> 4, tz >> 4);
+  } catch (eChk) {}
+  for (var y = 220; y >= 48; y--) {
+    var b = overworld.getBlock(tx, y, tz);
+    var bid = String(b.id);
+    if (bid === 'minecraft:air' || bid === 'minecraft:cave_air' || bid === 'minecraft:void_air' ||
+        bid === 'minecraft:water' || bid === 'minecraft:lava' ||
+        bid.indexOf('leaves') !== -1 || bid.indexOf('grass') !== -1 || bid.indexOf('flower') !== -1 ||
+        bid === 'minecraft:snow' || bid === 'minecraft:vine') {
+      continue;
+    }
+    var above1 = String(overworld.getBlock(tx, y + 1, tz).id);
+    var above2 = String(overworld.getBlock(tx, y + 2, tz).id);
+    if ((above1 === 'minecraft:air' || above1 === 'minecraft:cave_air' || above1 === 'minecraft:snow') &&
+        (above2 === 'minecraft:air' || above2 === 'minecraft:cave_air')) {
+      return y + 1;
+    }
+  }
+  for (var dx = -1; dx <= 1; dx++) {
+    for (var dz = -1; dz <= 1; dz++) {
+      overworld.getBlock(tx + dx, 80, tz + dz).set('minecraft:cobblestone');
+    }
+  }
+  return 81;
+}
+
+function lhApplyDeathItemLoss(server, player, coeff, dryRun) {
+  if (!player || !player.inventory) return { lostStacks: 0, lostItems: 0, fraction: 0, names: [] };
+  var inv = player.inventory;
+  var candidates = [];
+  for (var s = 0; s < inv.slots; s++) {
+    var st = inv.getStackInSlot(s);
+    if (!st || st.empty) continue;
+    var sid = String(st.id);
+    if (sid === 'heracles:quest_book' || sid === 'eccentrictome:tome') continue;
+    candidates.push({ slot: s, id: sid, count: Number(st.count || 1) });
+  }
+  if (!candidates.length) return { lostStacks: 0, lostItems: 0, fraction: 0, names: [] };
+
+  var k = Number(coeff || 1.0);
+  if (!(k >= 1.0)) k = 1.0;
+  var frac = 0.15 + 0.35 * Math.min(1.0, Math.max(0.0, (k - 1.0) / 95.0));
+  var toDelete = Math.min(candidates.length, Math.max(1, Math.round(candidates.length * frac)));
+
+  for (var i = candidates.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = candidates[i];
+    candidates[i] = candidates[j];
+    candidates[j] = tmp;
+  }
+
+  var lostItems = 0;
+  var names = [];
+  for (var d = 0; d < toDelete; d++) {
+    var c = candidates[d];
+    lostItems += c.count;
+    names.push(c.id.split(':')[1] + '×' + c.count);
+    try {
+      if (typeof inv.setStackInSlot === 'function' && typeof Item !== 'undefined') {
+        inv.setStackInSlot(c.slot, Item.empty);
+      } else if (typeof inv.extractItem === 'function') {
+        inv.extractItem(c.slot, c.count, false);
+      }
+    } catch (eDel) {
+      if (typeof inv.extractItem === 'function') {
+        try { inv.extractItem(c.slot, c.count, false); } catch (eDel2) {}
+      }
+    }
+  }
+  if (!dryRun && typeof player.tell === 'function' && toDelete > 0) {
+    player.tell('§c[Распад инвентаря] При смерти безвозвратно уничтожено слотов: §f' + toDelete +
+      ' §7(' + names.slice(0, 6).join(', ') + (names.length > 6 ? '…' : '') + ').');
+  }
+  return { lostStacks: toDelete, lostItems: lostItems, fraction: Math.round(frac * 100) / 100, names: names };
 }
 
 function lhHardIsActive(server, featureId) {
@@ -560,14 +725,147 @@ PlayerEvents.inventoryChanged(function (event) {
   lhScanWorkshopItems(event.server, event.player);
 });
 
+function lhHasLightSourceInHand(player) {
+  var check = function (st) {
+    if (!st || st.empty) return false;
+    var sid = String(st.id);
+    return sid.indexOf('torch') !== -1 || sid.indexOf('lantern') !== -1 ||
+      sid.indexOf('glowstone') !== -1 || sid.indexOf('lamp') !== -1 || sid.indexOf('flare') !== -1;
+  };
+  return check(player.mainHandItem) || check(player.offHandItem);
+}
+
+function lhCountOccupiedSlots(player) {
+  if (!player || !player.inventory) return 0;
+  var inv = player.inventory;
+  var used = 0;
+  for (var s = 0; s < inv.slots; s++) {
+    var st = inv.getStackInSlot(s);
+    if (st && !st.empty) used++;
+  }
+  return used;
+}
+
+function lhProcessRespawnScatter(server, dryRun) {
+  if (!LHRespawnScatterQueue.length) return 0;
+  var remaining = [];
+  var moved = 0;
+  var diff = lhDifficultyStatus(server);
+  var ow = server.getLevel('minecraft:overworld');
+  for (var i = 0; i < LHRespawnScatterQueue.length; i++) {
+    var job = LHRespawnScatterQueue[i];
+    job.delay -= 1;
+    if (job.delay > 0) {
+      remaining.push(job);
+      continue;
+    }
+    moved++;
+    if (dryRun || !ow) continue;
+    var plist = server.players || [];
+    var targetPlayer = null;
+    for (var pi = 0; pi < plist.length; pi++) {
+      if (lhId(plist[pi]) === job.uuid) { targetPlayer = plist[pi]; break; }
+    }
+    if (!targetPlayer) continue;
+    var tgt = lhComputeRandomRespawnTarget(server, job.centerX, job.centerZ, diff.coeff);
+    var safeY = lhFindSafeRespawnY(ow, tgt.x, tgt.z);
+    var uname = targetPlayer.username || (typeof targetPlayer.getName === 'function' ? targetPlayer.getName().getString() : '');
+    if (uname) {
+      server.runCommandSilent('execute in minecraft:overworld run tp ' + uname + ' ' + (tgt.x + 0.5) + ' ' + safeY + ' ' + (tgt.z + 0.5));
+      server.runCommandSilent('effect give ' + uname + ' minecraft:resistance 5 2 true');
+      server.runCommandSilent('effect give ' + uname + ' minecraft:slow_falling 5 0 true');
+    }
+    targetPlayer.tell('§e[Случайный спаун] Вы выброшены в точку (' + tgt.x + ', ' + safeY + ', ' + tgt.z +
+      ')! Текущий радиус рассеивания R=' + tgt.radius + ' м (k=' + (Math.round(diff.coeff * 100) / 100) + ').');
+  }
+  LHRespawnScatterQueue = remaining;
+  return moved;
+}
+
+if (typeof PlayerEvents !== 'undefined' && PlayerEvents.respawned) {
+  PlayerEvents.respawned(function (event) {
+    var server = event.server, player = event.player;
+    if (!server || !player) return;
+    if (!lhHardIsActive(server, 'random_respawn')) return;
+    var creative = (typeof player.isCreative === 'function' && player.isCreative()) ||
+      (typeof player.isSpectator === 'function' && player.isSpectator());
+    if (creative) return;
+    var center = lhGetPlayerSpawnCenter(server, player);
+    LHRespawnScatterQueue.push({
+      uuid: lhId(player),
+      centerX: center.x,
+      centerZ: center.z,
+      delay: 2
+    });
+  });
+}
+
+EntityEvents.hurt(function (event) {
+  var ent = event.entity;
+  if (!ent || typeof ent.isPlayer !== 'function' || !ent.isPlayer()) return;
+  var server = ent.server;
+  if (!server || !lhHardIsActive(server, 'spore_spoilage')) return;
+  if (Number(ent.y) >= 68 || Math.random() >= 0.25) return;
+  var inv = ent.inventory;
+  if (!inv) return;
+  var rawFoods = {
+    'minecraft:beef': 'minecraft:rotten_flesh',
+    'minecraft:porkchop': 'minecraft:rotten_flesh',
+    'minecraft:chicken': 'minecraft:rotten_flesh',
+    'minecraft:mutton': 'minecraft:rotten_flesh',
+    'minecraft:rabbit': 'minecraft:rotten_flesh',
+    'minecraft:cod': 'minecraft:rotten_flesh',
+    'minecraft:salmon': 'minecraft:rotten_flesh',
+    'minecraft:potato': 'minecraft:poisonous_potato'
+  };
+  for (var s = 0; s < inv.slots; s++) {
+    var st = inv.getStackInSlot(s);
+    if (!st || st.empty) continue;
+    var spoiled = rawFoods[String(st.id)];
+    if (spoiled) {
+      inv.extractItem(s, 1, false);
+      ent.give(spoiled);
+      ent.tell('§2[Брожение провианта] Сырая еда испортилась в сырости — готовьте полноценные блюда!');
+      break;
+    }
+  }
+});
+
 ServerEvents.tick(function (event) {
   LHProgTick++;
   var server = event.server;
   lhCasinoStep(server, false);
+  lhProcessRespawnScatter(server, false);
+
+  if (LHLightningWarnings.length > 0) {
+    var nextWarn = [];
+    for (var wi = 0; wi < LHLightningWarnings.length; wi++) {
+      var lw = LHLightningWarnings[wi];
+      lw.delay -= 1;
+      if (lw.delay > 0) {
+        nextWarn.push(lw);
+      } else {
+        try {
+          var owL = server.getLevel('minecraft:overworld');
+          if (owL) {
+            var bolt = owL.createEntity('minecraft:lightning_bolt');
+            if (bolt) {
+              bolt.setPos(lw.x, lw.y, lw.z);
+              bolt.spawn();
+            }
+          }
+        } catch (eBolt2) {}
+      }
+    }
+    LHLightningWarnings = nextWarn;
+  }
 
   if (LHProgTick % 40 !== 0) return;
   var plist = server.players;
   if (!plist) return;
+  var diff = lhDifficultyStatus(server);
+  var k = diff.coeff;
+
   for (var i = 0; i < plist.length; i++) {
     var p = plist[i];
     if (typeof lhStageRecompute === 'function') lhStageRecompute(server, p);
@@ -580,8 +878,14 @@ ServerEvents.tick(function (event) {
 
     var uname = p.username || (typeof p.getName === 'function' ? p.getName().getString() : '');
     if (!uname) continue;
+    var py = Number(p.y);
+    var px = Math.floor(Number(p.x));
+    var pz = Math.floor(Number(p.z));
+    var pPos = new LHBlockPos(px, Math.floor(py) + 1, pz);
+    var seeSky = false;
+    try { seeSky = p.level.canSeeSky(pPos); } catch (eSky) {}
 
-    if (LHProgTick % 120 === 0 && lhHardIsActive(server, 'acid_pollution') && Number(p.y) < 92) {
+    if (LHProgTick % 120 === 0 && lhHardIsActive(server, 'acid_pollution') && py < 92) {
       var hasHelmet = p.headArmorItem && !p.headArmorItem.empty;
       if (!hasHelmet) {
         server.runCommandSilent('effect give ' + uname + ' minecraft:weakness 4 0 true');
@@ -592,10 +896,75 @@ ServerEvents.tick(function (event) {
         server.runCommandSilent('effect give ' + uname + ' minecraft:hunger 3 0 true');
       }
     }
-    if (LHProgTick % 160 === 0 && lhHardIsActive(server, 'radiation_fallout') && Number(p.y) < 20) {
+    if (LHProgTick % 160 === 0 && lhHardIsActive(server, 'radiation_fallout') && py < 20) {
       var armored = p.chestArmorItem && !p.chestArmorItem.empty;
       if (!armored) {
         server.runCommandSilent('effect give ' + uname + ' minecraft:mining_fatigue 5 0 true');
+      }
+    }
+    if (LHProgTick % 80 === 0 && lhHardIsActive(server, 'overload_encumbrance')) {
+      var usedSlots = lhCountOccupiedSlots(p);
+      var limit = Math.max(16, 25 - Math.floor(k / 20));
+      if (usedSlots > limit) {
+        var amp = k >= 50 ? 1 : 0;
+        server.runCommandSilent('effect give ' + uname + ' minecraft:slowness 5 ' + amp + ' true');
+        server.runCommandSilent('effect give ' + uname + ' minecraft:mining_fatigue 5 0 true');
+      }
+    }
+    if (LHProgTick % 120 === 0 && lhHardIsActive(server, 'cold_altitude_frost') && py >= 120) {
+      var fullArmor = p.headArmorItem && !p.headArmorItem.empty &&
+        p.chestArmorItem && !p.chestArmorItem.empty &&
+        p.legsArmorItem && !p.legsArmorItem.empty &&
+        p.feetArmorItem && !p.feetArmorItem.empty;
+      if (!fullArmor && !lhHasLightSourceInHand(p)) {
+        server.runCommandSilent('effect give ' + uname + ' minecraft:slowness 5 0 true');
+        try { if (typeof p.setTicksFrozen === 'function') p.setTicksFrozen(160); } catch (eFr) {}
+      }
+    }
+    if (LHProgTick % 120 === 0 && lhHardIsActive(server, 'abyssal_pressure') && py < 0) {
+      if (!lhHasLightSourceInHand(p)) {
+        server.runCommandSilent('effect give ' + uname + ' minecraft:darkness 6 0 true');
+        server.runCommandSilent('effect give ' + uname + ' minecraft:slowness 4 0 true');
+      }
+    }
+    if (LHProgTick % 160 === 0 && lhHardIsActive(server, 'toxic_rain_corrosion')) {
+      var isRaining = false;
+      try { isRaining = !!p.level.isRaining(); } catch (eRain) {}
+      if (isRaining && seeSky) {
+        server.runCommandSilent('effect give ' + uname + ' minecraft:wither 3 0 true');
+        var armorSlots = [p.headArmorItem, p.chestArmorItem, p.legsArmorItem, p.feetArmorItem];
+        for (var ai = 0; ai < armorSlots.length; ai++) {
+          var ar = armorSlots[ai];
+          if (ar && !ar.empty && ar.damageable && Math.random() < 0.35) {
+            try { ar.hurtAndBreak(1, p, function () {}); } catch (eAr) {}
+          }
+        }
+      }
+    }
+    if (LHProgTick % 240 === 0 && lhHardIsActive(server, 'machine_sabotage_lightning')) {
+      var storm = false;
+      try { storm = !!p.level.isThundering() || (k >= 35 && !!p.level.isRaining()); } catch (eSt) {}
+      if (storm && seeSky && Math.random() < 0.25) {
+        var angL = Math.random() * 6.2831853;
+        var radL = 5.0 + Math.random() * 4.0;
+        var lx = Math.round(px + Math.cos(angL) * radL);
+        var lz = Math.round(pz + Math.sin(angL) * radL);
+        LHLightningWarnings.push({ x: lx, y: Math.floor(py), z: lz, delay: 60 });
+        p.tell('§e⚡ [Магнитная гроза] Рядом копится разряд! Укройтесь под крышей!');
+      }
+    }
+    if (LHProgTick % 600 === 0 && lhHardIsActive(server, 'insomnia_ambush')) {
+      var tod = Number(p.level.dayTime()) % 24000;
+      if (tod >= 13500 && tod <= 23000 && seeSky && Math.random() < 0.22) {
+        try {
+          var angM = Math.random() * 6.2831853;
+          var rM = 18.0 + Math.random() * 6.0;
+          var mob = p.level.createEntity('minecraft:phantom');
+          if (mob) {
+            mob.setPos(px + Math.cos(angM) * rM, py + 12.0, pz + Math.sin(angM) * rM);
+            mob.spawn();
+          }
+        } catch (ePh) {}
       }
     }
   }
@@ -606,9 +975,11 @@ PlayerEvents.loggedIn(function (event) {
   lhProgressionRecompute(server, player, false);
   var info = lhApplyTerritoryBorder(server, false);
   var db = lhProgRead(server);
+  var diff = lhDifficultyStatus(server);
   lhMsg(player, 'Граница мира: ' + info.size + '×' + info.size + ' (±' + Math.round(info.size / 2) +
-    ' м, закрыто глав: ' + info.locked + '). Активных угроз: ' + db.featureOrder.length +
-    '/' + (global.LHHardFeatureCatalog ? global.LHHardFeatureCatalog.length : 11) + ' (/lh territory, /lh casino status).');
+    ' м, закрыто глав: ' + info.locked + '). Коэффициент сложности k=' + (Math.round(diff.coeff * 100) / 100) +
+    '. Активных угроз: ' + db.featureOrder.length +
+    '/' + (global.LHHardFeatureCatalog ? global.LHHardFeatureCatalog.length : 20) + ' (/lh territory, /lh casino status, /lh difficulty).');
 });
 
 ServerEvents.commandRegistry(function (event) {
@@ -626,6 +997,33 @@ ServerEvents.commandRegistry(function (event) {
     return 1;
   });
   root.then(terr);
+
+  var diffCmd = C.literal('difficulty');
+  diffCmd.executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException;
+    var d = lhDifficultyStatus(server);
+    lhMsg(p, 'Коэффициент сложности k=' + (Math.round(d.coeff * 100) / 100) +
+      ' (смертей онлайн=' + d.onlineDeaths + ', игроков онлайн=' + d.onlinePlayers +
+      ', база T=' + d.targetAvgDeaths + '). Сила Voidout=' + (Math.round(d.voidoutPower * 100) / 100) +
+      ', радиус случайного спауна=' + d.respawnRadius + ' м.');
+    return 1;
+  });
+  diffCmd.then(C.literal('target').requires(function (s) { return s.hasPermission(2); })
+    .then(C.argument('value', LHDiffArgStr.word()).executes(function (ctx) {
+      var server = ctx.source.server, p = ctx.source.playerOrException;
+      var val = parseFloat(LHDiffArgStr.getString(ctx, 'value'));
+      if (!(val > 0)) {
+        lhMsg(p, 'Укажите положительное число T, например /lh difficulty target 63.15');
+        return 0;
+      }
+      var db = lhProgRead(server);
+      db.targetAvgDeaths = val;
+      lhProgSave(server);
+      var d = lhDifficultyStatus(server);
+      lhMsg(p, 'Целевой порог T обновлён до ' + val + ' -> k=' + (Math.round(d.coeff * 100) / 100) + '.');
+      return 1;
+    })));
+  root.then(diffCmd);
 
   var casino = C.literal('casino');
   casino.then(C.literal('status').executes(function (ctx) {
@@ -705,5 +1103,5 @@ ServerEvents.commandRegistry(function (event) {
 ServerEvents.loaded(function (event) {
   lhProgRead(event.server);
   lhApplyTerritoryBorder(event.server, false);
-  console.info('[LH] Territory scaling + Casino Wheel hard-feature gate loaded.');
+  console.info('[LH] Territory scaling + Casino Wheel hard-feature gate + global difficulty k loaded.');
 });

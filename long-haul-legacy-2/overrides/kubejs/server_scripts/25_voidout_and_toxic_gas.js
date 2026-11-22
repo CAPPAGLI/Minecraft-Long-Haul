@@ -42,13 +42,24 @@ function lhGasSave(server) {
   }
 }
 
-function lhQueueVoidout(server, dim, x, y, z, playerName) {
+function lhQueueVoidout(server, dim, x, y, z, playerName, coeffOverride) {
   var db = lhVoidoutRead(server);
   db.totalVoidouts = (db.totalVoidouts || 0) + 1;
   db.deathCount = (db.deathCount || 0) + 1;
-  var pwr = global.LHVoidoutMath.computePower(db.deathCount);
+  var coeff = (typeof coeffOverride === 'number' && coeffOverride >= 1.0)
+    ? coeffOverride
+    : (typeof lhDifficultyStatus === 'function' ? lhDifficultyStatus(server).coeff : 1.0);
+  var pwr = global.LHVoidoutMath.computePower(coeff);
   db.lastPower = pwr.raw;
-  db.lastVoidout = { dim: String(dim), x: Math.round(x), y: Math.round(y), z: Math.round(z), player: String(playerName || 'Игрок'), power: pwr.raw };
+  db.lastVoidout = {
+    dim: String(dim),
+    x: Math.round(x),
+    y: Math.round(y),
+    z: Math.round(z),
+    player: String(playerName || 'Игрок'),
+    power: pwr.raw,
+    coeff: coeff
+  };
   lhVoidoutSave(server);
   LHVoidoutQueue.push({
     dim: String(dim),
@@ -58,8 +69,8 @@ function lhQueueVoidout(server, dim, x, y, z, playerName) {
     player: String(playerName || 'Игрок'),
     powerRaw: pwr.raw,
     powerPrimary: pwr.primary,
-    shockwaves: pwr.shockwaves,
-    deathNumber: db.deathCount,
+    coeff: coeff,
+    deathNumber: db.totalVoidouts,
     delay: 3
   });
   return db.totalVoidouts;
@@ -81,22 +92,12 @@ function lhProcessVoidoutQueue(server, dryRun) {
     try {
       var level = server.getLevel(item.dim);
       if (level) {
-        var primary = Number(item.powerPrimary || 12.0);
+        var primary = Number(item.powerPrimary || 1.0);
         level.createExplosion(item.x, item.y, item.z)
           .strength(primary)
           .causesFire(true)
           .explosionMode('block')
           .explode();
-        var swCount = Number(item.shockwaves || 0);
-        for (var sw = 0; sw < swCount; sw++) {
-          var ang = (sw / swCount) * 6.2831853;
-          var rOff = 14.0 + sw * 2.0;
-          level.createExplosion(item.x + Math.cos(ang) * rOff, item.y, item.z + Math.sin(ang) * rOff)
-            .strength(32.0)
-            .causesFire(true)
-            .explosionMode('block')
-            .explode();
-        }
         try {
           var bolt = level.createEntity('minecraft:lightning_bolt');
           if (bolt) {
@@ -108,9 +109,11 @@ function lhProcessVoidoutQueue(server, dryRun) {
       }
       var plist = server.players;
       if (plist) {
+        var pShow = Math.round(Number(item.powerRaw || 1.0) * 100) / 100;
+        var kShow = Math.round(Number(item.coeff || 1.0) * 100) / 100;
         for (var j = 0; j < plist.length; j++) {
-          plist[j].tell('§4§l[VOIDOUT #' + (item.deathNumber || 1) + ' · Сила ' + (item.powerRaw || 12) + '] §cГибель ' + item.player + ' вызвала выброс на (' +
-            Math.round(item.x) + ', ' + Math.round(item.y) + ', ' + Math.round(item.z) + ')! Следующая смерть удвоит силу взрыва. Тотем спасает.');
+          plist[j].tell('§4§l[VOIDOUT #' + (item.deathNumber || 1) + ' · Сила ' + pShow + ' (k=' + kShow + ')] §cГибель ' + item.player + ' вызвала выброс на (' +
+            Math.round(item.x) + ', ' + Math.round(item.y) + ', ' + Math.round(item.z) + ')! Тотем спасает.');
         }
       }
     } catch (eExp) {
@@ -197,12 +200,21 @@ function lhGasStepPlayer(server, player, dtTicks, skipEffects) {
 EntityEvents.death(function (event) {
   var ent = event.entity;
   if (!ent || typeof ent.isPlayer !== 'function' || !ent.isPlayer()) return;
-  if (typeof lhHardIsActive === 'function' && !lhHardIsActive(ent.server, 'voidout_explosion')) return;
   var creative = (typeof ent.isCreative === 'function' && ent.isCreative()) ||
     (typeof ent.isSpectator === 'function' && ent.isSpectator());
   if (creative) return;
+  var server = ent.server;
+  if (typeof lhRecordPlayerDeath === 'function') {
+    lhRecordPlayerDeath(server, ent);
+  }
+  var coeff = typeof lhDifficultyStatus === 'function' ? lhDifficultyStatus(server).coeff : 1.0;
+  if (typeof lhHardIsActive === 'function' && lhHardIsActive(server, 'death_item_loss') &&
+      typeof lhApplyDeathItemLoss === 'function') {
+    lhApplyDeathItemLoss(server, ent, coeff, false);
+  }
+  if (typeof lhHardIsActive === 'function' && !lhHardIsActive(server, 'voidout_explosion')) return;
   var pname = ent.username || (typeof ent.getName === 'function' ? ent.getName().getString() : 'Игрок');
-  lhQueueVoidout(ent.server, ent.level.dimension, ent.x, ent.y, ent.z, pname);
+  lhQueueVoidout(server, ent.level.dimension, ent.x, ent.y, ent.z, pname, coeff);
 });
 
 if (typeof ExplosionEvents !== 'undefined' && ExplosionEvents.detonate) {
@@ -281,9 +293,13 @@ ServerEvents.commandRegistry(function (event) {
     var server = ctx.source.server, p = ctx.source.playerOrException;
     var db = lhVoidoutRead(server);
     var unlocked = typeof lhHardIsActive !== 'function' || lhHardIsActive(server, 'voidout_explosion');
-    var nextPwr = global.LHVoidoutMath.computePower((db.deathCount || 0) + 1);
+    var diff = typeof lhDifficultyStatus === 'function' ? lhDifficultyStatus(server) : { coeff: 1.0, onlineDeaths: 0, onlinePlayers: 1 };
+    var nextPwr = global.LHVoidoutMath.computePower(diff.coeff);
+    var pShow = Math.round(nextPwr.raw * 100) / 100;
+    var kShow = Math.round(diff.coeff * 100) / 100;
     lhMsg(p, 'Сингулярный выброс (Voidout): ' + (unlocked ? '§cАКТИВЕН' : '§7заблокирован в Колесе Угроз') +
-      ', прошлых выбросов=' + (db.deathCount || 0) + ', сила следующего взрыва=' + nextPwr.raw + ' (удваивается после каждой смерти).');
+      ', прошлых выбросов=' + (db.totalVoidouts || 0) +
+      ', сила следующего взрыва=1.0×k=' + pShow + ' (k=' + kShow + ', без капа).');
     return 1;
   }));
   root.then(vo);
