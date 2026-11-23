@@ -241,6 +241,7 @@ function lhRouteStepPlayer(server, player) {
     route.lastCompletedTick = Number(server.tickCount);
     lhLogSave(server);
     lhUnlock(player, 'longhaul:routes/first_route');
+    if (typeof lhCompanyAutoClaimFromInfra === 'function') lhCompanyAutoClaimFromInfra(server, player, gate.x, gate.z, 'route:' + route.id);
     if (typeof lhCompanyReward === 'function') {
       var rfam = Object.keys(run.families)[0] || null;
       lhCompanyReward(server, player, 250 + Math.round(route.length / 20), 'route', rfam);

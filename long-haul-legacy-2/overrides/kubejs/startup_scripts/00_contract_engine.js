@@ -633,7 +633,7 @@ global.LHOpenTTD = (function () {
       tag: 'IRON',
       transportSpec: 'rail',
       resourceSpec: 'mining',
-      hqSx: 1,
+      hqSx: 2,
       hqSz: 0,
       cash: 1500
     },
@@ -645,7 +645,7 @@ global.LHOpenTTD = (function () {
       tag: 'AGRO',
       transportSpec: 'road',
       resourceSpec: 'agro',
-      hqSx: -1,
+      hqSx: -2,
       hqSz: 0,
       cash: 1500
     },
@@ -658,7 +658,7 @@ global.LHOpenTTD = (function () {
       transportSpec: 'air',
       resourceSpec: 'energy',
       hqSx: 0,
-      hqSz: -1,
+      hqSz: -2,
       cash: 1500
     }
   ];
@@ -741,6 +741,10 @@ global.LHOpenTTD = (function () {
     return st;
   }
 
+  function isSpawnProtectedSector(sx, sz) {
+    return Math.max(Math.abs(Number(sx || 0)), Math.abs(Number(sz || 0))) <= 1;
+  }
+
   function ensureBots(state) {
     if (!state.companies) state.companies = {};
     if (!state.claims) state.claims = {};
@@ -748,6 +752,14 @@ global.LHOpenTTD = (function () {
     if (!state.playerCompany) state.playerCompany = {};
     if (!state.marketOrders) state.marketOrders = [];
     if (!state.tradeOffers) state.tradeOffers = [];
+
+    // Migrate legacy bot claims out of the 3x3 spawn sanctuary (-1..1, -1..1)
+    Object.keys(state.claims).forEach(function (ck) {
+      var cl = state.claims[ck];
+      if (cl && cl.owner && String(cl.owner).indexOf('bot_') === 0 && isSpawnProtectedSector(cl.sx, cl.sz)) {
+        delete state.claims[ck];
+      }
+    });
 
     for (var i = 0; i < DEFAULT_BOT_COMPANIES.length; i++) {
       var b = DEFAULT_BOT_COMPANIES[i];
@@ -768,6 +780,9 @@ global.LHOpenTTD = (function () {
           hqSz: b.hqSz,
           stats: { deliveries: 0, tradeVolume: 0, blocksMined: 0, sectorsCaptured: 1, contractsDone: 0, routesDone: 0 }
         };
+      } else {
+        state.companies[b.id].hqSx = b.hqSx;
+        state.companies[b.id].hqSz = b.hqSz;
       }
       var k = sectorKey(b.hqSx, b.hqSz);
       if (!state.claims[k]) {
@@ -847,6 +862,9 @@ global.LHOpenTTD = (function () {
 
   function resolveSectorOwner(state, sx, sz) {
     var key = sectorKey(sx, sz);
+    if (isSpawnProtectedSector(sx, sz)) {
+      return { sx: sx, sz: sz, key: key, owner: null, kind: 'unclaimed', strength: 0, isHq: false, claim: null };
+    }
     var cl = state.claims && state.claims[key];
     if (cl && state.companies && state.companies[cl.owner]) {
       return {
@@ -898,24 +916,50 @@ global.LHOpenTTD = (function () {
     return false;
   }
 
+  function minOwnedSectorDistance(state, cid, sx, sz) {
+    var best = 999999;
+    var owned = 0;
+    var keys = Object.keys(state.claims || {});
+    for (var i = 0; i < keys.length; i++) {
+      var cl = state.claims[keys[i]];
+      if (!cl || cl.owner !== cid) continue;
+      owned++;
+      var md = Math.abs(sx - cl.sx) + Math.abs(sz - cl.sz);
+      if (md < best) best = md;
+    }
+    if (owned === 0) return 1;
+    return best;
+  }
+
   function computeClaimCost(state, cid, sx, sz) {
     var c = state.companies && state.companies[cid];
     if (!c) return { ok: false, reason: 'no_company', cost: BASE_CLAIM_COST };
+    if (isSpawnProtectedSector(sx, sz)) {
+      return { ok: false, reason: 'spawn_protected', cost: 0, adjacent: false, sectorDist: 0, exclaveMult: 1.0 };
+    }
     var ownerInfo = resolveSectorOwner(state, sx, sz);
     var tSpec = c.transportSpec ? TRANSPORT_SPECS[c.transportSpec] : null;
     var disc = tSpec ? Number(tSpec.claimDiscount || 0) : 0;
-    var adj = isAdjacentOwned(state, cid, sx, sz) ? 0.20 : 0.0;
-    var mult = Math.max(0.40, 1.0 - disc - adj);
+    var owned = countClaims(state, cid);
+    var sectorDist = minOwnedSectorDistance(state, cid, sx, sz);
+    var adjacent = sectorDist <= 1;
+    var adjDiscount = (owned > 0 && adjacent) ? 0.20 : 0.0;
+    var specMult = Math.max(0.40, 1.0 - disc - adjDiscount);
+    var exclaveMult = adjacent ? 1.0 : (1.0 + 1.5 * (sectorDist - 1) + 0.5 * (sectorDist - 1) * (sectorDist - 1));
 
     if (ownerInfo.kind === 'claimed') {
-      if (ownerInfo.owner === cid) return { ok: false, reason: 'already_yours', cost: 0 };
-      var baseTakeover = ownerInfo.isHq ? 600 : (225 * ownerInfo.strength);
+      if (ownerInfo.owner === cid) return { ok: false, reason: 'already_yours', cost: 0, adjacent: true, sectorDist: 0, exclaveMult: 1.0 };
+      var baseTakeover = ownerInfo.isHq ? 750 : (240 * ownerInfo.strength);
+      var nonAdjSiege = adjacent ? 1.0 : 1.75;
       return {
         ok: true,
         mode: 'capture',
         targetOwner: ownerInfo.owner,
         strength: ownerInfo.strength,
-        cost: Math.round(baseTakeover * mult)
+        adjacent: adjacent,
+        sectorDist: sectorDist,
+        exclaveMult: exclaveMult * nonAdjSiege,
+        cost: Math.round(baseTakeover * specMult * exclaveMult * nonAdjSiege)
       };
     }
     return {
@@ -923,7 +967,10 @@ global.LHOpenTTD = (function () {
       mode: 'claim',
       targetOwner: ownerInfo.owner,
       strength: 1,
-      cost: Math.round(BASE_CLAIM_COST * mult)
+      adjacent: adjacent,
+      sectorDist: sectorDist,
+      exclaveMult: exclaveMult,
+      cost: Math.round(BASE_CLAIM_COST * specMult * exclaveMult)
     };
   }
 
@@ -943,6 +990,20 @@ global.LHOpenTTD = (function () {
     });
     var colorCode = PLAYER_COLORS[playerCount % PLAYER_COLORS.length];
     var sc = sectorCoords(hqX || 0, hqZ || 0);
+    if (isSpawnProtectedSector(sc.sx, sc.sz)) {
+      var ringCandidates = [
+        [0, 2], [2, 2], [-2, 2], [2, -2], [-2, -2],
+        [1, 2], [-1, 2], [2, 1], [-2, 1], [2, -1], [-2, -1], [1, -2], [-1, -2],
+        [0, 3], [3, 0], [-3, 0], [0, -3]
+      ];
+      for (var ri = 0; ri < ringCandidates.length; ri++) {
+        var rKey = sectorKey(ringCandidates[ri][0], ringCandidates[ri][1]);
+        if (!state.claims[rKey]) {
+          sc = { sx: ringCandidates[ri][0], sz: ringCandidates[ri][1], key: rKey };
+          break;
+        }
+      }
+    }
     var comp = {
       id: cid,
       name: String(displayName || cid).slice(0, 32),
@@ -1013,23 +1074,92 @@ global.LHOpenTTD = (function () {
     return { ok: false, reason: 'bad_kind' };
   }
 
-  function claimOrCaptureSector(state, cid, sx, sz, allowCapture) {
+  function claimOrCaptureSector(state, cid, sx, sz, allowCapture, opts) {
     var comp = state.companies[cid];
     if (!comp) return { ok: false, reason: 'no_company' };
     var info = computeClaimCost(state, cid, sx, sz);
     if (!info.ok) return info;
+    if (opts && opts.remote && !info.adjacent) {
+      return { ok: false, reason: 'not_adjacent_remote', sectorDist: info.sectorDist, cost: info.cost };
+    }
     if (info.mode === 'capture' && !allowCapture) return { ok: false, reason: 'enemy_claimed', targetOwner: info.targetOwner, cost: info.cost };
-    if (comp.cash < info.cost) return { ok: false, reason: 'no_cash', cost: info.cost, cash: comp.cash };
+    var discountFactor = (opts && opts.discountFactor > 0) ? Number(opts.discountFactor) : 1.0;
+    var finalCost = Math.max(10, Math.round(info.cost * discountFactor));
+    if (comp.cash < finalCost) return { ok: false, reason: 'no_cash', cost: finalCost, cash: comp.cash };
 
-    comp.cash -= info.cost;
+    comp.cash -= finalCost;
     if (info.mode === 'capture' && info.targetOwner && state.companies[info.targetOwner]) {
       // Pay 50% compensation into rival company's balance in hostile buyout
-      state.companies[info.targetOwner].cash += Math.round(info.cost * 0.5);
+      state.companies[info.targetOwner].cash += Math.round(finalCost * 0.5);
     }
     var k = sectorKey(sx, sz);
     state.claims[k] = { sx: sx, sz: sz, owner: cid, strength: 1, isHq: false };
     comp.stats.sectorsCaptured = (comp.stats.sectorsCaptured || 0) + 1;
-    return { ok: true, mode: info.mode, cost: info.cost, key: k, previousOwner: info.targetOwner };
+    return {
+      ok: true,
+      mode: info.mode,
+      cost: finalCost,
+      key: k,
+      previousOwner: info.targetOwner,
+      adjacent: info.adjacent,
+      sectorDist: info.sectorDist
+    };
+  }
+
+  function weakenOrCaptureSector(state, attackerCid, sx, sz, powerLevels, cashCost) {
+    var comp = state.companies[attackerCid];
+    if (!comp) return { ok: false, reason: 'no_company' };
+    var k = sectorKey(sx, sz);
+    var cl = state.claims[k];
+    if (!cl || !state.companies[cl.owner]) return { ok: false, reason: 'not_claimed' };
+    if (cl.owner === attackerCid) return { ok: false, reason: 'already_yours' };
+    var cost = Math.max(0, Math.round(Number(cashCost || 0)));
+    if (comp.cash < cost) return { ok: false, reason: 'no_cash', cost: cost, cash: comp.cash };
+
+    comp.cash -= cost;
+    var prevOwner = cl.owner;
+    var dmg = Math.max(1, Math.round(Number(powerLevels || 1)));
+    var rem = Number(cl.strength || 1) - dmg;
+    if (rem <= 0) {
+      state.claims[k] = { sx: sx, sz: sz, owner: attackerCid, strength: 1, isHq: false };
+      comp.stats.sectorsCaptured = (comp.stats.sectorsCaptured || 0) + 1;
+      return { ok: true, captured: true, previousOwner: prevOwner, newStrength: 1, cost: cost };
+    }
+    cl.strength = rem;
+    return { ok: true, captured: false, previousOwner: prevOwner, newStrength: rem, cost: cost };
+  }
+
+  function transferSector(state, fromCid, toCid, sx, sz) {
+    var fromComp = state.companies[fromCid];
+    var toComp = state.companies[toCid];
+    if (!fromComp || !toComp || fromCid === toCid) return { ok: false, reason: 'bad_company' };
+    var k = sectorKey(sx, sz);
+    var cl = state.claims[k];
+    if (!cl || cl.owner !== fromCid) return { ok: false, reason: 'not_owned' };
+    if (cl.isHq && countClaims(state, fromCid) <= 1) return { ok: false, reason: 'last_hq' };
+    cl.owner = toCid;
+    cl.isHq = false;
+    cl.strength = 1;
+    toComp.stats.sectorsCaptured = (toComp.stats.sectorsCaptured || 0) + 1;
+    return { ok: true, key: k, from: fromCid, to: toCid };
+  }
+
+  function antitrustSeize(state, attackerCid, sx, sz) {
+    var comp = state.companies[attackerCid];
+    if (!comp) return { ok: false, reason: 'no_company' };
+    var k = sectorKey(sx, sz);
+    var cl = state.claims[k];
+    if (!cl || !state.companies[cl.owner]) return { ok: false, reason: 'not_claimed' };
+    if (cl.owner === attackerCid) return { ok: false, reason: 'already_yours' };
+    if (!isAdjacentOwned(state, attackerCid, sx, sz)) return { ok: false, reason: 'not_adjacent' };
+    if ((cl.strength || 1) > 1) return { ok: false, reason: 'fortified', strength: cl.strength };
+    var target = state.companies[cl.owner];
+    var myVal = computeValuation(state, attackerCid);
+    var rivalVal = computeValuation(state, target.id);
+    if (target.cash >= 100 && myVal < rivalVal * 1.8) {
+      return { ok: false, reason: 'antitrust_not_eligible', myVal: myVal, rivalVal: rivalVal, rivalCash: target.cash };
+    }
+    return claimOrCaptureSector(state, attackerCid, sx, sz, true, { discountFactor: 0.55 });
   }
 
   function fortifySector(state, cid, sx, sz) {
@@ -1057,12 +1187,12 @@ global.LHOpenTTD = (function () {
       var bot = state.companies[DEFAULT_BOT_COMPANIES[i].id];
       if (!bot) continue;
       var ownedCount = countClaims(state, bot.id);
-      var income = 85 + ownedCount * 42;
+      var income = 70 + ownedCount * 28;
       bot.cash += income;
       bot.stats.deliveries += 1;
 
-      if (bot.cash >= 420) {
-        // Pick an unclaimed sector adjacent to an owned sector within active worldborder
+      if (bot.cash >= 650) {
+        // Pick an unclaimed sector adjacent to an owned sector within active worldborder, never inside the 3x3 spawn ring
         var candidates = [];
         var claimKeys = Object.keys(state.claims);
         var dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
@@ -1072,6 +1202,7 @@ global.LHOpenTTD = (function () {
           for (var d = 0; d < dirs.length; d++) {
             var nsx = cl.sx + dirs[d][0];
             var nsz = cl.sz + dirs[d][1];
+            if (isSpawnProtectedSector(nsx, nsz)) continue;
             if (Math.abs(nsx) > limit || Math.abs(nsz) > limit) continue;
             var nKey = sectorKey(nsx, nsz);
             if (!state.claims[nKey]) {
@@ -1173,12 +1304,18 @@ global.LHOpenTTD = (function () {
     countClaims: countClaims,
     computeValuation: computeValuation,
     resolveSectorOwner: resolveSectorOwner,
+    isSpawnProtectedSector: isSpawnProtectedSector,
+    isAdjacentOwned: isAdjacentOwned,
+    minOwnedSectorDistance: minOwnedSectorDistance,
     computeClaimCost: computeClaimCost,
     companyCreate: companyCreate,
     companyJoin: companyJoin,
     companyLeave: companyLeave,
     setSpecialization: setSpecialization,
     claimOrCaptureSector: claimOrCaptureSector,
+    weakenOrCaptureSector: weakenOrCaptureSector,
+    transferSector: transferSector,
+    antitrustSeize: antitrustSeize,
     fortifySector: fortifySector,
     botExpandStep: botExpandStep,
     refreshBotOrders: refreshBotOrders,

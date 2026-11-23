@@ -1,5 +1,6 @@
 {
   "dependencies": [
+    "tutorial_camera",
     "cat_expedition_14"
   ],
   "tasks": {
@@ -25,10 +26,10 @@
       "Проверка сервером: /lh catalog verify expedition_15 (сведения: /lh catalog info expedition_15)."
     ],
     "groups": {
-      "11 · Кампания: Лагеря и экспедиции": {
+      "13 · Фотодокументация (Опционально)": {
         "position": [
-          -42,
-          0
+          126,
+          432
         ]
       }
     },

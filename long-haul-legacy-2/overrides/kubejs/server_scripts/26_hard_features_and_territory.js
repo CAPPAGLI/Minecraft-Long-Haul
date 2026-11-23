@@ -10,15 +10,16 @@ var LHSpinQueue = [];
 var LHBossbarTimer = 0;
 var LHRespawnScatterQueue = [];
 var LHLightningWarnings = [];
+var LHSporeWarnCooldown = {};
 
 var LH_WORKSHOP_ITEMS = [
   'create:water_wheel', 'create:mechanical_press', 'create:mechanical_mixer',
   'create:brass_ingot', 'create:precision_mechanism', 'create:track',
-  'create:track_station', 'computercraft:computer_normal', 'exposure:camera',
-  'exposure:black_and_white_film', 'exposure:album', 'farmersdelight:cooking_pot'
+  'create:track_station', 'computercraft:computer_normal', 'farmersdelight:cooking_pot'
 ];
 
 var LH_GATE_ORDER = ['ch00', 'ch01', 'ch02', 'ch03', 'ch05', 'ch04'];
+var LH_MAIN_CHAPTER_KEYS = ['ch00', 'ch01', 'ch02', 'ch03', 'ch04', 'ch05', 'ch06', 'ch07', 'ch08', 'ch09', 'ch10', 'ch11', 'ch12'];
 
 var LH_CHAPTER_LABELS = {
   ch00: '00 · Сюжет: Ушёл за хлебом',
@@ -27,13 +28,15 @@ var LH_CHAPTER_LABELS = {
   ch03: '03 · Контрольные поставки',
   ch04: '04 · Экономические центры',
   ch05: '05 · Маршруты и лагеря',
-  ch06: '06 · Восстановление и полевые отчёты',
+  ch06: '06 · Восстановление и телеметрия',
   ch07: '07 · Кампания: Основная прогрессия',
   ch08: '08 · Кампания: Региональные контракты',
   ch09: '09 · Кампания: Инженерные испытания',
-  ch10: '10 · Кампания: Фотодокументация',
-  ch11: '11 · Кампания: Лагеря и экспедиции',
-  ch12: '12 · Ядерная энергетика и Драконик'
+  ch10: '10 · Кампания: Лагеря и экспедиции',
+  ch11: '11 · Ядерная энергетика и Драконик',
+  ch12: '12 · OpenTTD: Компании и Империя',
+  ch13: '13 · Фотодокументация (Опционально)',
+  ch14: '14 · DOOMED: Хардкор-выживание (Опционально)'
 };
 
 function lhProgRead(server) {
@@ -144,32 +147,98 @@ function lhComputeRandomRespawnTarget(server, centerX, centerZ, coeff, rngA, rng
   };
 }
 
-function lhFindSafeRespawnY(overworld, tx, tz) {
+function lhIsPassableSpawnSpace(bid) {
+  return bid === 'minecraft:air' || bid === 'minecraft:cave_air' || bid === 'minecraft:void_air' ||
+    bid === 'minecraft:snow' || bid.indexOf('grass') !== -1 || bid.indexOf('flower') !== -1 || bid === 'minecraft:vine';
+}
+
+function lhFindSafeRespawnY(overworld, tx, tz, allowPlatform) {
   try {
     overworld.getChunk(tx >> 4, tz >> 4);
   } catch (eChk) {}
-  for (var y = 220; y >= 48; y--) {
+  for (var y = 440; y >= 48; y--) {
     var b = overworld.getBlock(tx, y, tz);
     var bid = String(b.id);
     if (bid === 'minecraft:air' || bid === 'minecraft:cave_air' || bid === 'minecraft:void_air' ||
-        bid === 'minecraft:water' || bid === 'minecraft:lava' ||
+        bid === 'minecraft:bedrock' || bid === 'minecraft:water' || bid === 'minecraft:lava' ||
         bid.indexOf('leaves') !== -1 || bid.indexOf('grass') !== -1 || bid.indexOf('flower') !== -1 ||
         bid === 'minecraft:snow' || bid === 'minecraft:vine') {
       continue;
     }
     var above1 = String(overworld.getBlock(tx, y + 1, tz).id);
     var above2 = String(overworld.getBlock(tx, y + 2, tz).id);
-    if ((above1 === 'minecraft:air' || above1 === 'minecraft:cave_air' || above1 === 'minecraft:snow') &&
-        (above2 === 'minecraft:air' || above2 === 'minecraft:cave_air')) {
+    if (lhIsPassableSpawnSpace(above1) && lhIsPassableSpawnSpace(above2)) {
       return y + 1;
     }
   }
+  if (allowPlatform === false) return -1;
   for (var dx = -1; dx <= 1; dx++) {
     for (var dz = -1; dz <= 1; dz++) {
       overworld.getBlock(tx + dx, 80, tz + dz).set('minecraft:cobblestone');
+      overworld.getBlock(tx + dx, 81, tz + dz).set('minecraft:air');
+      overworld.getBlock(tx + dx, 82, tz + dz).set('minecraft:air');
     }
   }
   return 81;
+}
+
+function lhFindSafeSurfaceColumn(overworld, cx, cz) {
+  var directY = lhFindSafeRespawnY(overworld, cx, cz, false);
+  if (directY > 0) return { x: cx, y: directY, z: cz };
+  for (var rad = 4; rad <= 48; rad += 4) {
+    for (var step = 0; step < 12; step++) {
+      var ang = (step / 12.0) * 6.2831853;
+      var sx = Math.round(cx + Math.cos(ang) * rad);
+      var sz = Math.round(cz + Math.sin(ang) * rad);
+      var sy = lhFindSafeRespawnY(overworld, sx, sz, false);
+      if (sy > 0) return { x: sx, y: sy, z: sz };
+    }
+  }
+  return { x: cx, y: lhFindSafeRespawnY(overworld, cx, cz, true), z: cz };
+}
+
+function lhIsPlayerTrappedOrBedrock(overworld, px, py, pz) {
+  var ix = Math.floor(px), iy = Math.floor(py), iz = Math.floor(pz);
+  if (iy <= 0) return true;
+  try {
+    var below = String(overworld.getBlock(ix, iy - 1, iz).id);
+    var feet = String(overworld.getBlock(ix, iy, iz).id);
+    var head = String(overworld.getBlock(ix, iy + 1, iz).id);
+    if (below === 'minecraft:bedrock' || feet === 'minecraft:bedrock' || head === 'minecraft:bedrock') return true;
+    if (!lhIsPassableSpawnSpace(feet) && !lhIsPassableSpawnSpace(head) && feet !== 'minecraft:water' && head !== 'minecraft:water') return true;
+  } catch (eTrap) {}
+  return false;
+}
+
+function lhEnsureSafeSpawn(server, player, fixWorldSpawn) {
+  if (!server || !player || !player.level) return false;
+  if (String(player.level.dimension) !== 'minecraft:overworld') return false;
+  var creative = (typeof player.isCreative === 'function' && player.isCreative()) ||
+    (typeof player.isSpectator === 'function' && player.isSpectator());
+  if (creative) return false;
+  var ow = server.getLevel('minecraft:overworld');
+  if (!ow) return false;
+  var px = Number(player.x), py = Number(player.y), pz = Number(player.z);
+  if (!lhIsPlayerTrappedOrBedrock(ow, px, py, pz)) return false;
+
+  var safe = lhFindSafeSurfaceColumn(ow, Math.floor(px), Math.floor(pz));
+  var uname = player.username || (typeof player.getName === 'function' ? player.getName().getString() : '');
+  if (uname) {
+    server.runCommandSilent('execute in minecraft:overworld run tp ' + uname + ' ' + (safe.x + 0.5) + ' ' + safe.y + ' ' + (safe.z + 0.5));
+    server.runCommandSilent('effect give ' + uname + ' minecraft:resistance 5 4 true');
+    if (fixWorldSpawn) {
+      try {
+        var sp = typeof ow.getSharedSpawnPos === 'function' ? ow.getSharedSpawnPos() : null;
+        if (!sp || Number(sp.y) <= 0) {
+          server.runCommandSilent('setworldspawn ' + safe.x + ' ' + safe.y + ' ' + safe.z);
+        }
+      } catch (eSp) {}
+    }
+  }
+  if (typeof player.tell === 'function') {
+    player.tell('§e[Безопасный спаун] Обнаружен спаун в бэдроке/под землёй (Y=' + Math.round(py) + ') — вы перемещены на поверхность (' + safe.x + ', ' + safe.y + ', ' + safe.z + ').');
+  }
+  return true;
 }
 
 function lhApplyDeathItemLoss(server, player, coeff, dryRun) {
@@ -236,6 +305,26 @@ function lhHardFeatureMeta(featureId) {
   return null;
 }
 
+function lhChapterProgressSummary(server) {
+  var db = lhProgRead(server);
+  var doneMain = 0;
+  var firstOpenKey = LH_MAIN_CHAPTER_KEYS[LH_MAIN_CHAPTER_KEYS.length - 1];
+  for (var i = 0; i < LH_MAIN_CHAPTER_KEYS.length; i++) {
+    var ck = LH_MAIN_CHAPTER_KEYS[i];
+    if (db.chapters[ck]) {
+      doneMain++;
+    } else if (firstOpenKey === LH_MAIN_CHAPTER_KEYS[LH_MAIN_CHAPTER_KEYS.length - 1] && !db.chapters[ck]) {
+      firstOpenKey = ck;
+    }
+  }
+  return {
+    doneMain: doneMain,
+    totalMain: LH_MAIN_CHAPTER_KEYS.length,
+    currentKey: firstOpenKey,
+    currentLabel: LH_CHAPTER_LABELS[firstOpenKey] || firstOpenKey
+  };
+}
+
 function lhTerritoryCounts(server) {
   var db = lhProgRead(server);
   var gateUnlocked = 0;
@@ -243,6 +332,7 @@ function lhTerritoryCounts(server) {
     if (db.chapters[cid]) gateUnlocked++;
   });
   var bonusUnlocked = 0;
+  // Photo chapter (ch13) and DOOMED (ch14) remain strictly optional and are never required for border progression
   ['ch06', 'ch07', 'ch08', 'ch09', 'ch10', 'ch11', 'ch12'].forEach(function (cid) {
     if (db.chapters[cid]) bonusUnlocked++;
   });
@@ -266,11 +356,12 @@ function lhApplyTerritoryBorder(server, announce) {
 
   if (announce && prev > 0 && info.size > prev) {
     var half = Math.round(info.size / 2);
-    var plist = server.players;
-    if (plist) {
-      for (var i = 0; i < plist.length; i++) {
-        plist[i].tell('§b§l[Граница мира] §aТерритория расширена: §f' + info.size + '×' + info.size +
-          ' §7(±' + half + ' м, закрыто глав: ' + info.locked + ', x=' + (Math.round(info.x * 1000) / 1000) + ')');
+    var msgB = 'Территория расширена до ' + info.size + '×' + info.size + ' (±' + half + ' м, этапы расширения: ' + info.unlocked + '/' + info.total + ').';
+    if (typeof lhLogEvent === 'function') {
+      lhLogEvent(server, 'territory', msgB, { chatMode: 'important' });
+    } else if (server.players) {
+      for (var i = 0; i < server.players.length; i++) {
+        server.players[i].tell('§b§l[Граница мира] §a' + msgB);
       }
     }
   }
@@ -416,11 +507,16 @@ function lhCasinoFinalizeWinner(server, winnerId, reasonLabel, skipVisual) {
     }
     lhCasinoBroadcastFrame(server, pool, wIdx, true, reasonLabel);
     LHBossbarTimer = 100;
+    if (typeof lhLogEvent === 'function') {
+      lhLogEvent(server, 'hazard', 'Колесо Угроз (' + (reasonLabel || 'Глава') + '): выпало «' + winner.name + '» — ' + winner.summary, { chatMode: 'important' });
+    }
     var plist = server.players;
     if (plist) {
       for (var j = 0; j < plist.length; j++) {
-        plist[j].tell('§6§l[Колесо Угроз · ' + (reasonLabel || 'Глава') + '] §cВыпало усложнение: §f' +
-          winner.icon + ' ' + winner.name + ' §7— ' + winner.summary);
+        if (typeof lhLogEvent !== 'function') {
+          plist[j].tell('§6§l[Колесо Угроз · ' + (reasonLabel || 'Глава') + '] §cВыпало усложнение: §f' +
+            winner.icon + ' ' + winner.name + ' §7— ' + winner.summary);
+        }
         if (winner.id === 'immortal_snail' && typeof lhSnailWake === 'function') {
           lhSnailWake(server, plist[j], false);
         }
@@ -485,10 +581,13 @@ function lhUnlockChapter(server, chapterId, triggerSpin, dryRun) {
   lhProgSave(server);
 
   var label = LH_CHAPTER_LABELS[chapterId] || chapterId;
-  var plist = server.players;
-  if (!dryRun && plist) {
-    for (var i = 0; i < plist.length; i++) {
-      plist[i].tell('§a§l[Глава завершена] §f' + label + ' §7-> расширяем территорию и крутим Колесо Угроз!');
+  if (!dryRun) {
+    if (typeof lhLogEvent === 'function') {
+      lhLogEvent(server, 'chapter', 'Глава завершена: ' + label + ' -> расширяем границу и крутим Колесо Угроз!', { chatMode: 'important' });
+    } else if (server.players) {
+      for (var i = 0; i < server.players.length; i++) {
+        server.players[i].tell('§a§l[Глава завершена] §f' + label + ' §7-> расширяем территорию и крутим Колесо Угроз!');
+      }
     }
   }
   lhApplyTerritoryBorder(server, !dryRun);
@@ -572,8 +671,8 @@ function lhProgressionRecompute(server, player, dryRun) {
     lhUnlockChapter(server, 'ch01', true, dryRun);
   }
 
-  // ch02: Workshop & Expedition (>= 8 of 12 milestone items obtained)
-  if (!db.chapters.ch02 && Object.keys(db.workshopItems || {}).length >= 8) {
+  // ch02: Workshop & Expedition (>= 6 of 9 core industrial milestone items obtained)
+  if (!db.chapters.ch02 && Object.keys(db.workshopItems || {}).length >= 6) {
     lhUnlockChapter(server, 'ch02', true, dryRun);
   }
 
@@ -609,7 +708,7 @@ function lhProgressionRecompute(server, player, dryRun) {
     }
   }
 
-  // ch06: Recoveries & Field Reports
+  // ch06: Recoveries & CC Telemetry
   if (!db.chapters.ch06) {
     var restCount = 0;
     Object.keys(recDb.items || {}).forEach(function (rid) {
@@ -620,24 +719,29 @@ function lhProgressionRecompute(server, player, dryRun) {
     }
   }
 
-  // ch07..ch11: Catalog chapters (at least 4 verified orders in the respective chapter)
-  var catCounts = { ch07: 0, ch08: 0, ch09: 0, ch10: 0, ch11: 0 };
+  // ch07..ch10 (main campaign) + ch13 (optional photo): at least 4 verified orders
+  var catCounts = { ch07: 0, ch08: 0, ch09: 0, ch10: 0, ch13: 0 };
   Object.keys(catDb.completed || {}).forEach(function (ck) {
     var qid = ck.split(':')[1] || '';
     if (qid.indexOf('main_') === 0) catCounts.ch07++;
     else if (qid.indexOf('region_') === 0) catCounts.ch08++;
     else if (qid.indexOf('engineering_') === 0) catCounts.ch09++;
-    else if (qid.indexOf('photo_') === 0) catCounts.ch10++;
-    else if (qid.indexOf('expedition_') === 0) catCounts.ch11++;
+    else if (qid.indexOf('expedition_') === 0) catCounts.ch10++;
+    else if (qid.indexOf('photo_') === 0) catCounts.ch13++;
   });
   Object.keys(catCounts).forEach(function (cid) {
     if (!db.chapters[cid] && catCounts[cid] >= 4) {
-      lhUnlockChapter(server, cid, true, dryRun);
+      lhUnlockChapter(server, cid, cid !== 'ch13', dryRun);
     }
   });
 
-  // ch12: Nuclear & Draconic milestone
-  if (!db.chapters.ch12 && db.nuclearVerified) {
+  // ch11: Nuclear & Draconic milestone
+  if (!db.chapters.ch11 && db.nuclearVerified) {
+    lhUnlockChapter(server, 'ch11', true, dryRun);
+  }
+
+  // ch12: OpenTTD Empire milestone
+  if (!db.chapters.ch12 && player && typeof player.isAdvancementDone === 'function' && player.isAdvancementDone('longhaul:openttd/empire')) {
     lhUnlockChapter(server, 'ch12', true, dryRun);
   }
 
@@ -788,10 +892,13 @@ if (typeof PlayerEvents !== 'undefined' && PlayerEvents.respawned) {
   PlayerEvents.respawned(function (event) {
     var server = event.server, player = event.player;
     if (!server || !player) return;
-    if (!lhHardIsActive(server, 'random_respawn')) return;
     var creative = (typeof player.isCreative === 'function' && player.isCreative()) ||
       (typeof player.isSpectator === 'function' && player.isSpectator());
     if (creative) return;
+    if (!lhHardIsActive(server, 'random_respawn')) {
+      lhEnsureSafeSpawn(server, player, true);
+      return;
+    }
     var center = lhGetPlayerSpawnCenter(server, player);
     LHRespawnScatterQueue.push({
       uuid: lhId(player),
@@ -829,7 +936,13 @@ EntityEvents.hurt(function (event) {
     if (spoiled) {
       inv.extractItem(s, 1, false);
       ent.give(spoiled);
-      ent.tell('§2[Брожение провианта] Сырая еда испортилась в сырости — готовьте полноценные блюда!');
+      var pidSp = lhId(ent);
+      if (!LHSporeWarnCooldown[pidSp] || LHProgTick - LHSporeWarnCooldown[pidSp] >= 600) {
+        LHSporeWarnCooldown[pidSp] = LHProgTick;
+        if (typeof lhLogEvent === 'function') {
+          lhLogEvent(server, 'hazard', 'Брожение провианта: сырая еда испортилась у игрока в сырой низине.', { chatMode: 'never' });
+        }
+      }
       break;
     }
   }
@@ -880,6 +993,11 @@ ServerEvents.tick(function (event) {
       (typeof p.isSpectator === 'function' && p.isSpectator());
     if (creative) continue;
 
+    // Continuous safeguard for players still below Y=0 or trapped inside bedrock
+    if (Number(p.y) <= 0) {
+      lhEnsureSafeSpawn(server, p, true);
+    }
+
     var uname = p.username || (typeof p.getName === 'function' ? p.getName().getString() : '');
     if (!uname) continue;
     var py = Number(p.y);
@@ -889,26 +1007,26 @@ ServerEvents.tick(function (event) {
     var seeSky = false;
     try { seeSky = p.level.canSeeSky(pPos); } catch (eSky) {}
 
-    if (LHProgTick % 120 === 0 && lhHardIsActive(server, 'acid_pollution') && py < 92) {
+    if (LHProgTick % 240 === 0 && lhHardIsActive(server, 'acid_pollution') && py < 92) {
       var compAcid = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, p) : null;
       var hasHelmet = (p.headArmorItem && !p.headArmorItem.empty) || (compAcid && compAcid.resourceSpec === 'energy');
       if (!hasHelmet) {
         server.runCommandSilent('effect give ' + uname + ' minecraft:weakness 4 0 true');
       }
     }
-    if (LHProgTick % 120 === 0 && lhHardIsActive(server, 'hunger_exhaustion')) {
+    if (LHProgTick % 240 === 0 && lhHardIsActive(server, 'hunger_exhaustion')) {
       if (typeof p.isSprinting === 'function' && p.isSprinting()) {
         server.runCommandSilent('effect give ' + uname + ' minecraft:hunger 3 0 true');
       }
     }
-    if (LHProgTick % 160 === 0 && lhHardIsActive(server, 'radiation_fallout') && py < 20) {
+    if (LHProgTick % 320 === 0 && lhHardIsActive(server, 'radiation_fallout') && py < 20) {
       var compRad = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, p) : null;
       var armored = (p.chestArmorItem && !p.chestArmorItem.empty) || (compRad && compRad.resourceSpec === 'energy');
       if (!armored) {
         server.runCommandSilent('effect give ' + uname + ' minecraft:mining_fatigue 5 0 true');
       }
     }
-    if (LHProgTick % 80 === 0 && lhHardIsActive(server, 'overload_encumbrance')) {
+    if (LHProgTick % 160 === 0 && lhHardIsActive(server, 'overload_encumbrance')) {
       var compRoad = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, p) : null;
       var roadBonus = (compRoad && compRoad.transportSpec === 'road') ? 8 : 0;
       var usedSlots = lhCountOccupiedSlots(p);
@@ -919,7 +1037,7 @@ ServerEvents.tick(function (event) {
         server.runCommandSilent('effect give ' + uname + ' minecraft:mining_fatigue 5 0 true');
       }
     }
-    if (LHProgTick % 120 === 0 && lhHardIsActive(server, 'cold_altitude_frost') && py >= 120) {
+    if (LHProgTick % 240 === 0 && lhHardIsActive(server, 'cold_altitude_frost') && py >= 120) {
       var compAir = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, p) : null;
       var fullArmor = (compAir && compAir.transportSpec === 'air') ||
         (p.headArmorItem && !p.headArmorItem.empty &&
@@ -931,13 +1049,13 @@ ServerEvents.tick(function (event) {
         try { if (typeof p.setTicksFrozen === 'function') p.setTicksFrozen(160); } catch (eFr) {}
       }
     }
-    if (LHProgTick % 120 === 0 && lhHardIsActive(server, 'abyssal_pressure') && py < 0) {
+    if (LHProgTick % 240 === 0 && lhHardIsActive(server, 'abyssal_pressure') && py < 0) {
       if (!lhHasLightSourceInHand(p)) {
         server.runCommandSilent('effect give ' + uname + ' minecraft:darkness 6 0 true');
         server.runCommandSilent('effect give ' + uname + ' minecraft:slowness 4 0 true');
       }
     }
-    if (LHProgTick % 160 === 0 && lhHardIsActive(server, 'toxic_rain_corrosion')) {
+    if (LHProgTick % 320 === 0 && lhHardIsActive(server, 'toxic_rain_corrosion')) {
       var isRaining = false;
       try { isRaining = !!p.level.isRaining(); } catch (eRain) {}
       if (isRaining && seeSky) {
@@ -951,7 +1069,7 @@ ServerEvents.tick(function (event) {
         }
       }
     }
-    if (LHProgTick % 240 === 0 && lhHardIsActive(server, 'machine_sabotage_lightning')) {
+    if (LHProgTick % 480 === 0 && lhHardIsActive(server, 'machine_sabotage_lightning')) {
       var storm = false;
       try { storm = !!p.level.isThundering() || (k >= 35 && !!p.level.isRaining()); } catch (eSt) {}
       if (storm && seeSky && Math.random() < 0.25) {
@@ -960,10 +1078,13 @@ ServerEvents.tick(function (event) {
         var lx = Math.round(px + Math.cos(angL) * radL);
         var lz = Math.round(pz + Math.sin(angL) * radL);
         LHLightningWarnings.push({ x: lx, y: Math.floor(py), z: lz, delay: 60 });
-        p.tell('§e⚡ [Магнитная гроза] Рядом копится разряд! Укройтесь под крышей!');
+        server.runCommandSilent('title ' + uname + ' actionbar ' + JSON.stringify({ text: '⚡ Магнитная гроза: укройтесь под крышей!', color: 'yellow' }));
+        if (typeof lhLogEvent === 'function') {
+          lhLogEvent(server, 'hazard', 'Магнитная гроза: разряд рядом с (' + lx + ', ' + lz + ').', { chatMode: 'never' });
+        }
       }
     }
-    if (LHProgTick % 600 === 0 && lhHardIsActive(server, 'insomnia_ambush')) {
+    if (LHProgTick % 1200 === 0 && lhHardIsActive(server, 'insomnia_ambush')) {
       var tod = Number(p.level.dayTime()) % 24000;
       if (tod >= 13500 && tod <= 23000 && seeSky && Math.random() < 0.22) {
         try {
@@ -982,14 +1103,18 @@ ServerEvents.tick(function (event) {
 
 PlayerEvents.loggedIn(function (event) {
   var server = event.server, player = event.player;
+  lhEnsureSafeSpawn(server, player, true);
   lhProgressionRecompute(server, player, false);
   var info = lhApplyTerritoryBorder(server, false);
   var db = lhProgRead(server);
   var diff = lhDifficultyStatus(server);
+  var chap = lhChapterProgressSummary(server);
   lhMsg(player, 'Граница мира: ' + info.size + '×' + info.size + ' (±' + Math.round(info.size / 2) +
-    ' м, закрыто глав: ' + info.locked + '). Коэффициент сложности k=' + (Math.round(diff.coeff * 100) / 100) +
-    '. Активных угроз: ' + db.featureOrder.length +
-    '/' + (global.LHHardFeatureCatalog ? global.LHHardFeatureCatalog.length : 20) + ' (/lh territory, /lh casino status, /lh difficulty).');
+    ' м). Этапы расширения: ' + info.unlocked + '/' + info.total + ' (осталось этапов: ' + info.locked +
+    '). Пройдено глав: ' + chap.doneMain + '/' + chap.totalMain + ' · Текущая: ' + chap.currentLabel + '.');
+  lhMsg(player, 'Сложность k=' + (Math.round(diff.coeff * 100) / 100) +
+    ', угроз: ' + db.featureOrder.length + '/' + (global.LHHardFeatureCatalog ? global.LHHardFeatureCatalog.length : 20) +
+    ' (/lh territory, /lh map, /lh events, /lh difficulty).');
 });
 
 ServerEvents.commandRegistry(function (event) {
@@ -1000,21 +1125,72 @@ ServerEvents.commandRegistry(function (event) {
     var server = ctx.source.server, p = ctx.source.playerOrException;
     var info = lhApplyTerritoryBorder(server, false);
     var db = lhProgRead(server);
+    var chap = lhChapterProgressSummary(server);
     var unlocked = Object.keys(db.chapters).filter(function (k) { return db.chapters[k]; });
     lhMsg(p, 'Территория: ' + info.size + '×' + info.size + ' (±' + Math.round(info.size / 2) +
-      ' м), закрыто глав=' + info.locked + ', x=' + (Math.round(info.x * 1000) / 1000) +
-      '. Завершённые главы: ' + (unlocked.length ? unlocked.join(', ') : 'пока нет') + '.');
+      ' м), этапов расширения: ' + info.unlocked + '/' + info.total + ' (осталось: ' + info.locked +
+      '), x=' + (Math.round(info.x * 1000) / 1000) + '. Пройдено глав: ' + chap.doneMain + '/' + chap.totalMain +
+      ' (' + (unlocked.length ? unlocked.join(', ') : 'старт') + ').');
     return 1;
   });
-  terr.then(C.literal('map').executes(function (ctx) {
-    return typeof lhCompanyTerritoryMap === 'function' ? lhCompanyTerritoryMap(ctx.source.server, ctx.source.playerOrException) : 0;
+  terr.then(C.literal('map')
+    .executes(function (ctx) {
+      return typeof lhCompanyTerritoryMap === 'function' ? lhCompanyTerritoryMap(ctx.source.server, ctx.source.playerOrException, 5) : 0;
+    })
+    .then(C.argument('radius', LHDiffArgStr.word()).executes(function (ctx) {
+      var rad = parseInt(LHDiffArgStr.getString(ctx, 'radius'), 10);
+      return typeof lhCompanyTerritoryMap === 'function' ? lhCompanyTerritoryMap(ctx.source.server, ctx.source.playerOrException, isNaN(rad) ? 5 : rad) : 0;
+    })));
+  terr.then(C.literal('mapitem').executes(function (ctx) {
+    return typeof lhGiveTerritoryMapItem === 'function' ? lhGiveTerritoryMapItem(ctx.source.server, ctx.source.playerOrException, false) : 0;
   }));
+  terr.then(C.literal('inspect')
+    .then(C.argument('sx', LHDiffArgStr.word())
+      .then(C.argument('sz', LHDiffArgStr.word()).executes(function (ctx) {
+        var sx = parseInt(LHDiffArgStr.getString(ctx, 'sx'), 10);
+        var sz = parseInt(LHDiffArgStr.getString(ctx, 'sz'), 10);
+        if (isNaN(sx) || isNaN(sz)) return 0;
+        return typeof lhCompanyInspectSector === 'function' ? lhCompanyInspectSector(ctx.source.server, ctx.source.playerOrException, sx, sz) : 0;
+      }))));
+  terr.then(C.literal('buy')
+    .then(C.argument('sx', LHDiffArgStr.word())
+      .then(C.argument('sz', LHDiffArgStr.word()).executes(function (ctx) {
+        var sx = parseInt(LHDiffArgStr.getString(ctx, 'sx'), 10);
+        var sz = parseInt(LHDiffArgStr.getString(ctx, 'sz'), 10);
+        if (isNaN(sx) || isNaN(sz)) return 0;
+        return typeof lhCompanyClaimAt === 'function' ? lhCompanyClaimAt(ctx.source.server, ctx.source.playerOrException, sx, sz, false, true) : 0;
+      }))));
+  terr.then(C.literal('buyout')
+    .then(C.argument('sx', LHDiffArgStr.word())
+      .then(C.argument('sz', LHDiffArgStr.word()).executes(function (ctx) {
+        var sx = parseInt(LHDiffArgStr.getString(ctx, 'sx'), 10);
+        var sz = parseInt(LHDiffArgStr.getString(ctx, 'sz'), 10);
+        if (isNaN(sx) || isNaN(sz)) return 0;
+        return typeof lhCompanyClaimAt === 'function' ? lhCompanyClaimAt(ctx.source.server, ctx.source.playerOrException, sx, sz, true, true) : 0;
+      }))));
   terr.then(C.literal('claim').executes(function (ctx) {
     return typeof lhCompanyClaimHere === 'function' ? lhCompanyClaimHere(ctx.source.server, ctx.source.playerOrException, false) : 0;
+  }));
+  terr.then(C.literal('settle').executes(function (ctx) {
+    return typeof lhCompanySettleCargo === 'function' ? lhCompanySettleCargo(ctx.source.server, ctx.source.playerOrException, false) : 0;
   }));
   terr.then(C.literal('capture').executes(function (ctx) {
     return typeof lhCompanyClaimHere === 'function' ? lhCompanyClaimHere(ctx.source.server, ctx.source.playerOrException, true) : 0;
   }));
+  terr.then(C.literal('raid').executes(function (ctx) {
+    return typeof lhCompanyStartRaid === 'function' ? lhCompanyStartRaid(ctx.source.server, ctx.source.playerOrException) : 0;
+  }));
+  terr.then(C.literal('outbid').executes(function (ctx) {
+    return typeof lhCompanyOutbidHere === 'function' ? lhCompanyOutbidHere(ctx.source.server, ctx.source.playerOrException, false) : 0;
+  }));
+  terr.then(C.literal('seize').executes(function (ctx) {
+    return typeof lhCompanyAntitrustSeize === 'function' ? lhCompanyAntitrustSeize(ctx.source.server, ctx.source.playerOrException, false) : 0;
+  }));
+  terr.then(C.literal('transfer').then(C.argument('companyId', LHDiffArgStr.word()).executes(function (ctx) {
+    return typeof lhCompanyTransferHere === 'function'
+      ? lhCompanyTransferHere(ctx.source.server, ctx.source.playerOrException, LHDiffArgStr.getString(ctx, 'companyId'))
+      : 0;
+  })));
   terr.then(C.literal('fortify').executes(function (ctx) {
     return typeof lhCompanyFortifyHere === 'function' ? lhCompanyFortifyHere(ctx.source.server, ctx.source.playerOrException) : 0;
   }));

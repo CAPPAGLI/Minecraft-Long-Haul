@@ -19,26 +19,26 @@
   },
   "continents": {
     "continents_scale": 0.13,
-    "erosion_scale": 0.25,
-    "flat_terrain_skew": 0.1,
+    "erosion_scale": 0.20,
+    "flat_terrain_skew": -0.10,
     "jungle_pillars": true,
     "ocean_offset": -0.8,
-    "ridge_scale": 0.25,
+    "ridge_scale": 0.18,
     "river_lanterns": true,
     "rolling_hills": true,
     "underground_rivers": true
   },
   "general": {
     "mod_enabled": true,
-    "snow_start_offset": 128
+    "snow_start_offset": 160
   },
   "global_terrain": {
-    "elevation_boost": 0.0,
+    "elevation_boost": 0.25,
     "lava_tunnels": true,
-    "max_y": 320,
+    "max_y": 512,
     "min_y": -64,
     "ultrasmooth": false,
-    "vertical_scale": 1.125
+    "vertical_scale": 1.45
   },
   "islands": {
     "enabled": true,

@@ -166,7 +166,7 @@ test('hard-feature catalog covers all core + new casino threats (random_respawn,
   assert(ids.size >= 20, 'expected >= 20 hard features, got ' + ids.size);
 });
 
-test('all Heracles quests form an acyclic DAG with zero dangling dependencies and include Chapter 12 + DOOMED Chapter 13', () => {
+test('all Heracles quests form an acyclic DAG with zero dangling dependencies and include Nuclear, OpenTTD, optional Photo (Ch.13) and DOOMED (Ch.14)', () => {
   const path = require('path');
   const qDir = path.join(__dirname, '../overrides/config/heracles/quests');
   const map = {};
@@ -185,44 +185,102 @@ test('all Heracles quests form an acyclic DAG with zero dangling dependencies an
   }
   Object.keys(map).forEach(k => { if (!state[k]) dfs(k); });
   assert(map.story_01_left_for_bread && map.story_06_forgot_the_milk, 'Chapter 00 quests present');
-  assert(map.nuclear_01_geiger && map.nuclear_06_fusion_core, 'Chapter 12 Nuclear/Draconic quests present');
-  assert(map.doomed_01_intro && map.doomed_06_safe_toggle, 'Chapter 13 DOOMED quests present');
-  assert(map.openttd_01_found_company && map.openttd_06_empire_verify, 'Chapter 14 OpenTTD quests present');
+  assert(map.nuclear_01_geiger && map.nuclear_06_fusion_core, 'Chapter 11 Nuclear/Draconic quests present');
+  assert(map.openttd_01_found_company && map.openttd_06_empire_verify, 'Chapter 12 OpenTTD quests present');
+  assert(map.alpha_photo && map.tutorial_camera && map.photo_forest, 'Chapter 13 Photo quests present');
+  assert(map.doomed_01_intro && map.doomed_06_safe_toggle, 'Chapter 14 DOOMED quests present');
+
+  // Verify every single photo/camera quest lives exclusively in Chapter 13
+  Object.keys(map).forEach(qid => {
+    const grps = Object.keys(map[qid].display.groups || {});
+    const iconItem = map[qid].display && map[qid].display.icon && map[qid].display.icon.item && map[qid].display.icon.item.id;
+    const isPhoto = qid.indexOf('photo') !== -1 || qid === 'tutorial_camera' || qid === 'tutorial_film' || qid === 'tutorial_album' || iconItem === 'exposure:photograph';
+    if (isPhoto) {
+      assert.deepEqual(grps, ['13 · Фотодокументация (Опционально)'], qid + ' must be in Ch.13');
+    } else {
+      assert(!grps.includes('13 · Фотодокументация (Опционально)'), qid + ' should not be in Ch.13');
+    }
+  });
 });
 
-test('OpenTTD engine supports companies, specializations, Voronoi+claim partition, capture, fortify, pacts, and AI bots', () => {
+test('OpenTTD engine supports spawn sanctuary, companies, specializations, Voronoi+claim, remote exclave, raid/seize/transfer, pacts, and AI bots', () => {
   const ottd = sandbox.global.LHOpenTTD;
   const st = ottd.createInitialState();
   assert(st.companies.bot_ironrail && st.companies.bot_greencart && st.companies.bot_skyport, '3 AI bots seeded');
-  assert.equal(ottd.resolveSectorOwner(st, 1, 0).owner, 'bot_ironrail');
+  assert.equal(ottd.isSpawnProtectedSector(0, 0), true);
+  assert.equal(ottd.isSpawnProtectedSector(1, 1), true);
+  assert.equal(ottd.isSpawnProtectedSector(2, 0), false);
+  assert.equal(ottd.resolveSectorOwner(st, 0, 0).kind, 'unclaimed');
+  assert.equal(ottd.resolveSectorOwner(st, 0, 0).owner, null);
+  assert.equal(ottd.resolveSectorOwner(st, 2, 0).owner, 'bot_ironrail');
   // Voronoi partition assigns distant unclaimed sectors to nearest company HQ/outpost
   const vor = ottd.resolveSectorOwner(st, 10, 0);
   assert.equal(vor.kind, 'voronoi');
   assert.equal(vor.owner, 'bot_ironrail');
 
+  // Player founding at spawn (0,0) places HQ on safe outer ring outside 3x3 sanctuary
   const c1 = ottd.companyCreate(st, 'u1', 'transsib', 'Транссиб', 0, 0);
   assert.equal(c1.ok, true);
   assert.equal(c1.company.cash, ottd.STARTING_CASH);
-  const c2 = ottd.companyCreate(st, 'u2', 'pacific', 'Пасифик', 0, 256);
+  assert.equal(ottd.isSpawnProtectedSector(c1.company.hqSx, c1.company.hqSz), false);
+  const c2 = ottd.companyCreate(st, 'u2', 'pacific', 'Пасифик', 0, 512);
   assert.equal(c2.ok, true);
 
   assert.equal(ottd.setSpecialization(st, 'transsib', 'transport', 'rail').ok, true);
   assert.equal(ottd.setSpecialization(st, 'transsib', 'resource', 'mining').ok, true);
-  // Rail spec grants 35% claim discount + 20% adjacency discount -> floor 45% of 250 = 113
-  const claimCost = ottd.computeClaimCost(st, 'transsib', 1, 1);
+
+  // Spawn sanctuary cannot be claimed
+  assert.equal(ottd.claimOrCaptureSector(st, 'transsib', 0, 0, false).ok, false);
+
+  // Claim adjacent to transsib HQ
+  const adjX = c1.company.hqSx;
+  const adjZ = c1.company.hqSz + 1;
+  const adjFinalX = ottd.isSpawnProtectedSector(adjX, adjZ) ? c1.company.hqSx + 1 : adjX;
+  const adjFinalZ = ottd.isSpawnProtectedSector(adjX, adjZ) ? c1.company.hqSz : adjZ;
+  const claimCost = ottd.computeClaimCost(st, 'transsib', adjFinalX, adjFinalZ);
   assert.equal(claimCost.mode, 'claim');
   assert(claimCost.cost < ottd.BASE_CLAIM_COST, 'rail + adjacency discount reduces claim cost');
-  const cl = ottd.claimOrCaptureSector(st, 'transsib', 1, 1, false);
+  const cl = ottd.claimOrCaptureSector(st, 'transsib', adjFinalX, adjFinalZ, false);
   assert.equal(cl.ok, true);
-  assert.equal(ottd.fortifySector(st, 'transsib', 1, 1).strength, 2);
+  assert.equal(ottd.fortifySector(st, 'transsib', adjFinalX, adjFinalZ).strength, 2);
+
+  // Non-adjacent sector rejected remotely, allowed physically with exclave surcharge
+  assert.equal(ottd.claimOrCaptureSector(st, 'transsib', 5, 5, false, { remote: true }).ok, false);
+  const remCost = ottd.computeClaimCost(st, 'transsib', 5, 5);
+  assert.equal(remCost.adjacent, false);
+  assert(remCost.exclaveMult > 1.0);
+  st.companies.transsib.cash += 5000;
+  assert.equal(ottd.claimOrCaptureSector(st, 'transsib', 5, 5, false).ok, true);
 
   // Hostile capture fails without allowCapture, succeeds with allowCapture & compensates rival
-  assert.equal(ottd.claimOrCaptureSector(st, 'pacific', 1, 1, false).ok, false);
+  assert.equal(ottd.claimOrCaptureSector(st, 'pacific', adjFinalX, adjFinalZ, false).ok, false);
+  st.companies.pacific.cash += 5000;
   const prevCash = st.companies.transsib.cash;
-  const cap = ottd.claimOrCaptureSector(st, 'pacific', 1, 1, true);
+  const cap = ottd.claimOrCaptureSector(st, 'pacific', adjFinalX, adjFinalZ, true);
   assert.equal(cap.ok, true);
-  assert.equal(ottd.resolveSectorOwner(st, 1, 1).owner, 'pacific');
+  assert.equal(ottd.resolveSectorOwner(st, adjFinalX, adjFinalZ).owner, 'pacific');
   assert(st.companies.transsib.cash > prevCash, 'rival compensated on buyout');
+
+  // Raid siege lowers strength before capture; antitrustSeize & transferSector work cleanly
+  const fort = ottd.fortifySector(st, 'pacific', adjFinalX, adjFinalZ);
+  assert.equal(fort.ok, true);
+  const w1 = ottd.weakenOrCaptureSector(st, 'transsib', adjFinalX, adjFinalZ);
+  assert.equal(w1.ok, true);
+  assert.equal(w1.captured, false);
+  const w2 = ottd.weakenOrCaptureSector(st, 'transsib', adjFinalX, adjFinalZ);
+  assert.equal(w2.ok, true);
+  assert.equal(w2.captured, true);
+  assert.equal(ottd.resolveSectorOwner(st, adjFinalX, adjFinalZ).owner, 'transsib');
+
+  // Position pacific adjacent to (adjFinalX, adjFinalZ) for antitrustSeize test
+  ottd.claimOrCaptureSector(st, 'pacific', adjFinalX + 1, adjFinalZ, false);
+  const sz = ottd.antitrustSeize(st, 'pacific', adjFinalX, adjFinalZ);
+  assert.equal(sz.ok, true);
+  assert.equal(ottd.resolveSectorOwner(st, adjFinalX, adjFinalZ).owner, 'pacific');
+
+  const tr = ottd.transferSector(st, 'pacific', 'transsib', adjFinalX, adjFinalZ);
+  assert.equal(tr.ok, true);
+  assert.equal(ottd.resolveSectorOwner(st, adjFinalX, adjFinalZ).owner, 'transsib');
 
   // Bilateral trade pact toggle
   assert.equal(ottd.hasPact(st, 'transsib', 'pacific'), false);
@@ -232,9 +290,21 @@ test('OpenTTD engine supports companies, specializations, Voronoi+claim partitio
   // Bot expansion & dynamic orders
   ottd.refreshBotOrders(st, () => 0.5);
   assert(st.marketOrders.length >= 18, 'bot buy/sell market orders generated');
-  const botEv = ottd.botExpandStep(st, 2, () => 0);
+  const botEv = ottd.botExpandStep(st, 3, () => 0);
   assert(botEv.length >= 1, 'bots expand into adjacent sectors within border');
-  assert(ottd.renderAsciiMap(st, 0, 0, 2).length === 5, 'ASCII territory map renders 5x5 grid');
+  assert.equal(ottd.isSpawnProtectedSector(botEv[0].sx, botEv[0].sz), false);
+  assert.equal(ottd.renderAsciiMap(st, 0, 0, 2).length, 5, 'ASCII territory map renders 5x5 grid');
+});
+
+test('terrain config and worldgen datapack provide Tectonic max_y=512, sky_refuges, and boosted canyon carver', () => {
+  const path = require('path');
+  const tect = JSON.parse(fs.readFileSync(path.join(__dirname, '../overrides/config/tectonic.json'), 'utf8'));
+  assert(tect.global_terrain && tect.global_terrain.max_y >= 512, 'tectonic max_y >= 512');
+  assert(tect.global_terrain && tect.global_terrain.vertical_scale >= 1.3, 'dramatic vertical scale');
+  const canyon = JSON.parse(fs.readFileSync(path.join(__dirname, '../overrides/kubejs/data/minecraft/worldgen/configured_carver/canyon.json'), 'utf8'));
+  assert(canyon.config && canyon.config.probability >= 0.03, 'canyon carver probability boosted');
+  const sky = JSON.parse(fs.readFileSync(path.join(__dirname, '../overrides/kubejs/data/longhaul/worldgen/structure/sky_refuges.json'), 'utf8'));
+  assert(sky.start_height && sky.start_height.min_inclusive && sky.start_height.min_inclusive.absolute >= 200, 'sky_refuges placed at Y>=200');
 });
 
 test('subtle-effects is pinned to 1.13.2 (avoids Forge 47.4.14 Entity$FluidCalcs crash on 47.4.10)', () => {

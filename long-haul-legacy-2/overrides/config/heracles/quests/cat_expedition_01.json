@@ -25,7 +25,7 @@
       "Проверка сервером: /lh catalog verify expedition_01 (сведения: /lh catalog info expedition_01)."
     ],
     "groups": {
-      "11 · Кампания: Лагеря и экспедиции": {
+      "10 · Кампания: Лагеря и экспедиции": {
         "position": [
           -210,
           -144
@@ -35,7 +35,7 @@
     "icon": {
       "type": "heracles:item",
       "item": {
-        "id": "exposure:camera",
+        "id": "minecraft:compass",
         "count": 1
       }
     },

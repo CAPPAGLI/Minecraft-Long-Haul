@@ -115,12 +115,8 @@ intro = [
         'Посмотреть направления: /lh sites и /lh site info <id>.',
     ], ['alpha_limits']),
     ('alpha_territory_casino', 'Территория, коэффициент k и Колесо Угроз', 'minecraft:nether_star', [
-        'Граница мира расширяется по формуле 175000^(1/x), где x = 2 - (1 / закрытые_главы) (/lh territory). Коэффициент сложности k = 1 + 95 * (D/n) / 63.15 зависит от суммарных смертей игроков онлайн D и обратно пропорционален онлайну n без жёсткого капа (/lh difficulty).',
-        'Завершение каждой главы крутит визуальное Колесо Угроз с 20 усложнениями: случайный респаун (радиус 20203 * k / 96), распад инвентаря при гибели, выброс Voidout, токсичный газ, Бессмертная Улитка, перегруз, магнитные грозы и др. (/lh casino status).',
-    ], ['alpha_world']),
-    ('alpha_photo', 'Фотодокументация', 'exposure:camera', [
-        'Exposure добавлен: камера, плёнка, проявка и альбомы.',
-        'Снимайте фабрики, лагеря и маршруты (/lh photo report <узел> и /lh catalog verify <id>). Уникальный токен снимка нельзя использовать дважды.',
+        'Граница мира расширяется через 6 ключевых глав по формуле 175000^(1/x), где x = 2 - (1 / закрытые_главы) (/lh territory). Коэффициент сложности k = 1 + 95 * (D/n) / 63.15 зависит от суммарных смертей игроков онлайн D и обратно пропорционален онлайну n без жёсткого капа (/lh difficulty).',
+        'Завершение каждой главы крутит визуальное Колесо Угроз с 20 усложнениями: случайный респаун (радиус 20203 * k / 96), распад инвентаря при гибели, выброс Voidout, токсичный газ, Бессмертная Улитка, перегруз, магнитные грозы и др. (/lh casino status, /lh events).',
     ], ['alpha_world']),
     ('alpha_voidout', 'Выброс при смерти (Voidout), трупы и тотемы', 'minecraft:totem_of_undying', [
         'Когда Колесо Угроз активирует Voidout, каждая настоящая смерть вызывает взрыв силой 1.0 × k (где k — общий коэффициент сложности без верхнего предела, см. /lh difficulty и /lh voidout status)!',
@@ -151,7 +147,7 @@ quest('alpha_rules_confirm', 'Подтвердить устав консорци
       deps=['alpha_territory_casino'])
 
 # ---------------------------------------------------------------------------
-# 02 · Мастерская и экспедиция (connected engineering + expedition gear)
+# 02 · Мастерская и экспедиция (connected engineering + expedition gear; photo moved to Ch.13)
 # ---------------------------------------------------------------------------
 items = [
     ('waterwheel', 'Источник кинетики', 'create:water_wheel', 'Водяное колесо — начало механической мастерской.', ['story_02_bakery_burned']),
@@ -162,13 +158,10 @@ items = [
     ('track', 'Железнодорожный путь', 'create:track', 'Рельсы — только начало линии. Инвентарное задание НЕ доказывает наличие дороги.', ['tutorial_brass']),
     ('station', 'Грузовая станция', 'create:track_station', 'Спроектируйте погрузку и разгрузку. Проверка рейсов конкретного поезда появится отдельно.', ['tutorial_track']),
     ('computer', 'Промышленный компьютер', 'computercraft:computer_normal', 'CC: Tweaked — локальная автоматизация. Программа longhaul_depot следит за запасом склада.', ['tutorial_precision']),
-    ('camera', 'Камера экспедиции', 'exposure:camera', 'Фотографируйте открытия; берите запас плёнки.', ['alpha_photo']),
-    ('film', 'Запас плёнки', 'exposure:black_and_white_film', 'Чёрно-белая плёнка нужна для первых полевых снимков.', ['tutorial_camera']),
-    ('album', 'Альбом маршрута', 'exposure:album', 'Соберите фотографии городов, мостов и этапов фабрики.', ['tutorial_film']),
     ('cookpot', 'Походное снабжение', 'farmersdelight:cooking_pot', 'Farmer’s Delight связывает урожай и готовку. Держите запас для длительных рейсов.', ['tutorial_waterwheel']),
 ]
 for i, (qid, title, item, desc, deps) in enumerate(items):
-    quest('tutorial_' + qid, title, '02 · Мастерская и экспедиция', [(i % 4) * 84 - 126, (i // 4) * 72 - 72], item,
+    quest('tutorial_' + qid, title, '02 · Мастерская и экспедиция', [(i % 3 - 1) * 84, (i // 3) * 72 - 72], item,
           {'item': {'type': 'heracles:item', 'item': item, 'amount': 1, 'collection': 'AUTOMATIC'}},
           ['Учебная веха: обнаружение предмета, НЕ испытание работающего предприятия.', desc], deps=deps)
 
@@ -257,7 +250,7 @@ for i, (adv_id, title, icon, desc, deps) in enumerate(logistics):
           desc, deps=deps)
 
 # ---------------------------------------------------------------------------
-# 06 · Восстановление и полевые отчёты
+# 06 · Восстановление и телеметрия (photo reports moved to Ch.13)
 # ---------------------------------------------------------------------------
 recoveries = [
     ('sawmill', 'Восстановление лесопилки', 'create:mechanical_saw', 'Подайте 16 железа, 16 андезитового сплава, 32 бревна и установите пилу/водяное колесо.', ['site_forest']),
@@ -269,28 +262,10 @@ recoveries = [
 ]
 for i, (rid, title, icon, detail, rdeps) in enumerate(recoveries):
     adv('recovery/' + rid, 40)
-    quest('recovery_' + rid, title, '06 · Восстановление и полевые отчёты', [(i % 3) * 84 - 84, (i // 3) * 72 - 108], icon,
+    quest('recovery_' + rid, title, '06 · Восстановление и телеметрия', [(i % 3) * 84 - 84, (i // 3) * 72 - 108], icon,
           {'restored': {'type': 'heracles:advancement', 'title': 'Серверное восстановление объекта', 'advancements': ['longhaul:recovery/' + rid]}},
           ['Обследуйте объект (/lh recovery list, /lh recovery survey ' + rid + ').', detail, 'Встаньте на ремонтную бочку и выполните /lh recovery restore ' + rid + '.'],
           deps=rdeps)
-
-photo_sites = [
-    ('forest', 'Фотоотчёт: Лесная артель'),
-    ('farm', 'Фотоотчёт: Речной агрогород'),
-    ('mine', 'Фотоотчёт: Горный рудник'),
-    ('port', 'Фотоотчёт: Морской порт'),
-    ('badlands', 'Фотоотчёт: Карьер пустошей'),
-    ('smelter', 'Фотоотчёт: Стекольная долина'),
-    ('wetland', 'Фотоотчёт: Химический посёлок'),
-    ('machine', 'Фотоотчёт: Машиностроительный центр'),
-    ('continental_archive', 'Фотоотчёт: Архив магистралей'),
-]
-for i, (sid, title) in enumerate(photo_sites):
-    adv('photo/' + sid, 20)
-    quest('photo_' + sid, title, '06 · Восстановление и полевые отчёты', [(i % 5) * 84 - 168, (i // 5) * 72 + 54], 'exposure:photograph',
-          {'photo': {'type': 'heracles:advancement', 'title': 'Уникальный полевой снимок', 'advancements': ['longhaul:photo/' + sid]}},
-          ['Сделайте снимок Exposure на месте (<= 160 м от узла) и выполните /lh photo report ' + sid + '.', 'Один снимок нельзя использовать для двух разных узлов.'],
-          deps=['site_' + sid, 'tutorial_camera'])
 
 cc_sites = [
     ('forest', 'Телеметрия склада: Лесная артель'),
@@ -304,20 +279,20 @@ cc_sites = [
 ]
 for i, (sid, title) in enumerate(cc_sites):
     adv('cc/' + sid, 25)
-    quest('cc_' + sid, title, '06 · Восстановление и полевые отчёты', [(i % 4) * 84 - 126, (i // 4) * 72 + 210], 'computercraft:computer_normal',
+    quest('cc_' + sid, title, '06 · Восстановление и телеметрия', [(i % 4) * 84 - 126, (i // 4) * 72 + 54], 'computercraft:computer_normal',
           {'telemetry': {'type': 'heracles:advancement', 'title': 'Подтверждение телеметрии и запаса', 'advancements': ['longhaul:cc/' + sid]}},
           ['Запустите /lh cc challenge ' + sid + ', установите компьютер CC: Tweaked в 12 м от бочки узла и обеспечьте реальный запас продукции в бочке, затем /lh cc verify ' + sid + '.'],
           deps=['site_' + sid, 'tutorial_computer'])
 
 # ---------------------------------------------------------------------------
-# 07..11 · Full 240-spec catalog with connected dependency chains
+# 07..10 · Full 240-spec catalog with connected dependency chains (photo -> Ch.13)
 # ---------------------------------------------------------------------------
 CHAPTER_GROUPS = {
     'Основная прогрессия': '07 · Кампания: Основная прогрессия',
     'Региональные контракты': '08 · Кампания: Региональные контракты',
     'Инженерные испытания': '09 · Кампания: Инженерные испытания',
-    'Экспедиционная документация': '10 · Кампания: Фотодокументация',
-    'Лагеря и экспедиции': '11 · Кампания: Лагеря и экспедиции',
+    'Экспедиционная документация': '13 · Фотодокументация (Опционально)',
+    'Лагеря и экспедиции': '10 · Кампания: Лагеря и экспедиции',
 }
 
 TYPE_ICONS = {
@@ -337,7 +312,7 @@ TYPE_ICONS = {
     'camp_visit': 'minecraft:campfire',
     'vehicle_trial': 'create:track_station',
     'unique_site_visit': 'minecraft:writable_book',
-    'kit_check': 'exposure:camera',
+    'kit_check': 'minecraft:compass',
     'ration_delivery': 'longhaul:field_rations',
     'sample_return': 'longhaul:ore_concentrate',
 }
@@ -384,11 +359,18 @@ def catalog_deps(q):
                 if prev_id in catalog_ids:
                     return ['cat_' + prev_id]
         return ['photo_' + site] if site != 'continental_archive' else ['photo_continental_archive']
-    # Expedition: expedition_01..16
+    # Expedition: expedition_01..16 (skip optional photo quests in main chain)
     if qid.startswith('expedition_'):
         num = int(qid.split('_')[1])
-        if num > 1:
-            return [f'cat_expedition_{num-1:02d}']
+        if q['verification_type'] == 'photo_evidence':
+            prev = num - 1
+            return ['tutorial_camera', f'cat_expedition_{prev:02d}'] if prev >= 1 else ['tutorial_camera']
+        prev = num - 1
+        while prev >= 1:
+            prev_q = next((x for x in catalog if x['id'] == f'expedition_{prev:02d}'), None)
+            if not prev_q or prev_q['verification_type'] != 'photo_evidence':
+                return [f'cat_expedition_{prev:02d}']
+            prev -= 1
         return ['logistics_first_camp']
     return []
 
@@ -397,10 +379,10 @@ compact_catalog = []
 
 for q in catalog:
     qid = q['id']
-    grp = CHAPTER_GROUPS[q['chapter']]
+    vt = q['verification_type']
+    grp = '13 · Фотодокументация (Опционально)' if vt == 'photo_evidence' else CHAPTER_GROUPS[q['chapter']]
     idx = group_indices[grp]
     group_indices[grp] += 1
-    vt = q['verification_type']
     icon = TYPE_ICONS.get(vt, 'minecraft:paper')
     adv('catalog/' + qid, 20 + q['stage'] * 5)
 
@@ -413,7 +395,8 @@ for q in catalog:
         desc.append('Честное ограничение: физический трекер train/VS ID ещё не подключён; сервер проверяет маршрут/доставку контрольной партии в бочке на месте без фиктивного трекинга транспорта.')
 
     cols = 8 if len(catalog) > 40 and grp == '08 · Кампания: Региональные контракты' else 6
-    pos = [(idx % cols) * 84 - (cols * 42) + 42, (idx // cols) * 72 - 144]
+    y_offset = 216 if grp == '13 · Фотодокументация (Опционально)' else 0
+    pos = [(idx % cols) * 84 - (cols * 42) + 42, (idx // cols) * 72 - 144 + y_offset]
     quest(
         'cat_' + qid,
         q['title'],
@@ -436,7 +419,7 @@ for q in catalog:
     })
 
 # ---------------------------------------------------------------------------
-# 12 · Ядерная энергетика и Драконик (Electrodynamics, NuclearCraft, HBM, Ballistix, Draconic Evolution)
+# 11 · Ядерная энергетика и Драконик (Electrodynamics, NuclearCraft, HBM, Ballistix, Draconic Evolution)
 # ---------------------------------------------------------------------------
 adv('nuclear/verified', 60)
 nuclear_quests = [
@@ -470,11 +453,93 @@ for i, (qid, title, icon, desc, deps) in enumerate(nuclear_quests):
         tasks = {'nuclear_done': {'type': 'heracles:advancement', 'title': 'Подтверждение (/lh nuclear verify)', 'advancements': ['longhaul:nuclear/verified']}}
     else:
         tasks = {'read': {'type': 'heracles:check', 'title': 'Этап освоен (отметка инженера)'}}
-    quest(qid, title, '12 · Ядерная энергетика и Драконик', [(i % 3 - 1) * 96, (i // 3) * 84 - 42], icon,
+    quest(qid, title, '11 · Ядерная энергетика и Драконик', [(i % 3 - 1) * 96, (i // 3) * 84 - 42], icon,
           tasks, desc, deps=deps, subtitle='Long Haul Legacy 2.0 · Поздняя энергетика')
 
 # ---------------------------------------------------------------------------
-# 13 · DOOMED: Хардкор-выживание (Опционально — не блокирует прогрессию)
+# 12 · OpenTTD: Компании и Империя (multiplayer companies, specs, sectors, trading, AI bots)
+# ---------------------------------------------------------------------------
+openttd_advs = ['company', 'specs', 'claim', 'trade', 'empire']
+for oa in openttd_advs:
+    adv('openttd/' + oa, 30)
+
+openttd_quests = [
+    ('openttd_01_found_company', 'I. Основание транспортной корпорации', 'minecraft:writable_book', [
+        'В мультиплеере игроки делятся на конкурирующие компании в духе OpenTTD с общим счётом (Credits), капитализацией и рейтингом (/lh company list).',
+        'Создайте свою компанию командой /lh company create <id> <Название> (например, /lh company create translog Сибирь-Транс) или вступите к союзнику: /lh company join <id>.',
+        'Автоматически ваш стартовый сектор 256×256 закрепляется как штаб-квартира, а на карте действуют ИИ-конкуренты: Стальная Магистраль, Зелёный Обоз и Небесный Альянс.',
+    ], [], 'longhaul:openttd/company', 'Создайте или вступите в компанию'),
+    ('openttd_02_specializations', 'II. Специализация логистики и добычи', 'create:track', [
+        'Выберите транспортную специализацию (/lh company spec transport <rail|road|sea|air>): +45–50% прибыли с профильных маршрутов и скидка 20–35% на захват секторов + пассивные перки.',
+        'Выберите ресурсную специализацию (/lh company spec resource <mining|forestry|agro|energy>): +35–40% выхода и смягчение дефицита руд, леса, брожения еды или радиации.',
+    ], ['openttd_01_found_company'], 'longhaul:openttd/specs', 'Выберите обе специализации компании'),
+    ('openttd_03_sector_map', 'III. Карта секторов 256×256, выкуп и рейды', 'minecraft:filled_map', [
+        'Сектора 256×256 распределены между компаниями (кольцо вокруг 0,0 защищено от захвата). Вся логистика — в одной интерактивной карте: /lh map (или бумажная карта /lh map item).',
+        'Свободные сектора — захватывайте (/lh territory buy <sx> <sz> или кликом в карте). Вражеские — перебивайте ценой в бочке (/lh territory outbid), осаждайте 60 сек (/lh territory raid) или изымайте антимонопольной службой (/lh territory seize).',
+        'Можно также передать сектор союзнику (/lh territory transfer <id>) или урегулировать грузом в бочке (/lh territory settle).',
+    ], ['openttd_02_specializations'], 'longhaul:openttd/claim', 'Захватите дополнительный сектор 256×256'),
+    ('openttd_04_market_and_trade', 'IV. Биржа Консорциума и торговые пакты', 'minecraft:emerald', [
+        'На бирже (/lh market list) компании игроков и ИИ-боты выставляют ордера на покупку и продажу, а Консорциум периодически объявляет субсидии ×1.75.',
+        'Выполните биржевую сделку (/lh market sell <id> или /lh market buy <id>) или прямую сделку между компаниями (/lh trade offer <id_компании|any> <кол-во> <цена>).',
+        'Для беспошлинной торговли и свободной добычи без пошлин заключите пакт: /lh company pact <id>.',
+    ], ['openttd_03_sector_map'], 'longhaul:openttd/trade', 'Проведите межкорпоративную сделку'),
+    ('openttd_05_ai_competitors', 'V. Конкуренция с ИИ-корпорациями', 'minecraft:redstone_block', [
+        'Автономные ИИ-компании (/lh bot status) расширяют свои сектора внутри текущей границы мира, зарабатывают выручку и обновляют биржевые котировки.',
+        'Сравните капитализацию компаний через /lh company list и превзойдите ИИ по выручке и секторам.',
+    ], ['openttd_04_market_and_trade'], None, 'Ознакомьтесь с рейтингом ИИ-конкурентов'),
+    ('openttd_06_empire_verify', 'VI. Империя Консорциума (/lh openttd verify)', 'minecraft:nether_star', [
+        'Развивайте сеть секторов, закрывайте маршруты и экономические узлы, чтобы удерживать первое место в таблице компаний.',
+        'Выполните /lh openttd verify после создания компании, выбора специализаций, захвата сектора и первой сделки.',
+    ], ['openttd_05_ai_competitors'], 'longhaul:openttd/empire', 'Подтвердите статус OpenTTD-империи'),
+]
+for i, (qid, title, icon, desc, deps, adv_id, t_title) in enumerate(openttd_quests):
+    if adv_id:
+        tasks = {'ottd_task': {'type': 'heracles:advancement', 'title': t_title, 'advancements': [adv_id]}}
+    else:
+        tasks = {'check': {'type': 'heracles:check', 'title': t_title}}
+    quest(qid, title, '12 · OpenTTD: Компании и Империя', [(i % 3 - 1) * 96, (i // 3) * 84 - 42], icon,
+          tasks, desc, deps=deps, subtitle='Мультиплеерная экономика OpenTTD')
+
+# ---------------------------------------------------------------------------
+# 13 · Фотодокументация (Опционально — all Exposure photography quests separated here)
+# ---------------------------------------------------------------------------
+quest('alpha_photo', 'Фотодокументация экспедиции (Опционально)', '13 · Фотодокументация (Опционально)', [-168, -216], 'exposure:camera',
+      {'read': {'type': 'heracles:check', 'title': 'Прочитано (опционально)'}},
+      ['Exposure добавлен: камера, плёнка, проявка и альбомы.',
+       'Эта глава полностью опциональна: основная кампания и расширение территории больше НЕ требуют камеры или фотографий.',
+       'Снимайте фабрики, лагеря и маршруты (/lh photo report <узел> и /lh catalog verify <id>). Уникальный токен снимка нельзя использовать дважды.'],
+      deps=['alpha_world'], subtitle='Опциональная ветка Exposure')
+
+photo_gear = [
+    ('camera', 'Камера экспедиции', 'exposure:camera', 'Фотографируйте открытия; берите запас плёнки.', ['alpha_photo']),
+    ('film', 'Запас плёнки', 'exposure:black_and_white_film', 'Чёрно-белая плёнка нужна для первых полевых снимков.', ['tutorial_camera']),
+    ('album', 'Альбом маршрута', 'exposure:album', 'Соберите фотографии городов, мостов и этапов фабрики.', ['tutorial_film']),
+]
+for i, (qid, title, item, desc, deps) in enumerate(photo_gear):
+    quest('tutorial_' + qid, title, '13 · Фотодокументация (Опционально)', [(i - 1) * 84, -216], item,
+          {'item': {'type': 'heracles:item', 'item': item, 'amount': 1, 'collection': 'AUTOMATIC'}},
+          ['Опциональная веха фотодокументации.', desc], deps=deps, subtitle='Опциональное снаряжение Exposure')
+
+photo_sites = [
+    ('forest', 'Фотоотчёт: Лесная артель'),
+    ('farm', 'Фотоотчёт: Речной агрогород'),
+    ('mine', 'Фотоотчёт: Горный рудник'),
+    ('port', 'Фотоотчёт: Морской порт'),
+    ('badlands', 'Фотоотчёт: Карьер пустошей'),
+    ('smelter', 'Фотоотчёт: Стекольная долина'),
+    ('wetland', 'Фотоотчёт: Химический посёлок'),
+    ('machine', 'Фотоотчёт: Машиностроительный центр'),
+    ('continental_archive', 'Фотоотчёт: Архив магистралей'),
+]
+for i, (sid, title) in enumerate(photo_sites):
+    adv('photo/' + sid, 20)
+    quest('photo_' + sid, title, '13 · Фотодокументация (Опционально)', [(i % 5) * 84 - 168, (i // 5) * 72 - 120], 'exposure:photograph',
+          {'photo': {'type': 'heracles:advancement', 'title': 'Уникальный полевой снимок', 'advancements': ['longhaul:photo/' + sid]}},
+          ['Сделайте снимок Exposure на месте (<= 160 м от узла) и выполните /lh photo report ' + sid + '.', 'Один снимок нельзя использовать для двух разных узлов.'],
+          deps=['site_' + sid, 'tutorial_camera'], subtitle='Опциональный фотоотчёт')
+
+# ---------------------------------------------------------------------------
+# 14 · DOOMED: Хардкор-выживание (Опционально — не блокирует прогрессию)
 # ---------------------------------------------------------------------------
 adv('doomed/checked', 30)
 doomed_quests = [
@@ -506,52 +571,8 @@ for i, (qid, title, icon, desc, deps) in enumerate(doomed_quests):
         tasks = {'doomed_ok': {'type': 'heracles:advancement', 'title': 'Проверка (/lh doomed verify)', 'advancements': ['longhaul:doomed/checked']}}
     else:
         tasks = {'check': {'type': 'heracles:check', 'title': 'Опциональная отметка DOOMED'}}
-    quest(qid, title, '13 · DOOMED: Хардкор-выживание (Опционально)', [(i % 3 - 1) * 96, (i // 3) * 84 - 42], icon,
+    quest(qid, title, '14 · DOOMED: Хардкор-выживание (Опционально)', [(i % 3 - 1) * 96, (i // 3) * 84 - 42], icon,
           tasks, desc, deps=deps, subtitle='Опциональный профиль CurseForge')
-
-# ---------------------------------------------------------------------------
-# 14 · OpenTTD: Компании и Империя (multiplayer companies, specs, sectors, trading, AI bots)
-# ---------------------------------------------------------------------------
-openttd_advs = ['company', 'specs', 'claim', 'trade', 'empire']
-for oa in openttd_advs:
-    adv('openttd/' + oa, 30)
-
-openttd_quests = [
-    ('openttd_01_found_company', 'I. Основание транспортной корпорации', 'minecraft:writable_book', [
-        'В мультиплеере игроки делятся на конкурирующие компании в духе OpenTTD с общим счётом (Credits), капитализацией и рейтингом (/lh company list).',
-        'Создайте свою компанию командой /lh company create <id> <Название> (например, /lh company create translog Сибирь-Транс) или вступите к союзнику: /lh company join <id>.',
-        'Автоматически ваш стартовый сектор 256×256 закрепляется как штаб-квартира, а на карте действуют ИИ-конкуренты: Стальная Магистраль, Зелёный Обоз и Небесный Альянс.',
-    ], [], 'longhaul:openttd/company', 'Создайте или вступите в компанию'),
-    ('openttd_02_specializations', 'II. Специализация логистики и добычи', 'create:track', [
-        'Выберите транспортную специализацию (/lh company spec transport <rail|road|sea|air>): +45–50% прибыли с профильных маршрутов и скидка 20–35% на захват секторов + пассивные перки.',
-        'Выберите ресурсную специализацию (/lh company spec resource <mining|forestry|agro|energy>): +35–40% выхода и смягчение дефицита руд, леса, брожения еды или радиации.',
-    ], ['openttd_01_found_company'], 'longhaul:openttd/specs', 'Выберите обе специализации компании'),
-    ('openttd_03_sector_map', 'III. Карта секторов 256×256 и захват', 'minecraft:filled_map', [
-        'Вся карта разделена между компаниями на сектора 256×256 (прямой захват + диаграмма Вороного по ближайшим штабам и аванпостам).',
-        'Откройте ASCII-карту окружения: /lh map (или /lh territory map).',
-        'Захватите соседний сектор командой /lh territory claim, укрепите его (/lh territory fortify) или перехватите вражеский (/lh territory capture).',
-    ], ['openttd_02_specializations'], 'longhaul:openttd/claim', 'Захватите дополнительный сектор 256×256'),
-    ('openttd_04_market_and_trade', 'IV. Биржа Консорциума и торговые пакты', 'minecraft:emerald', [
-        'На бирже (/lh market list) компании игроков и ИИ-боты выставляют ордера на покупку и продажу, а Консорциум периодически объявляет субсидии ×1.75.',
-        'Выполните биржевую сделку (/lh market sell <id> или /lh market buy <id>) или прямую сделку между компаниями (/lh trade offer <id_компании|any> <кол-во> <цена>).',
-        'Для беспошлинной торговли и свободной добычи без пошлин заключите пакт: /lh company pact <id>.',
-    ], ['openttd_03_sector_map'], 'longhaul:openttd/trade', 'Проведите межкорпоративную сделку'),
-    ('openttd_05_ai_competitors', 'V. Конкуренция с ИИ-корпорациями', 'minecraft:redstone_block', [
-        'Автономные ИИ-компании (/lh bot status) расширяют свои сектора внутри текущей границы мира, зарабатывают выручку и обновляют биржевые котировки.',
-        'Сравните капитализацию компаний через /lh company list и превзойдите ИИ по выручке и секторам.',
-    ], ['openttd_04_market_and_trade'], None, 'Ознакомьтесь с рейтингом ИИ-конкурентов'),
-    ('openttd_06_empire_verify', 'VI. Империя Консорциума (/lh openttd verify)', 'minecraft:nether_star', [
-        'Развивайте сеть секторов, закрывайте маршруты и экономические узлы, чтобы удерживать первое место в таблице компаний.',
-        'Выполните /lh openttd verify после создания компании, выбора специализаций, захвата сектора и первой сделки.',
-    ], ['openttd_05_ai_competitors'], 'longhaul:openttd/empire', 'Подтвердите статус OpenTTD-империи'),
-]
-for i, (qid, title, icon, desc, deps, adv_id, t_title) in enumerate(openttd_quests):
-    if adv_id:
-        tasks = {'ottd_task': {'type': 'heracles:advancement', 'title': t_title, 'advancements': [adv_id]}}
-    else:
-        tasks = {'check': {'type': 'heracles:check', 'title': t_title}}
-    quest(qid, title, '14 · OpenTTD: Компании и Империя', [(i % 3 - 1) * 96, (i // 3) * 84 - 42], icon,
-          tasks, desc, deps=deps, subtitle='Мультиплеерная экономика OpenTTD')
 
 (O / 'kubejs/startup_scripts/02_quest_catalog.js').write_text(
     '// Auto-generated from design/quest-catalog.json by tools/generate_alpha_quests.py\n'
@@ -565,15 +586,15 @@ for i, (qid, title, icon, desc, deps, adv_id, t_title) in enumerate(openttd_ques
     '03 · Контрольные поставки\n'
     '04 · Экономические центры\n'
     '05 · Маршруты и лагеря\n'
-    '06 · Восстановление и полевые отчёты\n'
+    '06 · Восстановление и телеметрия\n'
     '07 · Кампания: Основная прогрессия\n'
     '08 · Кампания: Региональные контракты\n'
     '09 · Кампания: Инженерные испытания\n'
-    '10 · Кампания: Фотодокументация\n'
-    '11 · Кампания: Лагеря и экспедиции\n'
-    '12 · Ядерная энергетика и Драконик\n'
-    '13 · DOOMED: Хардкор-выживание (Опционально)\n'
-    '14 · OpenTTD: Компании и Империя\n'
+    '10 · Кампания: Лагеря и экспедиции\n'
+    '11 · Ядерная энергетика и Драконик\n'
+    '12 · OpenTTD: Компании и Империя\n'
+    '13 · Фотодокументация (Опционально)\n'
+    '14 · DOOMED: Хардкор-выживание (Опционально)\n'
 )
 total_q = len(list(Q.glob('*.json')))
 total_adv = len(list(ADV_ROOT.rglob('*.json')))

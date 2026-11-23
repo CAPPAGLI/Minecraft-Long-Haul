@@ -107,13 +107,15 @@ function lhProcessVoidoutQueue(server, dryRun) {
           }
         } catch (eBolt) {}
       }
-      var plist = server.players;
-      if (plist) {
-        var pShow = Math.round(Number(item.powerRaw || 1.0) * 100) / 100;
-        var kShow = Math.round(Number(item.coeff || 1.0) * 100) / 100;
-        for (var j = 0; j < plist.length; j++) {
-          plist[j].tell('§4§l[VOIDOUT #' + (item.deathNumber || 1) + ' · Сила ' + pShow + ' (k=' + kShow + ')] §cГибель ' + item.player + ' вызвала выброс на (' +
-            Math.round(item.x) + ', ' + Math.round(item.y) + ', ' + Math.round(item.z) + ')! Тотем спасает.');
+      var pShow = Math.round(Number(item.powerRaw || 1.0) * 100) / 100;
+      var kShow = Math.round(Number(item.coeff || 1.0) * 100) / 100;
+      var vMsg = 'VOIDOUT #' + (item.deathNumber || 1) + ' (сила ' + pShow + ', k=' + kShow + '): гибель ' + item.player +
+        ' на (' + Math.round(item.x) + ', ' + Math.round(item.y) + ', ' + Math.round(item.z) + ')';
+      if (typeof lhLogEvent === 'function') {
+        lhLogEvent(server, 'voidout', vMsg, { chatMode: 'important' });
+      } else if (server.players) {
+        for (var j = 0; j < server.players.length; j++) {
+          server.players[j].tell('§4§l[' + vMsg + '] §cТотем спасает.');
         }
       }
     } catch (eExp) {
@@ -174,10 +176,17 @@ function lhGasStepPlayer(server, player, dtTicks, skipEffects) {
       if (uname) {
         server.runCommandSilent('execute at ' + uname + ' run particle minecraft:spore_blossom_air ~ ~1 ~ 3 1.2 3 0.01 16');
       }
-      if (LHGasTick - rec.warnedTick >= 300) {
+      if (LHGasTick - rec.warnedTick >= 720) {
         rec.warnedTick = LHGasTick;
-        player.tell('§2[Токсичный газ] Вы ниже границы газа (Y=' + Math.round(py) + ' < Y=' + st.ceilingY +
-          '). Поднимайтесь на горы или летающие острова!');
+        if (uname) {
+          server.runCommandSilent('title ' + uname + ' actionbar ' + JSON.stringify({
+            text: '☣ Токсичный газ (Y=' + Math.round(py) + ' < ' + st.ceilingY + ') — поднимитесь в горы!',
+            color: 'green'
+          }));
+        }
+        if (typeof lhLogEvent === 'function') {
+          lhLogEvent(server, 'hazard', 'Токсичный газ задел ' + (uname || 'игрока') + ' на Y=' + Math.round(py) + ' (< ' + st.ceilingY + ').', { chatMode: 'never' });
+        }
       }
       if (rec.exposureTicks >= 160 && rec.exposureTicks % 40 < dtTicks) {
         var deep = st.ceilingY - py >= 20;
@@ -241,14 +250,11 @@ ServerEvents.tick(function (event) {
   if (st.phase !== db.lastNotifiedPhase) {
     db.lastNotifiedPhase = st.phase;
     lhGasSave(server);
-    var plist0 = server.players;
-    if (plist0) {
-      var msg = st.phase === 0
-        ? '§a[Токсичный газ] Наступил чистый сезон: воздух в низинах безопасен.'
-        : '§2[Токсичный газ] Фаза: ' + st.label + ' (граница ~Y=' + st.ceilingY + '). Укрывайтесь на горах и летающих островах!';
-      for (var k = 0; k < plist0.length; k++) {
-        plist0[k].tell(msg);
-      }
+    var msg = st.phase === 0
+      ? 'Токсичный газ: чистый сезон, воздух в низинах безопасен.'
+      : 'Токсичный газ: ' + st.label + ' (граница ~Y=' + st.ceilingY + ').';
+    if (typeof lhLogEvent === 'function') {
+      lhLogEvent(server, 'hazard', msg, { chatMode: 'never' });
     }
   }
 

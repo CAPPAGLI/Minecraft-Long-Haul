@@ -178,17 +178,17 @@ function lhCatVerify(server, player, qid) {
   } else if (vt === 'kit_check') {
     var inv = player.inventory;
     if (!inv) { lhMsg(player, 'Инвентарь недоступен.'); return 0; }
-    var hasCam = false, hasLight = false, hasFood = false;
+    var hasNav = false, hasLight = false, hasFood = false;
     for (var i = 0; i < inv.slots; i++) {
       var st = inv.getStackInSlot(i);
       if (st.empty) continue;
       var sid = String(st.id);
-      if (sid === 'exposure:camera') hasCam = true;
+      if (sid === 'minecraft:compass' || sid === 'minecraft:filled_map' || sid === 'minecraft:clock' || sid === 'exposure:camera') hasNav = true;
       if (sid.indexOf('torch') !== -1 || sid.indexOf('lantern') !== -1) hasLight = true;
       if (sid.indexOf('bread') !== -1 || sid.indexOf('rations') !== -1 || sid.indexOf('cooked') !== -1 || sid.indexOf('stew') !== -1) hasFood = true;
     }
-    if (!hasCam || !hasLight || !hasFood) {
-      lhMsg(player, 'Соберите экспедиционный набор в инвентарь: камера Exposure, свет (факел/фонарь) и провизия.');
+    if (!hasNav || !hasLight || !hasFood) {
+      lhMsg(player, 'Соберите экспедиционный набор в инвентарь: навигация (компас/карта/часы), свет (факел/фонарь) и провизия.');
       return 0;
     }
   } else {

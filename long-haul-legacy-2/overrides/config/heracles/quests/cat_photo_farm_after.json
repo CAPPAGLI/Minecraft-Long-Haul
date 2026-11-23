@@ -25,10 +25,10 @@
       "Проверка сервером: /lh catalog verify photo_farm_after (сведения: /lh catalog info photo_farm_after)."
     ],
     "groups": {
-      "10 · Кампания: Фотодокументация": {
+      "13 · Фотодокументация (Опционально)": {
         "position": [
           126,
-          -72
+          144
         ]
       }
     },

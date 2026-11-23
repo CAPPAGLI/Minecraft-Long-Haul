@@ -121,6 +121,9 @@ function lhStartIntegrationSetup(server) {
         ok(disp.performPrefixedCommand(src, 'lh catalog list') === 1, 'brigadier /lh catalog list');
         ok(disp.performPrefixedCommand(src, 'lh catalog stage 1') === 1, 'brigadier /lh catalog stage 1');
         ok(disp.performPrefixedCommand(src, 'lh catalog info main_1_01') === 1, 'brigadier /lh catalog info main_1_01');
+        ok(disp.performPrefixedCommand(src, 'lh events') === 1, 'brigadier /lh events');
+        ok(disp.performPrefixedCommand(src, 'lh map') === 1, 'brigadier /lh map');
+        ok(disp.performPrefixedCommand(src, 'lh territory') === 1, 'brigadier /lh territory');
 
         // 4. Site planner + remote rejection + physical NBT placement + on-site commission & production
         var sitesDb = lhSitesRead(server);
@@ -634,7 +637,7 @@ function lhStartIntegrationSetup(server) {
         var oP2 = {
           uuid: '00000000-0000-4000-8000-000000000032',
           level: overworld,
-          x: 0.5, y: 80, z: 256.5,
+          x: -512.5, y: 80, z: 512.5,
           mainHandItem: Item.empty,
           inventory: { slots: 1, items: [{ id: 'minecraft:air', count: 0, empty: true }], getStackInSlot: function (idx) { return this.items[idx]; } },
           tell: function () {},
@@ -642,6 +645,7 @@ function lhStartIntegrationSetup(server) {
           unlockAdvancement: function () {}
         };
         ok(global.LHOpenTTD.companyCreate(ottdSt, String(oP1.uuid), 'sibir', 'Сибирь-Логистик', oP1.x, oP1.z).ok === true, 'player 1 founded OpenTTD company');
+        ok(!global.LHOpenTTD.isSpawnProtectedSector(ottdSt.companies.sibir.hqSx, ottdSt.companies.sibir.hqSz), 'sibir HQ placed outside 3x3 spawn sanctuary');
         ok(global.LHOpenTTD.companyCreate(ottdSt, String(oP2.uuid), 'volga', 'Волга-Карго', oP2.x, oP2.z).ok === true, 'player 2 founded competing company');
         ok(global.LHOpenTTD.setSpecialization(ottdSt, 'sibir', 'transport', 'rail').ok === true, 'sibir set rail transport spec');
         ok(global.LHOpenTTD.setSpecialization(ottdSt, 'sibir', 'resource', 'mining').ok === true, 'sibir set mining resource spec');
@@ -649,13 +653,18 @@ function lhStartIntegrationSetup(server) {
         ok(earnedRail === 290, 'rail specialization adds +45% route payout (200 -> 290 Cr)');
         ok(lhCompanyScarcityFactor(server, oP1, 'mining') < 0.35, 'mining specialization mitigates ore scarcity');
 
-        // Claim + capture + fortify + Voronoi full-map partition
+        // Spawn sanctuary claim blocked; regular claim + fortify + buyout + Voronoi + transfer work
+        oP1.x = 0.5; oP1.z = 0.5;
+        ok(lhCompanyClaimHere(server, oP1, false) === 0, 'spawn sanctuary sector (0,0) protected from claim');
         oP1.x = 512.5; oP1.z = 512.5;
+        ottdSt.companies.sibir.cash += 2000;
+        ottdSt.companies.volga.cash += 5000;
         ok(lhCompanyClaimHere(server, oP1, false) === 1, 'sibir claimed sector (2,2)');
         ok(lhCompanyFortifyHere(server, oP1) === 1, 'sibir fortified sector (2,2)');
         oP2.x = 512.5; oP2.z = 512.5;
         ok(lhCompanyClaimHere(server, oP2, false) === 0, 'claim without capture blocked on rival sector');
         ok(lhCompanyClaimHere(server, oP2, true) === 1, 'hostile capture takes sector (2,2) for volga');
+        ok(lhCompanyTransferHere(server, oP2, 'sibir') === 1, 'volga transferred sector (2,2) back to sibir');
         ok(global.LHOpenTTD.resolveSectorOwner(ottdSt, 40, 40).kind === 'voronoi', 'entire map partitioned via Voronoi');
 
         // Consortium Market bot order + direct inter-company trade offer + AI bot tick
@@ -670,7 +679,23 @@ function lhStartIntegrationSetup(server) {
         LHOTTDState = JSON.parse(ottdSaved);
         lhOttdSave(server);
 
-        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic + openttd');
+        // 23. Event log ring buffer, safe spawn Y check (not bedrock Y=-64), and main vs optional chapter summary
+        var evtSaved = JSON.stringify(lhEventRead(server));
+        lhLogEvent(server, 'info', 'Integration test event log entry', { chatMode: 'never' });
+        ok(lhEventRead(server).entries.length >= 1, 'lhLogEvent records entry in persistent event log');
+        LHEventsState = JSON.parse(evtSaved);
+        lhEventSave(server);
+        ok(lhFindSafeRespawnY(overworld, 12, 12) >= 48, 'safe respawn Y stays well above Y=-64 bedrock (' + lhFindSafeRespawnY(overworld, 12, 12) + ')');
+        for (var sxC = 11; sxC <= 13; sxC++) {
+          for (var szC = 11; szC <= 13; szC++) {
+            if (String(overworld.getBlock(sxC, 80, szC).id) === 'minecraft:cobblestone') {
+              overworld.getBlock(sxC, 80, szC).set('minecraft:air');
+            }
+          }
+        }
+        ok(lhChapterProgressSummary(server).totalMain === 6, 'main campaign chapter progress tracks 6 core gates excluding optional photo/DOOMED');
+
+        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic + openttd + eventlog');
       } catch (err2) {
         console.error('LH_INTEGRATION_FAIL: live adapter ' + err2);
       }

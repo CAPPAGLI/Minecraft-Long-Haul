@@ -25,10 +25,10 @@
       "Проверка сервером: /lh catalog verify photo_wetland_arrival (сведения: /lh catalog info photo_wetland_arrival)."
     ],
     "groups": {
-      "10 · Кампания: Фотодокументация": {
+      "13 · Фотодокументация (Опционально)": {
         "position": [
           -42,
-          72
+          288
         ]
       }
     },

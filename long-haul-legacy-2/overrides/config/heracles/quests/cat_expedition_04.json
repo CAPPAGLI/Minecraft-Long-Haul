@@ -1,6 +1,6 @@
 {
   "dependencies": [
-    "cat_expedition_03"
+    "cat_expedition_02"
   ],
   "tasks": {
     "catalog_verified": {
@@ -25,9 +25,9 @@
       "Проверка сервером: /lh catalog verify expedition_04 (сведения: /lh catalog info expedition_04)."
     ],
     "groups": {
-      "11 · Кампания: Лагеря и экспедиции": {
+      "10 · Кампания: Лагеря и экспедиции": {
         "position": [
-          42,
+          -42,
           -144
         ]
       }

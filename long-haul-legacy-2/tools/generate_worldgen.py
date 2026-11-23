@@ -187,7 +187,7 @@ def main():
         'step': 'underground_ores',
     })
 
-    # 5. Floating sky-island refuge structures above the seasonal toxic gas ceiling (Y=172..212)
+    # 5. Floating sky-island refuge structures above the seasonal toxic gas ceiling (Y=210..260)
     lh_wg = DATA / 'longhaul/worldgen'
     write_json(lh_wg / 'template_pool/sky_refuges.json', {
         'fallback': 'minecraft:empty',
@@ -222,8 +222,8 @@ def main():
         'size': 1,
         'start_height': {
             'type': 'minecraft:uniform',
-            'min_inclusive': {'absolute': 172},
-            'max_inclusive': {'absolute': 212},
+            'min_inclusive': {'absolute': 210},
+            'max_inclusive': {'absolute': 260},
         },
         'max_distance_from_center': 80,
         'use_expansion_hack': False,
@@ -237,9 +237,37 @@ def main():
             'separation': 12,
         },
     })
+
+    # 6. Boosted canyon carvers for dramatic gorges and mountain valleys across expanded height
+    mc_carver = DATA / 'minecraft/worldgen/configured_carver'
+    write_json(mc_carver / 'canyon.json', {
+        'type': 'minecraft:canyon',
+        'config': {
+            'debug_settings': {
+                'air_state': {'Name': 'minecraft:warped_button', 'Properties': {'face': 'wall', 'facing': 'north', 'powered': 'false'}},
+                'barrier_state': {'Name': 'minecraft:glass'},
+                'lava_state': {'Name': 'minecraft:orange_stained_glass'},
+                'water_state': {'Name': 'minecraft:candle', 'Properties': {'candles': '1', 'lit': 'false', 'waterlogged': 'false'}},
+            },
+            'lava_level': {'above_bottom': 8},
+            'probability': 0.032,
+            'replaceable': '#minecraft:overworld_carver_replaceables',
+            'shape': {
+                'distance_factor': {'type': 'minecraft:uniform', 'value': {'max_exclusive': 1.15, 'min_inclusive': 0.75}},
+                'horizontal_radius_factor': {'type': 'minecraft:uniform', 'value': {'max_exclusive': 1.35, 'min_inclusive': 0.85}},
+                'thickness': {'type': 'minecraft:trapezoid', 'value': {'max': 6.0, 'min': 0.0, 'plateau': 2.0}},
+                'vertical_radius_center_factor': 0.0,
+                'vertical_radius_default_factor': 1.0,
+                'width_smoothness': 3,
+            },
+            'vertical_rotation': {'type': 'minecraft:uniform', 'value': {'max_exclusive': 0.14, 'min_inclusive': -0.14}},
+            'y': {'type': 'minecraft:uniform', 'min_inclusive': {'absolute': -16}, 'max_inclusive': {'absolute': 120}},
+            'yScale': 3.5,
+        },
+    })
     print(
         f'Generated {len(vanilla_overrides)} vanilla + {len(create_overrides) + len(ie_overrides) + len(pm_overrides)} modded ore overrides, '
-        f'{len(modded_veins)} custom ore veins, {len(rich_chunks)} rare mono-ore rich chunks, and floating sky-island refuges.'
+        f'{len(modded_veins)} custom ore veins, {len(rich_chunks)} rare mono-ore rich chunks, floating sky-island refuges, and boosted canyon carvers.'
     )
 
 
