@@ -699,13 +699,13 @@ function lhStartIntegrationSetup(server) {
             }
           }
         }
-        ok(lhChapterProgressSummary(server).totalMain === 13 && lhTerritoryCounts(server).total === 6, 'main campaign chapter progress tracks 13 core chapters and 6 border gates excluding optional photo/DOOMED');
+        ok(lhChapterProgressSummary(server).totalMain === 14 && lhTerritoryCounts(server).total === 14, 'main campaign chapter progress tracks 14 core chapters (including mandatory DOOMED Ch.14) and 14 territory stages excluding optional photo');
 
         // 24. /lh GUI Command Center & control_tablet item + all 11 tabs render cleanly
         ok(!Item.of('longhaul:control_tablet', 1).empty, 'longhaul:control_tablet registered');
         ok(!lhGuiItem('minecraft:barrel', 'Тест', ['Строка 1', 'Строка 2'], 1).empty, 'lhGuiItem creates ItemStack with name and lore');
         var guiSnap = lhGuiSnapshot(server, fp, 'hub');
-        ok(guiSnap.borderSize === 724 && guiSnap.totalChapters === 13, 'lhGuiSnapshot reports live territory & campaign status');
+        ok(guiSnap.borderSize === 724 && guiSnap.totalChapters === 14, 'lhGuiSnapshot reports live territory & campaign status');
         ok(disp.performPrefixedCommand(src, 'lh tablet') === 1, 'brigadier /lh tablet');
         var mockGuiSlots = {};
         var mockGui = {
