@@ -637,7 +637,7 @@ function lhStartIntegrationSetup(server) {
         var oP2 = {
           uuid: '00000000-0000-4000-8000-000000000032',
           level: overworld,
-          x: -512.5, y: 80, z: 512.5,
+          x: 768.5, y: 80, z: 512.5,
           mainHandItem: Item.empty,
           inventory: { slots: 1, items: [{ id: 'minecraft:air', count: 0, empty: true }], getStackInSlot: function (idx) { return this.items[idx]; } },
           tell: function () {},
