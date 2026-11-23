@@ -740,7 +740,10 @@ function lhStartIntegrationSetup(server) {
             missingQuestItems.push(qItemId);
           }
         }
-        ok(missingQuestItems.length === 0, 'unregistered quest items in Forge 1.20.1 (' + missingQuestItems.length + '): ' + missingQuestItems.slice(0, 20).join(', '));
+        if (missingQuestItems.length > 0) {
+          console.error('MISSING_QUEST_ITEMS_FULL: ' + missingQuestItems.join(', '));
+        }
+        ok(missingQuestItems.length === 0, 'unregistered quest items in Forge 1.20.1 (' + missingQuestItems.length + '): ' + missingQuestItems.join(', '));
 
         console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic + openttd + eventlog + gui + quest_items_' + auditList.length);
       } catch (err2) {
