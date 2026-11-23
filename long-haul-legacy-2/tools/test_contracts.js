@@ -120,15 +120,18 @@ test('all KubeJS startup/server/client scripts parse cleanly in ES5/Node', () =>
   assert(count >= 15, 'expected at least 15 KubeJS/fixture scripts, got ' + count);
 });
 
-test('territory border follows 175000^(1/x) where x = 2 - 1/locked and opens 175000 at locked <= 1', () => {
+test('territory border uses diminishing-returns concave area curve (more territory early, less late) up to 175000 at locked <= 1', () => {
   const tm = sandbox.global.LHTerritoryMath;
-  assert.equal(tm.computeBorder(6, 0).size, 724);
-  assert.equal(tm.computeBorder(6, 1).size, 818);
-  assert.equal(tm.computeBorder(6, 2).size, 991);
-  assert.equal(tm.computeBorder(6, 3).size, 1399);
-  assert.equal(tm.computeBorder(6, 4).size, 3129);
-  assert.equal(tm.computeBorder(6, 5).size, 175000);
-  assert.equal(tm.computeBorder(6, 6).size, 175000);
+  const sizes = [0, 1, 2, 3, 4, 5, 6].map(u => tm.computeBorder(6, u).size);
+  assert.deepEqual(sizes, [724, 105002, 140001, 160390, 171464, 175000, 175000]);
+  for (let i = 1; i <= 4; i++) {
+    const prevDSize = sizes[i] - sizes[i - 1];
+    const nextDSize = sizes[i + 1] - sizes[i];
+    assert(prevDSize > nextDSize, `expected decreasing border width increment at step ${i}: ${prevDSize} vs ${nextDSize}`);
+    const prevDArea = sizes[i] * sizes[i] - sizes[i - 1] * sizes[i - 1];
+    const nextDArea = sizes[i + 1] * sizes[i + 1] - sizes[i] * sizes[i];
+    assert(prevDArea > nextDArea, `expected decreasing area increment at step ${i}: ${prevDArea} vs ${nextDArea}`);
+  }
 });
 
 test('difficulty coefficient scales with online deaths / online players (target 63.15 -> 96) with no cap and drives random respawn radius 20203', () => {

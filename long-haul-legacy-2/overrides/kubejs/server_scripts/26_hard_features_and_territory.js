@@ -1,4 +1,4 @@
-// Long Haul Legacy 2.0: Chapter-gated territory expansion (175000^(1/x), x = 2 - 1/locked),
+// Long Haul Legacy 2.0: Chapter-gated territory expansion (concave area curve 1 - (1 - u/5)^2 from 724 to 175000),
 // randomized hard-feature unlocking with animated Casino Wheel visual, global death difficulty k,
 // random respawn scatter, random death item loss, and chapter completion sync.
 var LHBlockPos = Java.loadClass('net.minecraft.core.BlockPos');
@@ -1129,7 +1129,7 @@ ServerEvents.commandRegistry(function (event) {
     var unlocked = Object.keys(db.chapters).filter(function (k) { return db.chapters[k]; });
     lhMsg(p, 'Территория: ' + info.size + '×' + info.size + ' (±' + Math.round(info.size / 2) +
       ' м), этапов расширения: ' + info.unlocked + '/' + info.total + ' (осталось: ' + info.locked +
-      '), x=' + (Math.round(info.x * 1000) / 1000) + '. Пройдено глав: ' + chap.doneMain + '/' + chap.totalMain +
+      '), открыто площади: ' + Math.round((info.areaShare || 0) * 100) + '%. Пройдено глав: ' + chap.doneMain + '/' + chap.totalMain +
       ' (' + (unlocked.length ? unlocked.join(', ') : 'старт') + ').');
     return 1;
   });

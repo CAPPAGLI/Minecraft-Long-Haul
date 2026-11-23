@@ -459,22 +459,46 @@ global.LHEconomyGraph = (function () {
 
 global.LHTerritoryMath = (function () {
   var TOTAL_GATES = 6;
+  var BASE_BORDER = 724;
   var MAX_BORDER = 175000;
 
+  // Concave diminishing-returns area curve:
+  // More territory opens on early stages (+36% -> +28% -> +20% -> +12% -> +4% of total area),
+  // so both delta-Area and delta-Size strictly decrease toward the end of the playthrough.
   function computeBorder(totalGates, unlockedCount) {
     var total = totalGates > 0 ? totalGates : TOTAL_GATES;
+    var steps = total > 1 ? (total - 1) : 1;
     var unlocked = unlockedCount > 0 ? unlockedCount : 0;
     var locked = total - unlocked;
     if (locked < 0) locked = 0;
-    if (locked <= 1) {
-      return { total: total, unlocked: unlocked, locked: locked, x: 1.0, size: MAX_BORDER };
+    if (unlocked <= 0) {
+      return { total: total, unlocked: 0, locked: total, progress: 0, areaShare: 0, x: 0, size: BASE_BORDER };
     }
-    var x = 2.0 - (1.0 / locked);
-    var size = Math.round(Math.pow(MAX_BORDER, 1.0 / x));
-    return { total: total, unlocked: unlocked, locked: locked, x: x, size: size };
+    if (locked <= 1) {
+      return { total: total, unlocked: unlocked, locked: locked, progress: 1, areaShare: 1, x: 1, size: MAX_BORDER };
+    }
+    var p = Math.min(1.0, unlocked / steps);
+    var areaShare = 1.0 - Math.pow(1.0 - p, 2.0);
+    var baseArea = BASE_BORDER * BASE_BORDER;
+    var maxArea = MAX_BORDER * MAX_BORDER;
+    var size = Math.round(Math.sqrt(baseArea + (maxArea - baseArea) * areaShare));
+    return {
+      total: total,
+      unlocked: unlocked,
+      locked: locked,
+      progress: p,
+      areaShare: areaShare,
+      x: areaShare,
+      size: size
+    };
   }
 
-  return { TOTAL_GATES: TOTAL_GATES, MAX_BORDER: MAX_BORDER, computeBorder: computeBorder };
+  return {
+    TOTAL_GATES: TOTAL_GATES,
+    BASE_BORDER: BASE_BORDER,
+    MAX_BORDER: MAX_BORDER,
+    computeBorder: computeBorder
+  };
 })();
 
 global.LHDifficultyMath = (function () {

@@ -793,9 +793,9 @@ function lhGuiRenderTerritory(gui, server, player) {
     lhGiveTerritoryMapItem(server, pl, false);
   });
 
-  var border = typeof lhApplyTerritoryBorder === 'function' ? lhApplyTerritoryBorder(server, false) : { size: 724, unlocked: 0, total: 13 };
+  var border = typeof lhApplyTerritoryBorder === 'function' ? lhApplyTerritoryBorder(server, false) : { size: 724, unlocked: 0, total: 6, areaShare: 0 };
   lhGuiSlot(gui, 7, 4, 'minecraft:bedrock', '§bГраница мира: ' + border.size + '×' + border.size, [
-    '§fЭтапов расширения: §a' + border.unlocked + '/' + border.total,
+    '§fЭтапов расширения: §a' + border.unlocked + '/' + border.total + ' §7(§e' + Math.round((border.areaShare || 0) * 100) + '% §7площади)',
     '§7Светло-зелёный = ваш, Золотой = штаб, Жёлтый = заповедник.'
   ]);
 }

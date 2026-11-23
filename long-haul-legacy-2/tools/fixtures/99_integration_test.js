@@ -556,16 +556,16 @@ function lhStartIntegrationSetup(server) {
         // 19. Eccentric Tome item registered for unified mod guidebooks
         ok(!Item.of('eccentrictome:tome').isEmpty(), 'eccentrictome:tome registered');
 
-        // 20. Chapter-based territory border scaling (175000^(1/x), x = 2 - 1/locked) + Casino Wheel hard-feature unlocking + Chapter 00 story
+        // 20. Chapter-based territory border scaling (diminishing concave area curve 724 -> 175000) + Casino Wheel hard-feature unlocking + Chapter 00 story
         ok(Math.round(Number(overworld.worldBorder.size)) === 724, 'initial world border starts at 724 blocks when 6 gates locked');
         var pDb = lhProgRead(server);
         var savedProg = JSON.stringify(pDb);
         ok(lhUnlockChapter(server, 'ch00', true, true) === true, 'Chapter 00 unlocks and queues Casino Wheel spin');
-        ok(lhTerritoryCounts(server).size === 818, '1 unlocked gate expands border to 818 blocks');
+        ok(lhTerritoryCounts(server).size === 105002, '1 unlocked gate expands border to 105002 blocks (36% area)');
         lhUnlockChapter(server, 'ch01', true, true);
         lhUnlockChapter(server, 'ch02', true, true);
         lhUnlockChapter(server, 'ch03', true, true);
-        ok(lhTerritoryCounts(server).size === 3129, '4 unlocked gates (locked=2) expands border to 3129 blocks');
+        ok(lhTerritoryCounts(server).size === 171464, '4 unlocked gates (locked=2) expands border to 171464 blocks (96% area)');
         lhUnlockChapter(server, 'ch05', true, true);
         ok(lhTerritoryCounts(server).size === 175000 && Math.round(Number(overworld.worldBorder.size)) === 175000, '5 unlocked gates (locked=1) expands border to 175000 blocks');
         var spun = lhCasinoResolveImmediate(server, true);
