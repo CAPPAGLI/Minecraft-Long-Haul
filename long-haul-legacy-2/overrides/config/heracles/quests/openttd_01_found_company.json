@@ -1,0 +1,49 @@
+{
+  "dependencies": [],
+  "tasks": {
+    "ottd_task": {
+      "type": "heracles:advancement",
+      "title": "Создайте или вступите в компанию",
+      "advancements": [
+        "longhaul:openttd/company"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "I. Основание транспортной корпорации"
+    },
+    "subtitle": {
+      "text": "Мультиплеерная экономика OpenTTD"
+    },
+    "description": [
+      "В мультиплеере игроки делятся на конкурирующие компании в духе OpenTTD с общим счётом (Credits), капитализацией и рейтингом (/lh company list).",
+      "Создайте свою компанию командой /lh company create <id> <Название> (например, /lh company create translog Сибирь-Транс) или вступите к союзнику: /lh company join <id>.",
+      "Автоматически ваш стартовый сектор 256×256 закрепляется как штаб-квартира, а на карте действуют ИИ-конкуренты: Стальная Магистраль, Зелёный Обоз и Небесный Альянс."
+    ],
+    "groups": {
+      "14 · OpenTTD: Компании и Империя": {
+        "position": [
+          -96,
+          -42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:writable_book",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

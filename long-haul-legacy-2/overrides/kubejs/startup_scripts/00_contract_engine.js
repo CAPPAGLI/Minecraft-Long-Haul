@@ -543,3 +543,646 @@ global.LHHardFeatureCatalog = [
   { id: 'insomnia_ambush', name: 'Сингулярная бессонница', icon: '👁', color: 'dark_purple', summary: 'Ночью под открытым небом к одиноким путникам притягиваются засады фантомов и нежити.' }
 ];
 
+global.LHOpenTTD = (function () {
+  var SECTOR_SIZE = 256; // 16x16 chunks per sector, centered at (sx*256, sz*256)
+  var BASE_CLAIM_COST = 250;
+  var BASE_FORTIFY_COST = 200;
+  var SPEC_SWITCH_COST = 500;
+  var STARTING_CASH = 1000;
+
+  var TRANSPORT_SPECS = {
+    rail: {
+      id: 'rail',
+      name: 'Железнодорожная корпорация',
+      icon: '🚆',
+      telemetryFamily: 'rail',
+      payoutBonus: 0.45,
+      claimDiscount: 0.35,
+      summary: '+45% выручки с ж/д маршрутов и контрактов, -35% цена захвата секторов, ускорение на поездах/вагонетках.'
+    },
+    road: {
+      id: 'road',
+      name: 'Автотранспортный конвой',
+      icon: '🚚',
+      telemetryFamily: 'road_vehicle',
+      payoutBonus: 0.45,
+      claimDiscount: 0.20,
+      summary: '+45% выручки с авто/повозок, +8 слотов к лимиту перегруза, скидка 20% на захват секторов.'
+    },
+    sea: {
+      id: 'sea',
+      name: 'Морское пароходство',
+      icon: '🚢',
+      telemetryFamily: 'watercraft',
+      payoutBonus: 0.50,
+      claimDiscount: 0.25,
+      summary: '+50% выручки на воде и в портовых узлах, водное дыхание и скорость на воде, скидка 25% на захват.'
+    },
+    air: {
+      id: 'air',
+      name: 'Воздушный флот',
+      icon: '✈',
+      telemetryFamily: 'aircraft_vs',
+      payoutBonus: 0.50,
+      claimDiscount: 0.25,
+      summary: '+50% выручки на авиа/VS-судах, иммунитет к высотному морозу, страховка от падений, скидка 25% на захват.'
+    }
+  };
+
+  var RESOURCE_SPECS = {
+    mining: {
+      id: 'mining',
+      name: 'Горно-рудный холдинг',
+      icon: '⛏',
+      yieldBonus: 0.35,
+      scarcityReduction: 0.70,
+      summary: '+35% добычи руды и снижение потерь «Рудного голода» с 50% до 15%.'
+    },
+    forestry: {
+      id: 'forestry',
+      name: 'Лесозаготовительный трест',
+      icon: '🪓',
+      yieldBonus: 0.35,
+      scarcityReduction: 0.75,
+      summary: '+35% выхода древесины/угля и снижение потерь «Дефицита леса» с 40% до 10%.'
+    },
+    agro: {
+      id: 'agro',
+      name: 'Аграрный синдикат',
+      icon: '🌾',
+      yieldBonus: 0.35,
+      contractBonus: 0.40,
+      summary: '+35% урожая, +40% оплаты за продовольственные заказы и защита от брожения еды.'
+    },
+    energy: {
+      id: 'energy',
+      name: 'Энергетика и химия',
+      icon: '☢',
+      yieldBonus: 0.40,
+      hazardMitigation: true,
+      summary: '+40% прибыли с нефти/урана/драконика и ослабление радиационного и кислотного фона.'
+    }
+  };
+
+  var DEFAULT_BOT_COMPANIES = [
+    {
+      id: 'bot_ironrail',
+      name: 'Стальная Магистраль',
+      color: 'gold',
+      colorCode: '§6',
+      tag: 'IRON',
+      transportSpec: 'rail',
+      resourceSpec: 'mining',
+      hqSx: 1,
+      hqSz: 0,
+      cash: 1500
+    },
+    {
+      id: 'bot_greencart',
+      name: 'Зелёный Обоз',
+      color: 'green',
+      colorCode: '§a',
+      tag: 'AGRO',
+      transportSpec: 'road',
+      resourceSpec: 'agro',
+      hqSx: -1,
+      hqSz: 0,
+      cash: 1500
+    },
+    {
+      id: 'bot_skyport',
+      name: 'Небесный Альянс',
+      color: 'aqua',
+      colorCode: '§b',
+      tag: 'AERO',
+      transportSpec: 'air',
+      resourceSpec: 'energy',
+      hqSx: 0,
+      hqSz: -1,
+      cash: 1500
+    }
+  ];
+
+  var BOT_ORDER_TEMPLATES = {
+    bot_ironrail: {
+      buy: [
+        { item: 'minecraft:iron_ingot', qty: 16, price: 110 },
+        { item: 'minecraft:coal', qty: 32, price: 85 },
+        { item: 'longhaul:ore_concentrate', qty: 4, price: 190 }
+      ],
+      sell: [
+        { item: 'create:track', qty: 32, price: 140 },
+        { item: 'create:brass_ingot', qty: 8, price: 160 },
+        { item: 'longhaul:machine_parts', qty: 4, price: 240 }
+      ]
+    },
+    bot_greencart: {
+      buy: [
+        { item: 'minecraft:oak_log', qty: 32, price: 80 },
+        { item: 'longhaul:treated_timber', qty: 4, price: 170 },
+        { item: 'minecraft:wheat', qty: 32, price: 75 }
+      ],
+      sell: [
+        { item: 'minecraft:bread', qty: 16, price: 70 },
+        { item: 'longhaul:field_rations', qty: 4, price: 180 },
+        { item: 'minecraft:cooked_beef', qty: 12, price: 95 }
+      ]
+    },
+    bot_skyport: {
+      buy: [
+        { item: 'longhaul:technical_oil', qty: 4, price: 220 },
+        { item: 'longhaul:marine_reagent', qty: 4, price: 210 },
+        { item: 'minecraft:copper_ingot', qty: 24, price: 115 }
+      ],
+      sell: [
+        { item: 'longhaul:technical_glass', qty: 4, price: 210 },
+        { item: 'longhaul:refractory_mix', qty: 4, price: 205 },
+        { item: 'create:precision_mechanism', qty: 2, price: 260 }
+      ]
+    }
+  };
+
+  var PLAYER_COLORS = ['§9', '§d', '§e', '§c', '§3', '§5', '§f'];
+
+  function sectorCoords(x, z) {
+    var half = SECTOR_SIZE / 2;
+    var sx = Math.floor((Number(x || 0) + half) / SECTOR_SIZE);
+    var sz = Math.floor((Number(z || 0) + half) / SECTOR_SIZE);
+    return {
+      sx: sx,
+      sz: sz,
+      key: sx + ',' + sz,
+      centerX: sx * SECTOR_SIZE,
+      centerZ: sz * SECTOR_SIZE
+    };
+  }
+
+  function sectorKey(sx, sz) {
+    return sx + ',' + sz;
+  }
+
+  function sanitizeId(raw) {
+    return String(raw || '').toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20);
+  }
+
+  function createInitialState() {
+    var st = {
+      companies: {},
+      playerCompany: {},
+      claims: {},
+      pacts: {},
+      marketOrders: [],
+      tradeOffers: [],
+      nextOrderSeq: 1,
+      subsidy: null,
+      botCycle: 0
+    };
+    ensureBots(st);
+    return st;
+  }
+
+  function ensureBots(state) {
+    if (!state.companies) state.companies = {};
+    if (!state.claims) state.claims = {};
+    if (!state.pacts) state.pacts = {};
+    if (!state.playerCompany) state.playerCompany = {};
+    if (!state.marketOrders) state.marketOrders = [];
+    if (!state.tradeOffers) state.tradeOffers = [];
+
+    for (var i = 0; i < DEFAULT_BOT_COMPANIES.length; i++) {
+      var b = DEFAULT_BOT_COMPANIES[i];
+      if (!state.companies[b.id]) {
+        state.companies[b.id] = {
+          id: b.id,
+          name: b.name,
+          color: b.color,
+          colorCode: b.colorCode,
+          tag: b.tag,
+          isBot: true,
+          owner: 'AI',
+          members: [],
+          cash: b.cash,
+          transportSpec: b.transportSpec,
+          resourceSpec: b.resourceSpec,
+          hqSx: b.hqSx,
+          hqSz: b.hqSz,
+          stats: { deliveries: 0, tradeVolume: 0, blocksMined: 0, sectorsCaptured: 1, contractsDone: 0, routesDone: 0 }
+        };
+      }
+      var k = sectorKey(b.hqSx, b.hqSz);
+      if (!state.claims[k]) {
+        state.claims[k] = {
+          sx: b.hqSx,
+          sz: b.hqSz,
+          owner: b.id,
+          strength: 2,
+          isHq: true
+        };
+      }
+    }
+    return state;
+  }
+
+  function pactKey(a, b) {
+    return a < b ? (a + '|' + b) : (b + '|' + a);
+  }
+
+  function hasPact(state, a, b) {
+    if (!a || !b) return false;
+    if (a === b) return true;
+    return !!(state.pacts && state.pacts[pactKey(a, b)]);
+  }
+
+  function togglePact(state, a, b) {
+    if (!a || !b || a === b) return false;
+    var k = pactKey(a, b);
+    if (state.pacts[k]) {
+      delete state.pacts[k];
+      return false;
+    }
+    state.pacts[k] = true;
+    return true;
+  }
+
+  function countClaims(state, cid) {
+    var cnt = 0;
+    var keys = Object.keys(state.claims || {});
+    for (var i = 0; i < keys.length; i++) {
+      if (state.claims[keys[i]] && state.claims[keys[i]].owner === cid) cnt++;
+    }
+    return cnt;
+  }
+
+  function computeValuation(state, cid) {
+    var c = state.companies && state.companies[cid];
+    if (!c) return 0;
+    var claims = countClaims(state, cid);
+    var s = c.stats || {};
+    return Math.round(
+      Number(c.cash || 0) +
+      claims * 300 +
+      Number(s.deliveries || 0) * 45 +
+      Number(s.tradeVolume || 0) * 0.5 +
+      Number(s.contractsDone || 0) * 200 +
+      Number(s.routesDone || 0) * 250
+    );
+  }
+
+  function collectCompanyAnchors(state) {
+    var anchors = [];
+    var cids = Object.keys(state.companies || {});
+    for (var i = 0; i < cids.length; i++) {
+      var c = state.companies[cids[i]];
+      anchors.push({ cid: c.id, sx: Number(c.hqSx || 0), sz: Number(c.hqSz || 0), weight: 1.0 });
+    }
+    var claimKeys = Object.keys(state.claims || {});
+    for (var j = 0; j < claimKeys.length; j++) {
+      var cl = state.claims[claimKeys[j]];
+      if (cl && state.companies[cl.owner]) {
+        anchors.push({ cid: cl.owner, sx: cl.sx, sz: cl.sz, weight: 1.0 });
+      }
+    }
+    return anchors;
+  }
+
+  function resolveSectorOwner(state, sx, sz) {
+    var key = sectorKey(sx, sz);
+    var cl = state.claims && state.claims[key];
+    if (cl && state.companies && state.companies[cl.owner]) {
+      return {
+        sx: sx,
+        sz: sz,
+        key: key,
+        owner: cl.owner,
+        kind: 'claimed',
+        strength: Number(cl.strength || 1),
+        isHq: !!cl.isHq,
+        claim: cl
+      };
+    }
+    var anchors = collectCompanyAnchors(state);
+    if (!anchors.length) {
+      return { sx: sx, sz: sz, key: key, owner: null, kind: 'unclaimed', strength: 0, isHq: false, claim: null };
+    }
+    var bestCid = null;
+    var bestDist = 1e18;
+    for (var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      var dx = sx - a.sx;
+      var dz = sz - a.sz;
+      var d2 = dx * dx + dz * dz;
+      if (d2 < bestDist || (d2 === bestDist && bestCid !== null && a.cid < bestCid)) {
+        bestDist = d2;
+        bestCid = a.cid;
+      }
+    }
+    return {
+      sx: sx,
+      sz: sz,
+      key: key,
+      owner: bestCid,
+      kind: 'voronoi',
+      strength: 0,
+      isHq: false,
+      claim: null
+    };
+  }
+
+  function isAdjacentOwned(state, cid, sx, sz) {
+    var dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+    for (var i = 0; i < dirs.length; i++) {
+      var k = sectorKey(sx + dirs[i][0], sz + dirs[i][1]);
+      var cl = state.claims && state.claims[k];
+      if (cl && cl.owner === cid) return true;
+    }
+    return false;
+  }
+
+  function computeClaimCost(state, cid, sx, sz) {
+    var c = state.companies && state.companies[cid];
+    if (!c) return { ok: false, reason: 'no_company', cost: BASE_CLAIM_COST };
+    var ownerInfo = resolveSectorOwner(state, sx, sz);
+    var tSpec = c.transportSpec ? TRANSPORT_SPECS[c.transportSpec] : null;
+    var disc = tSpec ? Number(tSpec.claimDiscount || 0) : 0;
+    var adj = isAdjacentOwned(state, cid, sx, sz) ? 0.20 : 0.0;
+    var mult = Math.max(0.40, 1.0 - disc - adj);
+
+    if (ownerInfo.kind === 'claimed') {
+      if (ownerInfo.owner === cid) return { ok: false, reason: 'already_yours', cost: 0 };
+      var baseTakeover = ownerInfo.isHq ? 600 : (225 * ownerInfo.strength);
+      return {
+        ok: true,
+        mode: 'capture',
+        targetOwner: ownerInfo.owner,
+        strength: ownerInfo.strength,
+        cost: Math.round(baseTakeover * mult)
+      };
+    }
+    return {
+      ok: true,
+      mode: 'claim',
+      targetOwner: ownerInfo.owner,
+      strength: 1,
+      cost: Math.round(BASE_CLAIM_COST * mult)
+    };
+  }
+
+  function companyCreate(state, playerUuid, rawId, displayName, hqX, hqZ) {
+    var cid = sanitizeId(rawId);
+    if (!cid || cid.indexOf('bot_') === 0) return { ok: false, reason: 'invalid_id' };
+    if (state.companies[cid]) return { ok: false, reason: 'exists' };
+
+    var existing = state.playerCompany[playerUuid];
+    if (existing && state.companies[existing]) {
+      companyLeave(state, playerUuid);
+    }
+
+    var playerCount = 0;
+    Object.keys(state.companies).forEach(function (k) {
+      if (!state.companies[k].isBot) playerCount++;
+    });
+    var colorCode = PLAYER_COLORS[playerCount % PLAYER_COLORS.length];
+    var sc = sectorCoords(hqX || 0, hqZ || 0);
+    var comp = {
+      id: cid,
+      name: String(displayName || cid).slice(0, 32),
+      color: 'blue',
+      colorCode: colorCode,
+      tag: cid.toUpperCase().slice(0, 4),
+      isBot: false,
+      owner: playerUuid,
+      members: [playerUuid],
+      cash: STARTING_CASH,
+      transportSpec: null,
+      resourceSpec: null,
+      hqSx: sc.sx,
+      hqSz: sc.sz,
+      stats: { deliveries: 0, tradeVolume: 0, blocksMined: 0, sectorsCaptured: 0, contractsDone: 0, routesDone: 0 }
+    };
+    state.companies[cid] = comp;
+    state.playerCompany[playerUuid] = cid;
+
+    // Claim HQ sector if not already claimed by a bot/player HQ
+    var cur = state.claims[sc.key];
+    if (!cur) {
+      state.claims[sc.key] = { sx: sc.sx, sz: sc.sz, owner: cid, strength: 2, isHq: true };
+      comp.stats.sectorsCaptured = 1;
+    }
+    return { ok: true, company: comp };
+  }
+
+  function companyJoin(state, playerUuid, rawId) {
+    var cid = sanitizeId(rawId);
+    var comp = state.companies[cid];
+    if (!comp || comp.isBot) return { ok: false, reason: 'not_found' };
+    var prev = state.playerCompany[playerUuid];
+    if (prev && prev !== cid) companyLeave(state, playerUuid);
+    if (comp.members.indexOf(playerUuid) === -1) comp.members.push(playerUuid);
+    state.playerCompany[playerUuid] = cid;
+    return { ok: true, company: comp };
+  }
+
+  function companyLeave(state, playerUuid) {
+    var cid = state.playerCompany[playerUuid];
+    if (!cid || !state.companies[cid]) return false;
+    var comp = state.companies[cid];
+    comp.members = comp.members.filter(function (m) { return m !== playerUuid; });
+    delete state.playerCompany[playerUuid];
+    return true;
+  }
+
+  function setSpecialization(state, cid, kind, specId) {
+    var comp = state.companies[cid];
+    if (!comp) return { ok: false, reason: 'no_company' };
+    if (kind === 'transport') {
+      if (!TRANSPORT_SPECS[specId]) return { ok: false, reason: 'bad_spec' };
+      var switching = !!comp.transportSpec && comp.transportSpec !== specId;
+      if (switching && comp.cash < SPEC_SWITCH_COST) return { ok: false, reason: 'no_cash', cost: SPEC_SWITCH_COST };
+      if (switching) comp.cash -= SPEC_SWITCH_COST;
+      comp.transportSpec = specId;
+      return { ok: true, switched: switching, cost: switching ? SPEC_SWITCH_COST : 0, spec: TRANSPORT_SPECS[specId] };
+    }
+    if (kind === 'resource') {
+      if (!RESOURCE_SPECS[specId]) return { ok: false, reason: 'bad_spec' };
+      var switchingR = !!comp.resourceSpec && comp.resourceSpec !== specId;
+      if (switchingR && comp.cash < SPEC_SWITCH_COST) return { ok: false, reason: 'no_cash', cost: SPEC_SWITCH_COST };
+      if (switchingR) comp.cash -= SPEC_SWITCH_COST;
+      comp.resourceSpec = specId;
+      return { ok: true, switched: switchingR, cost: switchingR ? SPEC_SWITCH_COST : 0, spec: RESOURCE_SPECS[specId] };
+    }
+    return { ok: false, reason: 'bad_kind' };
+  }
+
+  function claimOrCaptureSector(state, cid, sx, sz, allowCapture) {
+    var comp = state.companies[cid];
+    if (!comp) return { ok: false, reason: 'no_company' };
+    var info = computeClaimCost(state, cid, sx, sz);
+    if (!info.ok) return info;
+    if (info.mode === 'capture' && !allowCapture) return { ok: false, reason: 'enemy_claimed', targetOwner: info.targetOwner, cost: info.cost };
+    if (comp.cash < info.cost) return { ok: false, reason: 'no_cash', cost: info.cost, cash: comp.cash };
+
+    comp.cash -= info.cost;
+    if (info.mode === 'capture' && info.targetOwner && state.companies[info.targetOwner]) {
+      // Pay 50% compensation into rival company's balance in hostile buyout
+      state.companies[info.targetOwner].cash += Math.round(info.cost * 0.5);
+    }
+    var k = sectorKey(sx, sz);
+    state.claims[k] = { sx: sx, sz: sz, owner: cid, strength: 1, isHq: false };
+    comp.stats.sectorsCaptured = (comp.stats.sectorsCaptured || 0) + 1;
+    return { ok: true, mode: info.mode, cost: info.cost, key: k, previousOwner: info.targetOwner };
+  }
+
+  function fortifySector(state, cid, sx, sz) {
+    var comp = state.companies[cid];
+    if (!comp) return { ok: false, reason: 'no_company' };
+    var k = sectorKey(sx, sz);
+    var cl = state.claims[k];
+    if (!cl || cl.owner !== cid) return { ok: false, reason: 'not_owned' };
+    if ((cl.strength || 1) >= 4) return { ok: false, reason: 'max_strength' };
+    var cost = BASE_FORTIFY_COST * (cl.strength || 1);
+    if (comp.cash < cost) return { ok: false, reason: 'no_cash', cost: cost };
+    comp.cash -= cost;
+    cl.strength = (cl.strength || 1) + 1;
+    return { ok: true, strength: cl.strength, cost: cost };
+  }
+
+  function botExpandStep(state, maxSectorAbs, rngFn) {
+    ensureBots(state);
+    state.botCycle = (state.botCycle || 0) + 1;
+    var rng = rngFn || Math.random;
+    var limit = Math.max(1, Math.floor(Number(maxSectorAbs || 1)));
+    var events = [];
+
+    for (var i = 0; i < DEFAULT_BOT_COMPANIES.length; i++) {
+      var bot = state.companies[DEFAULT_BOT_COMPANIES[i].id];
+      if (!bot) continue;
+      var ownedCount = countClaims(state, bot.id);
+      var income = 85 + ownedCount * 42;
+      bot.cash += income;
+      bot.stats.deliveries += 1;
+
+      if (bot.cash >= 420) {
+        // Pick an unclaimed sector adjacent to an owned sector within active worldborder
+        var candidates = [];
+        var claimKeys = Object.keys(state.claims);
+        var dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+        for (var k = 0; k < claimKeys.length; k++) {
+          var cl = state.claims[claimKeys[k]];
+          if (!cl || cl.owner !== bot.id) continue;
+          for (var d = 0; d < dirs.length; d++) {
+            var nsx = cl.sx + dirs[d][0];
+            var nsz = cl.sz + dirs[d][1];
+            if (Math.abs(nsx) > limit || Math.abs(nsz) > limit) continue;
+            var nKey = sectorKey(nsx, nsz);
+            if (!state.claims[nKey]) {
+              candidates.push({ sx: nsx, sz: nsz });
+            }
+          }
+        }
+        if (candidates.length > 0) {
+          var pick = candidates[Math.floor(rng() * candidates.length)];
+          var res = claimOrCaptureSector(state, bot.id, pick.sx, pick.sz, false);
+          if (res.ok) {
+            events.push({ botId: bot.id, botName: bot.name, sx: pick.sx, sz: pick.sz, cost: res.cost });
+          }
+        }
+      }
+    }
+    return events;
+  }
+
+  function refreshBotOrders(state, rngFn) {
+    ensureBots(state);
+    var rng = rngFn || Math.random;
+    // Keep player-created market orders, replace stale bot orders
+    var kept = (state.marketOrders || []).filter(function (o) { return !o.isBot; });
+    for (var i = 0; i < DEFAULT_BOT_COMPANIES.length; i++) {
+      var bid = DEFAULT_BOT_COMPANIES[i].id;
+      var bot = state.companies[bid];
+      var tpl = BOT_ORDER_TEMPLATES[bid];
+      if (!bot || !tpl) continue;
+
+      for (var b = 0; b < tpl.buy.length; b++) {
+        var bo = tpl.buy[b];
+        var bFactor = 0.90 + rng() * 0.25;
+        kept.push({
+          id: 'm' + (state.nextOrderSeq++),
+          companyId: bid,
+          isBot: true,
+          side: 'buy',
+          item: bo.item,
+          qty: bo.qty,
+          price: Math.round(bo.price * bFactor),
+          remainingBatches: 4
+        });
+      }
+      for (var s = 0; s < tpl.sell.length; s++) {
+        var so = tpl.sell[s];
+        var sFactor = 0.90 + rng() * 0.25;
+        kept.push({
+          id: 'm' + (state.nextOrderSeq++),
+          companyId: bid,
+          isBot: true,
+          side: 'sell',
+          item: so.item,
+          qty: so.qty,
+          price: Math.round(so.price * sFactor),
+          remainingBatches: 4
+        });
+      }
+    }
+    state.marketOrders = kept;
+    return kept.length;
+  }
+
+  function renderAsciiMap(state, centerSx, centerSz, radius) {
+    var r = radius > 0 ? radius : 3;
+    var rows = [];
+    for (var dz = -r; dz <= r; dz++) {
+      var row = '';
+      for (var dx = -r; dx <= r; dx++) {
+        var sx = centerSx + dx;
+        var sz = centerSz + dz;
+        var info = resolveSectorOwner(state, sx, sz);
+        var comp = info.owner ? state.companies[info.owner] : null;
+        var cc = comp ? (comp.colorCode || '§7') : '§8';
+        var sym = (dx === 0 && dz === 0) ? '◆' : (info.kind === 'claimed' ? '█' : '▒');
+        row += cc + sym + ' ';
+      }
+      rows.push(row);
+    }
+    return rows;
+  }
+
+  return {
+    SECTOR_SIZE: SECTOR_SIZE,
+    BASE_CLAIM_COST: BASE_CLAIM_COST,
+    SPEC_SWITCH_COST: SPEC_SWITCH_COST,
+    STARTING_CASH: STARTING_CASH,
+    TRANSPORT_SPECS: TRANSPORT_SPECS,
+    RESOURCE_SPECS: RESOURCE_SPECS,
+    DEFAULT_BOT_COMPANIES: DEFAULT_BOT_COMPANIES,
+    BOT_ORDER_TEMPLATES: BOT_ORDER_TEMPLATES,
+    sectorCoords: sectorCoords,
+    sectorKey: sectorKey,
+    sanitizeId: sanitizeId,
+    createInitialState: createInitialState,
+    ensureBots: ensureBots,
+    hasPact: hasPact,
+    togglePact: togglePact,
+    countClaims: countClaims,
+    computeValuation: computeValuation,
+    resolveSectorOwner: resolveSectorOwner,
+    computeClaimCost: computeClaimCost,
+    companyCreate: companyCreate,
+    companyJoin: companyJoin,
+    companyLeave: companyLeave,
+    setSpecialization: setSpecialization,
+    claimOrCaptureSector: claimOrCaptureSector,
+    fortifySector: fortifySector,
+    botExpandStep: botExpandStep,
+    refreshBotOrders: refreshBotOrders,
+    renderAsciiMap: renderAsciiMap
+  };
+})();
+

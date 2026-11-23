@@ -604,7 +604,73 @@ function lhStartIntegrationSetup(server) {
         ok(!Item.of('draconicevolution:draconium_ingot').isEmpty(), 'draconicevolution:draconium_ingot registered');
         ok(!Item.of('electrodynamics:ingoturanium').isEmpty() || !Item.of('nuclearcraft:uranium_ingot').isEmpty(), 'Nuclear uranium ingot registered');
 
-        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic');
+        // 22. OpenTTD multiplayer companies, specializations, Voronoi+claim sectors, inter-company trade/market, and AI bots
+        var ottdSaved = JSON.stringify(lhOttdRead(server));
+        var ottdSt = lhOttdRead(server);
+        var oP1 = {
+          uuid: '00000000-0000-4000-8000-000000000031',
+          level: overworld,
+          x: 0.5, y: 80, z: 0.5,
+          mainHandItem: Item.of('minecraft:iron_ingot', 16),
+          inventory: {
+            slots: 2,
+            items: [
+              { id: 'minecraft:iron_ingot', count: 16, empty: false },
+              { id: 'minecraft:air', count: 0, empty: true }
+            ],
+            getStackInSlot: function (idx) { return this.items[idx]; },
+            extractItem: function (idx, n) {
+              var it = this.items[idx];
+              var take = Math.min(n, it.count);
+              it.count -= take;
+              if (it.count <= 0) this.items[idx] = { id: 'minecraft:air', count: 0, empty: true };
+              return { count: take };
+            }
+          },
+          tell: function () {},
+          isAdvancementDone: function () { return false; },
+          unlockAdvancement: function () {}
+        };
+        var oP2 = {
+          uuid: '00000000-0000-4000-8000-000000000032',
+          level: overworld,
+          x: 0.5, y: 80, z: 256.5,
+          mainHandItem: Item.empty,
+          inventory: { slots: 1, items: [{ id: 'minecraft:air', count: 0, empty: true }], getStackInSlot: function (idx) { return this.items[idx]; } },
+          tell: function () {},
+          isAdvancementDone: function () { return false; },
+          unlockAdvancement: function () {}
+        };
+        ok(global.LHOpenTTD.companyCreate(ottdSt, String(oP1.uuid), 'sibir', 'Сибирь-Логистик', oP1.x, oP1.z).ok === true, 'player 1 founded OpenTTD company');
+        ok(global.LHOpenTTD.companyCreate(ottdSt, String(oP2.uuid), 'volga', 'Волга-Карго', oP2.x, oP2.z).ok === true, 'player 2 founded competing company');
+        ok(global.LHOpenTTD.setSpecialization(ottdSt, 'sibir', 'transport', 'rail').ok === true, 'sibir set rail transport spec');
+        ok(global.LHOpenTTD.setSpecialization(ottdSt, 'sibir', 'resource', 'mining').ok === true, 'sibir set mining resource spec');
+        var earnedRail = lhCompanyReward(server, oP1, 200, 'route', 'rail');
+        ok(earnedRail === 290, 'rail specialization adds +45% route payout (200 -> 290 Cr)');
+        ok(lhCompanyScarcityFactor(server, oP1, 'mining') < 0.35, 'mining specialization mitigates ore scarcity');
+
+        // Claim + capture + fortify + Voronoi full-map partition
+        oP1.x = 512.5; oP1.z = 512.5;
+        ok(lhCompanyClaimHere(server, oP1, false) === 1, 'sibir claimed sector (2,2)');
+        ok(lhCompanyFortifyHere(server, oP1) === 1, 'sibir fortified sector (2,2)');
+        oP2.x = 512.5; oP2.z = 512.5;
+        ok(lhCompanyClaimHere(server, oP2, false) === 0, 'claim without capture blocked on rival sector');
+        ok(lhCompanyClaimHere(server, oP2, true) === 1, 'hostile capture takes sector (2,2) for volga');
+        ok(global.LHOpenTTD.resolveSectorOwner(ottdSt, 40, 40).kind === 'voronoi', 'entire map partitioned via Voronoi');
+
+        // Consortium Market bot order + direct inter-company trade offer + AI bot tick
+        var ironBuyOrder = ottdSt.marketOrders.filter(function (o) { return o.isBot && o.side === 'buy' && o.item === 'minecraft:iron_ingot'; })[0];
+        ok(!!ironBuyOrder && lhMarketSell(server, oP1, ironBuyOrder.id, true) > 0, 'sold iron ingots to AI bot buy order on Consortium Market');
+        oP1.inventory.items[0] = { id: 'minecraft:iron_ingot', count: 16, empty: false };
+        var directOffer = lhCreateTradeOffer(server, oP1, 'volga', 8, 120, true);
+        ok(!!directOffer && lhAcceptTradeOffer(server, oP2, directOffer.id, true) === 1, 'inter-company direct trade offer created and accepted');
+        var botEvents = lhBotTick(server, true);
+        ok(Array.isArray(botEvents), 'AI bot tick executes cleanly inside active worldborder');
+        ok(server.getAdvancement('longhaul:openttd/company') !== null && server.getAdvancement('longhaul:openttd/empire') !== null, 'OpenTTD Chapter 14 advancements exist');
+        LHOTTDState = JSON.parse(ottdSaved);
+        lhOttdSave(server);
+
+        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic + openttd');
       } catch (err2) {
         console.error('LH_INTEGRATION_FAIL: live adapter ' + err2);
       }

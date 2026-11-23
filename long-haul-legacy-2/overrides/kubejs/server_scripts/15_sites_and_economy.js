@@ -127,6 +127,8 @@ function lhSiteCommission(server, player, siteId) {
   site.depot = depotPos;
   lhSitesSave(server);
   lhUnlock(player, 'longhaul:sites/' + siteId);
+  if (typeof lhCompanyAutoClaimFromInfra === 'function') lhCompanyAutoClaimFromInfra(server, player, site.x, site.z, siteId);
+  if (typeof lhCompanyReward === 'function') lhCompanyReward(server, player, 300, 'contract', null);
   if (typeof lhStageRecompute === 'function') lhStageRecompute(server, player);
   lhMsg(player, 'Площадка "' + site.name + '" введена в строй на [' + site.x + ', ' + site.z + ']. Производство: /lh site produce ' + siteId + ' bootstrap');
   return 1;
@@ -186,6 +188,10 @@ function lhSiteProduce(server, player, siteId, mode) {
   site.producedTotal = (site.producedTotal || 0) + outCount;
   lhSitesSave(server);
   lhUnlock(player, 'longhaul:production/' + siteId);
+  if (typeof lhCompanyReward === 'function') {
+    var pCat = siteId === 'iron_basin' ? 'mining' : (siteId === 'timber_valley' ? 'forestry' : (siteId === 'breadbasket_plains' ? 'food' : (siteId === 'oil_steppe' ? 'energy' : 'contract')));
+    lhCompanyReward(server, player, mode === 'industrial' ? 260 : 120, pCat, null);
+  }
   if (typeof lhStageRecompute === 'function') lhStageRecompute(server, player);
   lhMsg(player, 'Выпущено ' + outCount + 'x ' + spec.product + ' на площадке "' + site.name + '". Всего выпущено: ' + site.producedTotal);
   return 1;

@@ -509,6 +509,50 @@ for i, (qid, title, icon, desc, deps) in enumerate(doomed_quests):
     quest(qid, title, '13 · DOOMED: Хардкор-выживание (Опционально)', [(i % 3 - 1) * 96, (i // 3) * 84 - 42], icon,
           tasks, desc, deps=deps, subtitle='Опциональный профиль CurseForge')
 
+# ---------------------------------------------------------------------------
+# 14 · OpenTTD: Компании и Империя (multiplayer companies, specs, sectors, trading, AI bots)
+# ---------------------------------------------------------------------------
+openttd_advs = ['company', 'specs', 'claim', 'trade', 'empire']
+for oa in openttd_advs:
+    adv('openttd/' + oa, 30)
+
+openttd_quests = [
+    ('openttd_01_found_company', 'I. Основание транспортной корпорации', 'minecraft:writable_book', [
+        'В мультиплеере игроки делятся на конкурирующие компании в духе OpenTTD с общим счётом (Credits), капитализацией и рейтингом (/lh company list).',
+        'Создайте свою компанию командой /lh company create <id> <Название> (например, /lh company create translog Сибирь-Транс) или вступите к союзнику: /lh company join <id>.',
+        'Автоматически ваш стартовый сектор 256×256 закрепляется как штаб-квартира, а на карте действуют ИИ-конкуренты: Стальная Магистраль, Зелёный Обоз и Небесный Альянс.',
+    ], [], 'longhaul:openttd/company', 'Создайте или вступите в компанию'),
+    ('openttd_02_specializations', 'II. Специализация логистики и добычи', 'create:track', [
+        'Выберите транспортную специализацию (/lh company spec transport <rail|road|sea|air>): +45–50% прибыли с профильных маршрутов и скидка 20–35% на захват секторов + пассивные перки.',
+        'Выберите ресурсную специализацию (/lh company spec resource <mining|forestry|agro|energy>): +35–40% выхода и смягчение дефицита руд, леса, брожения еды или радиации.',
+    ], ['openttd_01_found_company'], 'longhaul:openttd/specs', 'Выберите обе специализации компании'),
+    ('openttd_03_sector_map', 'III. Карта секторов 256×256 и захват', 'minecraft:filled_map', [
+        'Вся карта разделена между компаниями на сектора 256×256 (прямой захват + диаграмма Вороного по ближайшим штабам и аванпостам).',
+        'Откройте ASCII-карту окружения: /lh map (или /lh territory map).',
+        'Захватите соседний сектор командой /lh territory claim, укрепите его (/lh territory fortify) или перехватите вражеский (/lh territory capture).',
+    ], ['openttd_02_specializations'], 'longhaul:openttd/claim', 'Захватите дополнительный сектор 256×256'),
+    ('openttd_04_market_and_trade', 'IV. Биржа Консорциума и торговые пакты', 'minecraft:emerald', [
+        'На бирже (/lh market list) компании игроков и ИИ-боты выставляют ордера на покупку и продажу, а Консорциум периодически объявляет субсидии ×1.75.',
+        'Выполните биржевую сделку (/lh market sell <id> или /lh market buy <id>) или прямую сделку между компаниями (/lh trade offer <id_компании|any> <кол-во> <цена>).',
+        'Для беспошлинной торговли и свободной добычи без пошлин заключите пакт: /lh company pact <id>.',
+    ], ['openttd_03_sector_map'], 'longhaul:openttd/trade', 'Проведите межкорпоративную сделку'),
+    ('openttd_05_ai_competitors', 'V. Конкуренция с ИИ-корпорациями', 'minecraft:redstone_block', [
+        'Автономные ИИ-компании (/lh bot status) расширяют свои сектора внутри текущей границы мира, зарабатывают выручку и обновляют биржевые котировки.',
+        'Сравните капитализацию компаний через /lh company list и превзойдите ИИ по выручке и секторам.',
+    ], ['openttd_04_market_and_trade'], None, 'Ознакомьтесь с рейтингом ИИ-конкурентов'),
+    ('openttd_06_empire_verify', 'VI. Империя Консорциума (/lh openttd verify)', 'minecraft:nether_star', [
+        'Развивайте сеть секторов, закрывайте маршруты и экономические узлы, чтобы удерживать первое место в таблице компаний.',
+        'Выполните /lh openttd verify после создания компании, выбора специализаций, захвата сектора и первой сделки.',
+    ], ['openttd_05_ai_competitors'], 'longhaul:openttd/empire', 'Подтвердите статус OpenTTD-империи'),
+]
+for i, (qid, title, icon, desc, deps, adv_id, t_title) in enumerate(openttd_quests):
+    if adv_id:
+        tasks = {'ottd_task': {'type': 'heracles:advancement', 'title': t_title, 'advancements': [adv_id]}}
+    else:
+        tasks = {'check': {'type': 'heracles:check', 'title': t_title}}
+    quest(qid, title, '14 · OpenTTD: Компании и Империя', [(i % 3 - 1) * 96, (i // 3) * 84 - 42], icon,
+          tasks, desc, deps=deps, subtitle='Мультиплеерная экономика OpenTTD')
+
 (O / 'kubejs/startup_scripts/02_quest_catalog.js').write_text(
     '// Auto-generated from design/quest-catalog.json by tools/generate_alpha_quests.py\n'
     'global.LHQuestCatalog = ' + json.dumps(compact_catalog, ensure_ascii=False) + ';\n'
@@ -529,6 +573,7 @@ for i, (qid, title, icon, desc, deps) in enumerate(doomed_quests):
     '11 · Кампания: Лагеря и экспедиции\n'
     '12 · Ядерная энергетика и Драконик\n'
     '13 · DOOMED: Хардкор-выживание (Опционально)\n'
+    '14 · OpenTTD: Компании и Империя\n'
 )
 total_q = len(list(Q.glob('*.json')))
 total_adv = len(list(ADV_ROOT.rglob('*.json')))

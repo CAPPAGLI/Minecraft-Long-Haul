@@ -128,6 +128,7 @@ ServerEvents.commandRegistry(function (event) {
     lhMsg(p, 'Регионы и объекты: /lh sites, /lh site <info|commission|produce|archive|repair_archive>, /lh recovery <list|info|survey|restore>, /lh photo <report|status>, /lh cc <challenge|verify|status>.');
     lhMsg(p, 'Логистика: /lh camp <deploy|pack|list>, /lh route <begin|gate|finish|start|abort|quota|list>, /lh cargo <issue|deliver>, /lh catalog <list|stage|info|verify>, /lh stage, /lh vehicle status.');
     lhMsg(p, 'Мир и угрозы: /lh prospect (редкие рудные чанки), /lh snail status (Улитка), /lh gas status (сезонный токсичный газ).');
+    lhMsg(p, 'OpenTTD: /lh company <create|join|list|info|spec|pact>, /lh map, /lh territory <map|claim|capture|fortify|info>, /lh market <list|sell|buy>, /lh trade <list|offer|accept>, /lh bot status.');
     return 1;
   }));
   root.then(C.literal('terminal').executes(function (ctx) { return lhRegister(ctx.source.server, ctx.source.playerOrException); }));
@@ -208,6 +209,10 @@ ServerEvents.tick(function (event) {
         lhSync(player, p, server);
         if (typeof lhStageRecompute === 'function') lhStageRecompute(server, player);
         if (typeof lhProgressionRecompute === 'function') lhProgressionRecompute(server, player, false);
+        if (typeof lhCompanyReward === 'function') {
+          var cCat = (job.id === 'frontier_rations') ? 'food' : ((job.id === 'nuclear_power' || job.id === 'steam_era') ? 'energy' : 'contract');
+          lhCompanyReward(server, player, 220, cCat, null);
+        }
         lhMsg(player, 'Заказ выполнен: ' + spec.title);
       }
     } else if (job.status === 'failed') {

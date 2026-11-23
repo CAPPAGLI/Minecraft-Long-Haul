@@ -657,7 +657,8 @@ BlockEvents.broken(function (event) {
   if (!block) return;
 
   if (block.hasTag('minecraft:logs') && lhHardIsActive(server, 'wood_scarcity')) {
-    if (Math.random() < 0.40) {
+    var woodChance = 0.40 * (typeof lhCompanyScarcityFactor === 'function' ? lhCompanyScarcityFactor(server, player, 'forestry') : 1.0);
+    if (Math.random() < woodChance) {
       block.set('minecraft:air');
       event.cancel();
       return;
@@ -672,7 +673,8 @@ BlockEvents.broken(function (event) {
         hasSilk = true;
       }
     } catch (eSilk) {}
-    if (!hasSilk && Math.random() < 0.50) {
+    var oreChance = 0.50 * (typeof lhCompanyScarcityFactor === 'function' ? lhCompanyScarcityFactor(server, player, 'mining') : 1.0);
+    if (!hasSilk && Math.random() < oreChance) {
       block.popItem('minecraft:cobblestone');
       block.set('minecraft:air');
       event.cancel();
@@ -805,6 +807,8 @@ EntityEvents.hurt(function (event) {
   if (!ent || typeof ent.isPlayer !== 'function' || !ent.isPlayer()) return;
   var server = ent.server;
   if (!server || !lhHardIsActive(server, 'spore_spoilage')) return;
+  var compHurt = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, ent) : null;
+  if (compHurt && compHurt.resourceSpec === 'agro') return;
   if (Number(ent.y) >= 68 || Math.random() >= 0.25) return;
   var inv = ent.inventory;
   if (!inv) return;
@@ -886,7 +890,8 @@ ServerEvents.tick(function (event) {
     try { seeSky = p.level.canSeeSky(pPos); } catch (eSky) {}
 
     if (LHProgTick % 120 === 0 && lhHardIsActive(server, 'acid_pollution') && py < 92) {
-      var hasHelmet = p.headArmorItem && !p.headArmorItem.empty;
+      var compAcid = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, p) : null;
+      var hasHelmet = (p.headArmorItem && !p.headArmorItem.empty) || (compAcid && compAcid.resourceSpec === 'energy');
       if (!hasHelmet) {
         server.runCommandSilent('effect give ' + uname + ' minecraft:weakness 4 0 true');
       }
@@ -897,14 +902,17 @@ ServerEvents.tick(function (event) {
       }
     }
     if (LHProgTick % 160 === 0 && lhHardIsActive(server, 'radiation_fallout') && py < 20) {
-      var armored = p.chestArmorItem && !p.chestArmorItem.empty;
+      var compRad = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, p) : null;
+      var armored = (p.chestArmorItem && !p.chestArmorItem.empty) || (compRad && compRad.resourceSpec === 'energy');
       if (!armored) {
         server.runCommandSilent('effect give ' + uname + ' minecraft:mining_fatigue 5 0 true');
       }
     }
     if (LHProgTick % 80 === 0 && lhHardIsActive(server, 'overload_encumbrance')) {
+      var compRoad = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, p) : null;
+      var roadBonus = (compRoad && compRoad.transportSpec === 'road') ? 8 : 0;
       var usedSlots = lhCountOccupiedSlots(p);
-      var limit = Math.max(16, 25 - Math.floor(k / 20));
+      var limit = Math.max(16, 25 - Math.floor(k / 20)) + roadBonus;
       if (usedSlots > limit) {
         var amp = k >= 50 ? 1 : 0;
         server.runCommandSilent('effect give ' + uname + ' minecraft:slowness 5 ' + amp + ' true');
@@ -912,10 +920,12 @@ ServerEvents.tick(function (event) {
       }
     }
     if (LHProgTick % 120 === 0 && lhHardIsActive(server, 'cold_altitude_frost') && py >= 120) {
-      var fullArmor = p.headArmorItem && !p.headArmorItem.empty &&
+      var compAir = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, p) : null;
+      var fullArmor = (compAir && compAir.transportSpec === 'air') ||
+        (p.headArmorItem && !p.headArmorItem.empty &&
         p.chestArmorItem && !p.chestArmorItem.empty &&
         p.legsArmorItem && !p.legsArmorItem.empty &&
-        p.feetArmorItem && !p.feetArmorItem.empty;
+        p.feetArmorItem && !p.feetArmorItem.empty);
       if (!fullArmor && !lhHasLightSourceInHand(p)) {
         server.runCommandSilent('effect give ' + uname + ' minecraft:slowness 5 0 true');
         try { if (typeof p.setTicksFrozen === 'function') p.setTicksFrozen(160); } catch (eFr) {}
@@ -996,6 +1006,21 @@ ServerEvents.commandRegistry(function (event) {
       '. Завершённые главы: ' + (unlocked.length ? unlocked.join(', ') : 'пока нет') + '.');
     return 1;
   });
+  terr.then(C.literal('map').executes(function (ctx) {
+    return typeof lhCompanyTerritoryMap === 'function' ? lhCompanyTerritoryMap(ctx.source.server, ctx.source.playerOrException) : 0;
+  }));
+  terr.then(C.literal('claim').executes(function (ctx) {
+    return typeof lhCompanyClaimHere === 'function' ? lhCompanyClaimHere(ctx.source.server, ctx.source.playerOrException, false) : 0;
+  }));
+  terr.then(C.literal('capture').executes(function (ctx) {
+    return typeof lhCompanyClaimHere === 'function' ? lhCompanyClaimHere(ctx.source.server, ctx.source.playerOrException, true) : 0;
+  }));
+  terr.then(C.literal('fortify').executes(function (ctx) {
+    return typeof lhCompanyFortifyHere === 'function' ? lhCompanyFortifyHere(ctx.source.server, ctx.source.playerOrException) : 0;
+  }));
+  terr.then(C.literal('info').executes(function (ctx) {
+    return typeof lhCompanySectorInfo === 'function' ? lhCompanySectorInfo(ctx.source.server, ctx.source.playerOrException) : 0;
+  }));
   root.then(terr);
 
   var diffCmd = C.literal('difficulty');

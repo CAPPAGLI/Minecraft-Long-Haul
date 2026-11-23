@@ -1,0 +1,50 @@
+{
+  "dependencies": [
+    "openttd_05_ai_competitors"
+  ],
+  "tasks": {
+    "ottd_task": {
+      "type": "heracles:advancement",
+      "title": "Подтвердите статус OpenTTD-империи",
+      "advancements": [
+        "longhaul:openttd/empire"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "VI. Империя Консорциума (/lh openttd verify)"
+    },
+    "subtitle": {
+      "text": "Мультиплеерная экономика OpenTTD"
+    },
+    "description": [
+      "Развивайте сеть секторов, закрывайте маршруты и экономические узлы, чтобы удерживать первое место в таблице компаний.",
+      "Выполните /lh openttd verify после создания компании, выбора специализаций, захвата сектора и первой сделки."
+    ],
+    "groups": {
+      "14 · OpenTTD: Компании и Империя": {
+        "position": [
+          96,
+          42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:nether_star",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

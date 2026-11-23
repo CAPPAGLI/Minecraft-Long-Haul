@@ -1,0 +1,50 @@
+{
+  "dependencies": [
+    "openttd_01_found_company"
+  ],
+  "tasks": {
+    "ottd_task": {
+      "type": "heracles:advancement",
+      "title": "Выберите обе специализации компании",
+      "advancements": [
+        "longhaul:openttd/specs"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "II. Специализация логистики и добычи"
+    },
+    "subtitle": {
+      "text": "Мультиплеерная экономика OpenTTD"
+    },
+    "description": [
+      "Выберите транспортную специализацию (/lh company spec transport <rail|road|sea|air>): +45–50% прибыли с профильных маршрутов и скидка 20–35% на захват секторов + пассивные перки.",
+      "Выберите ресурсную специализацию (/lh company spec resource <mining|forestry|agro|energy>): +35–40% выхода и смягчение дефицита руд, леса, брожения еды или радиации."
+    ],
+    "groups": {
+      "14 · OpenTTD: Компании и Империя": {
+        "position": [
+          0,
+          -42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "create:track",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

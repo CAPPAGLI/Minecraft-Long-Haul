@@ -187,6 +187,54 @@ test('all Heracles quests form an acyclic DAG with zero dangling dependencies an
   assert(map.story_01_left_for_bread && map.story_06_forgot_the_milk, 'Chapter 00 quests present');
   assert(map.nuclear_01_geiger && map.nuclear_06_fusion_core, 'Chapter 12 Nuclear/Draconic quests present');
   assert(map.doomed_01_intro && map.doomed_06_safe_toggle, 'Chapter 13 DOOMED quests present');
+  assert(map.openttd_01_found_company && map.openttd_06_empire_verify, 'Chapter 14 OpenTTD quests present');
+});
+
+test('OpenTTD engine supports companies, specializations, Voronoi+claim partition, capture, fortify, pacts, and AI bots', () => {
+  const ottd = sandbox.global.LHOpenTTD;
+  const st = ottd.createInitialState();
+  assert(st.companies.bot_ironrail && st.companies.bot_greencart && st.companies.bot_skyport, '3 AI bots seeded');
+  assert.equal(ottd.resolveSectorOwner(st, 1, 0).owner, 'bot_ironrail');
+  // Voronoi partition assigns distant unclaimed sectors to nearest company HQ/outpost
+  const vor = ottd.resolveSectorOwner(st, 10, 0);
+  assert.equal(vor.kind, 'voronoi');
+  assert.equal(vor.owner, 'bot_ironrail');
+
+  const c1 = ottd.companyCreate(st, 'u1', 'transsib', 'Транссиб', 0, 0);
+  assert.equal(c1.ok, true);
+  assert.equal(c1.company.cash, ottd.STARTING_CASH);
+  const c2 = ottd.companyCreate(st, 'u2', 'pacific', 'Пасифик', 0, 256);
+  assert.equal(c2.ok, true);
+
+  assert.equal(ottd.setSpecialization(st, 'transsib', 'transport', 'rail').ok, true);
+  assert.equal(ottd.setSpecialization(st, 'transsib', 'resource', 'mining').ok, true);
+  // Rail spec grants 35% claim discount + 20% adjacency discount -> floor 45% of 250 = 113
+  const claimCost = ottd.computeClaimCost(st, 'transsib', 1, 1);
+  assert.equal(claimCost.mode, 'claim');
+  assert(claimCost.cost < ottd.BASE_CLAIM_COST, 'rail + adjacency discount reduces claim cost');
+  const cl = ottd.claimOrCaptureSector(st, 'transsib', 1, 1, false);
+  assert.equal(cl.ok, true);
+  assert.equal(ottd.fortifySector(st, 'transsib', 1, 1).strength, 2);
+
+  // Hostile capture fails without allowCapture, succeeds with allowCapture & compensates rival
+  assert.equal(ottd.claimOrCaptureSector(st, 'pacific', 1, 1, false).ok, false);
+  const prevCash = st.companies.transsib.cash;
+  const cap = ottd.claimOrCaptureSector(st, 'pacific', 1, 1, true);
+  assert.equal(cap.ok, true);
+  assert.equal(ottd.resolveSectorOwner(st, 1, 1).owner, 'pacific');
+  assert(st.companies.transsib.cash > prevCash, 'rival compensated on buyout');
+
+  // Bilateral trade pact toggle
+  assert.equal(ottd.hasPact(st, 'transsib', 'pacific'), false);
+  assert.equal(ottd.togglePact(st, 'transsib', 'pacific'), true);
+  assert.equal(ottd.hasPact(st, 'transsib', 'pacific'), true);
+
+  // Bot expansion & dynamic orders
+  ottd.refreshBotOrders(st, () => 0.5);
+  assert(st.marketOrders.length >= 18, 'bot buy/sell market orders generated');
+  const botEv = ottd.botExpandStep(st, 2, () => 0);
+  assert(botEv.length >= 1, 'bots expand into adjacent sectors within border');
+  assert(ottd.renderAsciiMap(st, 0, 0, 2).length === 5, 'ASCII territory map renders 5x5 grid');
 });
 
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');

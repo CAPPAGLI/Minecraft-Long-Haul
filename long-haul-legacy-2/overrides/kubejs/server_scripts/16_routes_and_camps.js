@@ -118,6 +118,7 @@ function lhCampDeploy(server, player) {
   db.camps[pid] = myCamps;
   lhLogSave(server);
   lhUnlock(player, 'longhaul:expedition/first_camp');
+  if (typeof lhCompanyAutoClaimFromInfra === 'function') lhCompanyAutoClaimFromInfra(server, player, px, pz, campId);
   var activeCount = myCamps.filter(function (c) { return c.active; }).length;
   if (activeCount >= 3) lhUnlock(player, 'longhaul:expedition/three_camps');
   lhMsg(player, 'Лагерь ' + campId + ' развёрнут в [' + px + ', ' + py + ', ' + pz + ']. Активных лагерей: ' + activeCount);
@@ -240,6 +241,10 @@ function lhRouteStepPlayer(server, player) {
     route.lastCompletedTick = Number(server.tickCount);
     lhLogSave(server);
     lhUnlock(player, 'longhaul:routes/first_route');
+    if (typeof lhCompanyReward === 'function') {
+      var rfam = Object.keys(run.families)[0] || null;
+      lhCompanyReward(server, player, 250 + Math.round(route.length / 20), 'route', rfam);
+    }
     if (typeof lhStageRecompute === 'function') lhStageRecompute(server, player);
     lhMsg(player, 'Маршрут "' + route.id + '" пройден (' + route.length + ' м, рейсов: ' + route.completedCount + ')! Квота чанков освобождена.');
     return 2;
@@ -286,6 +291,7 @@ function lhCargoDeliver(server, player) {
   held.count = held.count - 1;
   lhLogSave(server);
   lhUnlock(player, 'longhaul:routes/cargo_delivery');
+  if (typeof lhCompanyReward === 'function') lhCompanyReward(server, player, 280, 'route', null);
   if (typeof lhStageRecompute === 'function') lhStageRecompute(server, player);
   lhMsg(player, 'Партия ' + txId + ' принята в "' + dest.name + '"!');
   return 1;

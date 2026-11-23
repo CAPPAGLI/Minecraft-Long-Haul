@@ -1,0 +1,47 @@
+{
+  "dependencies": [
+    "openttd_04_market_and_trade"
+  ],
+  "tasks": {
+    "check": {
+      "type": "heracles:check",
+      "title": "Ознакомьтесь с рейтингом ИИ-конкурентов"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "V. Конкуренция с ИИ-корпорациями"
+    },
+    "subtitle": {
+      "text": "Мультиплеерная экономика OpenTTD"
+    },
+    "description": [
+      "Автономные ИИ-компании (/lh bot status) расширяют свои сектора внутри текущей границы мира, зарабатывают выручку и обновляют биржевые котировки.",
+      "Сравните капитализацию компаний через /lh company list и превзойдите ИИ по выручке и секторам."
+    ],
+    "groups": {
+      "14 · OpenTTD: Компании и Империя": {
+        "position": [
+          0,
+          42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:redstone_block",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "dependencies": [
+    "openttd_02_specializations"
+  ],
+  "tasks": {
+    "ottd_task": {
+      "type": "heracles:advancement",
+      "title": "Захватите дополнительный сектор 256×256",
+      "advancements": [
+        "longhaul:openttd/claim"
+      ]
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "III. Карта секторов 256×256 и захват"
+    },
+    "subtitle": {
+      "text": "Мультиплеерная экономика OpenTTD"
+    },
+    "description": [
+      "Вся карта разделена между компаниями на сектора 256×256 (прямой захват + диаграмма Вороного по ближайшим штабам и аванпостам).",
+      "Откройте ASCII-карту окружения: /lh map (или /lh territory map).",
+      "Захватите соседний сектор командой /lh territory claim, укрепите его (/lh territory fortify) или перехватите вражеский (/lh territory capture)."
+    ],
+    "groups": {
+      "14 · OpenTTD: Компании и Империя": {
+        "position": [
+          96,
+          -42
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:filled_map",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}
