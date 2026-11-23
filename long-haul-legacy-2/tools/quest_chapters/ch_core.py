@@ -322,7 +322,7 @@ def build_core_chapters():
     extra_ch04 = [
         ('site_corridor_tier1', 'Логистика Тир-1: Лес, Ферма, Рудник', 'create:track', [-260, -210], ['prod_forest', 'prod_farm', 'prod_mine']),
         ('site_corridor_tier2', 'Логистика Тир-2: Порт и Пустоши', 'smallships:oak_cog', [-10, -210], ['prod_port', 'prod_badlands']),
-        ('site_corridor_tier3', 'Логистика Тир-3: Химпосёлок и Долина', 'immersiveengineering:pipe_item', [240, -210], ['prod_wetland', 'prod_smelter']),
+        ('site_corridor_tier3', 'Логистика Тир-3: Химпосёлок и Долина', 'immersiveengineering:conveyor_basic', [240, -210], ['prod_wetland', 'prod_smelter']),
         ('site_corridor_master', 'Единая сеть 8 экономических центров', 'minecraft:nether_star', [490, -210], ['prod_machine']),
     ]
     for i, (qid, title, icon, pos, deps) in enumerate(extra_ch04):
