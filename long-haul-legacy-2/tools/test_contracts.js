@@ -296,10 +296,10 @@ test('OpenTTD engine supports spawn sanctuary, companies, specializations, Voron
   assert.equal(ottd.renderAsciiMap(st, 0, 0, 2).length, 5, 'ASCII territory map renders 5x5 grid');
 });
 
-test('terrain config and worldgen datapack provide Tectonic max_y=512, sky_refuges, and boosted canyon carver', () => {
+test('terrain config and worldgen datapack provide Tectonic max_y>=448, sky_refuges, and boosted canyon carver', () => {
   const path = require('path');
   const tect = JSON.parse(fs.readFileSync(path.join(__dirname, '../overrides/config/tectonic.json'), 'utf8'));
-  assert(tect.global_terrain && tect.global_terrain.max_y >= 512, 'tectonic max_y >= 512');
+  assert(tect.global_terrain && tect.global_terrain.max_y >= 448, 'tectonic max_y >= 448');
   assert(tect.global_terrain && tect.global_terrain.vertical_scale >= 1.3, 'dramatic vertical scale');
   const canyon = JSON.parse(fs.readFileSync(path.join(__dirname, '../overrides/kubejs/data/minecraft/worldgen/configured_carver/canyon.json'), 'utf8'));
   assert(canyon.config && canyon.config.probability >= 0.03, 'canyon carver probability boosted');

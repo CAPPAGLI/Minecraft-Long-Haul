@@ -680,11 +680,11 @@ function lhStartIntegrationSetup(server) {
         lhOttdSave(server);
 
         // 23. Event log ring buffer, safe spawn Y check (not bedrock Y=-64), and main vs optional chapter summary
-        var evtSaved = JSON.stringify(lhEventRead(server));
-        lhLogEvent(server, 'info', 'Integration test event log entry', { chatMode: 'never' });
-        ok(lhEventRead(server).entries.length >= 1, 'lhLogEvent records entry in persistent event log');
-        LHEventsState = JSON.parse(evtSaved);
-        lhEventSave(server);
+        var evtSaved = JSON.stringify(lhEventsRead(server));
+        lhLogEvent(server, 'hazard', 'Integration test event log entry', { chatMode: 'never' });
+        ok(lhEventsRead(server).events.length >= 1, 'lhLogEvent records entry in persistent event log');
+        LHEventState = JSON.parse(evtSaved);
+        lhEventsSave(server);
         ok(lhFindSafeRespawnY(overworld, 12, 12) >= 48, 'safe respawn Y stays well above Y=-64 bedrock (' + lhFindSafeRespawnY(overworld, 12, 12) + ')');
         for (var sxC = 11; sxC <= 13; sxC++) {
           for (var szC = 11; szC <= 13; szC++) {
