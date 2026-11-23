@@ -62,6 +62,10 @@ function lhCompanyReward(server, player, baseCredits, category, transportHint) {
     else if (category === 'forestry' && rSpec.id === 'forestry') mult += Number(rSpec.yieldBonus || 0.35);
   }
 
+  if (typeof lhHardIsActive === 'function' && lhHardIsActive(server, 'logistics_toll')) {
+    mult *= 0.90;
+  }
+
   var earned = Math.max(1, Math.round(Number(baseCredits || 0) * mult));
   comp.cash += earned;
   comp.stats.deliveries = (comp.stats.deliveries || 0) + 1;
@@ -339,7 +343,8 @@ function lhCompanyClaimAt(server, player, sx, sz, allowCapture, isRemote) {
     lhMsg(player, 'Сначала создайте или вступите в компанию: /lh company create <id> <название>');
     return 0;
   }
-  var res = global.LHOpenTTD.claimOrCaptureSector(st, comp.id, sx, sz, !!allowCapture, { remote: !!isRemote });
+  var costMult = (typeof lhHardIsActive === 'function' && lhHardIsActive(server, 'bot_cartel_surge')) ? 1.2 : 1.0;
+  var res = global.LHOpenTTD.claimOrCaptureSector(st, comp.id, sx, sz, !!allowCapture, { remote: !!isRemote, costMultiplier: costMult });
   if (!res.ok) {
     if (res.reason === 'spawn_protected') lhMsg(player, '§eСектор (' + sx + ', ' + sz + ') входит в нейтральную зону спавна 3×3 (±384 м) и защищён от захвата.');
     else if (res.reason === 'already_yours') lhMsg(player, 'Сектор (' + sx + ', ' + sz + ') уже захвачен вашей компанией.');

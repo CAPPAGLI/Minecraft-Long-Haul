@@ -164,8 +164,9 @@ function lhGuiDistStr(player, x, z) {
 function lhGuiSnapshot(server, player, tab, arg) {
   var progDb = typeof lhProgRead === 'function' ? lhProgRead(server) : { featureOrder: [], chapters: {} };
   var diff = typeof lhDifficultyStatus === 'function' ? lhDifficultyStatus(server) : { coeff: 1.0, onlineDeaths: 0, onlinePlayers: 1 };
-  var border = typeof lhApplyTerritoryBorder === 'function' ? lhApplyTerritoryBorder(server, false) : { size: 724, unlocked: 0, total: 14 };
-  var chap = typeof lhChapterProgressSummary === 'function' ? lhChapterProgressSummary(server) : { doneMain: 0, totalMain: 14, currentLabel: 'Старт' };
+  var border = typeof lhApplyTerritoryBorder === 'function' ? lhApplyTerritoryBorder(server, false) : { size: 724, unlocked: 0, total: 61 };
+  var chap = typeof lhChapterProgressSummary === 'function' ? lhChapterProgressSummary(server) : { doneMain: 0, totalMain: 61, currentLabel: 'Старт' };
+  var totalPool = (typeof global !== 'undefined' && global.LHHardFeatureCatalog) ? global.LHHardFeatureCatalog.length : 100;
   var ottd = typeof lhOttdRead === 'function' ? lhOttdRead(server) : { companies: {}, marketOrders: [], tradeOffers: [] };
   var comp = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, player) : null;
   var sc = global.LHOpenTTD ? global.LHOpenTTD.sectorCoords(player.x, player.z) : { sx: 0, sz: 0 };
@@ -175,10 +176,11 @@ function lhGuiSnapshot(server, player, tab, arg) {
     coeff: Math.round((diff.coeff || 1) * 100) / 100,
     borderSize: border.size || 724,
     unlocked: border.unlocked || 0,
-    totalChapters: chap.totalMain || 14,
+    totalChapters: chap.totalMain || 61,
     doneChapters: chap.doneMain || 0,
     currentChapter: chap.currentLabel || 'Старт',
     hazardsCount: (progDb.featureOrder || []).length,
+    hazardsTotal: totalPool,
     company: comp ? { id: comp.id, name: comp.name, cash: comp.cash } : null,
     sector: sc
   };
@@ -204,7 +206,7 @@ function lhGuiRenderHub(gui, server, player) {
   lhGuiSlot(gui, 4, 0, 'minecraft:beacon', '§6✦ Центр управления Long Haul 2.0', [
     '§fГлавы: §a' + snap.doneChapters + '/' + snap.totalChapters + ' §7(' + snap.currentChapter + ')',
     '§fГраница мира: §b' + snap.borderSize + '×' + snap.borderSize + ' §7(±' + Math.round(snap.borderSize / 2) + ' м)',
-    '§fСложность: §ek=' + snap.coeff + ' §7| Угроз: §c' + snap.hazardsCount + '/20',
+    '§fСложность: §ek=' + snap.coeff + ' §7| Угроз: §c' + snap.hazardsCount + '/' + (snap.hazardsTotal || 100),
     snap.company
       ? ('§fКомпания: §a' + snap.company.name + ' §7| Касса: §e' + snap.company.cash + ' Cr')
       : '§7Компания: не выбрана (откройте «Компании OpenTTD»)',
@@ -915,9 +917,10 @@ function lhGuiRenderWorld(gui, server, player) {
     lhMsg(pl, 'Сложность k=' + (Math.round(diff.coeff * 100) / 100) + ', смертей онлайн=' + diff.onlineDeaths + ', Voidout=' + (Math.round((diff.voidoutPower || 1) * 100) / 100));
   });
 
+  var totalPool = (typeof global !== 'undefined' && global.LHHardFeatureCatalog) ? global.LHHardFeatureCatalog.length : 100;
   lhGuiSlot(gui, 2, 3, 'minecraft:emerald', '§cКолесо Угроз (/lh casino status)', [
-    '§fАктивно угроз: §c' + (progDb.featureOrder || []).length + '/20',
-    '§7Показывает активные и закрытые усложнения.'
+    '§fАктивно угроз: §c' + (progDb.featureOrder || []).length + '/' + totalPool,
+    '§7Показывает базовые и открытые главами усложнения.'
   ], function (pl) {
     if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
       server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh casino status');

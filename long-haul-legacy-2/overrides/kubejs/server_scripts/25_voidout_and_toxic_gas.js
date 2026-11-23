@@ -50,14 +50,16 @@ function lhQueueVoidout(server, dim, x, y, z, playerName, coeffOverride) {
     ? coeffOverride
     : (typeof lhDifficultyStatus === 'function' ? lhDifficultyStatus(server).coeff : 1.0);
   var pwr = global.LHVoidoutMath.computePower(coeff);
-  db.lastPower = pwr.raw;
+  var aftershockMult = (typeof lhHardIsActive === 'function' && lhHardIsActive(server, 'voidout_aftershock')) ? 1.25 : 1.0;
+  var blastPrimary = pwr.primary * aftershockMult;
+  db.lastPower = blastPrimary;
   db.lastVoidout = {
     dim: String(dim),
     x: Math.round(x),
     y: Math.round(y),
     z: Math.round(z),
     player: String(playerName || 'Игрок'),
-    power: pwr.raw,
+    power: blastPrimary,
     coeff: coeff
   };
   lhVoidoutSave(server);
@@ -67,8 +69,8 @@ function lhQueueVoidout(server, dim, x, y, z, playerName, coeffOverride) {
     y: Number(y),
     z: Number(z),
     player: String(playerName || 'Игрок'),
-    powerRaw: pwr.raw,
-    powerPrimary: pwr.primary,
+    powerRaw: blastPrimary,
+    powerPrimary: blastPrimary,
     coeff: coeff,
     deathNumber: db.totalVoidouts,
     delay: 3
@@ -140,6 +142,9 @@ function lhGasComputeStatus(server) {
   var frac = db.forcedPhase >= 0 ? 0.5 : (posInCycle - phaseIdx * phaseLen) / phaseLen;
   var spec = LH_GAS_PHASES[phaseIdx] || LH_GAS_PHASES[0];
   var ceilingY = Math.round(spec.minY + (spec.maxY - spec.minY) * frac);
+  if (ceilingY > -60 && typeof lhHardIsActive === 'function' && lhHardIsActive(server, 'gas_early_rise')) {
+    ceilingY += 16;
+  }
   var ticksLeft = db.forcedPhase >= 0 ? -1 : Math.max(0, Math.round((phaseIdx + 1) * phaseLen - posInCycle));
   return {
     phase: phaseIdx,
@@ -190,9 +195,20 @@ function lhGasStepPlayer(server, player, dtTicks, skipEffects) {
       }
       if (rec.exposureTicks >= 160 && rec.exposureTicks % 40 < dtTicks) {
         var deep = st.ceilingY - py >= 20;
+        var corrosive = typeof lhHardIsActive === 'function' && lhHardIsActive(server, 'gas_corrosive_cloud');
         if (uname) {
-          server.runCommandSilent('effect give ' + uname + ' minecraft:poison 5 ' + (deep ? 1 : 0) + ' true');
+          var pAmp = (deep ? 1 : 0) + (corrosive ? 1 : 0);
+          server.runCommandSilent('effect give ' + uname + ' minecraft:poison 5 ' + pAmp + ' true');
           server.runCommandSilent('effect give ' + uname + ' minecraft:hunger 6 0 true');
+        }
+        if (corrosive && Math.random() < 0.25) {
+          var gArmor = [player.headArmorItem, player.chestArmorItem, player.legsArmorItem, player.feetArmorItem];
+          for (var gi = 0; gi < gArmor.length; gi++) {
+            if (gArmor[gi] && !gArmor[gi].empty && gArmor[gi].damageable) {
+              try { gArmor[gi].hurtAndBreak(1, player, function () {}); } catch (eGa) {}
+              break;
+            }
+          }
         }
         if (deep && rec.exposureTicks % 100 < dtTicks && typeof player.attack === 'function') {
           player.attack(1.0);
@@ -220,6 +236,14 @@ EntityEvents.death(function (event) {
   if (typeof lhHardIsActive === 'function' && lhHardIsActive(server, 'death_item_loss') &&
       typeof lhApplyDeathItemLoss === 'function') {
     lhApplyDeathItemLoss(server, ent, coeff, false);
+  }
+  if (typeof lhHardIsActive === 'function' && lhHardIsActive(server, 'death_xp_wipe')) {
+    try {
+      var xpLvl = Number(ent.experienceLevel || 0);
+      if (xpLvl > 0 && typeof ent.setExperienceLevels === 'function') {
+        ent.setExperienceLevels(Math.floor(xpLvl * 0.5));
+      }
+    } catch (eXp) {}
   }
   if (typeof lhHardIsActive === 'function' && !lhHardIsActive(server, 'voidout_explosion')) return;
   var pname = ent.username || (typeof ent.getName === 'function' ? ent.getName().getString() : 'Игрок');

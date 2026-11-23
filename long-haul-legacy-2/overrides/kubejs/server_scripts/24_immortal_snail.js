@@ -150,6 +150,9 @@ function lhSnailStepPlayer(server, player, dtTicks, skipEntitySync) {
 
   // Speed scales gently with distance, phasing straight through solid blocks
   var speedBps = dist3 <= 64 ? 0.36 : (dist3 <= 256 ? 0.80 : 1.70);
+  if (typeof lhHardIsActive === 'function' && lhHardIsActive(server, 'snail_sprint_surge')) {
+    speedBps *= 1.35;
+  }
   var stepDist = Math.min(dist3, speedBps * (dtTicks / 20.0));
   if (dist3 > 0.01) {
     rec.x += (dx / dist3) * stepDist;
@@ -176,7 +179,7 @@ function lhSnailStepPlayer(server, player, dtTicks, skipEntitySync) {
     var creative = (typeof player.isCreative === 'function' && player.isCreative()) || (typeof player.isSpectator === 'function' && player.isSpectator());
     if (!creative) {
       rec.kills = (rec.kills || 0) + 1;
-      rec.cooldownTicks = 2400; // 120s grace after a kill
+      rec.cooldownTicks = (typeof lhHardIsActive === 'function' && lhHardIsActive(server, 'snail_short_grace')) ? 1200 : 2400; // 60s or 120s grace after a kill
       rec.x = Number(player.x) + 80.0;
       rec.y = Number(player.y);
       rec.z = Number(player.z);

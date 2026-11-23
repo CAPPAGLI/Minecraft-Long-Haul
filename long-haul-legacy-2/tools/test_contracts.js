@@ -146,16 +146,16 @@ test('all KubeJS startup/server/client scripts parse cleanly in ES5/Node', () =>
   assert(count >= 15, 'expected at least 15 KubeJS/fixture scripts, got ' + count);
 });
 
-test('territory border uses 14-stage (13-step) diminishing-returns concave area curve (more territory early, less late) up to 175000 at locked <= 1', () => {
+test('territory border uses 61-stage (60-step) diminishing-returns concave area curve (more territory early, less late) up to 175000 at locked <= 1', () => {
   const tm = sandbox.global.LHTerritoryMath;
-  assert.equal(tm.TOTAL_GATES, 14);
-  const sizes = Array.from({ length: 15 }, (_, u) => tm.computeBorder(14, u).size);
-  assert.deepEqual(sizes, [
-    724, 67311, 93266, 111821, 126281,
-    137940, 147464, 155246, 161539, 166510,
-    170277, 172917, 174481, 175000, 175000
-  ]);
-  for (let i = 1; i <= 12; i++) {
+  assert.equal(tm.TOTAL_GATES, 61);
+  const sizes = Array.from({ length: 62 }, (_, u) => tm.computeBorder(61, u).size);
+  assert.equal(sizes[0], 724);
+  assert.equal(sizes[1], 31825);
+  assert.equal(sizes[59], 174976);
+  assert.equal(sizes[60], 175000);
+  assert.equal(sizes[61], 175000);
+  for (let i = 1; i <= 59; i++) {
     const prevDSize = sizes[i] - sizes[i - 1];
     const nextDSize = sizes[i + 1] - sizes[i];
     assert(prevDSize > nextDSize, `expected decreasing border width increment at step ${i}: ${prevDSize} vs ${nextDSize}`);
@@ -165,13 +165,14 @@ test('territory border uses 14-stage (13-step) diminishing-returns concave area 
   }
 });
 
-test('difficulty coefficient scales with online deaths / online players (target 63.15 -> 96) with no cap and drives random respawn radius 20203', () => {
+test('difficulty coefficient scales with online deaths / online players (target 275.15 -> 96 for 61 chapters) with no cap and drives random respawn radius 20203', () => {
   const dm = sandbox.global.LHDifficultyMath;
+  assert.equal(dm.TARGET_AVG_DEATHS, 275.15);
   assert.equal(dm.compute(0, 5), 1.0);
   assert.equal(dm.compute(10, 0), 1.0);
-  assert(Math.abs(dm.compute(63.15 * 3, 3) - 96.0) < 1e-9);
+  assert(Math.abs(dm.compute(275.15 * 3, 3) - 96.0) < 1e-9);
   assert(dm.compute(200, 2) > dm.compute(200, 4));
-  assert(Math.abs(dm.compute(126.3 * 2, 2) - 191.0) < 1e-9);
+  assert(Math.abs(dm.compute(550.3 * 2, 2) - 191.0) < 1e-9);
   assert.equal(dm.randomRespawnRadius(96.0), 20203);
   assert.equal(dm.randomRespawnRadius(1.0), 210);
   assert(dm.randomRespawnRadius(191.0) > 20203);
@@ -187,17 +188,25 @@ test('voidout power equals 1.0 * difficulty coefficient with no safe cap', () =>
   assert.equal(vm2.computePower(250.0).raw, 250.0);
 });
 
-test('hard-feature catalog covers all core + new casino threats (random_respawn, death_item_loss, overload, etc.)', () => {
-  const ids = new Set((sandbox.global.LHHardFeatureCatalog || []).map(f => f.id));
+test('hard-feature catalog contains exactly 100 unique complications with always-active base ore_scarcity', () => {
+  const catalog = sandbox.global.LHHardFeatureCatalog || [];
+  assert.equal(catalog.length, 100, 'expected exactly 100 hard features, got ' + catalog.length);
+  const ids = new Set(catalog.map(f => f.id));
+  assert.equal(ids.size, 100, 'all 100 hard feature IDs must be unique');
+  const oreBase = catalog.find(f => f.id === 'ore_scarcity');
+  assert(oreBase && oreBase.isBase === true, 'ore_scarcity must be marked isBase: true (always active)');
+  const baseCount = catalog.filter(f => f.isBase).length;
+  assert.equal(baseCount, 1, 'expected 1 always-active base complication + 99 casino unlockables');
   [
     'ore_scarcity', 'wood_scarcity', 'smarter_mobs', 'immortal_snail',
     'voidout_explosion', 'toxic_gas', 'random_respawn', 'death_item_loss',
     'overload_encumbrance', 'cold_altitude_frost', 'machine_sabotage_lightning',
-    'abyssal_pressure', 'toxic_rain_corrosion', 'spore_spoilage', 'insomnia_ambush'
+    'abyssal_pressure', 'toxic_rain_corrosion', 'spore_spoilage', 'insomnia_ambush',
+    'solar_heatstroke', 'brittle_stone', 'armored_undead', 'snail_sprint_surge',
+    'doomed_final_protocol'
   ].forEach(k => {
     assert(ids.has(k), 'missing hard feature ' + k);
   });
-  assert(ids.size >= 20, 'expected >= 20 hard features, got ' + ids.size);
 });
 
 test('all Heracles quests form an acyclic DAG with zero dangling dependencies and include Nuclear, OpenTTD, optional Photo (Ch.13) and DOOMED (Ch.14)', () => {
@@ -254,7 +263,7 @@ test('all Heracles quests form an acyclic DAG with zero dangling dependencies an
   assert(groupsTxt.includes('14 · DOOMED: Хардкор-выживание\n') || groupsTxt.trim().endsWith('14 · DOOMED: Хардкор-выживание'));
   assert(!groupsTxt.includes('14 · DOOMED: Хардкор-выживание (Опционально)'));
   const terrJs = fs.readFileSync(path.join(__dirname, '../overrides/kubejs/server_scripts/26_hard_features_and_territory.js'), 'utf8');
-  assert(terrJs.includes("'ch14'") && terrJs.includes("computeBorder(14, effectiveUnlocked)"));
+  assert(terrJs.includes("'ch14'") && terrJs.includes("'ch61'") && terrJs.includes("computeBorder(totalMain, effectiveUnlocked)"));
 });
 
 test('OpenTTD engine supports spawn sanctuary, companies, specializations, Voronoi+claim, remote exclave, raid/seize/transfer, pacts, and AI bots', () => {

@@ -458,13 +458,12 @@ global.LHEconomyGraph = (function () {
 })();
 
 global.LHTerritoryMath = (function () {
-  var TOTAL_GATES = 14;
+  var TOTAL_GATES = 61;
   var BASE_BORDER = 724;
   var MAX_BORDER = 175000;
 
-  // Concave diminishing-returns area curve across all 14 non-optional chapters (13 expansion steps, reaching 175000 at locked <= 1):
-  // More territory opens at the start (+4530 km2 -> +4168 -> ... -> +181 km2),
-  // so both delta-Area and delta-Size strictly decrease toward the end of the playthrough.
+  // Concave diminishing-returns area curve across all 61 non-optional chapters (60 expansion steps, reaching 175000 at locked <= 1):
+  // More territory opens at the start, so both delta-Area and delta-Size strictly decrease toward the end of the playthrough.
   function computeBorder(totalGates, unlockedCount) {
     var total = totalGates > 0 ? totalGates : TOTAL_GATES;
     var steps = total > 1 ? (total - 1) : 1;
@@ -502,9 +501,9 @@ global.LHTerritoryMath = (function () {
 })();
 
 global.LHDifficultyMath = (function () {
-  // Time-weighted end-of-run target average deaths per online player:
-  // (23*0.90 + 63*0.75 + 3*90*0.45) / (0.90 + 0.75 + 3*0.45) = 189.45 / 3.00 = 63.15
-  var TARGET_AVG_DEATHS = 63.15;
+  // Scaled from the 14-chapter baseline (63.15 deaths/player) to the 61-chapter campaign:
+  // 63.15 * (61 / 14) = 275.15 target average deaths per online player at k=96.
+  var TARGET_AVG_DEATHS = 275.15;
   var RANDOM_SPAWN_AT_END = 20203;
   var END_COEFF = 96.0;
 
@@ -545,26 +544,123 @@ global.LHVoidoutMath = (function () {
 })();
 
 global.LHHardFeatureCatalog = [
-  { id: 'ore_scarcity', name: 'Рудный голод', icon: '⛏', color: 'gold', summary: 'Руды вне богатых жил теряют 50% добычи без Шёлкового касания — ищите жилы через /lh prospect и буры.' },
-  { id: 'wood_scarcity', name: 'Дефицит леса', icon: '🪓', color: 'dark_green', summary: 'Саженцы отключены, а 40% срубленных брёвен рассыпается — стройте линии в новые леса.' },
-  { id: 'smarter_mobs', name: 'Тактический ИИ мобов', icon: '🧠', color: 'red', summary: 'Враждебные мобы получают ускорение, усиленное чутьё и тактические баффы.' },
-  { id: 'immortal_snail', name: 'Бессмертная Улитка', icon: '🐌', color: 'dark_red', summary: 'Неуязвимая Улитка пробуждается и бесконечно ползёт к вам сквозь стены (/lh snail status).' },
-  { id: 'voidout_explosion', name: 'Сингулярный выброс', icon: '💥', color: 'dark_purple', summary: 'Каждая смерть вызывает взрыв Voidout силой 1.0 * k (растёт от коэффициента сложности без капа).' },
-  { id: 'toxic_gas', name: 'Сезонный токсичный газ', icon: '☣', color: 'green', summary: 'Раз в 4 дня ядовитый туман поднимается до Y=114 — спасайтесь на горах и летающих островах.' },
-  { id: 'random_respawn', name: 'Случайный спаун', icon: '🧭', color: 'aqua', summary: 'После смерти вы возрождаетесь в случайной точке вокруг спауна (радиус = 20203 * k / 96).' },
-  { id: 'death_item_loss', name: 'Распад инвентаря', icon: '🗑', color: 'dark_red', summary: 'После гибели случайная часть предметов в инвентаре безвозвратно исчезает (доля растёт с k).' },
-  { id: 'acid_pollution', name: 'Кислотный смог', icon: '🌫', color: 'gray', summary: 'Тяжёлый дым промышленных зон и низин (Y<92) вызывает слабость без шлема и дымоходов.' },
-  { id: 'hostile_nights', name: 'Кровавые ночи', icon: '🌙', color: 'dark_red', summary: 'Ночные монстры на поверхности появляются с Силой и огнестойкостью — обустраивайте укрытия.' },
-  { id: 'hunger_exhaustion', name: 'Экспедиционный голод', icon: '🍖', color: 'yellow', summary: 'Долгий бег ускоряет расход сытости — используйте транспорт, поезда и рационы.' },
-  { id: 'tool_wear', name: 'Хрупкость инструментов', icon: '⚒', color: 'aqua', summary: 'Вдали от дома (>400 м) инструменты изнашиваются быстрее — переходите на механизмы Create.' },
-  { id: 'radiation_fallout', name: 'Радиационный фон', icon: '☢', color: 'light_purple', summary: 'Глубокие шахты (Y<20) накапливают усталость без защитного нагрудника.' },
-  { id: 'overload_encumbrance', name: 'Гравитационный перегруз', icon: '🪨', color: 'gold', summary: 'Более 24 занятых слотов в инвентаре замедляют шаг — возите грузы вагонетками и транспортом!' },
-  { id: 'cold_altitude_frost', name: 'Высотный мороз', icon: '❄', color: 'aqua', summary: 'На высоте Y>=120 без полной брони или тепла в руке накапливается обморожение.' },
-  { id: 'machine_sabotage_lightning', name: 'Магнитные грозы', icon: '⚡', color: 'yellow', summary: 'Во время грозы и дождя под открытым небом бьют молнии — стройте крыши и громоотводы.' },
-  { id: 'abyssal_pressure', name: 'Глубинная баротравма', icon: '🕳', color: 'dark_gray', summary: 'Ниже Y=0 без источника света в руках накатывает Тьма и давление недр.' },
-  { id: 'toxic_rain_corrosion', name: 'Кислотные осадки', icon: '🌧', color: 'dark_green', summary: 'Дождь под открытым небом разъедает броню и наносит слабый урон — стройте навесы и кабины.' },
-  { id: 'spore_spoilage', name: 'Брожение провианта', icon: '🍄', color: 'green', summary: 'В сырых низинах (Y<68) при уроне сырая еда портится — готовьте полноценные блюда и консервы.' },
-  { id: 'insomnia_ambush', name: 'Сингулярная бессонница', icon: '👁', color: 'dark_purple', summary: 'Ночью под открытым небом к одиноким путникам притягиваются засады фантомов и нежити.' }
+  // 1. Always-active base complication (worldgen ~10x ore reduction + rare mono-ore chunks + 50% mining loss outside Silk Touch)
+  { id: 'ore_scarcity', name: 'Рудный голод', icon: '⛏', color: 'gold', isBase: true, category: 'world_base', summary: '[БАЗОВОЕ, ВСЕГДА АКТИВНО] Генерация руд снижена (~×10) с редкими моно-жилами (/lh prospect), а руды вне жил теряют 50% добычи без Шёлкового касания.' },
+
+  // 2..20. Core unlockable complications
+  { id: 'wood_scarcity', name: 'Дефицит леса', icon: '🪓', color: 'dark_green', category: 'logistics', summary: 'Саженцы отключены, а 40% срубленных брёвен рассыпается — стройте линии в новые леса.' },
+  { id: 'smarter_mobs', name: 'Тактический ИИ мобов', icon: '🧠', color: 'red', category: 'combat', summary: 'Враждебные мобы получают ускорение, усиленное чутьё и тактические баффы.' },
+  { id: 'immortal_snail', name: 'Бессмертная Улитка', icon: '🐌', color: 'dark_red', category: 'pressure', summary: 'Неуязвимая Улитка пробуждается и бесконечно ползёт к вам сквозь стены (/lh snail status).' },
+  { id: 'voidout_explosion', name: 'Сингулярный выброс', icon: '💥', color: 'dark_purple', category: 'pressure', summary: 'Каждая смерть вызывает взрыв Voidout силой 1.0 * k (растёт от коэффициента сложности без капа).' },
+  { id: 'toxic_gas', name: 'Сезонный токсичный газ', icon: '☣', color: 'green', category: 'pressure', summary: 'Раз в 4 дня ядовитый туман поднимается до Y=114 — спасайтесь на горах и летающих островах.' },
+  { id: 'random_respawn', name: 'Случайный спаун', icon: '🧭', color: 'aqua', category: 'pressure', summary: 'После смерти вы возрождаетесь в случайной точке вокруг спауна (радиус = 20203 * k / 96).' },
+  { id: 'death_item_loss', name: 'Распад инвентаря', icon: '🗑', color: 'dark_red', category: 'pressure', summary: 'После гибели случайная часть предметов в инвентаре безвозвратно исчезает (доля растёт с k).' },
+  { id: 'acid_pollution', name: 'Кислотный смог', icon: '🌫', color: 'gray', category: 'env', summary: 'Тяжёлый дым промышленных зон и низин (Y<92) вызывает слабость без шлема и дымоходов.' },
+  { id: 'hostile_nights', name: 'Кровавые ночи', icon: '🌙', color: 'dark_red', category: 'combat', summary: 'Ночные монстры на поверхности появляются с Силой и огнестойкостью — обустраивайте укрытия.' },
+  { id: 'hunger_exhaustion', name: 'Экспедиционный голод', icon: '🍖', color: 'yellow', category: 'survival', summary: 'Долгий бег ускоряет расход сытости — используйте транспорт, поезда и рационы.' },
+  { id: 'tool_wear', name: 'Хрупкость инструментов', icon: '⚒', color: 'aqua', category: 'mining', summary: 'Вдали от дома (>400 м) инструменты изнашиваются быстрее — переходите на механизмы Create.' },
+  { id: 'radiation_fallout', name: 'Радиационный фон', icon: '☢', color: 'light_purple', category: 'env', summary: 'Глубокие шахты (Y<20) накапливают усталость без защитного нагрудника.' },
+  { id: 'overload_encumbrance', name: 'Гравитационный перегруз', icon: '🪨', color: 'gold', category: 'logistics', summary: 'Более 24 занятых слотов в инвентаре замедляют шаг — возите грузы вагонетками и транспортом!' },
+  { id: 'cold_altitude_frost', name: 'Высотный мороз', icon: '❄', color: 'aqua', category: 'env', summary: 'На высоте Y>=120 без полной брони или тепла в руке накапливается обморожение.' },
+  { id: 'machine_sabotage_lightning', name: 'Магнитные грозы', icon: '⚡', color: 'yellow', category: 'env', summary: 'Во время грозы и дождя под открытым небом бьют молнии — стройте крыши и громоотводы.' },
+  { id: 'abyssal_pressure', name: 'Глубинная баротравма', icon: '🕳', color: 'dark_gray', category: 'env', summary: 'Ниже Y=0 без источника света в руках накатывает Тьма и давление недр.' },
+  { id: 'toxic_rain_corrosion', name: 'Кислотные осадки', icon: '🌧', color: 'dark_green', category: 'env', summary: 'Дождь под открытым небом разъедает броню и наносит слабый урон — стройте навесы и кабины.' },
+  { id: 'spore_spoilage', name: 'Брожение провианта', icon: '🍄', color: 'green', category: 'survival', summary: 'В сырых низинах (Y<68) при уроне сырая еда портится — готовьте полноценные блюда и консервы.' },
+  { id: 'insomnia_ambush', name: 'Сингулярная бессонница', icon: '👁', color: 'dark_purple', category: 'combat', summary: 'Ночью под открытым небом к одиноким путникам притягиваются засады фантомов.' },
+
+  // 21..30. Category A: Environment, Biomes & Altitude Hazards
+  { id: 'solar_heatstroke', name: 'Солнечный удар', icon: '☀', color: 'gold', category: 'env', summary: 'Днём под открытым солнцем без шлема (Y>=70) накапливаются голод и вялость.' },
+  { id: 'nether_heat_wave', name: 'Жар Незера', icon: '🔥', color: 'red', category: 'env', summary: 'В Нижнем мире без полной брони или огнестойкости накрывают перегрев и слабость.' },
+  { id: 'end_void_chill', name: 'Пустотный холод Энда', icon: '🌌', color: 'dark_purple', category: 'env', summary: 'В Краю без полной брони или факела в руке наступают мороз и Тьма.' },
+  { id: 'thin_air_hypoxia', name: 'Разрежённый воздух', icon: '💨', color: 'aqua', category: 'env', summary: 'На пиках выше Y=220 без шлема развивается гипоксия (усталость и замедление).' },
+  { id: 'cave_dampness', name: 'Пещерная сырость', icon: '💧', color: 'blue', category: 'env', summary: 'Ниже Y=40 без источника света в руке накатывает зябкая дрожь.' },
+  { id: 'desert_mirage', name: 'Пустынный мираж', icon: '🏜', color: 'yellow', category: 'env', summary: 'Днём в пустынях и пустошах без шлема возможны миражи (тошнота и слепота).' },
+  { id: 'swamp_miasma', name: 'Болотные миазмы', icon: '🌿', color: 'dark_green', category: 'env', summary: 'В болотных и мангровых биомах без сапог или шлема пробивается отравление.' },
+  { id: 'glacial_wind', name: 'Ледниковый ветер', icon: '🧊', color: 'aqua', category: 'env', summary: 'В снежных и ледяных биомах под открытым небом без полной брони морозит.' },
+  { id: 'ash_fallout', name: 'Вулканический пепел', icon: '🌋', color: 'dark_gray', category: 'env', summary: 'В непогоду под открытым небом пепел режет глаза и ускоряет голод.' },
+  { id: 'magnetic_anomaly', name: 'Магнитная аномалия', icon: '🧲', color: 'light_purple', category: 'env', summary: 'Во время грозы и на глубине Y<0 сбивается ориентация (краткая тошнота).' },
+
+  // 31..40. Category B: Mining, Quarrying & Resource Friction
+  { id: 'brittle_stone', name: 'Хрупкая порода', icon: '🪨', color: 'gray', category: 'mining', summary: '25% камня и сланца при ручной добыче крошится в пыль без дропа.' },
+  { id: 'dust_lung', name: 'Шахтёрская пыль', icon: '😷', color: 'gray', category: 'mining', summary: 'Добыча камня ниже Y=50 без шлема вызывает приступ кашля (усталость).' },
+  { id: 'pocket_cave_in', name: 'Обвал забоя', icon: '⚠', color: 'red', category: 'mining', summary: 'Глубокие выработки (Y<16) с редким шансом вызывают микрообвал (слепота и урон).' },
+  { id: 'pickaxe_fatigue', name: 'Перегрев кирки', icon: '⛏', color: 'gold', category: 'mining', summary: 'Добыча глубинного сланца с шансом 30% снимает дополнительную прочность кирки.' },
+  { id: 'scarce_coal_seams', name: 'Истощение угля', icon: '🖤', color: 'dark_gray', category: 'mining', summary: '35% угольной руды без Шёлкового касания рассыпается пустой породой.' },
+  { id: 'hardened_deepslate', name: 'Сверхплотный сланец', icon: '🧱', color: 'dark_gray', category: 'mining', summary: 'Ломание глубинного сланца кратковременно нагружает руки (усталость на 2 с).' },
+  { id: 'unrefined_gravel', name: 'Пустой гравий', icon: '⏳', color: 'gray', category: 'mining', summary: '35% гравия и песка осыпается без выпадения блока и замедляет раскопку.' },
+  { id: 'obsidian_strain', name: 'Нагрузка обсидиана', icon: '🟪', color: 'dark_purple', category: 'mining', summary: 'Добыча обсидиана или чёрного камня истощает сытость и даёт слабость.' },
+  { id: 'underground_gas_pocket', name: 'Метановый карман', icon: '💨', color: 'green', category: 'mining', summary: 'Вскрытие руд и сланца ниже Y=10 иногда выпускает ядовитый газ.' },
+  { id: 'nether_quartz_shard', name: 'Режущий кварц', icon: '💎', color: 'white', category: 'mining', summary: 'Добыча незерских руд без нагрудника ранит острыми осколками.' },
+
+  // 41..50. Category C: Forestry, Agriculture & Logistics Friction
+  { id: 'axe_splintering', name: 'Твёрдая древесина', icon: '🪵', color: 'gold', category: 'logistics', summary: 'Топоры при рубке брёвен теряют дополнительную прочность с шансом 35%.' },
+  { id: 'blight_crops', name: 'Фитофтора урожая', icon: '🌾', color: 'dark_green', category: 'logistics', summary: '30% собираемых посевов поражается гнилью и не даёт урожая.' },
+  { id: 'dry_soil_penalty', name: 'Истощённая почва', icon: '🏜', color: 'yellow', category: 'logistics', summary: 'Полевые работы днём под открытым небом быстрее тратят сытость.' },
+  { id: 'heavy_timber_drag', name: 'Тяжёлый лесоповал', icon: '🌲', color: 'dark_green', category: 'logistics', summary: 'Ношение более 192 брёвен в инвентаре замедляет передвижение.' },
+  { id: 'rot_in_rain', name: 'Сырость на складе', icon: '🥖', color: 'green', category: 'logistics', summary: 'Урон под дождём портит часть сырой еды и овощей в инвентаре.' },
+  { id: 'rusty_rails', name: 'Коррозия экипировки', icon: '⛓', color: 'gray', category: 'logistics', summary: 'Вдали от базы (>600 м) под дождём броня и инструменты быстрее ржавеют.' },
+  { id: 'logistics_toll', name: 'Таможенный сбор', icon: '💰', color: 'gold', category: 'logistics', summary: 'Консорциум удерживает 10% комиссии с выручки OpenTTD-компаний.' },
+  { id: 'freight_overweight', name: 'Осевая нагрузка', icon: '📦', color: 'gold', category: 'logistics', summary: 'При >=20 занятых слотах и тяжёлом блоке/инструменте в руке снижается скорость.' },
+  { id: 'expedition_attrition', name: 'Полевой износ', icon: '🥾', color: 'yellow', category: 'logistics', summary: 'На расстоянии >1000 м от центра (0,0) возрастает расход сытости.' },
+  { id: 'fog_disorientation', name: 'Туман трассы', icon: '🌁', color: 'gray', category: 'logistics', summary: 'В дождь на открытых дорогах (Y=60..85) периодически сгущается пелена тумана.' },
+
+  // 51..65. Category D: Hostile Mob Buffs & Combat Escalation
+  { id: 'armored_undead', name: 'Бронированная нежить', icon: '🛡', color: 'gray', category: 'combat', summary: '35% зомби и скелетов появляются с эффектом Сопротивления I.' },
+  { id: 'swift_creepers', name: 'Реактивные криперы', icon: '💣', color: 'green', category: 'combat', summary: 'Криперы появляются со Скоростью II.' },
+  { id: 'toxic_spiders', name: 'Ядовитые пауки', icon: '🕷', color: 'dark_red', category: 'combat', summary: 'Пауки и пещерные пауки получают Скорость I и Силу I.' },
+  { id: 'phantom_swarms', name: 'Прыгучие орды', icon: '🦇', color: 'dark_purple', category: 'combat', summary: 'Ночные монстры на поверхности получают Прыгучесть и Сопротивление.' },
+  { id: 'skeleton_sharpshooters', name: 'Снайперы-скелеты', icon: '🏹', color: 'white', category: 'combat', summary: 'Скелеты и зимогоры получают Силу I и Скорость I.' },
+  { id: 'bloodlust_aggression', name: 'Кровавая ярость', icon: '🩸', color: 'dark_red', category: 'combat', summary: 'При ранении игрока ближайшие монстры получают всплеск Силы.' },
+  { id: 'regenerating_horrors', name: 'Регенерация тварей', icon: '❤', color: 'light_purple', category: 'combat', summary: '25% враждебных мобов появляются с Регенерацией I.' },
+  { id: 'nether_brutes', name: 'Ярость Незера', icon: '👹', color: 'red', category: 'combat', summary: 'Монстры Нижнего мира спавнятся с Силой I и Сопротивлением I.' },
+  { id: 'end_stalkers', name: 'Хранители Края', icon: '👾', color: 'dark_purple', category: 'combat', summary: 'Монстры Края получают Скорость II и Силу I.' },
+  { id: 'cavern_predators', name: 'Пещерные хищники', icon: '🦇', color: 'dark_gray', category: 'combat', summary: 'Монстры глубин (Y<20) появляются с Силой I и Сопротивлением I.' },
+  { id: 'fireproof_raiders', name: 'Огнеупорные рейдеры', icon: '🪓', color: 'gold', category: 'combat', summary: 'Разбойники, ведьмы и поборники не боятся огня и быстрее бегают.' },
+  { id: 'venomous_strikes', name: 'Заражённые когти', icon: '☠', color: 'dark_green', category: 'combat', summary: 'Удары мобов с шансом 25% заражают голодом или отравлением.' },
+  { id: 'concussive_blows', name: 'Оглушающие удары', icon: '💫', color: 'yellow', category: 'combat', summary: 'Сильные удары (>=4 HP) оглушают игрока (тошнота и медлительность).' },
+  { id: 'armor_piercing_foes', name: 'Бронебойные атаки', icon: '🗡', color: 'red', category: 'combat', summary: 'Удары мобов с шансом 30% дополнительно повреждают случайный элемент брони.' },
+  { id: 'cursed_ambush_moon', name: 'Проклятая луна', icon: '🌑', color: 'dark_red', category: 'combat', summary: 'Ночью под открытым небом вокруг путника периодически материализуется нежить.' },
+
+  // 66..80. Category E: Survival, Nutrition & Vitality Penalties
+  { id: 'metabolic_burn', name: 'Ускоренный метаболизм', icon: '⚡', color: 'yellow', category: 'survival', summary: 'Спринт в броне быстрее расходует запасы сытости.' },
+  { id: 'raw_food_aversion', name: 'Сырая диета', icon: '🥩', color: 'red', category: 'survival', summary: 'Поедание сырой еды вызывает тошноту и голод на 6 с.' },
+  { id: 'sugar_crash', name: 'Сахарный спад', icon: '🍪', color: 'gold', category: 'survival', summary: 'Сладкая пища после перекуса оставляет кратковременную слабость.' },
+  { id: 'sleep_deprivation', name: 'Хронический недосып', icon: '🥱', color: 'gray', category: 'survival', summary: 'Ночью вдали от дома накладывается усталость на добычу.' },
+  { id: 'fragile_bones', name: 'Хрупкие кости', icon: '🦴', color: 'white', category: 'survival', summary: 'Любой существенный урон от падения (>=3 HP) замедляет на 5 с.' },
+  { id: 'bleeding_wounds', name: 'Кровотечение', icon: '🩸', color: 'dark_red', category: 'survival', summary: 'Сильные раны (>=6 HP) с шансом 35% вызывают краткое иссушение.' },
+  { id: 'panic_adrenaline', name: 'Паника в бою', icon: '💓', color: 'red', category: 'survival', summary: 'При падении здоровья ниже 4 сердец накатывают Тьма и слабость.' },
+  { id: 'water_drag', name: 'Тяжёлая вода', icon: '🌊', color: 'blue', category: 'survival', summary: 'Плавание в полной броне замедляет движение в воде.' },
+  { id: 'drowning_pressure', name: 'Глубоководный шок', icon: '🫧', color: 'dark_aqua', category: 'survival', summary: 'Погружение под воду ниже Y=50 без шлема вызывает усталость и Тьму.' },
+  { id: 'fire_vulnerability', name: 'Горючая экипировка', icon: '🔥', color: 'gold', category: 'survival', summary: 'Горение игрока дополнительно высушивает сытость и повреждает нагрудник.' },
+  { id: 'toxin_sensitivity', name: 'Токсический шок', icon: '🧪', color: 'green', category: 'survival', summary: 'Отравление или урон ядом дополнительно накладывают слабость.' },
+  { id: 'heavy_shield_stance', name: 'Тяжёлый щит', icon: '🛡', color: 'gray', category: 'survival', summary: 'Удержание щита во второй руке замедляет шаг.' },
+  { id: 'combat_exhaustion', name: 'Боевое истощение', icon: '🥵', color: 'yellow', category: 'survival', summary: 'Получение урона в бою с шансом 30% вызывает голод.' },
+  { id: 'night_blindness', name: 'Куриная слепота', icon: '🕶', color: 'dark_gray', category: 'survival', summary: 'Ночью без факела в руках зрение заволакивает Тьма.' },
+  { id: 'cursed_resurrection', name: 'Тяжкое возрождение', icon: '⚰', color: 'dark_purple', category: 'survival', summary: 'После каждого возрождения на 20 с накладываются слабость и голод.' },
+
+  // 81..90. Category F: Death, Voidout, Snail & Territory Pressure
+  { id: 'snail_sprint_surge', name: 'Ускорение Улитки', icon: '🐌', color: 'red', category: 'pressure', summary: 'Бессмертная Улитка преследует игрока на 35% быстрее.' },
+  { id: 'snail_short_grace', name: 'Короткая передышка', icon: '⏱', color: 'dark_red', category: 'pressure', summary: 'Перезарядка Улитки после убийства сокращается вдвое (60 с).' },
+  { id: 'voidout_aftershock', name: 'Вторичный выброс', icon: '💥', color: 'dark_red', category: 'pressure', summary: 'Сила взрыва Voidout увеличивается на +25%.' },
+  { id: 'death_xp_wipe', name: 'Потеря опыта', icon: '✨', color: 'light_purple', category: 'pressure', summary: 'Смерть дополнительно сжигает половину накопленного опыта игрока.' },
+  { id: 'border_edge_static', name: 'Помехи периметра', icon: '🚧', color: 'red', category: 'pressure', summary: 'В пределах 64 м от границы мира накрывают Тьма и слабость.' },
+  { id: 'gas_early_rise', name: 'Усиленный токсичный газ', icon: '☣', color: 'dark_green', category: 'pressure', summary: 'Потолок сезонного токсичного газа поднимается на +16 блоков выше (до Y=130).' },
+  { id: 'gas_corrosive_cloud', name: 'Едкий туман', icon: '🌫', color: 'green', category: 'pressure', summary: 'Токсичный газ быстрее разъедает броню и усиливает отравление.' },
+  { id: 'respawn_disorientation', name: 'Смещение координат', icon: '🌀', color: 'aqua', category: 'pressure', summary: 'Случайное возрождение вызывает 8 с тошноты и Тьмы.' },
+  { id: 'cargo_piracy_risk', name: 'Риск перевозки', icon: '📜', color: 'gold', category: 'pressure', summary: 'Перевозка грузовой накладной снижает скорость пешком на 10%.' },
+  { id: 'bot_cartel_surge', name: 'Картельный прессинг', icon: '🏦', color: 'gold', category: 'pressure', summary: 'Стоимость захвата новых секторов OpenTTD возрастает на +20%.' },
+
+  // 91..100. Category G: Industrial, Arcane & Late-Game Escalation
+  { id: 'arcane_backlash', name: 'Магическая отдача', icon: '🪄', color: 'light_purple', category: 'late', summary: 'Урон с магическим жезлом/фокусом в руке вызывает краткую левитацию и Тьму.' },
+  { id: 'kinetic_overload', name: 'Кинетическая перегрузка', icon: '⚙', color: 'gold', category: 'late', summary: 'Ношение >4 тяжёлых механизмов Create/IE в инвентаре накладывает слабость.' },
+  { id: 'voltage_shock', name: 'Статический разряд', icon: '⚡', color: 'yellow', category: 'late', summary: 'Использование механизмов/инструментов под дождём может ударить разрядом (1 HP).' },
+  { id: 'radiation_sickness_plus', name: 'Изотопный фон', icon: '☢', color: 'green', category: 'late', summary: 'Ношение уранового/ториевого/плутониевого топлива без полной брони вызывает иссушение.' },
+  { id: 'draconic_resonance', name: 'Драконий резонанс', icon: '🐉', color: 'dark_purple', category: 'late', summary: 'Предметы Draconic Evolution при получении урона вызывают вспышку ослепления.' },
+  { id: 'magnetic_interference', name: 'Электромагнитный шум', icon: '📡', color: 'aqua', category: 'late', summary: 'На глубине Y<0 в полной броне периодически гаснет обзор (Тьма).' },
+  { id: 'industrial_smog_zone', name: 'Промзона', icon: '🏭', color: 'dark_gray', category: 'late', summary: 'Работа с механизмами и рудами ниже Y=80 без шлема накладывает усталость.' },
+  { id: 'overheated_reactor_aura', name: 'Тепловой след', icon: '🌡', color: 'red', category: 'late', summary: 'В Нижнем мире и рядом с реакторным топливом вдвое быстрее уходит сытость.' },
+  { id: 'void_echo_whispers', name: 'Эхо пустоты', icon: '👁', color: 'dark_purple', category: 'late', summary: 'Ниже Y=-32 или в Краю периодически накатывает Тьма и шёпот пустоты.' },
+  { id: 'doomed_final_protocol', name: 'Протокол Судного Дня', icon: '💀', color: 'dark_red', category: 'late', summary: 'Ночные монстры получают Регенерацию, а добыча вдали от спауна замедляется.' }
 ];
 
 global.LHOpenTTD = (function () {
@@ -1108,7 +1204,8 @@ global.LHOpenTTD = (function () {
     }
     if (info.mode === 'capture' && !allowCapture) return { ok: false, reason: 'enemy_claimed', targetOwner: info.targetOwner, cost: info.cost };
     var discountFactor = (opts && opts.discountFactor > 0) ? Number(opts.discountFactor) : 1.0;
-    var finalCost = Math.max(10, Math.round(info.cost * discountFactor));
+    var costMult = (opts && opts.costMultiplier > 0) ? Number(opts.costMultiplier) : 1.0;
+    var finalCost = Math.max(10, Math.round(info.cost * discountFactor * costMult));
     if (comp.cash < finalCost) return { ok: false, reason: 'no_cash', cost: finalCost, cash: comp.cash };
 
     comp.cash -= finalCost;

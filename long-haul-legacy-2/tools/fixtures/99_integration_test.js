@@ -550,30 +550,67 @@ function lhStartIntegrationSetup(server) {
         lhRouteQuotaSync(server, qPid, [], true);
         ok(lhRouteQuotaStatus(server, qPid).used === 0, 'route chunk quota releases cleanly on completion');
 
-        // 18. Prospecting scan executes cleanly across vanilla + modded ore blocks
+        // 18. Prospecting scan executes cleanly across vanilla + modded ore blocks + live Overworld ore audit
         ok(lhProspectChunk(server, actor) === 1, 'prospecting scans vanilla and modded mono-ore chunks');
+        try {
+          var sampleNonAir = String(overworld.getBlock(8, 20, 8).id);
+          if (sampleNonAir !== 'minecraft:air' && sampleNonAir !== 'minecraft:void_air') {
+            var oreAuditCounts = {};
+            var totalOresAudit = 0;
+            for (var ox = -16; ox < 16; ox += 2) {
+              for (var oz = -16; oz < 16; oz += 2) {
+                for (var oy = -60; oy <= 120; oy += 4) {
+                  var ob = overworld.getBlock(ox, oy, oz);
+                  if (ob && ob.hasTag('forge:ores')) {
+                    var obId = String(ob.id);
+                    oreAuditCounts[obId] = (oreAuditCounts[obId] || 0) + 1;
+                    totalOresAudit++;
+                  }
+                }
+              }
+            }
+            console.info('LH_INTEGRATION_ORE_AUDIT total=' + totalOresAudit + ' ores=' + JSON.stringify(oreAuditCounts));
+          }
+        } catch (eOreAud) {}
 
         // 19. Eccentric Tome item registered for unified mod guidebooks
         ok(!Item.of('eccentrictome:tome').isEmpty(), 'eccentrictome:tome registered');
 
-        // 20. Chapter-based territory border scaling (14-stage diminishing concave area curve 724 -> 175000) + Casino Wheel + DOOMED Ch.14 + Hex Casting
-        ok(Math.round(Number(overworld.worldBorder.size)) === 724, 'initial world border starts at 724 blocks when 14 chapters locked');
+        // 20. Chapter-based territory border scaling (61-stage diminishing concave area curve 724 -> 175000) + always-active ore_scarcity + 100 Casino Wheel complications + worldgen verification
+        ok(Math.round(Number(overworld.worldBorder.size)) === 724, 'initial world border starts at 724 blocks when 61 chapters locked');
+        ok(lhHardIsActive(server, 'ore_scarcity') === true, 'base complication ore_scarcity is ALWAYS active from world start');
+        ok((global.LHHardFeatureCatalog || []).length === 100, '100 complications registered in LHHardFeatureCatalog');
+        ok(LHHeraclesProgressHandler !== null, 'Heracles QuestProgressHandler loaded for live ch15..ch61 completion sync');
+        try {
+          var LHRegCls = Java.loadClass('net.minecraft.core.registries.Registries');
+          var LHRLCls = Java.loadClass('net.minecraft.resources.ResourceLocation');
+          var pfReg = server.registryAccess().registryOrThrow(LHRegCls.PLACED_FEATURE);
+          ok(pfReg.containsKey(new LHRLCls('longhaul', 'rich_iron_chunk')) &&
+             pfReg.containsKey(new LHRLCls('longhaul', 'rich_uranium_chunk')) &&
+             pfReg.containsKey(new LHRLCls('minecraft', 'ore_iron_middle')),
+             'worldgen ore rebalance & rich mono-ore chunk placed_features active in Forge registry');
+        } catch (eWgCheck) {
+          ok(false, 'worldgen placed_feature registry check failed: ' + eWgCheck);
+        }
+
         var pDb = lhProgRead(server);
         var savedProg = JSON.stringify(pDb);
         ok(lhUnlockChapter(server, 'ch00', true, true) === true, 'Chapter 00 unlocks and queues Casino Wheel spin');
-        ok(lhTerritoryCounts(server).size === 67311, '1 unlocked chapter expands border to 67311 blocks');
+        ok(lhTerritoryCounts(server).size === 31825, '1 unlocked chapter expands border to 31825 blocks');
         lhUnlockChapter(server, 'ch01', true, true);
         lhUnlockChapter(server, 'ch02', true, true);
         lhUnlockChapter(server, 'ch03', true, true);
-        ok(lhTerritoryCounts(server).size === 126281, '4 unlocked chapters expands border to 126281 blocks');
-        ['ch05', 'ch06', 'ch07', 'ch08', 'ch09', 'ch10', 'ch11', 'ch12'].forEach(function (ck) {
-          lhUnlockChapter(server, ck, true, true);
+        ok(lhTerritoryCounts(server).size === 62831, '4 unlocked chapters expands border to 62831 blocks');
+        LH_MAIN_CHAPTER_KEYS.forEach(function (ck) {
+          if (ck !== 'ch04' && ck !== 'ch61' && !pDb.chapters[ck]) {
+            lhUnlockChapter(server, ck, true, true);
+          }
         });
-        ok(lhTerritoryCounts(server).size === 174481, '12 unlocked chapters expands border to 174481 blocks');
-        lhUnlockChapter(server, 'ch14', true, true);
-        ok(lhTerritoryCounts(server).size === 175000 && Math.round(Number(overworld.worldBorder.size)) === 175000, '13 unlocked chapters (including mandatory ch14 DOOMED, locked=1 ch04) expands border to 175000 blocks');
+        ok(lhTerritoryCounts(server).size === 174976, '59 unlocked chapters expands border to 174976 blocks');
+        lhUnlockChapter(server, 'ch61', true, true);
+        ok(lhTerritoryCounts(server).size === 175000 && Math.round(Number(overworld.worldBorder.size)) === 175000, '60 unlocked chapters (locked=1 ch04) expands border to 175000 blocks');
         var spun = lhCasinoResolveImmediate(server, true);
-        ok(spun.length === 13 && Object.keys(pDb.hardFeatures).length === 13, 'Casino Wheel resolved 13 distinct randomized hard features (' + spun.join(',') + ')');
+        ok(spun.length === 60 && Object.keys(pDb.hardFeatures).length === 61, 'Casino Wheel resolved 60 chapter complications + 1 base ore_scarcity = 61 active complications');
         ok(server.getAdvancement('longhaul:story/01_left_for_bread') !== null && server.getAdvancement('longhaul:story/06_forgot_the_milk') !== null, 'Chapter 00 story advancements exist');
         ok(server.getAdvancement('longhaul:story/03_dinner_telegram') !== null, 'Chapter 01 story/03_dinner_telegram advancement exists');
         ok(server.getAdvancement('longhaul:nuclear/verified') !== null && server.getAdvancement('longhaul:doomed/checked') !== null, 'Nuclear & DOOMED advancements exist');
@@ -582,14 +619,14 @@ function lhStartIntegrationSetup(server) {
         lhProgSave(server);
         lhApplyTerritoryBorder(server, false);
 
-        // 21. Difficulty coefficient + Random Respawn (20203 @ k=96) + Death Item Loss + Draconic & Nuclear mods
+        // 21. Difficulty coefficient (target 275.15 -> 96 for 61 chapters) + Random Respawn (20203 @ k=96) + Death Item Loss + Draconic & Nuclear mods
         var dSaved = JSON.stringify(lhProgRead(server));
         var pMock1 = { uuid: '00000000-0000-4000-8000-000000000021' };
         var pMock2 = { uuid: '00000000-0000-4000-8000-000000000022' };
-        for (var di = 0; di < 63; di++) lhRecordPlayerDeath(server, pMock1);
+        for (var di = 0; di < 275; di++) lhRecordPlayerDeath(server, pMock1);
         var dOne = lhDifficultyStatus(server, [pMock1]);
         var dTwo = lhDifficultyStatus(server, [pMock1, pMock2]);
-        ok(dOne.coeff > 94.0 && dOne.coeff < 97.0, 'difficulty coeff near 96 at 63 deaths solo (' + dOne.coeff + ')');
+        ok(dOne.coeff > 95.0 && dOne.coeff < 97.0, 'difficulty coeff near 96 at 275 deaths solo (' + dOne.coeff + ')');
         ok(dTwo.coeff < dOne.coeff, 'difficulty coeff inversely depends on online players (' + dTwo.coeff + ' < ' + dOne.coeff + ')');
         var rEnd = lhComputeRandomRespawnTarget(server, 0, 0, 96.0, 0.25, 1.0);
         ok(rEnd.radius === 20203 && Math.abs(rEnd.x) <= 362 && Math.abs(rEnd.z) <= 362, 'random respawn radius hits 20203 at k=96 and clamps cleanly within current worldborder');
@@ -699,13 +736,13 @@ function lhStartIntegrationSetup(server) {
             }
           }
         }
-        ok(lhChapterProgressSummary(server).totalMain === 14 && lhTerritoryCounts(server).total === 14, 'main campaign chapter progress tracks 14 core chapters (including mandatory DOOMED Ch.14) and 14 territory stages excluding optional photo');
+        ok(lhChapterProgressSummary(server).totalMain === 61 && lhTerritoryCounts(server).total === 61, 'main campaign chapter progress tracks 61 core chapters (ch00..ch12, ch14..ch61) and 61 territory stages excluding optional photo');
 
         // 24. /lh GUI Command Center & control_tablet item + all 11 tabs render cleanly
         ok(!Item.of('longhaul:control_tablet', 1).empty, 'longhaul:control_tablet registered');
         ok(!lhGuiItem('minecraft:barrel', 'Тест', ['Строка 1', 'Строка 2'], 1).empty, 'lhGuiItem creates ItemStack with name and lore');
         var guiSnap = lhGuiSnapshot(server, fp, 'hub');
-        ok(guiSnap.borderSize === 724 && guiSnap.totalChapters === 14, 'lhGuiSnapshot reports live territory & campaign status');
+        ok(guiSnap.borderSize === 724 && guiSnap.totalChapters === 61 && guiSnap.hazardsTotal === 100, 'lhGuiSnapshot reports live territory (61 chapters) & 100 complications');
         ok(disp.performPrefixedCommand(src, 'lh tablet') === 1, 'brigadier /lh tablet');
         var mockGuiSlots = {};
         var mockGui = {

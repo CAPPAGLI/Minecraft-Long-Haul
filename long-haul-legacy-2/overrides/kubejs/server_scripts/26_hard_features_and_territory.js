@@ -1,8 +1,14 @@
-// Long Haul Legacy 2.0: 14-chapter territory expansion (concave area curve 1 - (1 - u/13)^2 from 724 to 175000),
-// randomized hard-feature unlocking with animated Casino Wheel visual, global death difficulty k,
-// random respawn scatter, random death item loss, and chapter completion sync.
+// Long Haul Legacy 2.0: 61-chapter territory expansion (concave area curve 1 - (1 - u/60)^2 from 724 to 175000),
+// always-active base ore scarcity + 99 randomized Casino Wheel complications (100 total), global death difficulty k,
+// random respawn scatter, random death item loss, and full 62-chapter Heracles completion sync.
 var LHBlockPos = Java.loadClass('net.minecraft.core.BlockPos');
 var LHDiffArgStr = Java.loadClass('com.mojang.brigadier.arguments.StringArgumentType');
+var LHHeraclesProgressHandler = null;
+try {
+  LHHeraclesProgressHandler = Java.loadClass('earth.terrarium.heracles.common.handlers.progress.QuestProgressHandler');
+} catch (eHeraclesCls) {
+  LHHeraclesProgressHandler = null;
+}
 var LHProgState = null;
 var LHProgTick = 0;
 var LHActiveSpin = null;
@@ -18,8 +24,28 @@ var LH_WORKSHOP_ITEMS = [
   'create:track_station', 'computercraft:computer_normal', 'farmersdelight:cooking_pot'
 ];
 
-var LH_GATE_ORDER = ['ch00', 'ch01', 'ch02', 'ch03', 'ch05', 'ch06', 'ch07', 'ch08', 'ch09', 'ch10', 'ch11', 'ch12', 'ch14', 'ch04'];
-var LH_MAIN_CHAPTER_KEYS = ['ch00', 'ch01', 'ch02', 'ch03', 'ch04', 'ch05', 'ch06', 'ch07', 'ch08', 'ch09', 'ch10', 'ch11', 'ch12', 'ch14'];
+var LH_GATE_ORDER = [
+  'ch00', 'ch01', 'ch02', 'ch03', 'ch05', 'ch06', 'ch07', 'ch08', 'ch09', 'ch10',
+  'ch11', 'ch12', 'ch14', 'ch15', 'ch16', 'ch17', 'ch18', 'ch19', 'ch20', 'ch21',
+  'ch22', 'ch23', 'ch24', 'ch25', 'ch26', 'ch27', 'ch28', 'ch29', 'ch30', 'ch31',
+  'ch32', 'ch33', 'ch34', 'ch35', 'ch36', 'ch37', 'ch38', 'ch39', 'ch40', 'ch41',
+  'ch42', 'ch43', 'ch44', 'ch45', 'ch46', 'ch47', 'ch48', 'ch49', 'ch50', 'ch51',
+  'ch52', 'ch53', 'ch54', 'ch55', 'ch56', 'ch57', 'ch58', 'ch59', 'ch60', 'ch61',
+  'ch04'
+];
+var LH_MAIN_CHAPTER_KEYS = [
+  'ch00', 'ch01', 'ch02', 'ch03', 'ch04', 'ch05', 'ch06', 'ch07', 'ch08', 'ch09',
+  'ch10', 'ch11', 'ch12', 'ch14', 'ch15', 'ch16', 'ch17', 'ch18', 'ch19', 'ch20',
+  'ch21', 'ch22', 'ch23', 'ch24', 'ch25', 'ch26', 'ch27', 'ch28', 'ch29', 'ch30',
+  'ch31', 'ch32', 'ch33', 'ch34', 'ch35', 'ch36', 'ch37', 'ch38', 'ch39', 'ch40',
+  'ch41', 'ch42', 'ch43', 'ch44', 'ch45', 'ch46', 'ch47', 'ch48', 'ch49', 'ch50',
+  'ch51', 'ch52', 'ch53', 'ch54', 'ch55', 'ch56', 'ch57', 'ch58', 'ch59', 'ch60',
+  'ch61'
+];
+var LH_EXPANSION_CHAPTER_CODES = [];
+for (var _ec = 15; _ec <= 61; _ec++) {
+  LH_EXPANSION_CHAPTER_CODES.push(_ec < 10 ? ('0' + _ec) : String(_ec));
+}
 
 var LH_CHAPTER_LABELS = {
   ch00: '00 · Сюжет: Ушёл за хлебом',
@@ -36,19 +62,86 @@ var LH_CHAPTER_LABELS = {
   ch11: '11 · Ядерная энергетика и Драконик',
   ch12: '12 · OpenTTD: Компании и Империя',
   ch13: '13 · Фотодокументация (Опционально)',
-  ch14: '14 · DOOMED: Хардкор-выживание'
+  ch14: '14 · DOOMED: Хардкор-выживание',
+  ch15: '15 · Выживание: Стартовые ремёсла',
+  ch16: '16 · Выживание: Инструменты, Незер и Энд',
+  ch17: '17 · Вооружение: Tetra и Кузница',
+  ch18: '18 · Арсенал: Simply Swords и Артефакты',
+  ch19: '19 · Create: Кинетика и Механизмы',
+  ch20: '20 · Create: Поезда и Автоматика',
+  ch21: '21 · Create: Конструкции и Декор',
+  ch22: '22 · Create Addons: Энергия и Чар-магия',
+  ch23: '23 · Immersive Engineering: Сталь и Многоблоки',
+  ch24: '24 · Immersive Engineering: Конструкции и Арсенал',
+  ch25: '25 · PneumaticCraft: Давление и Компрессоры',
+  ch26: '26 · Логистика: Modular Routers и SFM',
+  ch27: '27 · Логика: Integrated Dynamics',
+  ch28: '28 · Railcraft Reborn: Ж/Д Магистрали',
+  ch29: '29 · Little Logistics и Автотранспорт',
+  ch30: '30 · Флот: Small Ships и Valkyrien Skies',
+  ch31: '31 · Авиация: Immersive Aircraft',
+  ch32: '32 · Вычислительная сеть: CC: Tweaked',
+  ch33: '33 · Склады и Печи: Functional & Iron Furnaces',
+  ch34: '34 · Extreme Reactors: Энергоблоки',
+  ch35: '35 · NuclearCraft: Топливо и Изотопы',
+  ch36: '36 · NuclearCraft: Реакторы и Электродинамика',
+  ch37: '37 · Draconic Evolution: Поздняя энергетика',
+  ch38: '38 · Farmer\'s Delight: Полевая кухня',
+  ch39: '39 · Farmer\'s Delight: Праздничные столы и Кухня',
+  ch40: '40 · Виноделие и Сыроварня: Vinery & Brewin',
+  ch41: '41 · Aquaculture 2: Рыболовство и Снасти',
+  ch42: '42 · Productive Bees: Промышленная пасека',
+  ch43: '43 · Primal Magick: Стихии и Теория',
+  ch44: '44 · Primal Magick: Жезлы и Алхимия',
+  ch45: '45 · Primal Magick: Ритуалы и Тауматургия',
+  ch46: '46 · Hex Casting: Стековая магия',
+  ch47: '47 · Биомы мира: Biomes O\' Plenty (Породы)',
+  ch48: '48 · Биомы мира: Biomes O\' Plenty (Флора)',
+  ch49: '49 · Alex\'s Caves: Магнитные, Дино и Токсик',
+  ch50: '50 · Alex\'s Caves: Бездна, Забвение и Сладости',
+  ch51: '51 · Фауна мира: Alex\'s Mobs',
+  ch52: '52 · Боссы: Cataclysm и Aquamirae',
+  ch53: '53 · Архитектура: FramedBlocks (Каркасы)',
+  ch54: '54 · Архитектура: FramedBlocks (Детали)',
+  ch55: '55 · Архитектура: Chipped (Отделка)',
+  ch56: '56 · Механика и Декор: Quark (Блоки)',
+  ch57: '57 · Механика и Декор: Quark (Детали и Трофеи)',
+  ch58: '58 · Промышленные Тиры I–IV: Масштабирование',
+  ch59: '59 · Логистика Консорциума: Массовые поставки',
+  ch60: '60 · Опасности и Среда: Выживание в кризисах',
+  ch61: '61 · Великий Синтез: Абсолютное мастерство'
 };
 
+function lhEnsureBaseHardFeatures(db) {
+  if (!db) return;
+  if (!db.hardFeatures) db.hardFeatures = {};
+  if (!db.featureOrder) db.featureOrder = [];
+  var pool = global.LHHardFeatureCatalog || [];
+  for (var i = 0; i < pool.length; i++) {
+    if (pool[i].isBase) {
+      var fid = pool[i].id;
+      db.hardFeatures[fid] = true;
+      if (db.featureOrder.indexOf(fid) === -1) {
+        db.featureOrder.unshift(fid);
+      }
+    }
+  }
+}
+
 function lhProgRead(server) {
-  if (LHProgState !== null) return LHProgState;
+  if (LHProgState !== null) {
+    lhEnsureBaseHardFeatures(LHProgState);
+    return LHProgState;
+  }
   var raw = server.persistentData.getString('longhaul_progression_v1');
   LHProgState = raw ? JSON.parse(String(raw)) : {
+    schemaVersion: 2,
     chapters: {},
     hardFeatures: {},
     featureOrder: [],
     workshopItems: {},
     deathsByPlayer: {},
-    targetAvgDeaths: 63.15,
+    targetAvgDeaths: 275.15,
     rulesConfirmed: false,
     nuclearVerified: false,
     doomedVerified: false,
@@ -59,7 +152,14 @@ function lhProgRead(server) {
   if (!LHProgState.featureOrder) LHProgState.featureOrder = [];
   if (!LHProgState.workshopItems) LHProgState.workshopItems = {};
   if (!LHProgState.deathsByPlayer) LHProgState.deathsByPlayer = {};
-  if (!(LHProgState.targetAvgDeaths > 0)) LHProgState.targetAvgDeaths = 63.15;
+  if ((LHProgState.schemaVersion || 1) < 2) {
+    if (!(LHProgState.targetAvgDeaths > 0) || Math.abs(LHProgState.targetAvgDeaths - 63.15) < 0.01) {
+      LHProgState.targetAvgDeaths = 275.15;
+    }
+    LHProgState.schemaVersion = 2;
+  }
+  if (!(LHProgState.targetAvgDeaths > 0)) LHProgState.targetAvgDeaths = 275.15;
+  lhEnsureBaseHardFeatures(LHProgState);
   return LHProgState;
 }
 
@@ -292,6 +392,8 @@ function lhApplyDeathItemLoss(server, player, coeff, dryRun) {
 }
 
 function lhHardIsActive(server, featureId) {
+  var meta = lhHardFeatureMeta(featureId);
+  if (meta && meta.isBase) return true;
   if (!server) return false;
   var db = lhProgRead(server);
   return !!(db.hardFeatures && db.hardFeatures[featureId]);
@@ -328,15 +430,16 @@ function lhChapterProgressSummary(server) {
 function lhTerritoryCounts(server) {
   var db = lhProgRead(server);
   // Photo chapter (ch13) remains strictly optional and never affects border progression;
-  // all 14 main chapters (ch00..ch12 + ch14 DOOMED) drive the 14-stage expansion.
+  // all 61 main chapters (ch00..ch12 + ch14..ch61) drive the 61-stage expansion.
+  var totalMain = LH_MAIN_CHAPTER_KEYS.length; // 61
   var otherMainUnlocked = 0;
   LH_MAIN_CHAPTER_KEYS.forEach(function (cid) {
     if (cid !== 'ch04' && db.chapters[cid]) otherMainUnlocked++;
   });
   var effectiveUnlocked = db.chapters.ch04
-    ? Math.min(14, otherMainUnlocked + 1)
-    : Math.min(13, otherMainUnlocked);
-  return global.LHTerritoryMath.computeBorder(14, effectiveUnlocked);
+    ? Math.min(totalMain, otherMainUnlocked + 1)
+    : Math.min(totalMain - 1, otherMainUnlocked);
+  return global.LHTerritoryMath.computeBorder(totalMain, effectiveUnlocked);
 }
 
 function lhApplyTerritoryBorder(server, announce) {
@@ -376,7 +479,7 @@ function lhLockedHardFeatures(server) {
   var out = [];
   for (var i = 0; i < pool.length; i++) {
     var fid = pool[i].id;
-    if (!db.hardFeatures[fid] && !pending[fid]) out.push(pool[i]);
+    if (!pool[i].isBase && !db.hardFeatures[fid] && !pending[fid]) out.push(pool[i]);
   }
   return out;
 }
@@ -727,7 +830,7 @@ function lhProgressionRecompute(server, player, dryRun) {
   });
   Object.keys(catCounts).forEach(function (cid) {
     if (!db.chapters[cid] && catCounts[cid] >= 4) {
-      lhUnlockChapter(server, cid, cid !== 'ch13', dryRun);
+      lhUnlockChapter(server, cid, true, dryRun);
     }
   });
 
@@ -744,6 +847,22 @@ function lhProgressionRecompute(server, player, dryRun) {
   // ch14: DOOMED Hardcore Survival (mandatory main chapter)
   if (!db.chapters.ch14 && db.doomedVerified) {
     lhUnlockChapter(server, 'ch14', true, dryRun);
+  }
+
+  // ch15..ch61: Expansion chapters verified directly from live Heracles capstone quest completion (chXX_99_master)
+  if (LHHeraclesProgressHandler && player && player.uuid) {
+    try {
+      var qProg = LHHeraclesProgressHandler.getProgress(server, player.uuid);
+      if (qProg && typeof qProg.isComplete === 'function') {
+        for (var ei = 0; ei < LH_EXPANSION_CHAPTER_CODES.length; ei++) {
+          var code = LH_EXPANSION_CHAPTER_CODES[ei];
+          var chId = 'ch' + code;
+          if (!db.chapters[chId] && qProg.isComplete(chId + '_99_master')) {
+            lhUnlockChapter(server, chId, true, dryRun);
+          }
+        }
+      }
+    } catch (eHeraclesProg) {}
   }
 
   return lhTerritoryCounts(server);
@@ -1114,8 +1233,8 @@ PlayerEvents.loggedIn(function (event) {
     ' м). Этапы расширения: ' + info.unlocked + '/' + info.total + ' (осталось этапов: ' + info.locked +
     '). Пройдено глав: ' + chap.doneMain + '/' + chap.totalMain + ' · Текущая: ' + chap.currentLabel + '.');
   lhMsg(player, 'Сложность k=' + (Math.round(diff.coeff * 100) / 100) +
-    ', угроз: ' + db.featureOrder.length + '/' + (global.LHHardFeatureCatalog ? global.LHHardFeatureCatalog.length : 20) +
-    ' (/lh territory, /lh map, /lh events, /lh difficulty).');
+    ', угроз: ' + db.featureOrder.length + '/' + (global.LHHardFeatureCatalog ? global.LHHardFeatureCatalog.length : 100) +
+    ' (базовое «Рудный голод» всегда активно; /lh territory, /lh map, /lh events, /lh difficulty).');
 });
 
 ServerEvents.commandRegistry(function (event) {
@@ -1215,7 +1334,7 @@ ServerEvents.commandRegistry(function (event) {
       var server = ctx.source.server, p = ctx.source.playerOrException;
       var val = parseFloat(LHDiffArgStr.getString(ctx, 'value'));
       if (!(val > 0)) {
-        lhMsg(p, 'Укажите положительное число T, например /lh difficulty target 63.15');
+        lhMsg(p, 'Укажите положительное число T, например /lh difficulty target 275.15');
         return 0;
       }
       var db = lhProgRead(server);
@@ -1231,13 +1350,15 @@ ServerEvents.commandRegistry(function (event) {
   casino.then(C.literal('status').executes(function (ctx) {
     var server = ctx.source.server, p = ctx.source.playerOrException;
     var db = lhProgRead(server);
+    var totalPool = global.LHHardFeatureCatalog ? global.LHHardFeatureCatalog.length : 100;
     var active = db.featureOrder.map(function (id) {
       var m = lhHardFeatureMeta(id);
-      return m ? (m.icon + ' ' + m.name) : id;
+      if (!m) return id;
+      return (m.isBase ? '[БАЗА] ' : '') + m.icon + ' ' + m.name;
     });
-    var locked = lhLockedHardFeatures(server).map(function (m) { return m.icon + ' ' + m.name; });
-    lhMsg(p, 'Активные угрозы (' + active.length + '): ' + (active.length ? active.join(', ') : 'нет — всё спокойно!'));
-    lhMsg(p, 'Ещё закрыты в Колесе (' + locked.length + '): ' + (locked.length ? locked.join(', ') : 'все открыты'));
+    var lockedCount = lhLockedHardFeatures(server).length;
+    lhMsg(p, 'Активные усложнения (' + active.length + '/' + totalPool + '): ' + (active.length ? active.join(', ') : 'нет'));
+    lhMsg(p, 'Ещё закрыто в Колесе Угроз: ' + lockedCount + ' (крутится после завершения каждой главы; статус глав: /lh chapter status).');
     return 1;
   }));
   casino.then(C.literal('spin').requires(function (s) { return s.hasPermission(2); }).executes(function (ctx) {
@@ -1248,6 +1369,29 @@ ServerEvents.commandRegistry(function (event) {
     return 1;
   }));
   root.then(casino);
+
+  var chapterCmd = C.literal('chapter');
+  chapterCmd.then(C.literal('status').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException;
+    var chap = lhChapterProgressSummary(server);
+    var info = lhTerritoryCounts(server);
+    lhMsg(p, 'Главы: ' + chap.doneMain + '/' + chap.totalMain + ' (текущая: ' + chap.currentLabel +
+      '), граница мира: ' + info.size + '×' + info.size + ' (этапов: ' + info.unlocked + '/' + info.total + ').');
+    return 1;
+  }));
+  chapterCmd.then(C.literal('unlock').requires(function (s) { return s.hasPermission(2); })
+    .then(C.argument('chapterId', LHDiffArgStr.word()).executes(function (ctx) {
+      var server = ctx.source.server, p = ctx.source.playerOrException;
+      var cid = LHDiffArgStr.getString(ctx, 'chapterId');
+      if (!LH_CHAPTER_LABELS[cid]) {
+        lhMsg(p, 'Неизвестный ID главы: ' + cid + ' (ожидается ch00..ch61).');
+        return 0;
+      }
+      var okU = lhUnlockChapter(server, cid, true, false);
+      lhMsg(p, okU ? ('Глава ' + LH_CHAPTER_LABELS[cid] + ' открыта -> запущено Колесо Угроз!') : ('Глава ' + cid + ' уже пройдена.'));
+      return 1;
+    })));
+  root.then(chapterCmd);
 
   var rules = C.literal('rules');
   rules.then(C.literal('confirm').executes(function (ctx) {
