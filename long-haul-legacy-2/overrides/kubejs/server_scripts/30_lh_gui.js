@@ -98,22 +98,51 @@ function lhGuiItem(iconId, title, loreLines, count) {
 function lhGuiSlot(gui, x, y, iconId, title, loreLines, onLeft, onRight, count) {
   var slot = gui.getSlot(x, y);
   slot.setItem(lhGuiItem(iconId, title, loreLines, count));
-  slot.setLeftClicked(function (click) {
+  if (typeof slot.resetClickHandlers === 'function') {
+    slot.resetClickHandlers();
+  }
+  var fire = function (fn, click) {
     if (click && typeof click.setHandled === 'function') click.setHandled();
+    if (click && click.slot && click.slot.gui) {
+      try { click.slot.gui.mouseItem = Item.of('minecraft:air'); } catch (eMouse) {}
+    }
     var p = click && click.slot && click.slot.gui ? click.slot.gui.player : null;
-    if (p && typeof onLeft === 'function') onLeft(p, click);
+    if (p && typeof fn === 'function') fn(p, click);
+  };
+  slot.setLeftClicked(function (click) {
+    fire(onLeft, click);
   });
   slot.setRightClicked(function (click) {
-    if (click && typeof click.setHandled === 'function') click.setHandled();
-    var p = click && click.slot && click.slot.gui ? click.slot.gui.player : null;
-    if (p && typeof onRight === 'function') onRight(p, click);
-    else if (p && typeof onLeft === 'function') onLeft(p, click);
+    fire(typeof onRight === 'function' ? onRight : onLeft, click);
   });
   slot.setShiftLeftClicked(function (click) {
-    if (click && typeof click.setHandled === 'function') click.setHandled();
-    var p = click && click.slot && click.slot.gui ? click.slot.gui.player : null;
-    if (p && typeof onLeft === 'function') onLeft(p, click);
+    fire(onLeft, click);
   });
+  if (typeof slot.setShiftRightClicked === 'function') {
+    slot.setShiftRightClicked(function (click) {
+      fire(typeof onRight === 'function' ? onRight : onLeft, click);
+    });
+  }
+  if (typeof slot.setMiddleClicked === 'function') {
+    slot.setMiddleClicked(function (click) {
+      fire(onLeft, click);
+    });
+  }
+  if (typeof slot.setDoubleClicked === 'function') {
+    slot.setDoubleClicked(function (click) {
+      fire(onLeft, click);
+    });
+  }
+  if (typeof slot.setSwapped === 'function') {
+    slot.setSwapped(function (click) {
+      if (click && typeof click.setHandled === 'function') click.setHandled();
+    });
+  }
+  if (typeof slot.setThrown === 'function') {
+    slot.setThrown(function (click) {
+      if (click && typeof click.setHandled === 'function') click.setHandled();
+    });
+  }
 }
 
 function lhGuiFillBg(gui, rows) {
@@ -121,11 +150,15 @@ function lhGuiFillBg(gui, rows) {
     for (var x = 0; x < 9; x++) {
       var s = gui.getSlot(x, y);
       s.setItem(lhGuiItem('minecraft:gray_stained_glass_pane', ' ', [], 1));
-      s.setLeftClicked(function (c) { if (c && c.setHandled) c.setHandled(); });
-      s.setRightClicked(function (c) { if (c && c.setHandled) c.setHandled(); });
-      s.setShiftLeftClicked(function (c) { if (c && c.setHandled) c.setHandled(); });
+      if (typeof s.resetClickHandlers === 'function') {
+        s.resetClickHandlers();
+      }
     }
   }
+  gui.anyClicked = function (c) {
+    if (c && typeof c.setHandled === 'function') c.setHandled();
+    try { gui.mouseItem = Item.of('minecraft:air'); } catch (eMouse) {}
+  };
   gui.inventoryClicked = function (c) { if (c && c.setHandled) c.setHandled(); };
 }
 
@@ -149,7 +182,8 @@ function lhGuiFooter(gui, server, tab, arg) {
     lhOpenGui(server, p, 'events', arg);
   });
   lhGuiSlot(gui, 8, 5, 'minecraft:barrier', '§c✖ Закрыть', ['§7Закрыть терминал Long Haul'], function (p) {
-    if (typeof p.closeMenu === 'function') p.closeMenu();
+    if (typeof p.closeContainer === 'function') p.closeContainer();
+    else if (typeof p.closeMenu === 'function') p.closeMenu();
   });
 }
 
@@ -1029,9 +1063,9 @@ function lhOpenGui(server, player, tab, arg) {
 }
 
 ItemEvents.rightClicked('longhaul:control_tablet', function (event) {
-  if (event.player) {
-    lhOpenGui(event.server, event.player, 'hub');
-  }
+  if (!event.server || !event.player) return;
+  lhOpenGui(event.server, event.player, 'hub');
+  if (typeof event.cancel === 'function') event.cancel();
 });
 
 ServerEvents.commandRegistry(function (event) {

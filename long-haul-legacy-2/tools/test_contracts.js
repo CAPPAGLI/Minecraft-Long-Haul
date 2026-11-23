@@ -399,6 +399,8 @@ test('alpha20 profile adds safe optimization/animation/graphics mods and wires /
 
   const guiJs = fs.readFileSync(path.join(__dirname, '../overrides/kubejs/server_scripts/30_lh_gui.js'), 'utf8');
   assert(guiJs.includes('lhOpenGui') && guiJs.includes('LH_GUI_TABS') && guiJs.includes('longhaul:control_tablet'));
+  assert(guiJs.includes('resetClickHandlers') && guiJs.includes('gui.anyClicked') && guiJs.includes('closeContainer'),
+         '30_lh_gui.js must reset click handlers, use gui.anyClicked for background, and call closeContainer()');
   const itemsJs = fs.readFileSync(path.join(__dirname, '../overrides/kubejs/startup_scripts/01_longhaul_items.js'), 'utf8');
   assert(itemsJs.includes("'control_tablet'"));
   assert(fs.existsSync(path.join(__dirname, '../overrides/kubejs/assets/longhaul/textures/item/control_tablet.png')));

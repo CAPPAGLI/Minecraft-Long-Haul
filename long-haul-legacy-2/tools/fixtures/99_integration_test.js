@@ -751,8 +751,10 @@ function lhStartIntegrationSetup(server) {
             if (!mockGuiSlots[k]) {
               mockGuiSlots[k] = {
                 item: null,
+                leftHandlers: [],
                 setItem: function (it) { this.item = it; },
-                setLeftClicked: function (fn) { this.onLeft = fn; },
+                resetClickHandlers: function () { this.leftHandlers = []; },
+                setLeftClicked: function (fn) { this.leftHandlers.push(fn); },
                 setRightClicked: function (fn) { this.onRight = fn; },
                 setShiftLeftClicked: function (fn) { this.onShift = fn; }
               };
@@ -765,7 +767,24 @@ function lhStartIntegrationSetup(server) {
           lhRenderGuiTab(mockGui, server, fp, tabObj.id, null);
           ok(Object.keys(mockGuiSlots).length === 54, 'GUI tab ' + tabObj.id + ' renders all 54 chest slots');
         });
+        // Verify background does NOT register dummy setLeftClicked that would shadow slot button handlers in KubeJS ChestMenuData
+        mockGuiSlots = {};
+        lhRenderGuiTab(mockGui, server, fp, 'hub', null);
+        ok(mockGuiSlots['0,0'].leftHandlers.length === 0, 'background slot has 0 shadowed clickHandlers (uses gui.anyClicked)');
+        ok(mockGuiSlots['1,1'].leftHandlers.length === 1, 'hub Contracts button has exactly 1 active leftClick handler');
+
+        // Real CustomChestMenu click tests via ServerPlayer fp
+        var ClickTypeCls = Java.loadClass('net.minecraft.world.inventory.ClickType');
         ok(disp.performPrefixedCommand(src, 'lh gui') === 1, 'brigadier /lh gui opens cleanly');
+        ok(fp.containerMenu && fp.containerMenu.data && fp.containerMenu.data.rows === 6, 'fp.containerMenu is live CustomChestMenu (hub)');
+        fp.containerMenu.clicked(1 + 1 * 9, 0, ClickTypeCls.PICKUP, fp);
+        ok(fp.containerMenu && fp.containerMenu.data && String(fp.containerMenu.data.title.getString()).indexOf('Контракты') >= 0, 'real click on hub (1,1) opens Contracts tab');
+        fp.containerMenu.clicked(3 + 5 * 9, 0, ClickTypeCls.PICKUP, fp);
+        ok(fp.containerMenu && fp.containerMenu.data && String(fp.containerMenu.data.title.getString()).indexOf('Карта') >= 0, 'real click on footer (3,5) opens Territory 5x5 tab');
+        fp.containerMenu.clicked(4 + 5 * 9, 0, ClickTypeCls.PICKUP, fp);
+        ok(fp.containerMenu && fp.containerMenu.data && String(fp.containerMenu.data.title.getString()).indexOf('Карта') >= 0, 'real click on footer (4,5) refreshes current tab');
+        fp.containerMenu.clicked(8 + 5 * 9, 0, ClickTypeCls.PICKUP, fp);
+        ok(fp.containerMenu === fp.inventoryMenu, 'real click on footer (8,5) closes CustomChestMenu cleanly');
 
         // 25. Every single item ID referenced across all 4,600-4,800 Heracles quests is genuinely registered in Forge 1.20.1
         var auditList = global.LHQuestItemAuditList || [];
