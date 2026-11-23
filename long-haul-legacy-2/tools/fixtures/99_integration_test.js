@@ -693,7 +693,7 @@ function lhStartIntegrationSetup(server) {
             }
           }
         }
-        ok(lhChapterProgressSummary(server).totalMain === 6, 'main campaign chapter progress tracks 6 core gates excluding optional photo/DOOMED');
+        ok(lhChapterProgressSummary(server).totalMain === 13 && lhTerritoryCounts(server).total === 6, 'main campaign chapter progress tracks 13 core chapters and 6 border gates excluding optional photo/DOOMED');
 
         console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic + openttd + eventlog');
       } catch (err2) {
