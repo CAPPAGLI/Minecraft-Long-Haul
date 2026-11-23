@@ -87,11 +87,37 @@ test('all Heracles quest display titles and subtitles use Component objects (not
   const path = require('path');
   const qDir = path.join(__dirname, '../overrides/config/heracles/quests');
   const qFiles = fs.readdirSync(qDir).filter(f => f.endsWith('.json'));
-  assert(qFiles.length >= 320, 'expected >= 320 quests, got ' + qFiles.length);
+  assert(qFiles.length >= 4600 && qFiles.length <= 4800, 'expected 4600..4800 quests, got ' + qFiles.length);
+  const bannedSubstrs = ['shulker', 'ender_chest', 'ender_drawer', 'jetpack', 'dislocator', 'supplementaries:sack', 'supplementaries:safe', 'quark:backpack', 'allthemodium', 'vibranium', 'unobtainium', 'spawn_egg'];
+  const checkNotBanned = (id, ctx) => {
+    const low = String(id || '').toLowerCase();
+    bannedSubstrs.forEach(b => assert(!low.includes(b), `banned item ${id} in ${ctx}`));
+  };
   qFiles.forEach(f => {
     const q = JSON.parse(fs.readFileSync(path.join(qDir, f), 'utf8'));
     assert(q.display && typeof q.display.title === 'object' && typeof q.display.title.text === 'string', f + ' invalid display.title');
     assert(q.display && typeof q.display.subtitle === 'object' && typeof q.display.subtitle.text === 'string', f + ' invalid display.subtitle');
+    if (q.display.icon && q.display.icon.item && q.display.icon.item.id) checkNotBanned(q.display.icon.item.id, f + ' icon');
+    Object.values(q.tasks || {}).forEach(t => {
+      if (t.type === 'heracles:item' && t.item) checkNotBanned(t.item, f + ' task');
+    });
+    const rews = Object.values(q.rewards || {});
+    assert(rews.length > 0, f + ' must have at least one reward');
+    rews.forEach(r => {
+      if (r.type === 'heracles:xp') {
+        assert(r.xptype === 'LEVEL' || r.xptype === 'POINTS', f + ' invalid heracles:xp xptype: ' + r.xptype);
+        assert(r.amount > 0, f + ' invalid heracles:xp amount');
+      } else if (r.type === 'heracles:item') {
+        assert(r.item && r.item.id && r.item.count > 0, f + ' invalid heracles:item reward');
+        checkNotBanned(r.item.id, f + ' reward');
+      } else if (r.type === 'heracles:selectable') {
+        assert(r.amount > 0 && r.rewards && Object.keys(r.rewards).length > 0, f + ' invalid heracles:selectable reward');
+        Object.values(r.rewards).forEach(sr => {
+          assert(sr.type === 'heracles:item' && sr.item && sr.item.id, f + ' invalid selectable sub-reward');
+          checkNotBanned(sr.item.id, f + ' selectable reward');
+        });
+      }
+    });
   });
 });
 
@@ -223,6 +249,8 @@ test('all Heracles quests form an acyclic DAG with zero dangling dependencies an
   });
 
   const groupsTxt = fs.readFileSync(path.join(__dirname, '../overrides/config/heracles/groups.txt'), 'utf8');
+  const groupLines = groupsTxt.trim().split('\n').filter(Boolean);
+  assert(groupLines.length >= 60, 'expected >= 60 Heracles groups, got ' + groupLines.length);
   assert(groupsTxt.includes('14 · DOOMED: Хардкор-выживание\n') || groupsTxt.trim().endsWith('14 · DOOMED: Хардкор-выживание'));
   assert(!groupsTxt.includes('14 · DOOMED: Хардкор-выживание (Опционально)'));
   const terrJs = fs.readFileSync(path.join(__dirname, '../overrides/kubejs/server_scripts/26_hard_features_and_territory.js'), 'utf8');

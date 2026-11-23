@@ -81,6 +81,28 @@ def main():
             shutil.copytree(src, dst)
 
     (S / 'kubejs/server_scripts').mkdir(parents=True, exist_ok=True)
+    # Emit transient Forge quest-item audit list (excluded from overrides/ and .mrpack)
+    audit_items = set()
+    q_dir = R / 'overrides/config/heracles/quests'
+    if q_dir.exists():
+        for qf in q_dir.glob('*.json'):
+            qd = json.loads(qf.read_text())
+            ico = qd.get('display', {}).get('icon', {}).get('item', {}).get('id')
+            if ico:
+                audit_items.add(ico)
+            for t in qd.get('tasks', {}).values():
+                if t.get('type') == 'heracles:item' and t.get('item'):
+                    audit_items.add(t['item'])
+            for rw in qd.get('rewards', {}).values():
+                if rw.get('type') == 'heracles:item' and rw.get('item', {}).get('id'):
+                    audit_items.add(rw['item']['id'])
+                elif rw.get('type') == 'heracles:selectable':
+                    for srw in rw.get('rewards', {}).values():
+                        if srw.get('type') == 'heracles:item' and srw.get('item', {}).get('id'):
+                            audit_items.add(srw['item']['id'])
+    (S / 'kubejs/server_scripts/98_quest_item_audit.js').write_text(
+        'global.LHQuestItemAuditList = ' + json.dumps(sorted(audit_items), separators=(',', ':')) + ';\n'
+    )
     shutil.copy2(R / 'tools/fixtures/99_integration_test.js', S / 'kubejs/server_scripts/99_integration_test.js')
     (S / 'eula.txt').write_text('eula=true\n')
 

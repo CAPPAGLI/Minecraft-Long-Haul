@@ -730,7 +730,19 @@ function lhStartIntegrationSetup(server) {
         });
         ok(disp.performPrefixedCommand(src, 'lh gui') === 1, 'brigadier /lh gui opens cleanly');
 
-        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic + openttd + eventlog + gui');
+        // 25. Every single item ID referenced across all 4,600-4,800 Heracles quests is genuinely registered in Forge 1.20.1
+        var auditList = global.LHQuestItemAuditList || [];
+        ok(auditList.length >= 2500, 'quest item audit list loaded (' + auditList.length + ' unique items)');
+        var missingQuestItems = [];
+        for (var ai = 0; ai < auditList.length; ai++) {
+          var qItemId = auditList[ai];
+          if (Item.of(qItemId, 1).empty) {
+            missingQuestItems.push(qItemId);
+          }
+        }
+        ok(missingQuestItems.length === 0, 'unregistered quest items in Forge 1.20.1 (' + missingQuestItems.length + '): ' + missingQuestItems.slice(0, 20).join(', '));
+
+        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic + openttd + eventlog + gui + quest_items_' + auditList.length);
       } catch (err2) {
         console.error('LH_INTEGRATION_FAIL: live adapter ' + err2);
       }

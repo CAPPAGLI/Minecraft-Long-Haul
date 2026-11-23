@@ -13,3 +13,50 @@
 12 · OpenTTD: Компании и Империя
 13 · Фотодокументация (Опционально)
 14 · DOOMED: Хардкор-выживание
+15 · Выживание: Стартовые ремёсла
+16 · Выживание: Инструменты, Незер и Энд
+17 · Вооружение: Tetra и Кузница
+18 · Арсенал: Simply Swords и Артефакты
+19 · Create: Кинетика и Механизмы
+20 · Create: Поезда и Автоматика
+21 · Create: Конструкции и Декор
+22 · Create Addons: Энергия и Чар-магия
+23 · Immersive Engineering: Сталь и Многоблоки
+24 · Immersive Engineering: Конструкции и Арсенал
+25 · PneumaticCraft: Давление и Компрессоры
+26 · Логистика: Modular Routers и SFM
+27 · Логика: Integrated Dynamics
+28 · Railcraft Reborn: Ж/Д Магистрали
+29 · Little Logistics и Автотранспорт
+30 · Флот: Small Ships и Valkyrien Skies
+31 · Авиация: Immersive Aircraft
+32 · Вычислительная сеть: CC: Tweaked
+33 · Склады и Печи: Functional & Iron Furnaces
+34 · Extreme Reactors: Энергоблоки
+35 · NuclearCraft: Топливо и Изотопы
+36 · NuclearCraft: Реакторы и Электродинамика
+37 · Draconic Evolution: Поздняя энергетика
+38 · Farmer's Delight: Полевая кухня
+39 · Farmer's Delight: Праздничные столы и Кухня
+40 · Виноделие и Сыроварня: Vinery & Brewin
+41 · Aquaculture 2: Рыболовство и Снасти
+42 · Productive Bees: Промышленная пасека
+43 · Primal Magick: Стихии и Теория
+44 · Primal Magick: Жезлы и Алхимия
+45 · Primal Magick: Ритуалы и Тауматургия
+46 · Hex Casting: Стековая магия
+47 · Биомы мира: Biomes O' Plenty (Породы)
+48 · Биомы мира: Biomes O' Plenty (Флора)
+49 · Alex's Caves: Магнитные, Дино и Токсик
+50 · Alex's Caves: Бездна, Забвение и Сладости
+51 · Фауна мира: Alex's Mobs
+52 · Боссы: Cataclysm и Aquamirae
+53 · Архитектура: FramedBlocks (Каркасы)
+54 · Архитектура: FramedBlocks (Детали)
+55 · Архитектура: Chipped (Отделка)
+56 · Механика и Декор: Quark (Блоки)
+57 · Механика и Декор: Quark (Детали и Трофеи)
+58 · Промышленные Тиры I–IV: Масштабирование
+59 · Логистика Консорциума: Массовые поставки
+60 · Опасности и Среда: Выживание в кризисах
+61 · Великий Синтез: Абсолютное мастерство
