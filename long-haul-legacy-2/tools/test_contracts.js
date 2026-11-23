@@ -319,13 +319,13 @@ test('alpha20 profile adds safe optimization/animation/graphics mods and wires /
   const prof = JSON.parse(fs.readFileSync(path.join(__dirname, '../profiles/alpha20.json'), 'utf8'));
   const all = Object.values(prof.categories).flat();
   const cli = new Set(prof.client_only);
-  ['structure-layout-optimizer', 'redirected', 'fast-ip-ping', 'better-biome-blend',
-   'better-animations-collection', 'wavey-capes', 'chunks-fade-in', 'itemphysic-lite',
+  ['structure-layout-optimizer', 'redirected', 'fast-ip-ping', 'krypton-fnp',
+   'better-animations-collection', 'wavey-capes', 'dynamiccrosshair', 'itemphysic-lite',
    'particular-reforged', 'visuality-forge', 'make_bubbles_pop', 'wakes-reforged'].forEach(slug => {
     assert(all.includes(slug), 'missing mod in alpha20: ' + slug);
   });
-  ['fast-ip-ping', 'better-biome-blend', 'better-animations-collection', 'wavey-capes',
-   'chunks-fade-in', 'itemphysic-lite', 'particular-reforged', 'visuality-forge', 'make_bubbles_pop'].forEach(slug => {
+  ['fast-ip-ping', 'better-animations-collection', 'wavey-capes',
+   'dynamiccrosshair', 'itemphysic-lite', 'particular-reforged', 'visuality-forge', 'make_bubbles_pop'].forEach(slug => {
     assert(cli.has(slug), 'client-only mod must be in client_only: ' + slug);
   });
   assert(!all.includes('servercore'), 'servercore must remain excluded due to Valkyrien Skies conflict');

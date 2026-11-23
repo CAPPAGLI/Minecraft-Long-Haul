@@ -62,7 +62,7 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p /tmp/ci-logs
-          python3 long-haul-legacy-2/tools/assemble_alpha.py --profile long-haul-legacy-2/profiles/alpha20.json | tee /tmp/ci-logs/assemble.txt
+          python3 long-haul-legacy-2/tools/assemble_alpha.py --profile long-haul-legacy-2/profiles/alpha20.json 2>&1 | tee /tmp/ci-logs/assemble.txt
           python3 long-haul-legacy-2/tools/generate_modlist.py
 
       - name: Prepare headless Forge 47.4.10 server (void fixture)
@@ -117,6 +117,7 @@ jobs:
               cli = sum(1 for m in mods if m.get('client_only'))
               lines.append(f"**Lock:** `{d.get('version')}` · `{len(mods)}` mods (`{len(mods)-cli}` server / `{cli}` client-only)\n")
           for label, p in [
+              ('Assemble Log (tail)', '/tmp/ci-logs/assemble.txt'),
               ('Inspect JARs', '/tmp/ci-logs/inspect.txt'),
               ('Void Smoke Result', '/tmp/ci-logs/smoke-void-result.json'),
               ('Normal Overworld Result', '/tmp/ci-logs/smoke-normal-result.json'),
@@ -127,7 +128,8 @@ jobs:
           ]:
               fp = pathlib.Path(p)
               if fp.exists():
-                  txt = fp.read_text(errors='replace')[:4000]
+                  raw = fp.read_text(errors='replace')
+                  txt = raw[-4000:] if label.endswith('(tail)') else raw[:4000]
                   lines.append(f'<details><summary>{label}</summary>\n\n```\n{txt}\n```\n</details>\n')
           sc = pathlib.Path('long-haul-legacy-2/server-test/smoke-console.log')
           if sc.exists():

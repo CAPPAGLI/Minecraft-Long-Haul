@@ -268,7 +268,7 @@
       "structure-layout-optimizer",
       "redirected",
       "fast-ip-ping",
-      "better-biome-blend"
+      "krypton-fnp"
     ],
     "qol": [
       "polymorph",
@@ -369,7 +369,7 @@
       "raised",
       "better-animations-collection",
       "wavey-capes",
-      "chunks-fade-in",
+      "dynamiccrosshair",
       "itemphysic-lite"
     ],
     "arcane": [
@@ -384,8 +384,8 @@
     "world": "Ambient wildlife, bosses/encounters, weathering, snow physics, and client audiovisual atmosphere. Added Smart Mobs (wall-breaching creepers, digging/pillaring zombies, sniping skeletons). Added Friends&Foes (Forge), Flowery Mooblooms, and Villager Names. Added Nyf's Spiders (wall/ceiling climbing). Added Villager Recruits and Subtle Effects (client-only; excluded Villager Workers due to VillagerPriceTable mixin clash with Forgified Fabric API + MoreJS). Added lightweight graphics enhancements: Particular Reforged, Visuality Reforged, Make Bubbles Pop (client-only), and Wakes Reforged (water wakes with Valkyrien Skies compat).",
     "building": "Architecture, framing, chipped/rechiseled, Macaw suite, Quark, Sully's Mod, Immersive Paintings, and wood/stone/clay variants. Added Macaw's Bridges, Paths, Roofs, Doors, and Fences. Added Macaw's Stairs. Added Straw Statues (excluded Every Compat due to Valkyrien Skies MassDatapackResolver blockstate heap bloat).",
     "food": "Expanded Farmer's Delight ecosystem, Fruit Trees, Productive Bees, Culinary Construct, Diet, and Aquaculture without temperature locks. Added Create Confectionery. Added End's Delight. Added Farmer's Delight expansions (Nether's, Ocean's, Miner's, Cultural Delights). Added Brewin' And Chewin' keg fermentation. Added [Let's Do] HerbalBrews (tea/coffee/flasks without DoAPI). Added [Let's Do] Vinery (vineyards and winemaking). Added Delightful Sandwiches.",
-    "performance": "Client/server optimization stack with Embeddium/Oculus/Noisium/ModernFix/FastWorkbench/RyoamicLights (radium excluded due to Valkyrien Skies POI mixin conflict; saturn removed as redundant with ModernFix+FerriteCore; fps-reducer removed as redundant with dynamic-fps; does-it-tick removed due to Valkyrien Skies seat dismount lock; servercore excluded due to Valkyrien Skies ticking entity mixin crash #1395). Includes FastFurnace, Smooth Boot Reloaded, Neruina, Let Me Despawn, Embeddium Extra, Distant Horizons (3.3.x pre-tuned to PRE_EXISTING_ONLY, 96-chunk radius, 2 threads), Cull Leaves, Mobtimizations, Model Gap Fix, [ETF] Entity Texture Features (Slow update frequency), Structure Layout Optimizer (faster Jigsaw/NBT worldgen), Redirected (Enum RAM deduplication), Fast IP Ping, and Better Biome Blend.",
-    "qol": "Compasses, Tetra+Extras, Combat Roll, JEI/EMI integrations, manuals, tooltips, UI polish, and voice chat addons without bulk backpacks or teleportation. Added Corpse, Better Spawner Control, Paxi, EntityJS, Game/Recipe/Item Stages, and FancyMenu/Drippy/ResourcePackOverrides/JustZoom client polish. Added Default Server Properties and Simple Discord RPC (client-only). Added Timeless and Classics Zero (TaCZ) industrial firearms. Added ParCool! parkour movement. Added corpse graves (corpse) to preserve items across Death Stranding voidout explosions. Added Map Atlases, Akashic Tome, Visual Workbench, TrashSlot, BetterF3, Dynamic Lights, Entity Culling, Sound Physics Remastered, and Presence Footsteps. Added Jade Addons, Exposure camera, Comforts sleeping bags, and Just Enough Resources. Added NetherPortalFix, Easy Anvils, Easy Magic, Enchanting Infuser, and Trading Post. Added No Chat Reports; unified guidebook handling on Eccentric Tome (removed duplicate akashic-tome) and fixed Heracles Component JSON formatting. Added 3D Skin Layers, Not Enough Animations, Extreme Sound Muffler, and Just Enough Breeding (client-only). Added Ultimate Chess (ultimate-chess: playable Chess & Checkers boards/pieces, replacing removed Modrinth chess-and-checks) and Eating Animations (client-only). Added Jade VS (Valkyrien Skies Jade info), Shulker Box Tooltip, Overflowing Bars, and Raised (client-only). Added Better Animations Collection, Wavey Capes, Chunks Fade In, and ItemPhysic Lite (client-only smooth animations). Removed duplicate dynamic-lights (kept ryoamiclights), better-f3 (kept betterf3), and trash-slot (kept trashslot).",
+    "performance": "Client/server optimization stack with Embeddium/Oculus/Noisium/ModernFix/FastWorkbench/RyoamicLights (radium excluded due to Valkyrien Skies POI mixin conflict; saturn removed as redundant with ModernFix+FerriteCore; fps-reducer removed as redundant with dynamic-fps; does-it-tick removed due to Valkyrien Skies seat dismount lock; servercore excluded due to Valkyrien Skies ticking entity mixin crash #1395). Includes FastFurnace, Smooth Boot Reloaded, Neruina, Let Me Despawn, Embeddium Extra, Distant Horizons (3.3.x pre-tuned to PRE_EXISTING_ONLY, 96-chunk radius, 2 threads), Cull Leaves, Mobtimizations, Model Gap Fix, [ETF] Entity Texture Features (Slow update frequency), Structure Layout Optimizer (faster Jigsaw/NBT worldgen), Redirected (Enum RAM deduplication), Fast IP Ping, and Krypton Reno (Netty/network optimization).",
+    "qol": "Compasses, Tetra+Extras, Combat Roll, JEI/EMI integrations, manuals, tooltips, UI polish, and voice chat addons without bulk backpacks or teleportation. Added Corpse, Better Spawner Control, Paxi, EntityJS, Game/Recipe/Item Stages, and FancyMenu/Drippy/ResourcePackOverrides/JustZoom client polish. Added Default Server Properties and Simple Discord RPC (client-only). Added Timeless and Classics Zero (TaCZ) industrial firearms. Added ParCool! parkour movement. Added corpse graves (corpse) to preserve items across Death Stranding voidout explosions. Added Map Atlases, Akashic Tome, Visual Workbench, TrashSlot, BetterF3, Dynamic Lights, Entity Culling, Sound Physics Remastered, and Presence Footsteps. Added Jade Addons, Exposure camera, Comforts sleeping bags, and Just Enough Resources. Added NetherPortalFix, Easy Anvils, Easy Magic, Enchanting Infuser, and Trading Post. Added No Chat Reports; unified guidebook handling on Eccentric Tome (removed duplicate akashic-tome) and fixed Heracles Component JSON formatting. Added 3D Skin Layers, Not Enough Animations, Extreme Sound Muffler, and Just Enough Breeding (client-only). Added Ultimate Chess (ultimate-chess: playable Chess & Checkers boards/pieces, replacing removed Modrinth chess-and-checks) and Eating Animations (client-only). Added Jade VS (Valkyrien Skies Jade info), Shulker Box Tooltip, Overflowing Bars, and Raised (client-only). Added Better Animations Collection, Wavey Capes, Dynamic Crosshair, and ItemPhysic Lite (client-only smooth animations/UI). Removed duplicate dynamic-lights (kept ryoamiclights), better-f3 (kept betterf3), and trash-slot (kept trashslot).",
     "arcane": "Thaumcraft-inspired research, alchemy, primal essences, and arcane blocks compatible with Forge 1.20.1 (official Thaumcraft 6/7 is not released on 1.20.1 Forge)."
   },
   "client_only": [
@@ -459,13 +459,12 @@
     "raised",
     "jade-vs",
     "fast-ip-ping",
-    "better-biome-blend",
     "particular-reforged",
     "visuality-forge",
     "make_bubbles_pop",
     "better-animations-collection",
     "wavey-capes",
-    "chunks-fade-in",
+    "dynamiccrosshair",
     "itemphysic-lite"
   ]
 }
