@@ -50,9 +50,9 @@ def resolve_profile(profile_path: pathlib.Path):
     by_slug = {r['slug']: r for r in rows}
     by_pid = {r['project_id']: r for r in dg_projects}
     known = {}
-    work = list(roots)
+    work = [(s, 'profile') for s in roots]
     while work:
-        slug = work.pop(0)
+        slug, parent = work.pop(0)
         row = by_slug.get(slug) or by_pid.get(slug)
         v = None
         if row and row.get('status') == 'candidate':
@@ -63,7 +63,7 @@ def resolve_profile(profile_path: pathlib.Path):
             vs = get('project/' + slug + '/version?loaders=%5B%22forge%22%5D&game_versions=%5B%221.20.1%22%5D') or []
             vs = [v for v in vs if v['date_published'] <= '2026-11-15T15:59:59Z' and any(f['filename'].endswith('.jar') for f in v['files'])]
             if not vs:
-                raise RuntimeError('No supported version for ' + slug)
+                raise RuntimeError(f'No supported version for {slug} (required by {parent})')
             stable = [v for v in vs if v['version_type'] == 'release']
             cands = stable or vs
             if slug == 'distanthorizons':
@@ -121,7 +121,7 @@ def resolve_profile(profile_path: pathlib.Path):
                 dv = get('version/' + pin)
                 dep = dv['project_id']
             if dep and dep not in known:
-                work.append(dep)
+                work.append((dep, meta['slug']))
     return profile.get('version', '2.0-alpha.2'), roots, list(known.values())
 
 def select_file(row):

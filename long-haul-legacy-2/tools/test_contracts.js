@@ -320,14 +320,15 @@ test('alpha20 profile adds safe optimization/animation/graphics mods and wires /
   const all = Object.values(prof.categories).flat();
   const cli = new Set(prof.client_only);
   ['structure-layout-optimizer', 'redirected', 'fast-ip-ping', 'krypton-fnp',
-   'better-animations-collection', 'wavey-capes', 'dynamiccrosshair', 'itemphysic-lite',
+   'better-animations-collection', 'wavey-capes', 'cave-dust', 'itemphysic-lite',
    'particular-reforged', 'visuality-forge', 'make_bubbles_pop', 'wakes-reforged'].forEach(slug => {
     assert(all.includes(slug), 'missing mod in alpha20: ' + slug);
   });
   ['fast-ip-ping', 'better-animations-collection', 'wavey-capes',
-   'dynamiccrosshair', 'itemphysic-lite', 'particular-reforged', 'visuality-forge', 'make_bubbles_pop'].forEach(slug => {
+   'cave-dust', 'itemphysic-lite', 'visuality-forge', 'make_bubbles_pop'].forEach(slug => {
     assert(cli.has(slug), 'client-only mod must be in client_only: ' + slug);
   });
+  assert(!cli.has('particular-reforged'), 'particular-reforged 1.20.1 is required on server and must not be client_only');
   assert(!all.includes('servercore'), 'servercore must remain excluded due to Valkyrien Skies conflict');
 
   const guiJs = fs.readFileSync(path.join(__dirname, '../overrides/kubejs/server_scripts/30_lh_gui.js'), 'utf8');
