@@ -1,0 +1,46 @@
+{
+  "dependencies": [
+    "mod_road_vehicles"
+  ],
+  "tasks": {
+    "check": {
+      "type": "heracles:check",
+      "title": "Освоены корабли и физические конструкции"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "2.4 · Флот и физика Valkyrien Skies"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
+    "description": [
+      "Морские и речные линии: Small Ships (когги, галеры, драккары с трюмами) и физический движок Valkyrien Skies с аддонами Eureka! Ships, Create: Clockwork и Trackwork (подвижные суда, дирижабли и гусеничная техника)."
+    ],
+    "groups": {
+      "02 · Мастерская и экспедиция": {
+        "position": [
+          60,
+          -60
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:oak_boat",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

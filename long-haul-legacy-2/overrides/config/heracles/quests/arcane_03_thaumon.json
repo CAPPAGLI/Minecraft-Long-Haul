@@ -1,0 +1,46 @@
+{
+  "dependencies": [
+    "arcane_02_primal_magick"
+  ],
+  "tasks": {
+    "check": {
+      "type": "heracles:check",
+      "title": "Изучены механики Thaumon"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "4.3 · Thaumon: аура, порча и алхимия"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
+    "description": [
+      "Thaumon добавляет тауматургические блоки, кристальные кластеры, порчу ауры и классическую алхимическую эстетику, отлично сочетающуюся с Primal Magick и промышленными цехами."
+    ],
+    "groups": {
+      "02 · Мастерская и экспедиция": {
+        "position": [
+          -60,
+          180
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:cauldron",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

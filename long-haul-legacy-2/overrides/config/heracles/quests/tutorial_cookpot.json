@@ -1,6 +1,6 @@
 {
   "dependencies": [
-    "tutorial_waterwheel"
+    "story_02_bakery_burned"
   ],
   "tasks": {
     "item": {
@@ -13,20 +13,20 @@
   "rewards": {},
   "display": {
     "title": {
-      "text": "Походное снабжение"
+      "text": "3.1 · Полевая кухня и рыболовство"
     },
     "subtitle": {
       "text": "Long Haul Legacy 2.0"
     },
     "description": [
-      "Учебная веха: обнаружение предмета, НЕ испытание работающего предприятия.",
-      "Farmer’s Delight связывает урожай и готовку. Держите запас для длительных рейсов."
+      "Farmer's Delight и 12 тематических аддонов (Cultural, Miner's, Rustic, Corn, Crabber's, Fruit's, Nether's, Ocean's, End's, Chef's, Butcher's, Delightful, Collector's Reap, Ube's, Casualness, Pineapple) открывают сотни блюд без температурных запретов.",
+      "Система Diet вознаграждает сбалансированное питание, Culinary Construct собирает сэндвичи, а Aquaculture 2 расширяет рыбалку."
     ],
     "groups": {
       "02 · Мастерская и экспедиция": {
         "position": [
-          84,
-          72
+          -300,
+          60
         ]
       }
     },

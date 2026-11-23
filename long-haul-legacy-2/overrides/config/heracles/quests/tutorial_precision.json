@@ -13,20 +13,19 @@
   "rewards": {},
   "display": {
     "title": {
-      "text": "Точная сборка"
+      "text": "1.5 · Точные механизмы и оптика"
     },
     "subtitle": {
       "text": "Long Haul Legacy 2.0"
     },
     "description": [
-      "Учебная веха: обнаружение предмета, НЕ испытание работающего предприятия.",
-      "Механизм нужен для промышленного оборудования. Изучите последовательную сборку в JEI."
+      "Точный механизм — ключ к Create Optical, Enchantment Industry, Create Big Cannons, Create Radars, Pattern Schematics и Stuff & Additions (джетпаки отключены)."
     ],
     "groups": {
       "02 · Мастерская и экспедиция": {
         "position": [
-          0,
-          0
+          180,
+          -180
         ]
       }
     },

@@ -1,5 +1,6 @@
 {
   "dependencies": [
+    "nuclear_04_ballistix_hbm",
     "nuclear_05_draconium"
   ],
   "tasks": {
@@ -26,8 +27,8 @@
     "groups": {
       "11 · Ядерная энергетика и Драконик": {
         "position": [
-          96,
-          42
+          240,
+          0
         ]
       }
     },

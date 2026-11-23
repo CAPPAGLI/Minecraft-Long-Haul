@@ -164,8 +164,8 @@ function lhGuiDistStr(player, x, z) {
 function lhGuiSnapshot(server, player, tab, arg) {
   var progDb = typeof lhProgRead === 'function' ? lhProgRead(server) : { featureOrder: [], chapters: {} };
   var diff = typeof lhDifficultyStatus === 'function' ? lhDifficultyStatus(server) : { coeff: 1.0, onlineDeaths: 0, onlinePlayers: 1 };
-  var border = typeof lhApplyTerritoryBorder === 'function' ? lhApplyTerritoryBorder(server, false) : { size: 724, unlocked: 0, total: 13 };
-  var chap = typeof lhChapterProgressSummary === 'function' ? lhChapterProgressSummary(server) : { doneMain: 0, totalMain: 13, currentLabel: 'Старт' };
+  var border = typeof lhApplyTerritoryBorder === 'function' ? lhApplyTerritoryBorder(server, false) : { size: 724, unlocked: 0, total: 14 };
+  var chap = typeof lhChapterProgressSummary === 'function' ? lhChapterProgressSummary(server) : { doneMain: 0, totalMain: 14, currentLabel: 'Старт' };
   var ottd = typeof lhOttdRead === 'function' ? lhOttdRead(server) : { companies: {}, marketOrders: [], tradeOffers: [] };
   var comp = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, player) : null;
   var sc = global.LHOpenTTD ? global.LHOpenTTD.sectorCoords(player.x, player.z) : { sx: 0, sz: 0 };
@@ -175,7 +175,7 @@ function lhGuiSnapshot(server, player, tab, arg) {
     coeff: Math.round((diff.coeff || 1) * 100) / 100,
     borderSize: border.size || 724,
     unlocked: border.unlocked || 0,
-    totalChapters: chap.totalMain || 13,
+    totalChapters: chap.totalMain || 14,
     doneChapters: chap.doneMain || 0,
     currentChapter: chap.currentLabel || 'Старт',
     hazardsCount: (progDb.featureOrder || []).length,
@@ -942,8 +942,8 @@ function lhGuiRenderWorld(gui, server, player) {
     lhOpenGui(server, pl, 'world');
   });
 
-  lhGuiSlot(gui, 8, 3, 'minecraft:iron_sword', progDb.doomedVerified ? '§a✔ DOOMED отмечен' : '§7Проверить DOOMED (/lh doomed verify)', [
-    '§7Отмечает опциональную главу 13.'
+  lhGuiSlot(gui, 8, 3, 'minecraft:iron_sword', progDb.doomedVerified ? '§a✔ DOOMED (Гл. 14) отмечен' : '§eПодтвердить DOOMED (/lh doomed verify)', [
+    '§7Подтверждает Главу 14 (DOOMED: Хардкор-выживание).'
   ], function (pl) {
     if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
       server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh doomed verify');

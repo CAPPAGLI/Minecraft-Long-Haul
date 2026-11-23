@@ -1,0 +1,47 @@
+{
+  "dependencies": [
+    "arcane_01_intro"
+  ],
+  "tasks": {
+    "check": {
+      "type": "heracles:check",
+      "title": "Скрафчен посох и изучен фолиант Hex Casting"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "4.4 · Hex Casting: посох и стековая магия"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
+    "description": [
+      "Hex Casting — программируемая стековая магия (наследница Psi): скрафтите Посох (Staff) и справочник The Hexonomicon (Patchouli), рисуйте 2D-гексагональные паттерны в воздухе и расходуйте аметистовую пыль/кристаллы (Media).",
+      "Вы можете программировать векторные толчки, проходку туннелей, точный крафт, сортировку и защитные заклинания, записывая готовые программы на Свитки (Scrolls), Фокусы (Focus) и Книги заклинаний."
+    ],
+    "groups": {
+      "02 · Мастерская и экспедиция": {
+        "position": [
+          60,
+          180
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:amethyst_cluster",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

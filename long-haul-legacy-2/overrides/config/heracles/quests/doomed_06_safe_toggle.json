@@ -5,7 +5,7 @@
   "tasks": {
     "doomed_ok": {
       "type": "heracles:advancement",
-      "title": "Проверка (/lh doomed verify)",
+      "title": "Подтверждение (/lh doomed verify)",
       "advancements": [
         "longhaul:doomed/checked"
       ]
@@ -14,20 +14,19 @@
   "rewards": {},
   "display": {
     "title": {
-      "text": "Протокол отката и серверная отметка (/lh doomed verify)"
+      "text": "VI. Завершение протокола DOOMED (/lh doomed verify)"
     },
     "subtitle": {
-      "text": "Опциональный профиль CurseForge"
+      "text": "Long Haul Legacy 2.0 · Боевое выживание"
     },
     "description": [
-      "При необходимости выключить режим используйте /doom off.",
-      "Выполните /lh doomed verify, чтобы зафиксировать опциональную главу DOOMED (работает безопасно даже без установленного JAR)."
+      "Выполните /lh doomed verify, чтобы закрыть Главу 14 на сервере и получить финальный вклад в расширение территории (при желании /doom off отключает травмы)."
     ],
     "groups": {
-      "14 · DOOMED: Хардкор-выживание (Опционально)": {
+      "14 · DOOMED: Хардкор-выживание": {
         "position": [
-          96,
-          42
+          275,
+          0
         ]
       }
     },

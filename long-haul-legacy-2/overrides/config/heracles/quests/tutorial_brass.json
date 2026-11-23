@@ -13,20 +13,19 @@
   "rewards": {},
   "display": {
     "title": {
-      "text": "Латунная мастерская"
+      "text": "1.4 · Латунная логистика и хранилища"
     },
     "subtitle": {
       "text": "Long Haul Legacy 2.0"
     },
     "description": [
-      "Учебная веха: обнаружение предмета, НЕ испытание работающего предприятия.",
-      "Латунь открывает точные механизмы и новую автоматизацию."
+      "Латунь открывает умные фильтры, Create Factory Logistics, Vibrant Vaults, Create Encased и мобильные посылки (Mobile Packages), а Functional Storage, Iron Chests/Barrels держат стационарные склады."
     ],
     "groups": {
       "02 · Мастерская и экспедиция": {
         "position": [
-          -84,
-          0
+          60,
+          -180
         ]
       }
     },

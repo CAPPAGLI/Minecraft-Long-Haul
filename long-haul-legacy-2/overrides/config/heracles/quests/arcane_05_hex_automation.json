@@ -1,0 +1,47 @@
+{
+  "dependencies": [
+    "arcane_04_hex_casting"
+  ],
+  "tasks": {
+    "check": {
+      "type": "heracles:check",
+      "title": "Освоены круги заклинаний Hex Casting"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "4.5 · Hex Casting: круги заклинаний и шифры"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
+    "description": [
+      "Постройте стационарный Круг заклинаний (Spell Circle из Impetus и Slate) или заряжаемый Тринкат/Артефакт для автоматической обработки ресурсов, освещения шахт и обороны цехов.",
+      "Правило логистики Long Haul: дальняя телепортация (включая Greater Teleport) запрещена уставом консорциума — магистральные грузы всегда возятся транспортом."
+    ],
+    "groups": {
+      "02 · Мастерская и экспедиция": {
+        "position": [
+          180,
+          180
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:observer",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

@@ -5,25 +5,25 @@
   "tasks": {
     "check": {
       "type": "heracles:check",
-      "title": "Опциональная отметка DOOMED"
+      "title": "Этап выживания DOOMED освоен"
     }
   },
   "rewards": {},
   "display": {
     "title": {
-      "text": "Огнестрельная защита (Doomed: Guns / TaCZ)"
+      "text": "IV. Огнестрельная оборона (TaCZ / Doomed: Guns)"
     },
     "subtitle": {
-      "text": "Опциональный профиль CurseForge"
+      "text": "Long Haul Legacy 2.0 · Боевое выживание"
     },
     "description": [
-      "Соберите лёгкое огнестрельное вооружение из Doomed: Guns или TaCZ для дистанционного боя без ближнего контакта и лишних переломов."
+      "Соберите дистанционное вооружение из Timeless and Classics Zero (TaCZ) или Doomed: Guns, чтобы избегать критических ближних переломов при штурмах данжей Cataclysm и Alex's Caves."
     ],
     "groups": {
-      "14 · DOOMED: Хардкор-выживание (Опционально)": {
+      "14 · DOOMED: Хардкор-выживание": {
         "position": [
-          -96,
-          42
+          55,
+          0
         ]
       }
     },

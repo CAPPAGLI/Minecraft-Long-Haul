@@ -1,5 +1,6 @@
 {
   "dependencies": [
+    "alpha_limits",
     "alpha_territory_casino"
   ],
   "tasks": {
@@ -26,8 +27,8 @@
     "groups": {
       "01 · Начало и правила": {
         "position": [
-          0,
-          216
+          280,
+          -55
         ]
       }
     },

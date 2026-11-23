@@ -1,0 +1,46 @@
+{
+  "dependencies": [
+    "tutorial_cookpot"
+  ],
+  "tasks": {
+    "check": {
+      "type": "heracles:check",
+      "title": "Изучены ферментация и пасеки"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "3.2 · Виноделие, чаи, сады и пчеловодство"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
+    "description": [
+      "Освойте бочонки Brewin' And Chewin', виноградники [Let's Do] Vinery, чайные настои HerbalBrews, плодовые деревья Fruit Trees и промышленное пчеловодство Productive Bees (плюс Create Confectionery для сладостей)."
+    ],
+    "groups": {
+      "02 · Мастерская и экспедиция": {
+        "position": [
+          -180,
+          60
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:honeycomb",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

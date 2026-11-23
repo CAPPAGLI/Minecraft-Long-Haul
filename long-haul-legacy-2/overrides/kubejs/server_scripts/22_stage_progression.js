@@ -81,7 +81,6 @@ function lhStageRecompute(server, player) {
     if ((hasCompass || unlocked.indexOf('longhaul_finale') !== -1) &&
         typeof player.isAdvancementDone === 'function' &&
         player.isAdvancementDone('longhaul:story/02_bakery_burned') &&
-        player.isAdvancementDone('longhaul:story/03_dinner_telegram') &&
         player.isAdvancementDone('longhaul:story/04_snail_at_door') &&
         player.isAdvancementDone('longhaul:story/05_continental_bakery')) {
       lhUnlock(player, 'longhaul:story/06_forgot_the_milk');

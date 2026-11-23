@@ -1,0 +1,10 @@
+# Long Haul Legacy 2.0: Hex Casting server rules
+# Greater Teleport is disallowed so freight and long-distance travel remain physical.
+
+[Spells]
+	#Resource locations of disallowed actions. Trying to cast one of these will result in a mishap.
+	actionDenyList = ["hexcasting:teleport/great"]
+
+["Spell Circles"]
+	#Resource locations of disallowed actions within circles. Trying to cast one of these in a circle will result in a mishap.
+	circleActionDenyList = ["hexcasting:teleport/great"]

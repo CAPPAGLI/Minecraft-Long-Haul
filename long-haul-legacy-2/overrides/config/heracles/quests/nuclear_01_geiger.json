@@ -17,14 +17,14 @@
       "text": "Long Haul Legacy 2.0 · Поздняя энергетика"
     },
     "description": [
-      "Собраны ядерные индустриальные моды: NuclearCraft Neoteric, Electrodynamics, Nuclear Science, Extreme Reactors и Ballistix (атомная энергетика, ускорители частиц, радиация и МБР в духе HBM).",
+      "Собраны ядерные индустриальные моды: NuclearCraft Neoteric, Electrodynamics, Nuclear Science, Extreme Reactors и Ballistix (атомная энергетика, ускорители частиц, радиация и МБР).",
       "Начните с изучения урановых/ториевых жил (/lh prospect), защиты и счётчика Гейгера в JEI."
     ],
     "groups": {
       "11 · Ядерная энергетика и Драконик": {
         "position": [
-          -96,
-          -42
+          -220,
+          0
         ]
       }
     },

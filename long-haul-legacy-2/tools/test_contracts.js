@@ -120,11 +120,16 @@ test('all KubeJS startup/server/client scripts parse cleanly in ES5/Node', () =>
   assert(count >= 15, 'expected at least 15 KubeJS/fixture scripts, got ' + count);
 });
 
-test('territory border uses diminishing-returns concave area curve (more territory early, less late) up to 175000 at locked <= 1', () => {
+test('territory border uses 14-stage (13-step) diminishing-returns concave area curve (more territory early, less late) up to 175000 at locked <= 1', () => {
   const tm = sandbox.global.LHTerritoryMath;
-  const sizes = [0, 1, 2, 3, 4, 5, 6].map(u => tm.computeBorder(6, u).size);
-  assert.deepEqual(sizes, [724, 105002, 140001, 160390, 171464, 175000, 175000]);
-  for (let i = 1; i <= 4; i++) {
+  assert.equal(tm.TOTAL_GATES, 14);
+  const sizes = Array.from({ length: 15 }, (_, u) => tm.computeBorder(14, u).size);
+  assert.deepEqual(sizes, [
+    724, 67311, 93266, 111821, 126281,
+    137940, 147464, 155246, 161539, 166510,
+    170277, 172917, 174481, 175000, 175000
+  ]);
+  for (let i = 1; i <= 12; i++) {
     const prevDSize = sizes[i] - sizes[i - 1];
     const nextDSize = sizes[i + 1] - sizes[i];
     assert(prevDSize > nextDSize, `expected decreasing border width increment at step ${i}: ${prevDSize} vs ${nextDSize}`);
@@ -188,14 +193,19 @@ test('all Heracles quests form an acyclic DAG with zero dangling dependencies an
   }
   Object.keys(map).forEach(k => { if (!state[k]) dfs(k); });
   assert(map.story_01_left_for_bread && map.story_06_forgot_the_milk, 'Chapter 00 quests present');
+  assert.deepEqual(Object.keys(map.story_03_dinner_telegram.display.groups || {}), ['01 · Начало и правила'], 'Глава III moved to Chapter 01');
+  assert(map.arcane_04_hex_casting && map.arcane_05_hex_automation, 'Chapter 02 Hex Casting quests present');
   assert(map.nuclear_01_geiger && map.nuclear_06_fusion_core, 'Chapter 11 Nuclear/Draconic quests present');
   assert(map.openttd_01_found_company && map.openttd_06_empire_verify, 'Chapter 12 OpenTTD quests present');
   assert(map.alpha_photo && map.tutorial_camera && map.photo_forest, 'Chapter 13 Photo quests present');
   assert(map.doomed_01_intro && map.doomed_06_safe_toggle, 'Chapter 14 DOOMED quests present');
+  assert.deepEqual(Object.keys(map.doomed_01_intro.display.groups || {}), ['14 · DOOMED: Хардкор-выживание'], 'Chapter 14 DOOMED is a mandatory main chapter (not optional)');
 
-  // Verify every single photo/camera quest lives exclusively in Chapter 13
+  // Verify every single photo/camera quest lives exclusively in Chapter 13 and no chapter has overlapping node positions
+  const seenCoordsByGroup = {};
   Object.keys(map).forEach(qid => {
-    const grps = Object.keys(map[qid].display.groups || {});
+    const grpsObj = map[qid].display.groups || {};
+    const grps = Object.keys(grpsObj);
     const iconItem = map[qid].display && map[qid].display.icon && map[qid].display.icon.item && map[qid].display.icon.item.id;
     const isPhoto = qid.indexOf('photo') !== -1 || qid === 'tutorial_camera' || qid === 'tutorial_film' || qid === 'tutorial_album' || iconItem === 'exposure:photograph';
     if (isPhoto) {
@@ -203,7 +213,20 @@ test('all Heracles quests form an acyclic DAG with zero dangling dependencies an
     } else {
       assert(!grps.includes('13 · Фотодокументация (Опционально)'), qid + ' should not be in Ch.13');
     }
+    grps.forEach(g => {
+      const pos = grpsObj[g].position;
+      const key = `${pos[0]},${pos[1]}`;
+      seenCoordsByGroup[g] = seenCoordsByGroup[g] || new Set();
+      assert(!seenCoordsByGroup[g].has(key), `duplicate position ${key} in ${g} (${qid})`);
+      seenCoordsByGroup[g].add(key);
+    });
   });
+
+  const groupsTxt = fs.readFileSync(path.join(__dirname, '../overrides/config/heracles/groups.txt'), 'utf8');
+  assert(groupsTxt.includes('14 · DOOMED: Хардкор-выживание\n') || groupsTxt.trim().endsWith('14 · DOOMED: Хардкор-выживание'));
+  assert(!groupsTxt.includes('14 · DOOMED: Хардкор-выживание (Опционально)'));
+  const terrJs = fs.readFileSync(path.join(__dirname, '../overrides/kubejs/server_scripts/26_hard_features_and_territory.js'), 'utf8');
+  assert(terrJs.includes("'ch14'") && terrJs.includes("computeBorder(14, effectiveUnlocked)"));
 });
 
 test('OpenTTD engine supports spawn sanctuary, companies, specializations, Voronoi+claim, remote exclave, raid/seize/transfer, pacts, and AI bots', () => {
@@ -324,9 +347,12 @@ test('alpha20 profile adds safe optimization/animation/graphics mods and wires /
   const cli = new Set(prof.client_only);
   ['structure-layout-optimizer', 'redirected', 'fast-ip-ping', 'krypton-fnp',
    'better-animations-collection', 'wavey-capes', 'cave-dust', 'itemphysic-lite',
-   'particular-reforged', 'visuality-forge', 'make_bubbles_pop', 'wakes-reforged'].forEach(slug => {
+   'particular-reforged', 'visuality-forge', 'make_bubbles_pop', 'wakes-reforged',
+   'hex-casting', 'paucal', 'caelus', 'inline'].forEach(slug => {
     assert(all.includes(slug), 'missing mod in alpha20: ' + slug);
   });
+  const hexCfg = fs.readFileSync(path.join(__dirname, '../overrides/defaultconfigs/hexcasting-server.toml'), 'utf8');
+  assert(hexCfg.includes('hexcasting:teleport/great'), 'hexcasting-server.toml must block Greater Teleport');
   ['fast-ip-ping', 'better-animations-collection', 'wavey-capes',
    'cave-dust', 'itemphysic-lite', 'visuality-forge', 'make_bubbles_pop'].forEach(slug => {
     assert(cli.has(slug), 'client-only mod must be in client_only: ' + slug);

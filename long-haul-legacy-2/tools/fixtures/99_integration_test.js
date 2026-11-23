@@ -556,22 +556,28 @@ function lhStartIntegrationSetup(server) {
         // 19. Eccentric Tome item registered for unified mod guidebooks
         ok(!Item.of('eccentrictome:tome').isEmpty(), 'eccentrictome:tome registered');
 
-        // 20. Chapter-based territory border scaling (diminishing concave area curve 724 -> 175000) + Casino Wheel hard-feature unlocking + Chapter 00 story
-        ok(Math.round(Number(overworld.worldBorder.size)) === 724, 'initial world border starts at 724 blocks when 6 gates locked');
+        // 20. Chapter-based territory border scaling (14-stage diminishing concave area curve 724 -> 175000) + Casino Wheel + DOOMED Ch.14 + Hex Casting
+        ok(Math.round(Number(overworld.worldBorder.size)) === 724, 'initial world border starts at 724 blocks when 14 chapters locked');
         var pDb = lhProgRead(server);
         var savedProg = JSON.stringify(pDb);
         ok(lhUnlockChapter(server, 'ch00', true, true) === true, 'Chapter 00 unlocks and queues Casino Wheel spin');
-        ok(lhTerritoryCounts(server).size === 105002, '1 unlocked gate expands border to 105002 blocks (36% area)');
+        ok(lhTerritoryCounts(server).size === 67311, '1 unlocked chapter expands border to 67311 blocks');
         lhUnlockChapter(server, 'ch01', true, true);
         lhUnlockChapter(server, 'ch02', true, true);
         lhUnlockChapter(server, 'ch03', true, true);
-        ok(lhTerritoryCounts(server).size === 171464, '4 unlocked gates (locked=2) expands border to 171464 blocks (96% area)');
-        lhUnlockChapter(server, 'ch05', true, true);
-        ok(lhTerritoryCounts(server).size === 175000 && Math.round(Number(overworld.worldBorder.size)) === 175000, '5 unlocked gates (locked=1) expands border to 175000 blocks');
+        ok(lhTerritoryCounts(server).size === 126281, '4 unlocked chapters expands border to 126281 blocks');
+        ['ch05', 'ch06', 'ch07', 'ch08', 'ch09', 'ch10', 'ch11', 'ch12'].forEach(function (ck) {
+          lhUnlockChapter(server, ck, true, true);
+        });
+        ok(lhTerritoryCounts(server).size === 174481, '12 unlocked chapters expands border to 174481 blocks');
+        lhUnlockChapter(server, 'ch14', true, true);
+        ok(lhTerritoryCounts(server).size === 175000 && Math.round(Number(overworld.worldBorder.size)) === 175000, '13 unlocked chapters (including mandatory ch14 DOOMED, locked=1 ch04) expands border to 175000 blocks');
         var spun = lhCasinoResolveImmediate(server, true);
-        ok(spun.length === 5 && Object.keys(pDb.hardFeatures).length === 5, 'Casino Wheel resolved 5 distinct randomized hard features (' + spun.join(',') + ')');
+        ok(spun.length === 13 && Object.keys(pDb.hardFeatures).length === 13, 'Casino Wheel resolved 13 distinct randomized hard features (' + spun.join(',') + ')');
         ok(server.getAdvancement('longhaul:story/01_left_for_bread') !== null && server.getAdvancement('longhaul:story/06_forgot_the_milk') !== null, 'Chapter 00 story advancements exist');
+        ok(server.getAdvancement('longhaul:story/03_dinner_telegram') !== null, 'Chapter 01 story/03_dinner_telegram advancement exists');
         ok(server.getAdvancement('longhaul:nuclear/verified') !== null && server.getAdvancement('longhaul:doomed/checked') !== null, 'Nuclear & DOOMED advancements exist');
+        ok(!Item.of('hexcasting:amethyst_dust').isEmpty() && !Item.of('hexcasting:staff/oak').isEmpty(), 'Hex Casting items registered');
         LHProgState = JSON.parse(savedProg);
         lhProgSave(server);
         lhApplyTerritoryBorder(server, false);

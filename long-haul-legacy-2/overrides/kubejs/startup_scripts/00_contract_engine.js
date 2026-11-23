@@ -458,12 +458,12 @@ global.LHEconomyGraph = (function () {
 })();
 
 global.LHTerritoryMath = (function () {
-  var TOTAL_GATES = 6;
+  var TOTAL_GATES = 14;
   var BASE_BORDER = 724;
   var MAX_BORDER = 175000;
 
-  // Concave diminishing-returns area curve:
-  // More territory opens on early stages (+36% -> +28% -> +20% -> +12% -> +4% of total area),
+  // Concave diminishing-returns area curve across all 14 non-optional chapters (13 expansion steps, reaching 175000 at locked <= 1):
+  // More territory opens at the start (+4530 km2 -> +4168 -> ... -> +181 km2),
   // so both delta-Area and delta-Size strictly decrease toward the end of the playthrough.
   function computeBorder(totalGates, unlockedCount) {
     var total = totalGates > 0 ? totalGates : TOTAL_GATES;

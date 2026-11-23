@@ -1,0 +1,47 @@
+{
+  "dependencies": [
+    "mod_ships_vs"
+  ],
+  "tasks": {
+    "check": {
+      "type": "heracles:check",
+      "title": "Освоены самолёты и мобильность"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "2.5 · Авиация и паркур (без джетпаков)"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
+    "description": [
+      "Покоряйте небо на бипланах, гирокоптерах и дирижаблях из Immersive Aircraft и Man of Many Planes. На земле помогут ParCool! (паркур), Grappling Hook и Combat Roll.",
+      "Напоминание: джетпаки и телепортеры заблокированы — воздух принадлежит честной авиации и физическим кораблям."
+    ],
+    "groups": {
+      "02 · Мастерская и экспедиция": {
+        "position": [
+          180,
+          -60
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:elytra",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}

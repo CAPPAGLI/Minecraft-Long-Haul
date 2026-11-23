@@ -1,11 +1,11 @@
 {
   "dependencies": [
-    "alpha_terminal"
+    "story_03_dinner_telegram"
   ],
   "tasks": {
     "read": {
       "type": "heracles:check",
-      "title": "Прочитано (ручное подтверждение)"
+      "title": "Механика окон понята"
     }
   },
   "rewards": {},
@@ -24,8 +24,8 @@
     "groups": {
       "01 · Начало и правила": {
         "position": [
-          84,
-          -72
+          56,
+          -110
         ]
       }
     },

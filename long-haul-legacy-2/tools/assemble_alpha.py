@@ -72,6 +72,15 @@ def resolve_profile(profile_path: pathlib.Path):
                 safe_dh = [cand for cand in cands if cand['version_number'].startswith(('3.3.2', '3.3.1', '3.3.0'))]
                 if safe_dh:
                     cands = safe_dh
+            if slug == 'hex-casting':
+                # Hex Casting 0.11.4 requires inline >= 1.20.1-1.2.2 (CurseForge-only), whereas Modrinth latest is 1.20.1-1.2.0-forge.
+                # Prefer 0.11.3 (requires inline >= 1.0.1) unless Modrinth actually serves inline >= 1.2.2 for Forge 1.20.1.
+                inl_vs = get('project/inline/version?loaders=%5B%22forge%22%5D&game_versions=%5B%221.20.1%22%5D') or []
+                has_inl_122 = any('1.2.2' in iv.get('version_number', '') for iv in inl_vs if iv.get('date_published', '') <= '2026-11-15T15:59:59Z')
+                if not has_inl_122:
+                    safe_hex = [cand for cand in cands if '0.11.3' in cand.get('version_number', '')]
+                    if safe_hex:
+                        cands = safe_hex
             if slug not in ('create-clockwork', 'polymorph', 'ends-delight', 'subtle-effects'):
                 picked = None
                 for cand in cands[:24]:

@@ -1,4 +1,4 @@
-// Long Haul Legacy 2.0: Chapter-gated territory expansion (concave area curve 1 - (1 - u/5)^2 from 724 to 175000),
+// Long Haul Legacy 2.0: 14-chapter territory expansion (concave area curve 1 - (1 - u/13)^2 from 724 to 175000),
 // randomized hard-feature unlocking with animated Casino Wheel visual, global death difficulty k,
 // random respawn scatter, random death item loss, and chapter completion sync.
 var LHBlockPos = Java.loadClass('net.minecraft.core.BlockPos');
@@ -18,8 +18,8 @@ var LH_WORKSHOP_ITEMS = [
   'create:track_station', 'computercraft:computer_normal', 'farmersdelight:cooking_pot'
 ];
 
-var LH_GATE_ORDER = ['ch00', 'ch01', 'ch02', 'ch03', 'ch05', 'ch04'];
-var LH_MAIN_CHAPTER_KEYS = ['ch00', 'ch01', 'ch02', 'ch03', 'ch04', 'ch05', 'ch06', 'ch07', 'ch08', 'ch09', 'ch10', 'ch11', 'ch12'];
+var LH_GATE_ORDER = ['ch00', 'ch01', 'ch02', 'ch03', 'ch05', 'ch06', 'ch07', 'ch08', 'ch09', 'ch10', 'ch11', 'ch12', 'ch14', 'ch04'];
+var LH_MAIN_CHAPTER_KEYS = ['ch00', 'ch01', 'ch02', 'ch03', 'ch04', 'ch05', 'ch06', 'ch07', 'ch08', 'ch09', 'ch10', 'ch11', 'ch12', 'ch14'];
 
 var LH_CHAPTER_LABELS = {
   ch00: '00 · Сюжет: Ушёл за хлебом',
@@ -36,7 +36,7 @@ var LH_CHAPTER_LABELS = {
   ch11: '11 · Ядерная энергетика и Драконик',
   ch12: '12 · OpenTTD: Компании и Империя',
   ch13: '13 · Фотодокументация (Опционально)',
-  ch14: '14 · DOOMED: Хардкор-выживание (Опционально)'
+  ch14: '14 · DOOMED: Хардкор-выживание'
 };
 
 function lhProgRead(server) {
@@ -327,19 +327,16 @@ function lhChapterProgressSummary(server) {
 
 function lhTerritoryCounts(server) {
   var db = lhProgRead(server);
-  var gateUnlocked = 0;
-  LH_GATE_ORDER.forEach(function (cid) {
-    if (db.chapters[cid]) gateUnlocked++;
-  });
-  var bonusUnlocked = 0;
-  // Photo chapter (ch13) and DOOMED (ch14) remain strictly optional and are never required for border progression
-  ['ch06', 'ch07', 'ch08', 'ch09', 'ch10', 'ch11', 'ch12'].forEach(function (cid) {
-    if (db.chapters[cid]) bonusUnlocked++;
+  // Photo chapter (ch13) remains strictly optional and never affects border progression;
+  // all 14 main chapters (ch00..ch12 + ch14 DOOMED) drive the 14-stage expansion.
+  var otherMainUnlocked = 0;
+  LH_MAIN_CHAPTER_KEYS.forEach(function (cid) {
+    if (cid !== 'ch04' && db.chapters[cid]) otherMainUnlocked++;
   });
   var effectiveUnlocked = db.chapters.ch04
-    ? Math.min(6, gateUnlocked + bonusUnlocked)
-    : Math.min(5, gateUnlocked + bonusUnlocked);
-  return global.LHTerritoryMath.computeBorder(6, effectiveUnlocked);
+    ? Math.min(14, otherMainUnlocked + 1)
+    : Math.min(13, otherMainUnlocked);
+  return global.LHTerritoryMath.computeBorder(14, effectiveUnlocked);
 }
 
 function lhApplyTerritoryBorder(server, announce) {
@@ -653,12 +650,11 @@ function lhProgressionRecompute(server, player, dryRun) {
     return !!(cDb.players[pid] && cDb.players[pid].terminal);
   });
 
-  // ch00: Chapter 00 (Story prologue)
+  // ch00: Chapter 00 (Story prologue; 03_dinner_telegram moved to Chapter 01)
   if (!db.chapters.ch00 && player && typeof player.isAdvancementDone === 'function') {
     var storyOk = [
       'longhaul:story/01_left_for_bread',
       'longhaul:story/02_bakery_burned',
-      'longhaul:story/03_dinner_telegram',
       'longhaul:story/04_snail_at_door',
       'longhaul:story/05_continental_bakery',
       'longhaul:story/06_forgot_the_milk'
@@ -743,6 +739,11 @@ function lhProgressionRecompute(server, player, dryRun) {
   // ch12: OpenTTD Empire milestone
   if (!db.chapters.ch12 && player && typeof player.isAdvancementDone === 'function' && player.isAdvancementDone('longhaul:openttd/empire')) {
     lhUnlockChapter(server, 'ch12', true, dryRun);
+  }
+
+  // ch14: DOOMED Hardcore Survival (mandatory main chapter)
+  if (!db.chapters.ch14 && db.doomedVerified) {
+    lhUnlockChapter(server, 'ch14', true, dryRun);
   }
 
   return lhTerritoryCounts(server);
@@ -1278,8 +1279,9 @@ ServerEvents.commandRegistry(function (event) {
     lhUnlock(p, 'longhaul:doomed/checked');
     var loaded = typeof Platform !== 'undefined' && Platform.isLoaded && Platform.isLoaded('doomed');
     lhMsg(p, loaded
-      ? 'DOOMED проверен на сервере: отметка для опциональной главы 13 выдана.'
-      : 'DOOMED не установлен в этой сборке; опциональный статус отмечен без блокировки основной игры.');
+      ? 'DOOMED проверен на сервере: отметка для главы 14 выдана.'
+      : 'Протокол полевого выживания (Глава 14 · DOOMED) подтверждён сервером.');
+    lhProgressionRecompute(server, p, false);
     return 1;
   }));
   root.then(doomed);

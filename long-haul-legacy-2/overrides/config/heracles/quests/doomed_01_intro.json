@@ -1,28 +1,30 @@
 {
-  "dependencies": [],
+  "dependencies": [
+    "alpha_voidout"
+  ],
   "tasks": {
     "check": {
       "type": "heracles:check",
-      "title": "Опциональная отметка DOOMED"
+      "title": "Этап выживания DOOMED освоен"
     }
   },
   "rewards": {},
   "display": {
     "title": {
-      "text": "Опционально: Установка DOOMED и бэкап мира"
+      "text": "I. Вводный инструктаж DOOMED и боеготовность"
     },
     "subtitle": {
-      "text": "Опциональный профиль CurseForge"
+      "text": "Long Haul Legacy 2.0 · Боевое выживание"
     },
     "description": [
-      "DOOMED | UNKNOWN CASUALTY — опциональный мод с CurseForge (ID 1589967), не входящий в .mrpack по лицензии.",
-      "Если хотите сыграть с ним: поместите JAR Forge 1.20.1 (и Doomed: Guns) в optional-mods/ (см. DOOMED.md), обязательно сделайте резервную копию мира и проверьте статус через /lh doomed status."
+      "Глава 14 входит в 14 основных этапов расширения территории (/lh territory).",
+      "Если в optional-mods/ добавлен мод DOOMED | UNKNOWN CASUALTY (CurseForge ID 1589967 + Doomed: Guns), проверьте его через /lh doomed status и сделайте бэкап мира; в базовой сборке сервер ведёт протокол боевой медицины через /lh doomed verify."
     ],
     "groups": {
-      "14 · DOOMED: Хардкор-выживание (Опционально)": {
+      "14 · DOOMED: Хардкор-выживание": {
         "position": [
-          -96,
-          -42
+          -275,
+          0
         ]
       }
     },

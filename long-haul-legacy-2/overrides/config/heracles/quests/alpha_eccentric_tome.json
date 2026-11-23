@@ -5,7 +5,7 @@
   "tasks": {
     "read": {
       "type": "heracles:check",
-      "title": "Прочитано (ручное подтверждение)"
+      "title": "Руководство Eccentric Tome прочитано"
     }
   },
   "rewards": {},
@@ -17,14 +17,14 @@
       "text": "Long Haul Legacy 2.0"
     },
     "description": [
-      "Все книги и справочники из модов (Immersive Engineering, Alex’s Caves, Primal Magick, Draconic, Patchouli и др.) можно объединить в один том — Eccentric Tome.",
+      "Все книги и справочники из модов (Immersive Engineering, Alex's Caves, Primal Magick, Draconic, Patchouli, Hex Casting и др.) можно объединить в один том — Eccentric Tome.",
       "Положите Eccentric Tome и любые книги-гайды в крафт. ПКМ открывает выбор книги, Shift+ЛКМ возвращает обратно."
     ],
     "groups": {
       "01 · Начало и правила": {
         "position": [
-          84,
-          72
+          -168,
+          110
         ]
       }
     },

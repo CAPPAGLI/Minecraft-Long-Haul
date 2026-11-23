@@ -1,0 +1,46 @@
+{
+  "dependencies": [
+    "tutorial_station"
+  ],
+  "tasks": {
+    "check": {
+      "type": "heracles:check",
+      "title": "Освоен наземный транспорт"
+    }
+  },
+  "rewards": {},
+  "display": {
+    "title": {
+      "text": "2.3 · Дорожный транспорт и повозки"
+    },
+    "subtitle": {
+      "text": "Long Haul Legacy 2.0"
+    },
+    "description": [
+      "Для безрельсовых дорог и грунтовых экспедиций используйте AstikorCarts Redux (грузовые повозки на тяге), Automobility (модульные багги) и Ultimate Car Mod (автомобили, заправки и дороги)."
+    ],
+    "groups": {
+      "02 · Мастерская и экспедиция": {
+        "position": [
+          -60,
+          -60
+        ]
+      }
+    },
+    "icon": {
+      "type": "heracles:item",
+      "item": {
+        "id": "minecraft:minecart",
+        "count": 1
+      }
+    },
+    "icon_background": "heracles:textures/gui/quest_backgrounds/default.png"
+  },
+  "settings": {
+    "hidden": "LOCKED",
+    "showDependencyArrow": true,
+    "individualProgress": true,
+    "repeatable": false,
+    "unlockNotification": true
+  }
+}
