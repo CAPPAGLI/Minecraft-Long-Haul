@@ -57,7 +57,7 @@ def resolve_profile(profile_path: pathlib.Path):
         v = None
         if row and row.get('status') == 'candidate':
             cand_row = {'project_id': row['project_id'], 'id': row['version_id'], 'version_number': row['version'], 'dependencies': row['dependencies'], 'files': row['files']}
-            if slug in ('create-clockwork', 'polymorph', 'ends-delight') or supports_forge_47410(cand_row):
+            if slug in ('create-clockwork', 'polymorph', 'ends-delight', 'subtle-effects') or supports_forge_47410(cand_row):
                 v = cand_row
         if v is None:
             vs = get('project/' + slug + '/version?loaders=%5B%22forge%22%5D&game_versions=%5B%221.20.1%22%5D') or []
@@ -72,7 +72,7 @@ def resolve_profile(profile_path: pathlib.Path):
                 safe_dh = [cand for cand in cands if cand['version_number'].startswith(('3.3.2', '3.3.1', '3.3.0'))]
                 if safe_dh:
                     cands = safe_dh
-            if slug not in ('create-clockwork', 'polymorph', 'ends-delight'):
+            if slug not in ('create-clockwork', 'polymorph', 'ends-delight', 'subtle-effects'):
                 picked = None
                 for cand in cands[:24]:
                     if supports_forge_47410(cand):
@@ -93,6 +93,11 @@ def resolve_profile(profile_path: pathlib.Path):
         if slug == 'ends-delight':
             # create_central_kitchen and delightful require ends_delight >= 2.6.1 (tagged beta on Modrinth).
             v = json.loads((R / 'audit/ends-delight-2.6.1.json').read_text(encoding='utf-8'))
+        if slug == 'subtle-effects':
+            # 1.14.0+ uses net.minecraft.world.entity.Entity$FluidCalcs (added in Forge 47.4.14;
+            # 1.14.0 omitted the bump in mods.toml and crashes on Forge 47.4.10).
+            # Pin 1.13.2, which uses MutableTriple interimCalcs and works cleanly on Forge 47.4.10.
+            v = json.loads((R / 'audit/subtle-effects-1.13.2.json').read_text(encoding='utf-8'))
         pid = v['project_id']
         if pid in known:
             continue

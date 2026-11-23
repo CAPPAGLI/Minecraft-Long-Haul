@@ -237,4 +237,11 @@ test('OpenTTD engine supports companies, specializations, Voronoi+claim partitio
   assert(ottd.renderAsciiMap(st, 0, 0, 2).length === 5, 'ASCII territory map renders 5x5 grid');
 });
 
+test('subtle-effects is pinned to 1.13.2 (avoids Forge 47.4.14 Entity$FluidCalcs crash on 47.4.10)', () => {
+  const path = require('path');
+  const pin = JSON.parse(fs.readFileSync(path.join(__dirname, '../audit/subtle-effects-1.13.2.json'), 'utf8'));
+  assert.equal(pin.version_number, '1.13.2');
+  assert.equal(pin.files[0].filename, 'SubtleEffects-forge-1.20.1-1.13.2.jar');
+});
+
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');

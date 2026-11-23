@@ -59,6 +59,10 @@ def main():
                     if line.lower().startswith('implementation-version:'):
                         jar_impl_ver = line.split(':', 1)[1].strip()
                         break
+            if 'META-INF/accesstransformer.cfg' in names:
+                at_txt = z.read('META-INF/accesstransformer.cfg').decode(errors='replace')
+                if 'Entity$FluidCalcs' in at_txt:
+                    raise RuntimeError(f'{source} accesses Entity$FluidCalcs (requires Forge >= 47.4.14, incompatible with 47.4.10)')
             if 'META-INF/mods.toml' in names:
                 m = tomllib.loads(z.read('META-INF/mods.toml').decode(errors='replace'))
                 for mod in m.get('mods', []):

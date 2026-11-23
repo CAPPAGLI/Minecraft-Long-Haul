@@ -1,0 +1,44 @@
+{
+  "game_versions": [
+    "1.20.1"
+  ],
+  "loaders": [
+    "forge"
+  ],
+  "environment": "client_only_server_optional",
+  "id": "Ci8SWnwn",
+  "project_id": "4q8UOK1d",
+  "author_id": "hmwq7gBm",
+  "featured": false,
+  "name": "Subtle Effects (Forge) 1.20.1-1.13.2",
+  "version_number": "1.13.2",
+  "changelog": "1.21.6-1.21.8 support has had to be dropped to divert energy to 1.21.10+\n\n### Added\n- Added a small amount of sheep fluff particles when attacking sheep\n- Added slime particles when attacking slimes\n- (1.21+) Added compat for Dyed Flames ([#97](https://github.com/MincraftEinstein/SubtleEffects/issues/97))\n- Added a particle bounding box debug renderer and `/subtle_effects` command argument to toggle it\n\n### Changes\n- (1.21+) Replaced Soul Fire'd compat with Prometheus compat ([#171](https://github.com/MincraftEinstein/SubtleEffects/issues/171))\n- Rewrote splash particle rendering to be less weird and easier to port to 1.21.10+\n- Changed Ender Pearl trail config to a density config\n- Ripple particles now render back face, so they can be seen from underneath\n- Reworked burning entity configs\n- Renamed configs for entity attack particles\n\n### Fixes\n- Fixed decorated pots spawning bubbles outside water ([#179](https://github.com/MincraftEinstein/SubtleEffects/issues/179))\n- Fixed crash caused by feeding mooshrooms the last item in a stack ([#164](https://github.com/MincraftEinstein/SubtleEffects/issues/164))\n- (1.20.1) Fixed crash with Better Statistics Screen on Connector ([#175](https://github.com/MincraftEinstein/SubtleEffects/issues/175))\n- (1.20.1) Possible fix for biome particles causing a crash. Someone who has had this issue, please check this and lmk ([#146](https://github.com/MincraftEinstein/SubtleEffects/issues/146))\n\nAs of this release, Prometheus and Dyed Flames support is still exclusive to Soul Fire. I do plan on adding a way for users to add support for more fire types in the future.",
+  "changelog_url": null,
+  "date_published": "2025-12-01T23:04:43.991098Z",
+  "downloads": 801972,
+  "version_type": "release",
+  "status": "listed",
+  "requested_status": null,
+  "files": [
+    {
+      "id": "Bupoyfvk",
+      "hashes": {
+        "sha512": "efd4e80ef42d405c99f4e87ed24b5f244a34fb79bada59e7d53a2cbd9759dc64b0b7b0df0caf4efe6e8e40868893fa9ca88529364c6141180c4c8bce06cf8ff9",
+        "sha1": "704e6b718c405b67296fe717f099aff72ebba8db"
+      },
+      "url": "https://cdn.modrinth.com/data/4q8UOK1d/versions/Ci8SWnwn/SubtleEffects-forge-1.20.1-1.13.2.jar",
+      "filename": "SubtleEffects-forge-1.20.1-1.13.2.jar",
+      "primary": true,
+      "size": 3386816,
+      "file_type": null
+    }
+  ],
+  "dependencies": [
+    {
+      "version_id": null,
+      "project_id": "hYykXjDp",
+      "file_name": null,
+      "dependency_type": "required"
+    }
+  ]
+}
