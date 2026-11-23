@@ -22,6 +22,10 @@ ItemEvents.tooltip(function (event) {
     Text.aqua('Серверная грузовая накладная (/lh cargo issue|deliver).'),
     Text.gray('Требует физической доставки до узла назначения.')
   ]);
+  event.add('longhaul:control_tablet', [
+    Text.gold('ПКМ: открыть графический терминал Long Haul (/lh gui).'),
+    Text.gray('Контракты, узлы, маршруты, OpenTTD-карта, биржа и лог событий.')
+  ]);
 
   event.add('minecraft:bundle', Text.green('Этап I: походный узелок (до телег и грузовых поездов).'));
   event.add('functionalstorage:ender_drawer', Text.red('Отключено правилами Long Haul: портальные сети запрещены.'));

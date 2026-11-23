@@ -34,4 +34,11 @@ ServerEvents.recipes(function (event) {
   // Anti-deadlock leather curing from rotten flesh for early bundles, carts, and Create belts
   event.smoking('minecraft:leather', 'minecraft:rotten_flesh').id('longhaul:cure_leather_smoking');
   event.campfireCooking('minecraft:leather', 'minecraft:rotten_flesh').id('longhaul:cure_leather_campfire');
+
+  // Cheap dispatcher tablet for opening the /lh GUI anywhere
+  event.shapeless('longhaul:control_tablet', [
+    'minecraft:iron_ingot',
+    'minecraft:redstone',
+    'minecraft:paper'
+  ]).id('longhaul:control_tablet_recipe');
 });

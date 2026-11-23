@@ -314,4 +314,27 @@ test('subtle-effects is pinned to 1.13.2 (avoids Forge 47.4.14 Entity$FluidCalcs
   assert.equal(pin.files[0].filename, 'SubtleEffects-forge-1.20.1-1.13.2.jar');
 });
 
+test('alpha20 profile adds safe optimization/animation/graphics mods and wires /lh GUI + control_tablet', () => {
+  const path = require('path');
+  const prof = JSON.parse(fs.readFileSync(path.join(__dirname, '../profiles/alpha20.json'), 'utf8'));
+  const all = Object.values(prof.categories).flat();
+  const cli = new Set(prof.client_only);
+  ['structure-layout-optimizer', 'redirected', 'fast-ip-ping', 'better-biome-blend',
+   'better-animations-collection', 'wavey-capes', 'chunks-fade-in', 'itemphysic-lite',
+   'particular-reforged', 'visuality-forge', 'make_bubbles_pop', 'wakes-reforged'].forEach(slug => {
+    assert(all.includes(slug), 'missing mod in alpha20: ' + slug);
+  });
+  ['fast-ip-ping', 'better-biome-blend', 'better-animations-collection', 'wavey-capes',
+   'chunks-fade-in', 'itemphysic-lite', 'particular-reforged', 'visuality-forge', 'make_bubbles_pop'].forEach(slug => {
+    assert(cli.has(slug), 'client-only mod must be in client_only: ' + slug);
+  });
+  assert(!all.includes('servercore'), 'servercore must remain excluded due to Valkyrien Skies conflict');
+
+  const guiJs = fs.readFileSync(path.join(__dirname, '../overrides/kubejs/server_scripts/30_lh_gui.js'), 'utf8');
+  assert(guiJs.includes('lhOpenGui') && guiJs.includes('LH_GUI_TABS') && guiJs.includes('longhaul:control_tablet'));
+  const itemsJs = fs.readFileSync(path.join(__dirname, '../overrides/kubejs/startup_scripts/01_longhaul_items.js'), 'utf8');
+  assert(itemsJs.includes("'control_tablet'"));
+  assert(fs.existsSync(path.join(__dirname, '../overrides/kubejs/assets/longhaul/textures/item/control_tablet.png')));
+});
+
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');

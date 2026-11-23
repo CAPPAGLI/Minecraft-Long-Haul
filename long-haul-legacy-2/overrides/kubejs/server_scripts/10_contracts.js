@@ -124,11 +124,28 @@ ServerEvents.commandRegistry(function (event) {
   var C = event.commands, root = C.literal('lh');
   root.then(C.literal('help').executes(function (ctx) {
     var p = ctx.source.playerOrException;
+    var s = ctx.source.server;
+    lhMsg(p, '§6Графический терминал: §e/lh §7или §e/lh gui [вкладка] §7или ПКМ по предмету «Планшет диспетчера» (§e/lh tablet§7).');
     lhMsg(p, 'Контракты: /lh terminal, /lh accept <заказ>, /lh status, /lh abort, /lh team <join|leave> [имя]. Заказы: ' + Object.keys(global.LHContracts).join(', '));
     lhMsg(p, 'Регионы и объекты: /lh sites, /lh site <info|commission|produce|archive|repair_archive>, /lh recovery <list|info|survey|restore>, /lh photo <report|status>, /lh cc <challenge|verify|status>.');
     lhMsg(p, 'Логистика: /lh camp <deploy|pack|list>, /lh route <begin|gate|finish|start|abort|quota|list>, /lh cargo <issue|deliver>, /lh catalog <list|stage|info|verify>, /lh stage, /lh vehicle status.');
     lhMsg(p, 'Мир и угрозы: /lh prospect (рудные жилы), /lh snail status (Улитка), /lh gas status (газ), /lh events [категория] (лог событий).');
     lhMsg(p, 'OpenTTD: /lh company <create|join|list|info|spec|pact>, /lh map [radius|item], /lh territory <map|claim|settle|buy|capture|raid|outbid|seize|fortify|transfer|info>, /lh market <list|sell|buy>, /lh trade <list|offer|accept>, /lh bot status.');
+    try {
+      var uname = p.username || (typeof p.getName === 'function' ? p.getName().getString() : '');
+      if (uname && s) {
+        var btns = [
+          { text: 'Быстрый запуск GUI: ', color: 'gray' },
+          { text: '[Главное меню] ', color: 'gold', clickEvent: { action: 'run_command', value: '/lh gui' } },
+          { text: '[Контракты] ', color: 'yellow', clickEvent: { action: 'run_command', value: '/lh gui contracts' } },
+          { text: '[Узлы] ', color: 'aqua', clickEvent: { action: 'run_command', value: '/lh gui sites' } },
+          { text: '[Карта 5x5] ', color: 'green', clickEvent: { action: 'run_command', value: '/lh gui territory' } },
+          { text: '[Биржа] ', color: 'gold', clickEvent: { action: 'run_command', value: '/lh gui market' } },
+          { text: '[События]', color: 'light_purple', clickEvent: { action: 'run_command', value: '/lh gui events' } }
+        ];
+        s.runCommandSilent('tellraw ' + uname + ' ' + JSON.stringify(btns));
+      }
+    } catch (eBtn) {}
     return 1;
   }));
   root.then(C.literal('terminal').executes(function (ctx) { return lhRegister(ctx.source.server, ctx.source.playerOrException); }));

@@ -110,7 +110,8 @@ PlayerEvents.loggedIn(function (event) {
   if (!event.player.persistentData.getBoolean('longhaul_alpha_book')) {
     event.player.give('heracles:quest_book');
     event.player.give('eccentrictome:tome');
+    event.player.give('longhaul:control_tablet');
     event.player.persistentData.putBoolean('longhaul_alpha_book', true);
-    event.player.tell('Long Haul Legacy 2.0 Alpha: квестбук и Eccentric Tome выданы в инвентарь (объедините любые книги-гайды с Eccentric Tome в крафте). /lh help — контракты, узлы, лагеря и маршруты.');
+    event.player.tell('Long Haul Legacy 2.0 Alpha: квестбук, Eccentric Tome и Планшет диспетчера (ПКМ или /lh) выданы в инвентарь. /lh help — список команд.');
   }
 });

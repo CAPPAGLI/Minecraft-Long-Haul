@@ -695,7 +695,36 @@ function lhStartIntegrationSetup(server) {
         }
         ok(lhChapterProgressSummary(server).totalMain === 13 && lhTerritoryCounts(server).total === 6, 'main campaign chapter progress tracks 13 core chapters and 6 border gates excluding optional photo/DOOMED');
 
-        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic + openttd + eventlog');
+        // 24. /lh GUI Command Center & control_tablet item + all 11 tabs render cleanly
+        ok(!Item.of('longhaul:control_tablet', 1).empty, 'longhaul:control_tablet registered');
+        ok(!lhGuiItem('minecraft:barrel', 'Тест', ['Строка 1', 'Строка 2'], 1).empty, 'lhGuiItem creates ItemStack with name and lore');
+        var guiSnap = lhGuiSnapshot(server, fp, 'hub');
+        ok(guiSnap.borderSize === 724 && guiSnap.totalChapters === 13, 'lhGuiSnapshot reports live territory & campaign status');
+        ok(disp.performPrefixedCommand(src, 'lh tablet') === 1, 'brigadier /lh tablet');
+        var mockGuiSlots = {};
+        var mockGui = {
+          getSlot: function (gx, gy) {
+            var k = gx + ',' + gy;
+            if (!mockGuiSlots[k]) {
+              mockGuiSlots[k] = {
+                item: null,
+                setItem: function (it) { this.item = it; },
+                setLeftClicked: function (fn) { this.onLeft = fn; },
+                setRightClicked: function (fn) { this.onRight = fn; },
+                setShiftLeftClicked: function (fn) { this.onShift = fn; }
+              };
+            }
+            return mockGuiSlots[k];
+          }
+        };
+        LH_GUI_TABS.forEach(function (tabObj) {
+          mockGuiSlots = {};
+          lhRenderGuiTab(mockGui, server, fp, tabObj.id, null);
+          ok(Object.keys(mockGuiSlots).length === 54, 'GUI tab ' + tabObj.id + ' renders all 54 chest slots');
+        });
+        ok(disp.performPrefixedCommand(src, 'lh gui') === 1, 'brigadier /lh gui opens cleanly');
+
+        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic + openttd + eventlog + gui');
       } catch (err2) {
         console.error('LH_INTEGRATION_FAIL: live adapter ' + err2);
       }

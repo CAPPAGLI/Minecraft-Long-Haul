@@ -10,13 +10,16 @@ StartupEvents.registry('item', function (event) {
     ['technical_glass', 'Техническое стекло'],
     ['machine_parts', 'Прецизионные узлы'],
     ['continental_module', 'Континентальный модуль'],
-    ['cargo_manifest', 'Грузовая накладная']
+    ['cargo_manifest', 'Грузовая накладная'],
+    ['control_tablet', 'Планшет диспетчера Long Haul']
   ];
   items.forEach(function (entry) {
     var id = entry[0];
     var title = entry[1];
     var builder = event.create('longhaul:' + id).displayName(title).texture('longhaul:item/' + id);
-    if (id === 'cargo_manifest' || id === 'continental_module') {
+    if (id === 'control_tablet') {
+      builder.maxStackSize(1);
+    } else if (id === 'cargo_manifest' || id === 'continental_module') {
       builder.maxStackSize(16);
     } else {
       builder.maxStackSize(64);
