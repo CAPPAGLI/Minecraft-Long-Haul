@@ -39,4 +39,8 @@ threadRunTimeRatio = "0.5"
 
 [common.logging.warning]
 showLowMemoryWarningOnStart = false
-showGarbageCollectorWarning = true
+showGarbageCollectorWarning = false
+showModCompatibilityWarningsOnStartup = false
+showHighVanillaRenderDistanceWarning = false
+showSlowWorldGenSettingWarnings = false
+showUpdateQueueOverloadedChatWarning = false

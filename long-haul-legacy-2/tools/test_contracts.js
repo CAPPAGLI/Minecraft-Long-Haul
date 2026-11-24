@@ -382,12 +382,27 @@ test('alpha20 profile adds safe optimization/animation/graphics mods and wires /
   const prof = JSON.parse(fs.readFileSync(path.join(__dirname, '../profiles/alpha20.json'), 'utf8'));
   const all = Object.values(prof.categories).flat();
   const cli = new Set(prof.client_only);
-  ['structure-layout-optimizer', 'redirected', 'fast-ip-ping', 'krypton-fnp',
+  ['structure-layout-optimizer', 'redirected', 'fast-ip-ping',
    'better-animations-collection', 'wavey-capes', 'cave-dust', 'itemphysic-lite',
    'particular-reforged', 'visuality-forge', 'make_bubbles_pop', 'wakes-reforged',
    'hex-casting', 'paucal', 'caelus', 'inline'].forEach(slug => {
     assert(all.includes(slug), 'missing mod in alpha20: ' + slug);
   });
+  assert(!all.includes('krypton-fnp'), 'krypton-fnp must remain excluded to avoid Netty flush/login packet-sync stalls');
+  assert(!all.includes('seamless-loading-screen'), 'seamless-loading-screen must remain excluded to avoid ReceivingLevelScreen freeze');
+  const asmPy = fs.readFileSync(path.join(__dirname, 'assemble_alpha.py'), 'utf8');
+  assert(!/\bchunky\b/.test(asmPy.split('BASE_ROOTS')[1].split("'''.split()")[0]), 'chunky must remain excluded from BASE_ROOTS due to Distant Horizons conflict');
+
+  const dhToml = fs.readFileSync(path.join(__dirname, '../overrides/config/DistantHorizons.toml'), 'utf8');
+  assert(dhToml.includes('showGarbageCollectorWarning = false'), 'DistantHorizons G1GC warning must be disabled');
+  assert(dhToml.includes('showModCompatibilityWarningsOnStartup = false'), 'DistantHorizons startup mod compat warnings must be disabled');
+  const acToml = fs.readFileSync(path.join(__dirname, '../overrides/config/alexscaves-client.toml'), 'utf8');
+  assert(acToml.includes('biome_ambient_light_coloring = false'), 'AlexsCaves biome_ambient_light_coloring must be disabled for DH compatibility');
+  const ifToml = fs.readFileSync(path.join(__dirname, '../overrides/config/ironfurnaces-client.toml'), 'utf8');
+  assert(ifToml.includes('updates = false'), 'IronFurnaces update checker must be disabled');
+  const terrJs = fs.readFileSync(path.join(__dirname, '../overrides/kubejs/server_scripts/26_hard_features_and_territory.js'), 'utf8');
+  assert(terrJs.includes('LHPendingFirstJoins') && terrJs.includes('lhProcessFirstJoinQueue'), 'first-join spawn must defer chunk lookup outside PlayerEvents.loggedIn');
+
   const hexCfg = fs.readFileSync(path.join(__dirname, '../overrides/defaultconfigs/hexcasting-server.toml'), 'utf8');
   assert(hexCfg.includes('hexcasting:teleport/great'), 'hexcasting-server.toml must block Greater Teleport');
   ['fast-ip-ping', 'better-animations-collection', 'wavey-capes',

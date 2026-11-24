@@ -23,7 +23,7 @@ bellsandwhistles interiors farmers-delight brewin-and-chewin
 comforts immersive-aircraft man-of-many-planes small-ships storagedrawers
 tectonic terralith lithostitched towns-and-towers yungs-bridges
 jei emi jade jade-addons-forge appleskin mouse-tweaks controlling
-ferrite-core modernfix spark chunky xaeros-minimap xaeros-world-map'''.split()
+ferrite-core modernfix spark xaeros-minimap xaeros-world-map'''.split()
 
 BASE_CLIENT = set('zume jei emi jade jade-addons-forge appleskin mouse-tweaks controlling configured catalogue xaeros-minimap xaeros-world-map'.split())
 
@@ -69,12 +69,6 @@ def resolve_profile(profile_path: pathlib.Path):
                 raise RuntimeError(f'No supported version for {slug} (required by {parent})')
             stable = [v for v in vs if v['version_type'] == 'release']
             cands = stable or vs
-            if slug == 'distanthorizons':
-                # 3.3.3+ crashes on server chunk load when Chunky is installed (DH #1329: ChunkyAccessor.bindOnGenerationProgressEvent).
-                # Prefer 3.3.0..3.3.2 (Oculus depth & floating-island lighting fixes without the Chunky startup hook).
-                safe_dh = [cand for cand in cands if cand['version_number'].startswith(('3.3.2', '3.3.1', '3.3.0'))]
-                if safe_dh:
-                    cands = safe_dh
             if slug == 'hex-casting':
                 # Hex Casting 0.11.4 requires inline >= 1.20.1-1.2.2 (CurseForge-only), whereas Modrinth latest is 1.20.1-1.2.0-forge.
                 # Prefer 0.11.3 (requires inline >= 1.0.1) unless Modrinth actually serves inline >= 1.2.2 for Forge 1.20.1.

@@ -433,17 +433,18 @@ function lhFirstJoinRandomSpawn(server, player) {
   var ottdSt = typeof lhOttdRead === 'function' ? lhOttdRead(server) : null;
 
   var chosen = null;
-  for (var attempt = 0; attempt < 3; attempt++) {
+  var maxAttempts = safeHalf < 560 ? 2 : 3;
+  for (var attempt = 0; attempt < maxAttempts; attempt++) {
     var wx = 0, wz = 0;
     if (safeHalf < 560) {
-      // Initial 724x724 border (±362): pick inside the claimable L-strip [-safeHalf, -264]
-      // which is strictly inside the world border AND outside the 3x3 spawn sanctuary (-256..511).
+      // Initial 724x724 border (±362): pick near the closest claimable L-strip outside
+      // the 3x3 spawn sanctuary (-256..511) to avoid generating far-away chunk rings on first join.
       if (attempt % 2 === 0) {
-        wx = -270 - Math.floor(Math.random() * Math.max(8, safeHalf - 270));
-        wz = Math.floor((Math.random() * 2 - 1) * (safeHalf - 16));
+        wx = -270 - Math.floor(Math.random() * Math.min(24, Math.max(8, safeHalf - 270)));
+        wz = Math.floor((Math.random() * 2 - 1) * Math.min(48, safeHalf - 16));
       } else {
-        wz = -270 - Math.floor(Math.random() * Math.max(8, safeHalf - 270));
-        wx = Math.floor((Math.random() * 2 - 1) * (safeHalf - 16));
+        wz = -270 - Math.floor(Math.random() * Math.min(24, Math.max(8, safeHalf - 270)));
+        wx = Math.floor((Math.random() * 2 - 1) * Math.min(48, safeHalf - 16));
       }
     } else {
       wx = Math.floor((Math.random() * 2 - 1) * safeHalf);
@@ -456,15 +457,15 @@ function lhFirstJoinRandomSpawn(server, player) {
       var ownerInfo = global.LHOpenTTD.resolveSectorOwner(ottdSt, cSc.sx, cSc.sz);
       if (ownerInfo.kind === 'claimed') continue;
     }
-    var sy = lhFindSafeRespawnY(ow, wx, wz, attempt === 2);
+    var sy = lhFindSafeRespawnY(ow, wx, wz, attempt === maxAttempts - 1);
     if (sy > 52) {
       chosen = { x: wx, y: sy, z: wz, sx: cSc.sx, sz: cSc.sz };
       break;
     }
   }
   if (!chosen) {
-    // Guaranteed inside-border fallback inside sector (-2, 0) -> x=-288, z=0
-    var fWx = Math.max(-safeHalf, Math.min(safeHalf, -288));
+    // Guaranteed inside-border fallback inside sector (-2, 0) -> x=-272, z=0
+    var fWx = Math.max(-safeHalf, Math.min(safeHalf, -272));
     var fWz = 0;
     var fY = lhFindSafeRespawnY(ow, fWx, fWz, true);
     var fSc = global.LHOpenTTD ? global.LHOpenTTD.sectorCoords(fWx, fWz) : { sx: -2, sz: 0 };
@@ -501,6 +502,11 @@ function lhFirstJoinRandomSpawn(server, player) {
       lhAutoCreateCompanyAtSpawn(server, player, chosen.x, chosen.z);
     }
 
+    try {
+      if (typeof player.teleportTo === 'function') {
+        player.teleportTo(chosen.x + 0.5, chosen.y, chosen.z + 0.5);
+      }
+    } catch (eTpFirst) {}
     var uname = player.username || (typeof player.getName === 'function' ? player.getName().getString() : '');
     if (uname) {
       server.runCommandSilent('execute in minecraft:overworld run tp ' + uname + ' ' + (chosen.x + 0.5) + ' ' + chosen.y + ' ' + (chosen.z + 0.5));
@@ -1358,9 +1364,39 @@ EntityEvents.hurt(function (event) {
   }
 });
 
+var LHPendingFirstJoins = {};
+
+function lhProcessFirstJoinQueue(server) {
+  var pids = Object.keys(LHPendingFirstJoins);
+  if (!pids.length || !server) return;
+  var plist = server.players || [];
+  for (var i = 0; i < pids.length; i++) {
+    var pid = pids[i];
+    var entry = LHPendingFirstJoins[pid];
+    if (!entry) { delete LHPendingFirstJoins[pid]; continue; }
+    if (LHProgTick < entry.readyTick) continue;
+    var found = null;
+    for (var j = 0; j < plist.length; j++) {
+      if (lhId(plist[j]) === pid) { found = plist[j]; break; }
+    }
+    if (found) {
+      delete LHPendingFirstJoins[pid];
+      try {
+        lhFirstJoinRandomSpawn(server, found);
+        lhEnsureSafeSpawn(server, found, false);
+      } catch (eFj) {
+        console.error('[LH] Deferred first-join spawn error: ' + eFj);
+      }
+    } else if (LHProgTick > entry.readyTick + 200) {
+      delete LHPendingFirstJoins[pid];
+    }
+  }
+}
+
 ServerEvents.tick(function (event) {
   LHProgTick++;
   var server = event.server;
+  lhProcessFirstJoinQueue(server);
   lhCasinoStep(server, false);
   lhProcessRespawnScatter(server, false);
 
@@ -1516,9 +1552,19 @@ PlayerEvents.loggedIn(function (event) {
   var server = event.server, player = event.player;
   lhProgressionRecompute(server, player, false);
   var info = lhApplyTerritoryBorder(server, false);
-  lhFirstJoinRandomSpawn(server, player);
-  lhEnsureSafeSpawn(server, player, false);
   var db = lhProgRead(server);
+  var pid = lhId(player);
+  if (!db.firstJoinDone[pid]) {
+    // Defer chunk lookup & company HQ deployment by 20 ticks so the login handshake,
+    // client ReceivingLevelScreen, and ParCool limitation sync finish without stalling.
+    var unameBoot = player.username || (typeof player.getName === 'function' ? player.getName().getString() : '');
+    if (unameBoot) {
+      server.runCommandSilent('effect give ' + unameBoot + ' minecraft:resistance 12 4 true');
+    }
+    LHPendingFirstJoins[pid] = { readyTick: LHProgTick + 20 };
+  } else {
+    lhEnsureSafeSpawn(server, player, false);
+  }
   var diff = lhDifficultyStatus(server);
   var chap = lhChapterProgressSummary(server);
   lhMsg(player, 'Граница мира: ' + info.size + '×' + info.size + ' (±' + Math.round(info.size / 2) +
