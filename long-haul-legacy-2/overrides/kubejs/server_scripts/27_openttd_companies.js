@@ -60,7 +60,30 @@ function lhEconRead(server) {
 
 function lhEconSave(server) {
   if (LHEconState !== null) {
-    server.persistentData.putString('longhaul_economy_v1', JSON.stringify(LHEconState));
+    var persist = {
+      items: LHEconState.items || {},
+      adminOverrides: LHEconState.adminOverrides || {},
+      recipePrices: {},
+      listings: LHEconState.listings || [],
+      pickupOrders: LHEconState.pickupOrders || [],
+      nextListingSeq: LHEconState.nextListingSeq || 1,
+      nextPickupSeq: LHEconState.nextPickupSeq || 1,
+      traderSeed: LHEconState.traderSeed || 1,
+      totalCrashes: LHEconState.totalCrashes || 0
+    };
+    var encoded = JSON.stringify(persist);
+    if (encoded.length > 52000) {
+      var trimmedItems = {};
+      Object.keys(persist.items).forEach(function (k) {
+        var it = persist.items[k];
+        if (it && (it.demand > 0 || it.supply > 0 || it.crashTicks > 0)) {
+          trimmedItems[k] = it;
+        }
+      });
+      persist.items = trimmedItems;
+      encoded = JSON.stringify(persist);
+    }
+    server.persistentData.putString('longhaul_economy_v1', encoded);
   }
 }
 
@@ -1898,13 +1921,21 @@ ServerEvents.commandRegistry(function (event) {
   })));
   root.then(mmCmd);
 
+  var Args = event.arguments;
+  function lhCmdItemArg(ctx, p) {
+    var raw = String(Args.RESOURCE_LOCATION.getResult(ctx, 'item'));
+    if ((raw === 'hand' || raw === 'minecraft:hand') && p && p.mainHandItem && !p.mainHandItem.empty) {
+      return String(p.mainHandItem.id);
+    }
+    return raw;
+  }
+
   var priceCmd = C.literal('price');
-  priceCmd.then(C.literal('check').then(C.argument('item', LHOTTDStringArg.word()).executes(function (ctx) {
+  priceCmd.then(C.literal('check').then(C.argument('item', Args.RESOURCE_LOCATION.create(event)).executes(function (ctx) {
     var server = ctx.source.server, p = ctx.source.playerOrException;
     if (!global.LHEconomyEngine) return 0;
     var econ = lhEconRead(server);
-    var itemArg = LHOTTDStringArg.getString(ctx, 'item');
-    if (itemArg === 'hand' && p.mainHandItem && !p.mainHandItem.empty) itemArg = String(p.mainHandItem.id);
+    var itemArg = lhCmdItemArg(ctx, p);
     var q = global.LHEconomyEngine.getMarketQuote(econ, itemArg);
     lhMsg(p, '§6[Биржа] §f' + q.itemId + ' [' + q.kind + '] | База: ' + q.basePrice + ' Cr | Рынок: §e' + q.price +
       ' Cr §7(×' + q.multiplier + ', спрос=' + q.demand + ', предл=' + q.supply +
@@ -1913,20 +1944,20 @@ ServerEvents.commandRegistry(function (event) {
     return 1;
   })));
   priceCmd.then(C.literal('set').requires(function (s) { return s.hasPermission(2); })
-    .then(C.argument('item', LHOTTDStringArg.word())
+    .then(C.argument('item', Args.RESOURCE_LOCATION.create(event))
       .then(C.argument('value', LHOTTDStringArg.word()).executes(function (ctx) {
         var server = ctx.source.server, p = ctx.source.playerOrException;
         if (!global.LHEconomyEngine) return 0;
         var val = parseInt(LHOTTDStringArg.getString(ctx, 'value'), 10);
         if (!(val > 0)) return 0;
         var econ = lhEconRead(server);
-        var q = global.LHEconomyEngine.setAdminPrice(econ, LHOTTDStringArg.getString(ctx, 'item'), val);
+        var q = global.LHEconomyEngine.setAdminPrice(econ, lhCmdItemArg(ctx, p), val);
         lhEconSave(server);
         lhMsg(p, '§b[Admin Price] §fЦена ' + q.itemId + ' зафиксирована на §e' + q.price + ' Cr.');
         return 1;
       }))));
   priceCmd.then(C.literal('bounds').requires(function (s) { return s.hasPermission(2); })
-    .then(C.argument('item', LHOTTDStringArg.word())
+    .then(C.argument('item', Args.RESOURCE_LOCATION.create(event))
       .then(C.argument('min', LHOTTDStringArg.word())
         .then(C.argument('max', LHOTTDStringArg.word()).executes(function (ctx) {
           var server = ctx.source.server, p = ctx.source.playerOrException;
@@ -1935,27 +1966,27 @@ ServerEvents.commandRegistry(function (event) {
           var mx = parseInt(LHOTTDStringArg.getString(ctx, 'max'), 10);
           if (!(mn > 0) || mx < mn) return 0;
           var econ = lhEconRead(server);
-          var q = global.LHEconomyEngine.setAdminBounds(econ, LHOTTDStringArg.getString(ctx, 'item'), mn, mx);
+          var q = global.LHEconomyEngine.setAdminBounds(econ, lhCmdItemArg(ctx, p), mn, mx);
           lhEconSave(server);
           lhMsg(p, '§b[Admin Price] §fКоридор для ' + q.itemId + ': ' + mn + '..' + mx + ' Cr (тек: ' + q.price + ').');
           return 1;
         })))));
   priceCmd.then(C.literal('clear').requires(function (s) { return s.hasPermission(2); })
-    .then(C.argument('item', LHOTTDStringArg.word()).executes(function (ctx) {
+    .then(C.argument('item', Args.RESOURCE_LOCATION.create(event)).executes(function (ctx) {
       var server = ctx.source.server, p = ctx.source.playerOrException;
       if (!global.LHEconomyEngine) return 0;
       var econ = lhEconRead(server);
-      var q = global.LHEconomyEngine.clearAdminPrice(econ, LHOTTDStringArg.getString(ctx, 'item'));
+      var q = global.LHEconomyEngine.clearAdminPrice(econ, lhCmdItemArg(ctx, p));
       lhEconSave(server);
       lhMsg(p, '§b[Admin Price] §fСброшено для ' + q.itemId + ', текущая рыночная: ' + q.price + ' Cr.');
       return 1;
     })));
   priceCmd.then(C.literal('crash').requires(function (s) { return s.hasPermission(2); })
-    .then(C.argument('item', LHOTTDStringArg.word()).executes(function (ctx) {
+    .then(C.argument('item', Args.RESOURCE_LOCATION.create(event)).executes(function (ctx) {
       var server = ctx.source.server, p = ctx.source.playerOrException;
       if (!global.LHEconomyEngine) return 0;
       var econ = lhEconRead(server);
-      var q = global.LHEconomyEngine.forceCrash(econ, LHOTTDStringArg.getString(ctx, 'item'), 12);
+      var q = global.LHEconomyEngine.forceCrash(econ, lhCmdItemArg(ctx, p), 12);
       lhEconSave(server);
       lhMsg(p, '§c[Обвал рынка] §fДля ' + q.itemId + ' принудительно включён обвал: цена ' + q.price + ' Cr (×' + q.multiplier + ').');
       return 1;
@@ -1979,7 +2010,7 @@ ServerEvents.commandRegistry(function (event) {
     return 1;
   }));
   shopCmd.then(C.literal('sell')
-    .then(C.argument('item', LHOTTDStringArg.word())
+    .then(C.argument('item', Args.RESOURCE_LOCATION.create(event))
       .then(C.argument('qty', LHOTTDStringArg.word())
         .then(C.argument('unitPrice', LHOTTDStringArg.word()).executes(function (ctx) {
           var server = ctx.source.server, p = ctx.source.playerOrException;
@@ -1994,10 +2025,9 @@ ServerEvents.commandRegistry(function (event) {
             lhMsg(p, 'Вы должны находиться в секторе со своим зданием компании (/lh building build).');
             return 0;
           }
-          var itemArg = LHOTTDStringArg.getString(ctx, 'item');
-          if (itemArg === 'hand') {
-            if (!p.mainHandItem || p.mainHandItem.empty) { lhMsg(p, 'Возьмите предмет в руку или укажите ID.'); return 0; }
-            itemArg = String(p.mainHandItem.id);
+          var itemArg = lhCmdItemArg(ctx, p);
+          if (itemArg === 'hand' || itemArg === 'minecraft:hand') {
+            lhMsg(p, 'Возьмите предмет в руку или укажите ID.'); return 0;
           }
           var qty = parseInt(LHOTTDStringArg.getString(ctx, 'qty'), 10);
           var unitP = parseInt(LHOTTDStringArg.getString(ctx, 'unitPrice'), 10);
