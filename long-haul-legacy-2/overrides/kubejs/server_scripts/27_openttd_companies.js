@@ -64,40 +64,68 @@ function lhEconSave(server) {
   }
 }
 
-var LHLastRecipeGraphDebug = { edges: 0, firstErr: '' };
+var LHLastRecipeGraphDebug = { seen: 0, hasOut: 0, hasIngs: 0, edges: 0, firstErr: '', sample: '' };
 
 function lhRefreshRecipeEconomyGraph(server) {
   if (!server || !global.LHEconomyEngine) return 0;
   var econ = lhEconRead(server);
   var edges = [];
   var firstErr = '';
+  var seen = 0, hasOut = 0, hasIngs = 0, sample = '';
   try {
     var rm = server.recipeManager;
     var regAccess = server.registryAccess();
     if (rm && regAccess) {
       var iter = rm.getRecipes().iterator();
-      var count = 0;
-      while (iter.hasNext() && count < 25000) {
-        count++;
+      while (iter.hasNext() && seen < 25000) {
+        seen++;
         try {
           var rec = iter.next();
           var resStack = rec.getResultItem(regAccess);
           if (!resStack) continue;
           var outId = String(resStack.id || '');
-          if (!outId || outId === 'minecraft:air') continue;
+          if ((!outId || outId === 'undefined') && typeof Item !== 'undefined') {
+            try { outId = String(Item.of(resStack).id || ''); } catch (eIt) {}
+          }
+          if (!outId || outId === 'undefined' || outId === 'minecraft:air') continue;
+          hasOut++;
           var outCount = Math.max(1, Number(resStack.count || 1));
           var parsedIngs = [];
           var ings = rec.getIngredients();
           if (ings && ings.size() > 0) {
+            hasIngs++;
             for (var ii = 0; ii < ings.size(); ii++) {
               var ing = ings.get(ii);
               if (!ing) continue;
-              var items = ing.items || (typeof ing.getItems === 'function' ? ing.getItems() : null);
-              if (items && items.length > 0 && items[0]) {
-                var ingId = String(items[0].id || '');
-                if (ingId && ingId !== 'minecraft:air') {
-                  parsedIngs.push({ id: ingId, count: 1 });
-                }
+              var ingId = '';
+              try {
+                var fst = ing.first;
+                if (fst) ingId = String(fst.id || '');
+              } catch (eFst) {}
+              if (!ingId || ingId === 'undefined' || ingId === 'minecraft:air') {
+                try {
+                  var ids = ing.itemIds;
+                  if (ids && ids.iterator) {
+                    var idIt = ids.iterator();
+                    if (idIt.hasNext()) ingId = String(idIt.next() || '');
+                  }
+                } catch (eIds) {}
+              }
+              if (!ingId || ingId === 'undefined' || ingId === 'minecraft:air') {
+                try {
+                  var items = typeof ing.getItems === 'function' ? ing.getItems() : ing.items;
+                  if (items && items.length > 0 && items[0]) {
+                    ingId = String(items[0].id || '');
+                  }
+                } catch (eArr) {}
+              }
+              if (!sample && seen <= 50) {
+                try {
+                  sample = 'out=' + outId + ',ingClass=' + ing.getClass().getSimpleName() + ',first=' + ing.first + ',ingId=' + ingId;
+                } catch (eSmp) {}
+              }
+              if (ingId && ingId !== 'undefined' && ingId !== 'minecraft:air') {
+                parsedIngs.push({ id: ingId, count: 1 });
               }
             }
           }
@@ -108,15 +136,17 @@ function lhRefreshRecipeEconomyGraph(server) {
           if (!firstErr) firstErr = String(eRecOne);
         }
       }
+    } else {
+      firstErr = 'missing rm=' + !!rm + ' regAccess=' + !!regAccess;
     }
   } catch (eRm) {
     if (!firstErr) firstErr = 'outer: ' + eRm;
     console.warn('[LH] Recipe economy graph error: ' + eRm);
   }
-  LHLastRecipeGraphDebug = { edges: edges.length, firstErr: firstErr };
+  LHLastRecipeGraphDebug = { seen: seen, hasOut: hasOut, hasIngs: hasIngs, edges: edges.length, firstErr: firstErr, sample: sample };
   global.LHEconomyEngine.propagateRecipePrices(econ, edges, 5);
   lhEconSave(server);
-  console.info('[LH] Economy recipe graph propagated: edges=' + edges.length + ', priced=' + Object.keys(econ.recipePrices || {}).length + (firstErr ? (', firstErr=' + firstErr) : ''));
+  console.info('[LH] Economy recipe graph propagated: seen=' + seen + ', hasOut=' + hasOut + ', hasIngs=' + hasIngs + ', edges=' + edges.length + ', priced=' + Object.keys(econ.recipePrices || {}).length + (firstErr ? (', firstErr=' + firstErr) : ''));
   return edges.length;
 }
 
