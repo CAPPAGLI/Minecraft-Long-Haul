@@ -1327,13 +1327,14 @@ BlockEvents.broken(function (event) {
   var st = lhOttdRead(server);
   var sc = global.LHOpenTTD.sectorCoords(block.x, block.z);
   var sec = global.LHOpenTTD.resolveSectorOwner(st, sc.sx, sc.sz);
+  var isSpawnZone = !!(global.LHOpenTTD.isSpawnProtectedSector && global.LHOpenTTD.isSpawnProtectedSector(sc.sx, sc.sz));
   var bidStr = String(block.id);
 
   var isOre = block.hasTag('forge:ores');
   var isLog = block.hasTag('minecraft:logs');
 
-  // Prohibit resource extraction and looting in unclaimed territories
-  if (sec.kind !== 'claimed' && !lhIsFragilePassableBreak(bidStr)) {
+  // Prohibit resource extraction and looting in unclaimed territories (3x3 neutral spawn zone is open to all players)
+  if (!isSpawnZone && sec.kind !== 'claimed' && !lhIsFragilePassableBreak(bidStr)) {
     var pidUncl = lhId(player);
     if (!LHOTTDLastBreakWarnByPlayer[pidUncl] || (LHOTTDTick - LHOTTDLastBreakWarnByPlayer[pidUncl]) >= 60) {
       LHOTTDLastBreakWarnByPlayer[pidUncl] = LHOTTDTick;
@@ -1419,7 +1420,8 @@ BlockEvents.rightClicked(function (event) {
   var st = lhOttdRead(server);
   var sc = global.LHOpenTTD.sectorCoords(block.x, block.z);
   var sec = global.LHOpenTTD.resolveSectorOwner(st, sc.sx, sc.sz);
-  if (sec.kind !== 'claimed') {
+  var isSpawnZone = !!(global.LHOpenTTD.isSpawnProtectedSector && global.LHOpenTTD.isSpawnProtectedSector(sc.sx, sc.sz));
+  if (!isSpawnZone && sec.kind !== 'claimed') {
     lhMsg(player, '§c[Незаприваченный сектор (' + sc.sx + ',' + sc.sz + ')] §fЛутинг контейнеров запрещён на незаприваченной территории! Заприватьте сектор (/lh territory claim).');
     event.cancel();
   }

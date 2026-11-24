@@ -637,6 +637,7 @@ test('Spawn/border safety guards and native Xaero territory integration are wire
   assert(!s26.includes('lhCompanyRead'), 'no undefined lhCompanyRead call in first-join spawn');
   assert(s27.includes('lhSyncXaeroTerritories') && !s27.includes("type: 'rectangle'") && !s27.includes("draw: 'ingame'"), '27_openttd_companies uses Xaero sync instead of custom HUD paint minimap');
   assert(s27.includes('TerritoryMapHelper') && fs.existsSync(path.join(ROOT, 'runtime-mod/src/main/java/com/longhaul/runtime/map/TerritoryMapHelper.java')), 'lhGiveTerritoryMapItem uses TerritoryMapHelper to lock MapItemSavedData so vanilla terrain never overwrites it');
+  assert((s27.match(/!isSpawnZone && sec\.kind !== 'claimed'/g) || []).length === 2, '27_openttd_companies must allow both block breaking and container looting inside the 3x3 neutral spawn zone');
   const prof = JSON.parse(fs.readFileSync(path.join(ROOT, 'profiles/alpha20.json'), 'utf8'));
   assert(prof.categories.qol.includes('mimi') && prof.categories.qol.includes('reactive-music'), 'alpha20 includes MIMI and Reactive Music');
   assert(prof.client_only.includes('reactive-music') && Array.isArray(prof.resourcepacks) && prof.resourcepacks.includes('U85lsKF1'), 'alpha20 marks reactive-music client-only and pins Deepwoken Music resourcepack');
