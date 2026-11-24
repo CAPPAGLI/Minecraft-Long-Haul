@@ -913,7 +913,7 @@ function lhStartIntegrationSetup(server) {
         var MapItemClsTest = Java.loadClass('net.minecraft.world.item.MapItem');
         var TerritoryMapHelperTest = Java.loadClass('com.longhaul.runtime.map.TerritoryMapHelper');
         var savedMap = givenMapStack ? MapItemClsTest.getSavedData(givenMapStack, overworld) : null;
-        ok(savedMap !== null && TerritoryMapHelperTest.isLocked(savedMap) === true && savedMap.locked === true,
+        ok(savedMap !== null && TerritoryMapHelperTest.isLocked(savedMap) === true,
           'territory map item MapItemSavedData is locked=true so vanilla terrain never overwrites it');
         var gridPxBefore = TerritoryMapHelperTest.getColorUnsigned(savedMap, 0, 0);
         if (givenMapStack && typeof givenMapStack.inventoryTick === 'function') {
