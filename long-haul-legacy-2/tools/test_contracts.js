@@ -406,4 +406,134 @@ test('alpha20 profile adds safe optimization/animation/graphics mods and wires /
   assert(fs.existsSync(path.join(__dirname, '../overrides/kubejs/assets/longhaul/textures/item/control_tablet.png')));
 });
 
+test('OpenTTD buildings (2-way fork), territory violations, diplomacy, and supply contracts work cleanly', () => {
+  const path = require('path');
+  const O = sandbox.global.LHOpenTTD;
+  assert(O && O.BUILDING_CATALOG, 'BUILDING_CATALOG present');
+  assert.equal(Object.keys(O.BUILDING_CATALOG).length, 6, '6 building types across 3 categories');
+  const cats = new Set(Object.values(O.BUILDING_CATALOG).map(b => b.category));
+  assert(cats.has('extraction') && cats.has('logistics') && cats.has('production'), 'all 3 building categories present');
+
+  const st = O.createInitialState();
+  O.ensureBots(st);
+  const cRes = O.companyCreate(st, 'p1', 'acme', 'Acme Corp');
+  assert(cRes.ok);
+  st.companies.acme.cash = 5000;
+  st.companies.bot_ironrail.cash = 5000;
+
+  // Claim sector (0,3) adjacent to HQ (0,2) and build + upgrade with 2-way branching lockout
+  const clm = O.claimOrCaptureSector(st, 'acme', 0, 3, false);
+  assert(clm.ok, 'claimed (0,3)');
+  const bld = O.buildCompanyBuilding(st, 'acme', 0, 3, 'mine_shaft');
+  assert(bld.ok && bld.building.level === 1);
+
+  // Tier 1 fork: pick option A, then option B must be rejected / locked out
+  const forkA = O.BUILDING_CATALOG.mine_shaft.tier1Fork[0].id;
+  const forkB = O.BUILDING_CATALOG.mine_shaft.tier1Fork[1].id;
+  const up1 = O.upgradeCompanyBuilding(st, 'acme', 0, 3, forkA);
+  assert(up1.ok && up1.building.level === 2 && up1.building.branch1 === forkA && up1.building.locked1 === forkB);
+  const up1b = O.upgradeCompanyBuilding(st, 'acme', 0, 3, forkB);
+  assert(!up1b.ok, 'second Tier 1 branch locked out after choosing first branch');
+
+  // Tier 2 fork
+  const t2A = O.BUILDING_CATALOG.mine_shaft.tier2Fork[0].id;
+  const t2B = O.BUILDING_CATALOG.mine_shaft.tier2Fork[1].id;
+  const up2 = O.upgradeCompanyBuilding(st, 'acme', 0, 3, t2A);
+  assert(up2.ok && up2.building.level === 3 && up2.building.branch2 === t2A && up2.building.locked2 === t2B);
+  const up3 = O.upgradeCompanyBuilding(st, 'acme', 0, 3, t2B);
+  assert(!up3.ok && up3.reason === 'max_level', 'cannot pick second Tier 2 branch');
+
+  // Production tick + collect
+  const ticks = O.tickCompanyBuildings(st);
+  assert(ticks >= 1 && st.buildings['0,3'].cashBuffer > 0);
+  const col = O.collectBuildingOutput(st, 'acme', 0, 3);
+  assert(col.ok && col.cash > 0);
+
+  // Territory violation penalties on trespass & block breaking without license
+  assert(!O.canTransit(st, 'acme', 'bot_ironrail'), 'no initial transit license');
+  const v1 = O.recordTerritoryViolation(st, 'acme', 'bot_ironrail', 'trespass', 2, 0);
+  assert(v1.violated && v1.delta < 0 && v1.newScore < 0 && v1.fine > 0);
+  const v2 = O.recordTerritoryViolation(st, 'acme', 'bot_ironrail', 'break_ore', 2, 0);
+  assert(v2.violated && v2.newScore < v1.newScore);
+
+  // Diplomacy: gift improves score, buy transit & mining licenses, alliance, peaceful buyout, supply contract
+  const g1 = O.formOrBreakAlliance(st, 'acme', 'bot_ironrail', 'gift');
+  assert(g1.ok && g1.score > v2.newScore);
+  const licT = O.buyLicense(st, 'acme', 'bot_ironrail', 'transit');
+  assert(licT.ok && O.canTransit(st, 'acme', 'bot_ironrail'));
+  const licM = O.buyLicense(st, 'acme', 'bot_ironrail', 'mining');
+  assert(licM.ok && O.canMine(st, 'acme', 'bot_ironrail'));
+
+  // Push score >= 25 to allow alliance
+  O.adjustRelation(st, 'acme', 'bot_ironrail', 40);
+  const ally = O.formOrBreakAlliance(st, 'acme', 'bot_ironrail', 'ally');
+  assert(ally.ok && ally.allied && O.hasPact(st, 'acme', 'bot_ironrail'));
+
+  // Peaceful sector buyout on a claimed rival sector
+  st.claims['3,0'] = { owner: 'bot_ironrail', strength: 1, since: 1 };
+  const buySec = O.diplomaticBuySector(st, 'acme', 3, 0);
+  assert(buySec.ok && st.claims['3,0'].owner === 'acme');
+
+  // Supply contract creation & fulfillment
+  const scCreate = O.createSupplyContract(st, 'acme', 'bot_ironrail', 'minecraft:iron_ingot', 16, 200, 2);
+  assert(scCreate.ok);
+  const scFulfill = O.fulfillSupplyContract(st, 'acme', scCreate.contract.id);
+  assert(scFulfill.ok && scFulfill.payout === 200);
+
+  // Realistic Walkie-Talkie optional addon + config
+  const cfAddons = JSON.parse(fs.readFileSync(path.join(__dirname, '../optional-mods/curseforge-addons.json'), 'utf8'));
+  assert(cfAddons.addons.some(a => a.curseforge_project_id === 1750447 && a.mod_id === 'walkietalkies'),
+         'Realistic Walkie-Talkie registered in curseforge-addons.json');
+  assert(fs.existsSync(path.join(__dirname, '../overrides/config/walkietalkies-server.properties')),
+         'walkietalkies-server.properties present');
+});
+
+test('LHChapterFork enforces mandatory start -> early (5) -> mid (6) -> late 3-choice random forks across 61 chapters', () => {
+  const F = sandbox.global.LHChapterFork;
+  assert(F, 'LHChapterFork loaded');
+  assert.equal(F.MANDATORY_CHAPTERS.length, 3);
+  assert.equal(F.EARLY_CHAPTERS.length, 18);
+  assert.equal(F.MID_CHAPTERS.length, 23);
+  assert.equal(F.LATE_CHAPTERS.length, 17);
+  assert.equal(3 + 18 + 23 + 17, 61, 'all 61 main chapters partitioned cleanly');
+
+  const completed = {};
+  const ps = F.ensurePlayerState(null);
+  assert(!F.isMandatoryDone(completed));
+  assert.equal(F.currentEligibleTier(ps, completed), 'mandatory');
+  const blockedRoll = F.rollThreeChoices(ps, completed);
+  assert(!blockedRoll.ok && blockedRoll.reason === 'mandatory_incomplete');
+
+  // Complete mandatory ch00..ch02 -> unlocks early tier + rolls 3 random choices
+  completed.ch00 = true; completed.ch01 = true; completed.ch02 = true;
+  assert(F.isMandatoryDone(completed));
+  assert.equal(F.currentEligibleTier(ps, completed), 'early');
+  const rollEarly = F.rollThreeChoices(ps, completed);
+  assert(rollEarly.ok && rollEarly.offers.length === 3);
+  rollEarly.offers.forEach(c => assert(F.EARLY_CHAPTERS.includes(c), 'offer is from EARLY tier: ' + c));
+
+  // Pick 1 from offer -> cannot pick another until active is completed
+  const picked1 = rollEarly.offers[0];
+  const pk1 = F.pickChapterFromOffer(ps, picked1, completed);
+  assert(pk1.ok && ps.activePick === picked1 && ps.unlocked.includes(picked1));
+  const pkDup = F.pickChapterFromOffer(ps, rollEarly.offers[1], completed);
+  assert(!pkDup.ok && pkDup.reason === 'active_chapter_pending');
+
+  // Complete 5 early chapters -> transitions strictly to MID tier!
+  completed[picked1] = true;
+  F.onChapterCompleted(ps, picked1, completed);
+  for (let i = 0; i < 4; i++) {
+    const r = F.rollThreeChoices(ps, completed);
+    assert(r.ok && r.tier === 'early');
+    const c = r.offers[0];
+    assert(F.pickChapterFromOffer(ps, c, completed).ok);
+    completed[c] = true;
+    F.onChapterCompleted(ps, c, completed);
+  }
+  assert.equal(F.currentEligibleTier(ps, completed), 'mid', '5 completed early chapters unlock mid tier');
+  const rollMid = F.rollThreeChoices(ps, completed);
+  assert(rollMid.ok && rollMid.offers.length === 3);
+  rollMid.offers.forEach(c => assert(F.MID_CHAPTERS.includes(c), 'offer is from MID tier: ' + c));
+});
+
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');

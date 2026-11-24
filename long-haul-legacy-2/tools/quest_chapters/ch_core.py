@@ -44,6 +44,9 @@ def build_core_chapters():
     # -----------------------------------------------------------------------
     adv('story/03_dinner_telegram', 45)
     adv('rules/confirmed', 25)
+    adv('tier/mandatory_done', 30)
+    for _cid in ('ch03', 'ch04', 'ch05', 'ch06', 'ch07', 'ch08', 'ch09', 'ch10', 'ch11', 'ch12', 'ch14'):
+        adv(f'chapters/{_cid}_unlocked', 10)
     ch01_nodes = [
         ('alpha_welcome', 'Прототип промышленной сети', 'minecraft:book', [-320, 0],
          t_check('Прочитано (ручное подтверждение)'), [
@@ -110,7 +113,7 @@ def build_core_chapters():
          ], ['alpha_welcome'], {'xp': r_xp(50, 'POINTS'), 'item': r_item('eccentrictome:tome', 1)}),
         ('alpha_control_tablet', 'Планшет управления (/lh GUI)', 'longhaul:control_tablet', [-80, 110],
          t_item('longhaul:control_tablet', 1), [
-             'Планшет управления (longhaul:control_tablet) открывает серверный GUI с 11 вкладками (/lh gui).',
+             'Планшет управления (longhaul:control_tablet) открывает серверный GUI с 14 вкладками (/lh gui), включая карту 7×5 с зумом и HUD-миникарту, здания с вилкой прокачки, дипломатию и вилку глав.',
          ], ['alpha_eccentric_tome'], {'xp': r_xp(1, 'LEVEL'), 'item': r_item('minecraft:iron_ingot', 4)}),
         ('alpha_pollution_arcane', 'Экология среды и Три Школы Магии', 'minecraft:cauldron', [40, 110],
          t_check('Введение в экологию и аркану пройдено'), [
@@ -141,6 +144,11 @@ def build_core_chapters():
          t_check('Механика Carry On проверена'), [
              'Carry On позволяет поднимать сундуки, бочки, станки и небольших животных вручную (Shift + ПКМ пустыми руками) для перегрузки на повозки, баржи и поезда.',
          ], ['alpha_storage_basics'], {'xp': r_xp(70, 'POINTS'), 'item': r_item('minecraft:barrel', 2)}),
+        ('alpha_chapter_fork_radio', 'Вилка глав (3 случайные) и Радиосвязь', 'minecraft:compass', [400, 110],
+         t_check('Система вилки глав и рации изучена'), [
+             'После обязательных глав 00–02 дальнейшие главы открываются через вилку из 3 случайных глав по тирам: Ранние (5) → Средние (6) → Поздние (/lh chapters или вкладка «Вилка глав» в Планшете).',
+             'Игроки расходятся по разным модам — обменивайтесь товарами через компании/дипломатию и держите связь по Simple Voice Chat + рациям (Walkie-Talkie и опциональный Realistic Walkie-Talkie CF #1750447).',
+         ], ['alpha_first_camp_prep'], {'xp': r_xp(75, 'POINTS'), 'item': r_item('minecraft:paper', 4)}),
     ]
     for qid, title, icon, pos, tasks, desc, deps, rew in ch01_nodes:
         quest(qid, title, '01 · Начало и правила', pos, icon, tasks, desc, deps=deps, rewards=rew)

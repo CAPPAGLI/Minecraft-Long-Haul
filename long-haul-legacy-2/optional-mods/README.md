@@ -12,7 +12,7 @@
 
 ### Способ 1 — прямо в лаунчере (быстрее всего)
 1. Импортируйте `Long-Haul-Legacy-2.0-alpha.20.mrpack` в Prism Launcher / Modrinth App.
-2. Скачайте `.jar` нужных CurseForge-модов (для `DOOMED` и `The Furry Project` см. `curseforge-addons.json`) и положите их в папку `mods/` созданного профиля.
+2. Скачайте `.jar` нужных CurseForge-модов (например `DOOMED`, `The Furry Project`, `Realistic Walkie-Talkie` (`1750447`) от Toni_Carter — см. `curseforge-addons.json`) и положите их в папку `mods/` созданного профиля. Для `Realistic Walkie-Talkie` серверный конфиг уже подготовлен в `overrides/config/walkietalkies-server.properties`.
 
 ### Способ 2 — локальная пересборка `.mrpack` / серверного теста из этого репозитория
 1. Положите скачанные `.jar` в `long-haul-legacy-2/optional-mods/` (или в `long-haul-legacy-2/overrides/mods/`).

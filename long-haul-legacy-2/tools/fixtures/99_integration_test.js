@@ -780,11 +780,50 @@ function lhStartIntegrationSetup(server) {
         fp.containerMenu.clicked(1 + 1 * 9, 0, ClickTypeCls.PICKUP, fp);
         ok(fp.containerMenu && fp.containerMenu.data && String(fp.containerMenu.data.title.getString()).indexOf('Контракты') >= 0, 'real click on hub (1,1) opens Contracts tab');
         fp.containerMenu.clicked(3 + 5 * 9, 0, ClickTypeCls.PICKUP, fp);
-        ok(fp.containerMenu && fp.containerMenu.data && String(fp.containerMenu.data.title.getString()).indexOf('Карта') >= 0, 'real click on footer (3,5) opens Territory 5x5 tab');
+        ok(fp.containerMenu && fp.containerMenu.data && String(fp.containerMenu.data.title.getString()).indexOf('Карта') >= 0, 'real click on footer (3,5) opens enlarged Territory 7x5 tab');
+        fp.containerMenu.clicked(5 + 5 * 9, 0, ClickTypeCls.PICKUP, fp);
+        ok(fp.containerMenu && fp.containerMenu.data && String(fp.containerMenu.data.title.getString()).indexOf('Здания') >= 0, 'real click on footer (5,5) opens Buildings tab');
+        fp.containerMenu.clicked(6 + 5 * 9, 0, ClickTypeCls.PICKUP, fp);
+        ok(fp.containerMenu && fp.containerMenu.data && String(fp.containerMenu.data.title.getString()).indexOf('Дипломатия') >= 0, 'real click on footer (6,5) opens Diplomacy tab');
+        fp.containerMenu.clicked(1 + 5 * 9, 0, ClickTypeCls.PICKUP, fp);
+        ok(fp.containerMenu && fp.containerMenu.data && String(fp.containerMenu.data.title.getString()).indexOf('Вилка глав') >= 0, 'real click on footer (1,5) opens Chapter Fork tab');
         fp.containerMenu.clicked(4 + 5 * 9, 0, ClickTypeCls.PICKUP, fp);
-        ok(fp.containerMenu && fp.containerMenu.data && String(fp.containerMenu.data.title.getString()).indexOf('Карта') >= 0, 'real click on footer (4,5) refreshes current tab');
+        ok(fp.containerMenu && fp.containerMenu.data && String(fp.containerMenu.data.title.getString()).indexOf('Вилка глав') >= 0, 'real click on footer (4,5) refreshes current tab');
         fp.containerMenu.clicked(8 + 5 * 9, 0, ClickTypeCls.PICKUP, fp);
         ok(fp.containerMenu === fp.inventoryMenu, 'real click on footer (8,5) closes CustomChestMenu cleanly');
+
+        // 24b. Chapter Fork, Company Buildings (2-way upgrade fork), Territory Violations, Diplomacy & Minimap HUD
+        var forkProgSaved = JSON.stringify(lhProgRead(server));
+        var pDbTest = lhProgRead(server);
+        pDbTest.chapters.ch00 = true; pDbTest.chapters.ch01 = true; pDbTest.chapters.ch02 = true;
+        var fStat = lhChapterForkStatus(server, fp, false);
+        ok(fStat && fStat.mandatoryDone && fStat.tier === 'early' && fStat.offers.length === 3, 'chapter fork rolled 3 early choices after ch00..ch02');
+        ok(fp.isAdvancementDone('longhaul:tier/mandatory_done'), 'mandatory_done advancement awarded');
+        var pickRes = lhChapterForkPick(server, fp, fStat.offers[0], false);
+        ok(pickRes && pickRes.ok && fp.isAdvancementDone('longhaul:chapters/' + fStat.offers[0] + '_unlocked'), 'chapter fork pick unlocked Heracles advancement');
+        LHProgState = JSON.parse(forkProgSaved);
+        lhProgSave(server);
+
+        var ottdForkSaved = JSON.stringify(lhOttdRead(server));
+        var stTest = lhOttdRead(server);
+        global.LHOpenTTD.companyCreate(stTest, lhId(fp), 'testco', 'TestCo');
+        stTest.companies.testco.cash = 5000;
+        global.LHOpenTTD.claimOrCaptureSector(stTest, 'testco', 0, 3, false);
+        var bRes = lhBuildFacilityCmd(server, fp, 'factory', 0, 3, false);
+        ok(bRes && bRes.ok, 'built company factory in owned sector (0,3)');
+        var t1a = lhUpgradeFacilityCmd(server, fp, 0, 3, global.LHOpenTTD.BUILDING_CATALOG.factory.tier1Fork[0].id, false);
+        var t1b = lhUpgradeFacilityCmd(server, fp, 0, 3, global.LHOpenTTD.BUILDING_CATALOG.factory.tier1Fork[1].id, false);
+        ok(t1a.ok && !t1b.ok, 'building Tier 1 2-way upgrade fork locks out alternate branch');
+        var vRes = global.LHOpenTTD.recordTerritoryViolation(stTest, 'testco', 'bot_ironrail', 'break_block', 2, 0);
+        ok(vRes.delta < 0 && vRes.newScore < 0, 'territory violation reduces diplomatic relation score');
+        var dRes = lhDiplomacyAction(server, fp, 'transit', 'bot_ironrail', null, false);
+        ok(dRes && dRes.ok && global.LHOpenTTD.canTransit(stTest, 'testco', 'bot_ironrail'), 'diplomacy transit license purchased cleanly');
+        ok(disp.performPrefixedCommand(src, 'lh minimap toggle') === 1, 'brigadier /lh minimap toggle');
+        ok(disp.performPrefixedCommand(src, 'lh building list') === 1, 'brigadier /lh building list');
+        ok(disp.performPrefixedCommand(src, 'lh diplomacy status') === 1, 'brigadier /lh diplomacy status');
+        ok(disp.performPrefixedCommand(src, 'lh chapters status') === 1, 'brigadier /lh chapters status');
+        LHOTTDState = JSON.parse(ottdForkSaved);
+        lhOttdSave(server);
 
         // 25. Every single item ID referenced across all 4,600-4,800 Heracles quests is genuinely registered in Forge 1.20.1
         var auditList = global.LHQuestItemAuditList || [];

@@ -824,6 +824,844 @@ global.LHOpenTTD = (function () {
 
   var PLAYER_COLORS = ['§9', '§d', '§e', '§c', '§3', '§5', '§f'];
 
+  var BUILDING_CATALOG = {
+    mine_shaft: {
+      id: 'mine_shaft',
+      category: 'extraction',
+      categoryName: 'Добыча',
+      name: 'Шахта',
+      icon: 'minecraft:iron_pickaxe',
+      mapSym: 'M',
+      cost: 320,
+      baseIncome: 38,
+      baseProduct: 'minecraft:raw_iron',
+      baseQty: 6,
+      summary: 'Добывает руды в захваченном секторе и приносит стабильный доход.',
+      tier1Fork: [
+        {
+          id: 'deep_bore',
+          name: 'Глубокое бурение',
+          icon: 'minecraft:diamond_pickaxe',
+          cost: 420,
+          incomeMult: 1.75,
+          yieldMult: 1.25,
+          bonusProduct: 'minecraft:raw_gold',
+          bonusQty: 3,
+          summary: '+75% дохода Cr и редкая золотая жила (+3 золота/цикл). Блокирует Открытый карьер.'
+        },
+        {
+          id: 'strip_mining',
+          name: 'Открытый карьер',
+          icon: 'create:mechanical_drill',
+          cost: 380,
+          incomeMult: 1.35,
+          yieldMult: 2.25,
+          bonusProduct: 'minecraft:coal',
+          bonusQty: 8,
+          summary: '×2.25 объёма базовой руды и +8 угля/цикл. Блокирует Глубокое бурение.'
+        }
+      ],
+      tier2Fork: [
+        {
+          id: 'seismic_charges',
+          name: 'Сейсмические заряды',
+          icon: 'minecraft:tnt',
+          cost: 760,
+          incomeMult: 1.65,
+          yieldMult: 1.40,
+          summary: '+65% прибыли и +40% объёма добычи. Блокирует Роботизированный ствол.'
+        },
+        {
+          id: 'automated_hoist',
+          name: 'Роботизированный ствол',
+          icon: 'create:brass_funnel',
+          cost: 720,
+          incomeMult: 1.40,
+          yieldMult: 1.75,
+          summary: '+75% выпуска ресурсов и 2× ёмкость склада. Блокирует Сейсмические заряды.'
+        }
+      ]
+    },
+    oil_rig: {
+      id: 'oil_rig',
+      category: 'extraction',
+      categoryName: 'Добыча',
+      name: 'Нефтяная вышка',
+      icon: 'minecraft:bucket',
+      mapSym: 'O',
+      cost: 420,
+      baseIncome: 48,
+      baseProduct: 'longhaul:technical_oil',
+      baseQty: 2,
+      summary: 'Качает нефтепродукты и техническое масло в секторе компании.',
+      tier1Fork: [
+        {
+          id: 'field_cracking',
+          name: 'Полевой крекинг',
+          icon: 'minecraft:blaze_powder',
+          cost: 480,
+          incomeMult: 1.80,
+          yieldMult: 1.30,
+          bonusProduct: 'minecraft:redstone',
+          bonusQty: 6,
+          summary: '+80% выручки и побочная химия (+6 редстоуна/цикл). Блокирует Сверхвысокое давление.'
+        },
+        {
+          id: 'high_pressure_pump',
+          name: 'Сверхвысокое давление',
+          icon: 'create:fluid_pipe',
+          cost: 450,
+          incomeMult: 1.30,
+          yieldMult: 2.00,
+          bonusProduct: 'longhaul:technical_oil',
+          bonusQty: 2,
+          summary: '×2.0 дебит нефти (+2 тех. масла/цикл). Блокирует Полевой крекинг.'
+        }
+      ],
+      tier2Fork: [
+        {
+          id: 'offshore_platform',
+          name: 'Морская платформа',
+          icon: 'minecraft:prismarine_shard',
+          cost: 840,
+          incomeMult: 1.70,
+          yieldMult: 1.35,
+          summary: '+70% дохода и экспортная премия. Блокирует Газлифт-контур.'
+        },
+        {
+          id: 'gas_lift_loop',
+          name: 'Газлифт-контур',
+          icon: 'create:steam_engine',
+          cost: 800,
+          incomeMult: 1.35,
+          yieldMult: 1.80,
+          summary: '+80% выпуска нефтепродуктов. Блокирует Морскую платформу.'
+        }
+      ]
+    },
+    warehouse: {
+      id: 'warehouse',
+      category: 'logistics',
+      categoryName: 'Логистика',
+      name: 'Логистический склад',
+      icon: 'minecraft:barrel',
+      mapSym: 'W',
+      cost: 300,
+      baseIncome: 34,
+      baseProduct: 'create:iron_sheet',
+      baseQty: 4,
+      summary: 'Ускоряет оборот грузов, снижает экспансию (-10% захват/склад) и хранит сырьё.',
+      tier1Fork: [
+        {
+          id: 'customs_hub',
+          name: 'Таможенный терминал',
+          icon: 'minecraft:emerald',
+          cost: 390,
+          incomeMult: 1.85,
+          yieldMult: 1.20,
+          bonusProduct: 'minecraft:gold_nugget',
+          bonusQty: 9,
+          summary: '+85% дохода с транзита и торговый сбор. Блокирует Распределительный узел.'
+        },
+        {
+          id: 'distribution_hub',
+          name: 'Распределительный узел',
+          icon: 'create:package_frogport',
+          cost: 370,
+          incomeMult: 1.35,
+          yieldMult: 2.00,
+          bonusProduct: 'create:andesite_alloy',
+          bonusQty: 6,
+          summary: '×2.0 запаса материалов и +6 андезитового сплава/цикл. Блокирует Таможенный терминал.'
+        }
+      ],
+      tier2Fork: [
+        {
+          id: 'bonded_vault',
+          name: 'Таможенный сейф',
+          icon: 'minecraft:iron_block',
+          cost: 700,
+          incomeMult: 1.75,
+          yieldMult: 1.25,
+          summary: '+75% пассивной прибыли и усиленная охрана сектора. Блокирует Конвейер-док.'
+        },
+        {
+          id: 'cross_dock',
+          name: 'Кросс-докинг платформа',
+          icon: 'create:belt_connector',
+          cost: 680,
+          incomeMult: 1.35,
+          yieldMult: 1.85,
+          summary: '+85% отгрузки деталей и грузов. Блокирует Таможенный сейф.'
+        }
+      ]
+    },
+    airport: {
+      id: 'airport',
+      category: 'logistics',
+      categoryName: 'Логистика',
+      name: 'Грузовой аэропорт',
+      icon: 'minecraft:elytra',
+      mapSym: 'A',
+      cost: 560,
+      baseIncome: 68,
+      baseProduct: 'create:brass_ingot',
+      baseQty: 3,
+      summary: 'Магистральный воздушный узел компании: высокая выручка и дальний экспорт.',
+      tier1Fork: [
+        {
+          id: 'heavy_airlift',
+          name: 'Тяжёлые дирижабли',
+          icon: 'minecraft:phantom_membrane',
+          cost: 540,
+          incomeMult: 1.75,
+          yieldMult: 1.40,
+          bonusProduct: 'create:brass_ingot',
+          bonusQty: 3,
+          summary: '+75% доходов от авиафрахта и +3 латуни/цикл. Блокирует Диспетчерский радар.'
+        },
+        {
+          id: 'atc_radar',
+          name: 'Диспетчерский радар',
+          icon: 'minecraft:spyglass',
+          cost: 500,
+          incomeMult: 1.45,
+          yieldMult: 1.80,
+          bonusProduct: 'minecraft:copper_ingot',
+          bonusQty: 8,
+          summary: '+80% пропускной способности и +8 меди/цикл. Блокирует Тяжёлые дирижабли.'
+        }
+      ],
+      tier2Fork: [
+        {
+          id: 'continental_runway',
+          name: 'Трансконтинентальная ВПП',
+          icon: 'minecraft:nether_star',
+          cost: 960,
+          incomeMult: 1.80,
+          yieldMult: 1.35,
+          summary: '+80% сверхприбыли от межконтинентальных рейсов. Блокирует Автопилот-сеть.'
+        },
+        {
+          id: 'drone_apron',
+          name: 'Автономный перрон',
+          icon: 'computercraft:wireless_modem_advanced',
+          cost: 920,
+          incomeMult: 1.40,
+          yieldMult: 1.90,
+          summary: '+90% товарного потока без простоя. Блокирует Трансконтинентальную ВПП.'
+        }
+      ]
+    },
+    factory: {
+      id: 'factory',
+      category: 'production',
+      categoryName: 'Производство',
+      name: 'Завод',
+      icon: 'create:mechanical_press',
+      mapSym: 'F',
+      cost: 480,
+      baseIncome: 58,
+      baseProduct: 'create:iron_sheet',
+      baseQty: 8,
+      summary: 'Штампует промышленные комплектующие, пластины и детали механизмов.',
+      tier1Fork: [
+        {
+          id: 'mass_assembly',
+          name: 'Конвейерный цех',
+          icon: 'create:cogwheel',
+          cost: 460,
+          incomeMult: 1.40,
+          yieldMult: 2.10,
+          bonusProduct: 'create:iron_sheet',
+          bonusQty: 6,
+          summary: '×2.1 выпуска пластин (+6/цикл). Блокирует Точное приборостроение.'
+        },
+        {
+          id: 'precision_tooling',
+          name: 'Точное приборостроение',
+          icon: 'create:precision_mechanism',
+          cost: 520,
+          incomeMult: 1.85,
+          yieldMult: 1.25,
+          bonusProduct: 'longhaul:machine_parts',
+          bonusQty: 1,
+          summary: '+85% прибыли и выпуск Прецизионных узлов (+1/цикл). Блокирует Конвейерный цех.'
+        }
+      ],
+      tier2Fork: [
+        {
+          id: 'overclocked_stamping',
+          name: 'Форсированная штамповка',
+          icon: 'create:blaze_burner',
+          cost: 880,
+          incomeMult: 1.75,
+          yieldMult: 1.45,
+          summary: '+75% дохода и +45% продукции. Блокирует Безотходный цикл.'
+        },
+        {
+          id: 'zero_waste_line',
+          name: 'Безотходная автоматика',
+          icon: 'create:deployer',
+          cost: 840,
+          incomeMult: 1.40,
+          yieldMult: 1.95,
+          summary: '+95% товарного выхода со станков. Блокирует Форсированную штамповку.'
+        }
+      ]
+    },
+    refinery: {
+      id: 'refinery',
+      category: 'production',
+      categoryName: 'Производство',
+      name: 'Перерабатывающая станция',
+      icon: 'minecraft:blast_furnace',
+      mapSym: 'R',
+      cost: 540,
+      baseIncome: 64,
+      baseProduct: 'longhaul:ore_concentrate',
+      baseQty: 2,
+      summary: 'Обогащает руду и синтезирует химические реагенты и концентраты.',
+      tier1Fork: [
+        {
+          id: 'ore_enrichment',
+          name: 'Обогащение руд',
+          icon: 'longhaul:ore_concentrate',
+          cost: 500,
+          incomeMult: 1.50,
+          yieldMult: 2.00,
+          bonusProduct: 'longhaul:ore_concentrate',
+          bonusQty: 1,
+          summary: '×2.0 выхода рудного концентрата (+1/цикл). Блокирует Нефтехимический синтез.'
+        },
+        {
+          id: 'petrochem_synth',
+          name: 'Нефтехимический синтез',
+          icon: 'longhaul:refractory_mix',
+          cost: 540,
+          incomeMult: 1.90,
+          yieldMult: 1.30,
+          bonusProduct: 'longhaul:technical_glass',
+          bonusQty: 2,
+          summary: '+90% прибыли и +2 тех. стекла/цикл. Блокирует Обогащение руд.'
+        }
+      ],
+      tier2Fork: [
+        {
+          id: 'catalytic_tower',
+          name: 'Каталитическая колонна',
+          icon: 'minecraft:brewing_stand',
+          cost: 920,
+          incomeMult: 1.80,
+          yieldMult: 1.40,
+          summary: '+80% выручки от тонкой переработки. Блокирует Крио-ректификацию.'
+        },
+        {
+          id: 'cryo_rectification',
+          name: 'Крио-ректификация',
+          icon: 'minecraft:packed_ice',
+          cost: 890,
+          incomeMult: 1.45,
+          yieldMult: 1.90,
+          summary: '+90% выхода химикатов и концентратов. Блокирует Каталитическую колонну.'
+        }
+      ]
+    }
+  };
+
+  function ensureDiplomacyState(state) {
+    if (!state.buildings) state.buildings = {};
+    if (!state.relations) state.relations = {};
+    if (!state.supplyContracts) state.supplyContracts = [];
+    if (!state.sectorOffers) state.sectorOffers = [];
+    if (!(state.nextBuildingSeq > 0)) state.nextBuildingSeq = 1;
+    if (!(state.nextSupplySeq > 0)) state.nextSupplySeq = 1;
+    return state;
+  }
+
+  function relationKey(a, b) {
+    return a < b ? (a + '|' + b) : (b + '|' + a);
+  }
+
+  function getRelation(state, a, b) {
+    ensureDiplomacyState(state);
+    if (!a || !b || a === b) {
+      return { score: 100, alliance: true, transit: {}, mining: {}, trespassCount: 0, griefCount: 0, lastIncident: '' };
+    }
+    var k = relationKey(a, b);
+    if (!state.relations[k]) {
+      state.relations[k] = {
+        score: 0,
+        alliance: false,
+        transit: {},
+        mining: {},
+        trespassCount: 0,
+        griefCount: 0,
+        lastIncident: ''
+      };
+    }
+    var r = state.relations[k];
+    if (!r.transit) r.transit = {};
+    if (!r.mining) r.mining = {};
+    return r;
+  }
+
+  function getStandingLabel(score) {
+    var s = Number(score || 0);
+    if (s >= 60) return 'Альянс / Дружба';
+    if (s >= 20) return 'Дружелюбие';
+    if (s > -20) return 'Нейтралитет';
+    if (s > -50) return 'Недовольство';
+    return 'Вражда';
+  }
+
+  function adjustRelation(state, a, b, delta, reason) {
+    if (!a || !b || a === b) return 100;
+    var r = getRelation(state, a, b);
+    r.score = Math.max(-100, Math.min(100, Math.round(Number(r.score || 0) + Number(delta || 0))));
+    if (reason) r.lastIncident = String(reason).slice(0, 120);
+    if (r.score <= -50 && r.alliance) {
+      r.alliance = false;
+      if (state.pacts) delete state.pacts[pactKey(a, b)];
+    }
+    return r.score;
+  }
+
+  function isAllied(state, a, b) {
+    if (!a || !b) return false;
+    if (a === b) return true;
+    var r = getRelation(state, a, b);
+    return !!r.alliance;
+  }
+
+  function canTransit(state, visitorCid, ownerCid) {
+    if (!ownerCid || !visitorCid || visitorCid === ownerCid) return true;
+    var r = getRelation(state, visitorCid, ownerCid);
+    if (r.alliance) return true;
+    if (r.transit && r.transit[visitorCid]) return true;
+    return false;
+  }
+
+  function canMine(state, visitorCid, ownerCid) {
+    if (!ownerCid || !visitorCid || visitorCid === ownerCid) return true;
+    var r = getRelation(state, visitorCid, ownerCid);
+    if (r.alliance) return true;
+    if (r.mining && r.mining[visitorCid]) return true;
+    return false;
+  }
+
+  function buyLicense(state, buyerCid, ownerCid, kind) {
+    ensureDiplomacyState(state);
+    var buyer = state.companies && state.companies[buyerCid];
+    var owner = state.companies && state.companies[ownerCid];
+    if (!buyer || !owner || buyerCid === ownerCid) return { ok: false, reason: 'bad_company' };
+    var rel = getRelation(state, buyerCid, ownerCid);
+    if (rel.score <= -75) return { ok: false, reason: 'hostile', score: rel.score };
+    if (rel.alliance) return { ok: false, reason: 'already_allied' };
+    var k = kind === 'mining' ? 'mining' : 'transit';
+    var map = k === 'mining' ? rel.mining : rel.transit;
+    if (map[buyerCid]) return { ok: false, reason: 'already_owned' };
+    var base = k === 'mining' ? 240 : 120;
+    var mult = rel.score < 0 ? (1.0 + Math.abs(rel.score) / 100.0) : Math.max(0.70, 1.0 - rel.score / 250.0);
+    var cost = Math.round(base * mult);
+    if (buyer.cash < cost) return { ok: false, reason: 'no_cash', cost: cost, cash: buyer.cash };
+    buyer.cash -= cost;
+    owner.cash += cost;
+    map[buyerCid] = true;
+    adjustRelation(state, buyerCid, ownerCid, 6, 'Покупка лицензии: ' + k);
+    return { ok: true, kind: k, cost: cost, newScore: rel.score };
+  }
+
+  function formOrBreakAlliance(state, cidA, cidB, action) {
+    ensureDiplomacyState(state);
+    var compA = state.companies && state.companies[cidA];
+    var compB = state.companies && state.companies[cidB];
+    if (!compA || !compB || cidA === cidB) return { ok: false, reason: 'bad_company' };
+    var rel = getRelation(state, cidA, cidB);
+    if (action === 'break') {
+      if (!rel.alliance) return { ok: false, reason: 'not_allied' };
+      rel.alliance = false;
+      if (state.pacts) delete state.pacts[pactKey(cidA, cidB)];
+      adjustRelation(state, cidA, cidB, -25, 'Разрыв альянса');
+      return { ok: true, allied: false, score: rel.score };
+    }
+    if (action === 'gift') {
+      var giftCost = 100;
+      if (compA.cash < giftCost) return { ok: false, reason: 'no_cash', cost: giftCost };
+      compA.cash -= giftCost;
+      compB.cash += giftCost;
+      var ns = adjustRelation(state, cidA, cidB, 15, 'Дипломатический жест');
+      return { ok: true, gifted: true, cost: giftCost, score: ns };
+    }
+    if (rel.alliance) return { ok: false, reason: 'already_allied' };
+    if (compB.isBot && rel.score < 15 && !hasPact(state, cidA, cidB)) {
+      return { ok: false, reason: 'low_relation', score: rel.score, needScore: 15 };
+    }
+    var fee = 250;
+    if (compA.cash < fee) return { ok: false, reason: 'no_cash', cost: fee, cash: compA.cash };
+    compA.cash -= fee;
+    compB.cash += Math.round(fee * 0.5);
+    rel.alliance = true;
+    rel.transit[cidA] = true;
+    rel.transit[cidB] = true;
+    rel.mining[cidA] = true;
+    rel.mining[cidB] = true;
+    state.pacts[pactKey(cidA, cidB)] = true;
+    adjustRelation(state, cidA, cidB, 30, 'Подписан альянс');
+    return { ok: true, allied: true, cost: fee, score: rel.score };
+  }
+
+  function recordTerritoryViolation(state, intruderCid, ownerCid, kind, sx, sz) {
+    ensureDiplomacyState(state);
+    if (!ownerCid || intruderCid === ownerCid) return { violated: false };
+    var owner = state.companies && state.companies[ownerCid];
+    if (!owner) return { violated: false };
+    var isMine = kind === 'break_block' || kind === 'break_ore';
+    if (isMine && intruderCid && canMine(state, intruderCid, ownerCid)) return { violated: false };
+    if (!isMine && intruderCid && canTransit(state, intruderCid, ownerCid)) return { violated: false };
+
+    var delta = kind === 'break_ore' ? -12 : (kind === 'break_block' ? -5 : -4);
+    var fine = kind === 'break_ore' ? 20 : (kind === 'break_block' ? 10 : 8);
+    var paid = 0;
+    var rel = null;
+    if (intruderCid && state.companies[intruderCid]) {
+      rel = getRelation(state, intruderCid, ownerCid);
+      if (isMine) rel.griefCount = (rel.griefCount || 0) + 1;
+      else rel.trespassCount = (rel.trespassCount || 0) + 1;
+      adjustRelation(state, intruderCid, ownerCid, delta, (isMine ? 'Добыча в (' : 'Нарушение границ (') + sx + ',' + sz + ')');
+      var intr = state.companies[intruderCid];
+      if (intr.cash >= fine) {
+        intr.cash -= fine;
+        owner.cash += fine;
+        paid = fine;
+      }
+    }
+    var scNow = rel ? rel.score : -10;
+    return {
+      violated: true,
+      kind: kind,
+      delta: delta,
+      fine: paid,
+      newScore: scNow,
+      standing: getStandingLabel(scNow),
+      hostile: scNow <= -40
+    };
+  }
+
+  function diplomaticBuySector(state, buyerCid, sx, sz) {
+    ensureDiplomacyState(state);
+    var buyer = state.companies && state.companies[buyerCid];
+    var info = resolveSectorOwner(state, sx, sz);
+    if (!buyer || info.kind !== 'claimed' || !info.owner || info.owner === buyerCid) {
+      return { ok: false, reason: 'not_owned_by_other' };
+    }
+    var seller = state.companies[info.owner];
+    if (!seller) return { ok: false, reason: 'no_seller' };
+    if (info.isHq && countClaims(state, seller.id) <= 1) return { ok: false, reason: 'last_hq' };
+    var rel = getRelation(state, buyerCid, seller.id);
+    if (rel.score <= -30) return { ok: false, reason: 'hostile', score: rel.score };
+    var mult = rel.alliance ? 0.75 : (rel.score >= 20 ? 0.85 : 1.0);
+    var bldg = getSectorBuilding(state, sx, sz);
+    var bldgVal = bldg ? (BUILDING_CATALOG[bldg.type] ? BUILDING_CATALOG[bldg.type].cost * bldg.level * 0.6 : 200) : 0;
+    var price = Math.round((220 * info.strength + bldgVal) * mult);
+    if (buyer.cash < price) return { ok: false, reason: 'no_cash', cost: price, cash: buyer.cash };
+    buyer.cash -= price;
+    seller.cash += price;
+    var k = sectorKey(sx, sz);
+    state.claims[k].owner = buyerCid;
+    state.claims[k].isHq = false;
+    if (bldg) bldg.owner = buyerCid;
+    buyer.stats.sectorsCaptured = (buyer.stats.sectorsCaptured || 0) + 1;
+    adjustRelation(state, buyerCid, seller.id, 5, 'Мирная покупка сектора (' + sx + ',' + sz + ')');
+    return { ok: true, price: price, sellerName: seller.name, newScore: rel.score };
+  }
+
+  function offerSectorSale(state, sellerCid, buyerCid, sx, sz, price) {
+    ensureDiplomacyState(state);
+    var k = sectorKey(sx, sz);
+    var cl = state.claims[k];
+    if (!cl || cl.owner !== sellerCid) return { ok: false, reason: 'not_owned' };
+    if (cl.isHq && countClaims(state, sellerCid) <= 1) return { ok: false, reason: 'last_hq' };
+    if (!state.companies[buyerCid] || buyerCid === sellerCid) return { ok: false, reason: 'bad_buyer' };
+    var pr = Math.max(10, Math.round(Number(price || 200)));
+    var offer = {
+      id: 'so' + (state.nextOrderSeq++),
+      sellerCid: sellerCid,
+      buyerCid: buyerCid,
+      sx: sx,
+      sz: sz,
+      price: pr,
+      status: 'open'
+    };
+    state.sectorOffers.push(offer);
+    return { ok: true, offer: offer };
+  }
+
+  function acceptSectorOffer(state, buyerCid, offerId) {
+    ensureDiplomacyState(state);
+    var offer = null;
+    for (var i = 0; i < state.sectorOffers.length; i++) {
+      if (state.sectorOffers[i].id === offerId && state.sectorOffers[i].status === 'open') {
+        offer = state.sectorOffers[i];
+        break;
+      }
+    }
+    if (!offer || offer.buyerCid !== buyerCid) return { ok: false, reason: 'not_found' };
+    var buyer = state.companies[buyerCid];
+    var seller = state.companies[offer.sellerCid];
+    var k = sectorKey(offer.sx, offer.sz);
+    var cl = state.claims[k];
+    if (!buyer || !seller || !cl || cl.owner !== offer.sellerCid) return { ok: false, reason: 'invalid_state' };
+    if (buyer.cash < offer.price) return { ok: false, reason: 'no_cash', cost: offer.price };
+    buyer.cash -= offer.price;
+    seller.cash += offer.price;
+    cl.owner = buyerCid;
+    cl.isHq = false;
+    var bldg = getSectorBuilding(state, offer.sx, offer.sz);
+    if (bldg) bldg.owner = buyerCid;
+    offer.status = 'completed';
+    adjustRelation(state, buyerCid, seller.id, 6, 'Сделка по сектору');
+    return { ok: true, offer: offer };
+  }
+
+  function getSectorBuilding(state, sx, sz) {
+    ensureDiplomacyState(state);
+    return state.buildings[sectorKey(sx, sz)] || null;
+  }
+
+  function listCompanyBuildings(state, cid) {
+    ensureDiplomacyState(state);
+    var out = [];
+    var keys = Object.keys(state.buildings);
+    for (var i = 0; i < keys.length; i++) {
+      var b = state.buildings[keys[i]];
+      if (b && b.owner === cid) out.push(b);
+    }
+    return out;
+  }
+
+  function buildCompanyBuilding(state, cid, sx, sz, bType, wx, wy, wz) {
+    ensureDiplomacyState(state);
+    var comp = state.companies && state.companies[cid];
+    if (!comp) return { ok: false, reason: 'no_company' };
+    var spec = BUILDING_CATALOG[bType];
+    if (!spec) return { ok: false, reason: 'bad_type' };
+    var k = sectorKey(sx, sz);
+    var cl = state.claims[k];
+    if (!cl || cl.owner !== cid) return { ok: false, reason: 'not_your_sector' };
+    if (state.buildings[k]) return { ok: false, reason: 'already_built', existing: state.buildings[k] };
+    if (comp.cash < spec.cost) return { ok: false, reason: 'no_cash', cost: spec.cost, cash: comp.cash };
+    comp.cash -= spec.cost;
+    var bldg = {
+      id: 'b' + (state.nextBuildingSeq++),
+      type: bType,
+      category: spec.category,
+      owner: cid,
+      sx: sx,
+      sz: sz,
+      key: k,
+      x: Math.round(Number(wx || sx * SECTOR_SIZE)),
+      y: Math.round(Number(wy || 64)),
+      z: Math.round(Number(wz || sz * SECTOR_SIZE)),
+      level: 1,
+      branch1: null,
+      locked1: null,
+      branch2: null,
+      locked2: null,
+      cashBuffer: 0,
+      stockBuffer: {},
+      cyclesDone: 0
+    };
+    state.buildings[k] = bldg;
+    return { ok: true, building: bldg, spec: spec, cost: spec.cost };
+  }
+
+  function upgradeCompanyBuilding(state, cid, sx, sz, choiceId) {
+    ensureDiplomacyState(state);
+    var comp = state.companies && state.companies[cid];
+    var b = getSectorBuilding(state, sx, sz);
+    if (!comp || !b || b.owner !== cid) return { ok: false, reason: 'not_found' };
+    var spec = BUILDING_CATALOG[b.type];
+    if (!spec) return { ok: false, reason: 'bad_type' };
+
+    if (b.level === 1) {
+      var opts1 = spec.tier1Fork || [];
+      var chosen1 = null, locked1 = null;
+      for (var i = 0; i < opts1.length; i++) {
+        if (opts1[i].id === choiceId) chosen1 = opts1[i];
+        else locked1 = opts1[i].id;
+      }
+      if (!chosen1) return { ok: false, reason: 'bad_choice' };
+      if (comp.cash < chosen1.cost) return { ok: false, reason: 'no_cash', cost: chosen1.cost, cash: comp.cash };
+      comp.cash -= chosen1.cost;
+      b.level = 2;
+      b.branch1 = chosen1.id;
+      b.locked1 = locked1;
+      return { ok: true, building: b, chosen: chosen1, lockedOut: locked1 };
+    }
+    if (b.level === 2) {
+      var opts2 = spec.tier2Fork || [];
+      var chosen2 = null, locked2 = null;
+      for (var j = 0; j < opts2.length; j++) {
+        if (opts2[j].id === choiceId) chosen2 = opts2[j];
+        else locked2 = opts2[j].id;
+      }
+      if (!chosen2) return { ok: false, reason: 'bad_choice' };
+      if (comp.cash < chosen2.cost) return { ok: false, reason: 'no_cash', cost: chosen2.cost, cash: comp.cash };
+      comp.cash -= chosen2.cost;
+      b.level = 3;
+      b.branch2 = chosen2.id;
+      b.locked2 = locked2;
+      return { ok: true, building: b, chosen: chosen2, lockedOut: locked2 };
+    }
+    return { ok: false, reason: 'max_level' };
+  }
+
+  function getBuildingYieldProfile(b) {
+    var spec = BUILDING_CATALOG[b.type];
+    if (!spec) return { income: 0, items: {} };
+    var incMult = 1.0, yMult = 1.0;
+    var items = {};
+    var f1 = null, f2 = null;
+    if (b.branch1 && spec.tier1Fork) {
+      for (var i = 0; i < spec.tier1Fork.length; i++) {
+        if (spec.tier1Fork[i].id === b.branch1) f1 = spec.tier1Fork[i];
+      }
+    }
+    if (b.branch2 && spec.tier2Fork) {
+      for (var j = 0; j < spec.tier2Fork.length; j++) {
+        if (spec.tier2Fork[j].id === b.branch2) f2 = spec.tier2Fork[j];
+      }
+    }
+    if (f1) { incMult *= f1.incomeMult; yMult *= f1.yieldMult; }
+    if (f2) { incMult *= f2.incomeMult; yMult *= f2.yieldMult; }
+    var income = Math.round(spec.baseIncome * incMult);
+    items[spec.baseProduct] = Math.max(1, Math.round(spec.baseQty * yMult));
+    if (f1 && f1.bonusProduct) {
+      items[f1.bonusProduct] = (items[f1.bonusProduct] || 0) + Math.max(1, Math.round((f1.bonusQty || 1) * (f2 ? f2.yieldMult : 1.0)));
+    }
+    return { income: income, items: items };
+  }
+
+  function tickCompanyBuildings(state) {
+    ensureDiplomacyState(state);
+    var keys = Object.keys(state.buildings);
+    var producedCount = 0;
+    for (var i = 0; i < keys.length; i++) {
+      var b = state.buildings[keys[i]];
+      if (!b || !state.companies[b.owner]) continue;
+      var prof = getBuildingYieldProfile(b);
+      var capCash = prof.income * 8;
+      if ((b.cashBuffer || 0) < capCash) {
+        b.cashBuffer = Math.min(capCash, (b.cashBuffer || 0) + prof.income);
+      }
+      if (!b.stockBuffer) b.stockBuffer = {};
+      Object.keys(prof.items).forEach(function (iid) {
+        var cur = Number(b.stockBuffer[iid] || 0);
+        var capItem = prof.items[iid] * 6;
+        if (cur < capItem) {
+          b.stockBuffer[iid] = Math.min(capItem, cur + prof.items[iid]);
+        }
+      });
+      b.cyclesDone = (b.cyclesDone || 0) + 1;
+      producedCount++;
+    }
+    return producedCount;
+  }
+
+  function collectBuildingOutput(state, cid, sx, sz) {
+    ensureDiplomacyState(state);
+    var comp = state.companies && state.companies[cid];
+    var b = getSectorBuilding(state, sx, sz);
+    if (!comp || !b || b.owner !== cid) return { ok: false, reason: 'not_found' };
+    var cash = Math.round(Number(b.cashBuffer || 0));
+    var items = {};
+    Object.keys(b.stockBuffer || {}).forEach(function (iid) {
+      var q = Math.round(Number(b.stockBuffer[iid] || 0));
+      if (q > 0) items[iid] = q;
+    });
+    if (cash <= 0 && !Object.keys(items).length) return { ok: false, reason: 'empty' };
+    comp.cash += cash;
+    comp.stats.deliveries = (comp.stats.deliveries || 0) + 1;
+    b.cashBuffer = 0;
+    b.stockBuffer = {};
+    return { ok: true, cash: cash, items: items };
+  }
+
+  function createSupplyContract(state, initiatorCid, partnerCid, item, qty, price, batches) {
+    ensureDiplomacyState(state);
+    if (!state.companies[initiatorCid] || !state.companies[partnerCid] || initiatorCid === partnerCid) {
+      return { ok: false, reason: 'bad_company' };
+    }
+    var q = Math.max(1, Math.round(Number(qty || 16)));
+    var p = Math.max(10, Math.round(Number(price || 100)));
+    var b = Math.max(1, Math.min(12, Math.round(Number(batches || 3))));
+    var c = {
+      id: 'sc' + (state.nextSupplySeq++),
+      supplierCid: initiatorCid,
+      buyerCid: partnerCid,
+      item: String(item || 'minecraft:iron_ingot'),
+      qty: q,
+      price: p,
+      remainingBatches: b,
+      status: 'open'
+    };
+    state.supplyContracts.push(c);
+    return { ok: true, contract: c };
+  }
+
+  function refreshBotSupplyContracts(state) {
+    ensureDiplomacyState(state);
+    var kept = (state.supplyContracts || []).filter(function (c) {
+      return c.status === 'open' && !c.isBot && c.remainingBatches > 0;
+    });
+    for (var i = 0; i < DEFAULT_BOT_COMPANIES.length; i++) {
+      var bot = DEFAULT_BOT_COMPANIES[i];
+      var tpl = BOT_ORDER_TEMPLATES[bot.id];
+      if (!tpl || !tpl.buy || !tpl.buy.length) continue;
+      var bo = tpl.buy[0];
+      kept.push({
+        id: 'sc' + (state.nextSupplySeq++),
+        supplierCid: 'any',
+        buyerCid: bot.id,
+        isBot: true,
+        item: bo.item,
+        qty: bo.qty * 2,
+        price: Math.round(bo.price * 2.15),
+        remainingBatches: 3,
+        status: 'open'
+      });
+    }
+    state.supplyContracts = kept;
+    return kept.length;
+  }
+
+  function fulfillSupplyContract(state, actorCid, contractId) {
+    ensureDiplomacyState(state);
+    var c = null;
+    for (var i = 0; i < state.supplyContracts.length; i++) {
+      if (state.supplyContracts[i].id === contractId && state.supplyContracts[i].status === 'open') {
+        c = state.supplyContracts[i];
+        break;
+      }
+    }
+    if (!c || c.remainingBatches <= 0) return { ok: false, reason: 'not_found' };
+    if (c.buyerCid === actorCid) return { ok: false, reason: 'own_contract' };
+    if (c.supplierCid !== 'any' && c.supplierCid !== actorCid) return { ok: false, reason: 'wrong_supplier' };
+    var actor = state.companies[actorCid];
+    var buyer = state.companies[c.buyerCid];
+    if (!actor || !buyer) return { ok: false, reason: 'bad_company' };
+    if (buyer.cash < c.price) return { ok: false, reason: 'buyer_no_cash' };
+    buyer.cash -= c.price;
+    actor.cash += c.price;
+    actor.stats.tradeVolume = (actor.stats.tradeVolume || 0) + c.price;
+    buyer.stats.tradeVolume = (buyer.stats.tradeVolume || 0) + c.price;
+    c.remainingBatches -= 1;
+    if (c.remainingBatches <= 0) c.status = 'completed';
+    var newScore = adjustRelation(state, actorCid, buyer.id, 8, 'Поставка по контракту ' + c.id);
+    return { ok: true, contract: c, payout: c.price, buyerName: buyer.name, newScore: newScore };
+  }
+
   function sectorCoords(x, z) {
     var half = SECTOR_SIZE / 2;
     var sx = Math.floor((Number(x || 0) + half) / SECTOR_SIZE);
@@ -851,13 +1689,20 @@ global.LHOpenTTD = (function () {
       playerCompany: {},
       claims: {},
       pacts: {},
+      buildings: {},
+      relations: {},
+      supplyContracts: [],
+      sectorOffers: [],
       marketOrders: [],
       tradeOffers: [],
       nextOrderSeq: 1,
+      nextBuildingSeq: 1,
+      nextSupplySeq: 1,
       subsidy: null,
       botCycle: 0
     };
     ensureBots(st);
+    ensureDiplomacyState(st);
     return st;
   }
 
@@ -872,6 +1717,7 @@ global.LHOpenTTD = (function () {
     if (!state.playerCompany) state.playerCompany = {};
     if (!state.marketOrders) state.marketOrders = [];
     if (!state.tradeOffers) state.tradeOffers = [];
+    ensureDiplomacyState(state);
 
     // Migrate legacy bot claims out of the 3x3 spawn sanctuary (-1..1, -1..1)
     Object.keys(state.claims).forEach(function (ck) {
@@ -952,10 +1798,17 @@ global.LHOpenTTD = (function () {
     var c = state.companies && state.companies[cid];
     if (!c) return 0;
     var claims = countClaims(state, cid);
+    var bldgs = listCompanyBuildings(state, cid);
+    var bldgValue = 0;
+    for (var i = 0; i < bldgs.length; i++) {
+      var sp = BUILDING_CATALOG[bldgs[i].type];
+      bldgValue += (sp ? sp.cost : 300) * Number(bldgs[i].level || 1);
+    }
     var s = c.stats || {};
     return Math.round(
       Number(c.cash || 0) +
       claims * 300 +
+      bldgValue +
       Number(s.deliveries || 0) * 45 +
       Number(s.tradeVolume || 0) * 0.5 +
       Number(s.contractsDone || 0) * 200 +
@@ -1340,6 +2193,7 @@ global.LHOpenTTD = (function () {
         }
       }
     }
+    tickCompanyBuildings(state);
     return events;
   }
 
@@ -1415,11 +2269,13 @@ global.LHOpenTTD = (function () {
     RESOURCE_SPECS: RESOURCE_SPECS,
     DEFAULT_BOT_COMPANIES: DEFAULT_BOT_COMPANIES,
     BOT_ORDER_TEMPLATES: BOT_ORDER_TEMPLATES,
+    BUILDING_CATALOG: BUILDING_CATALOG,
     sectorCoords: sectorCoords,
     sectorKey: sectorKey,
     sanitizeId: sanitizeId,
     createInitialState: createInitialState,
     ensureBots: ensureBots,
+    ensureDiplomacyState: ensureDiplomacyState,
     hasPact: hasPact,
     togglePact: togglePact,
     countClaims: countClaims,
@@ -1440,7 +2296,230 @@ global.LHOpenTTD = (function () {
     fortifySector: fortifySector,
     botExpandStep: botExpandStep,
     refreshBotOrders: refreshBotOrders,
-    renderAsciiMap: renderAsciiMap
+    renderAsciiMap: renderAsciiMap,
+    getRelation: getRelation,
+    getStandingLabel: getStandingLabel,
+    adjustRelation: adjustRelation,
+    isAllied: isAllied,
+    canTransit: canTransit,
+    canMine: canMine,
+    buyLicense: buyLicense,
+    formOrBreakAlliance: formOrBreakAlliance,
+    recordTerritoryViolation: recordTerritoryViolation,
+    diplomaticBuySector: diplomaticBuySector,
+    offerSectorSale: offerSectorSale,
+    acceptSectorOffer: acceptSectorOffer,
+    getSectorBuilding: getSectorBuilding,
+    listCompanyBuildings: listCompanyBuildings,
+    buildCompanyBuilding: buildCompanyBuilding,
+    upgradeCompanyBuilding: upgradeCompanyBuilding,
+    getBuildingYieldProfile: getBuildingYieldProfile,
+    tickCompanyBuildings: tickCompanyBuildings,
+    collectBuildingOutput: collectBuildingOutput,
+    createSupplyContract: createSupplyContract,
+    refreshBotSupplyContracts: refreshBotSupplyContracts,
+    fulfillSupplyContract: fulfillSupplyContract
+  };
+})();
+
+global.LHChapterFork = (function () {
+  var MANDATORY_CHAPTERS = ['ch00', 'ch01', 'ch02'];
+  var EARLY_CHAPTERS = [
+    'ch03', 'ch05', 'ch07', 'ch12', 'ch15', 'ch17', 'ch19', 'ch29', 'ch30',
+    'ch38', 'ch41', 'ch43', 'ch47', 'ch48', 'ch51', 'ch53', 'ch55', 'ch56'
+  ];
+  var MID_CHAPTERS = [
+    'ch04', 'ch06', 'ch08', 'ch09', 'ch10', 'ch16', 'ch18', 'ch20', 'ch21',
+    'ch22', 'ch23', 'ch24', 'ch28', 'ch31', 'ch32', 'ch33', 'ch39', 'ch40',
+    'ch42', 'ch44', 'ch49', 'ch54', 'ch57'
+  ];
+  var LATE_CHAPTERS = [
+    'ch11', 'ch14', 'ch25', 'ch26', 'ch27', 'ch34', 'ch35', 'ch36', 'ch37',
+    'ch45', 'ch46', 'ch50', 'ch52', 'ch58', 'ch59', 'ch60', 'ch61'
+  ];
+  var EARLY_TO_MID_REQ = 5;
+  var MID_TO_LATE_REQ = 6;
+
+  function getChapterTier(chId) {
+    if (chId === 'ch13') return 'optional';
+    if (MANDATORY_CHAPTERS.indexOf(chId) !== -1) return 'mandatory';
+    if (EARLY_CHAPTERS.indexOf(chId) !== -1) return 'early';
+    if (MID_CHAPTERS.indexOf(chId) !== -1) return 'mid';
+    if (LATE_CHAPTERS.indexOf(chId) !== -1) return 'late';
+    return 'optional';
+  }
+
+  function getTierLabel(tier) {
+    if (tier === 'mandatory') return 'Обязательный старт';
+    if (tier === 'early') return 'Ранний тир (Стартовые моды и логистика)';
+    if (tier === 'mid') return 'Средний тир (Индустрия, сети и экспедиции)';
+    if (tier === 'late') return 'Поздний тир (Эндгейм, ядерка, боссы и синтез)';
+    if (tier === 'cleanup') return 'Добор оставшихся глав';
+    return 'Опционально';
+  }
+
+  function createPlayerForkState() {
+    return {
+      unlocked: MANDATORY_CHAPTERS.slice(),
+      activePick: null,
+      offers: [],
+      history: []
+    };
+  }
+
+  function ensurePlayerState(pState) {
+    var st = pState || createPlayerForkState();
+    if (!st.unlocked) st.unlocked = MANDATORY_CHAPTERS.slice();
+    for (var i = 0; i < MANDATORY_CHAPTERS.length; i++) {
+      if (st.unlocked.indexOf(MANDATORY_CHAPTERS[i]) === -1) {
+        st.unlocked.unshift(MANDATORY_CHAPTERS[i]);
+      }
+    }
+    if (!st.offers) st.offers = [];
+    if (!st.history) st.history = [];
+    return st;
+  }
+
+  function countCompletedInList(list, completedMap) {
+    var n = 0;
+    var map = completedMap || {};
+    for (var i = 0; i < list.length; i++) {
+      if (map[list[i]]) n++;
+    }
+    return n;
+  }
+
+  function isMandatoryDone(completedMap) {
+    return countCompletedInList(MANDATORY_CHAPTERS, completedMap) >= MANDATORY_CHAPTERS.length;
+  }
+
+  function unpickedInList(list, unlockedArr) {
+    var out = [];
+    for (var i = 0; i < list.length; i++) {
+      if (unlockedArr.indexOf(list[i]) === -1) out.push(list[i]);
+    }
+    return out;
+  }
+
+  function currentEligibleTier(pState, completedMap) {
+    var st = ensurePlayerState(pState);
+    var map = completedMap || {};
+    if (!isMandatoryDone(map)) return 'mandatory';
+
+    var earlyRem = unpickedInList(EARLY_CHAPTERS, st.unlocked);
+    var earlyDone = countCompletedInList(EARLY_CHAPTERS, map);
+    if (earlyDone < EARLY_TO_MID_REQ && earlyRem.length > 0) return 'early';
+
+    var midRem = unpickedInList(MID_CHAPTERS, st.unlocked);
+    var midDone = countCompletedInList(MID_CHAPTERS, map);
+    if (midDone < MID_TO_LATE_REQ && midRem.length > 0) return 'mid';
+
+    var lateRem = unpickedInList(LATE_CHAPTERS, st.unlocked);
+    if (lateRem.length > 0) return 'late';
+
+    if (earlyRem.length > 0 || midRem.length > 0) return 'cleanup';
+    return 'complete';
+  }
+
+  function eligiblePool(pState, completedMap) {
+    var st = ensurePlayerState(pState);
+    var tier = currentEligibleTier(st, completedMap);
+    if (tier === 'mandatory' || tier === 'complete') return [];
+    if (tier === 'early') return unpickedInList(EARLY_CHAPTERS, st.unlocked);
+    if (tier === 'mid') return unpickedInList(MID_CHAPTERS, st.unlocked);
+    if (tier === 'late') return unpickedInList(LATE_CHAPTERS, st.unlocked);
+    var remEarly = unpickedInList(EARLY_CHAPTERS, st.unlocked);
+    if (remEarly.length > 0) return remEarly;
+    return unpickedInList(MID_CHAPTERS, st.unlocked);
+  }
+
+  function rollThreeChoices(pState, completedMap, rngFn) {
+    var st = ensurePlayerState(pState);
+    var map = completedMap || {};
+    if (!isMandatoryDone(map)) {
+      st.offers = [];
+      return { ok: false, reason: 'mandatory_incomplete', tier: 'mandatory', offers: [] };
+    }
+    // If activePick is already completed, clear it so a fresh 3-choice fork can roll
+    if (st.activePick && map[st.activePick]) {
+      st.activePick = null;
+    }
+    var pool = eligiblePool(st, map);
+    var tier = currentEligibleTier(st, map);
+    if (!pool.length) {
+      st.offers = [];
+      return { ok: true, tier: tier, offers: [] };
+    }
+    // Keep existing offers if all are still valid in current eligible pool
+    if (st.offers && st.offers.length > 0) {
+      var allValid = st.offers.every(function (cid) { return pool.indexOf(cid) !== -1; });
+      if (allValid) {
+        return { ok: true, tier: tier, offers: st.offers.slice() };
+      }
+    }
+    var rng = rngFn || Math.random;
+    var copy = pool.slice();
+    for (var i = copy.length - 1; i > 0; i--) {
+      var j = Math.floor(rng() * (i + 1));
+      var tmp = copy[i];
+      copy[i] = copy[j];
+      copy[j] = tmp;
+    }
+    st.offers = copy.slice(0, Math.min(3, copy.length));
+    return { ok: true, tier: tier, offers: st.offers.slice() };
+  }
+
+  function pickChapterFromOffer(pState, chId, completedMap, rngFn) {
+    var st = ensurePlayerState(pState);
+    var map = completedMap || {};
+    if (!isMandatoryDone(map)) {
+      return { ok: false, reason: 'mandatory_incomplete' };
+    }
+    if (st.activePick && !map[st.activePick]) {
+      return { ok: false, reason: 'active_chapter_pending', activePick: st.activePick };
+    }
+    if (!st.offers || !st.offers.length) {
+      rollThreeChoices(st, map, rngFn);
+    }
+    if (st.offers.indexOf(chId) === -1) {
+      return { ok: false, reason: 'not_in_offers', offers: st.offers.slice() };
+    }
+    if (st.unlocked.indexOf(chId) === -1) st.unlocked.push(chId);
+    st.activePick = chId;
+    st.history.push({ chId: chId, tier: getChapterTier(chId), offers: st.offers.slice() });
+    st.offers = [];
+    return { ok: true, picked: chId, tier: getChapterTier(chId), unlocked: st.unlocked.slice() };
+  }
+
+  function onChapterCompleted(pState, chId, completedMap, rngFn) {
+    var st = ensurePlayerState(pState);
+    var map = completedMap || {};
+    if (st.activePick === chId) {
+      st.activePick = null;
+    }
+    if (isMandatoryDone(map) && (!st.activePick || map[st.activePick])) {
+      return rollThreeChoices(st, map, rngFn);
+    }
+    return { ok: true, tier: currentEligibleTier(st, map), offers: st.offers.slice() };
+  }
+
+  return {
+    MANDATORY_CHAPTERS: MANDATORY_CHAPTERS,
+    EARLY_CHAPTERS: EARLY_CHAPTERS,
+    MID_CHAPTERS: MID_CHAPTERS,
+    LATE_CHAPTERS: LATE_CHAPTERS,
+    EARLY_TO_MID_REQ: EARLY_TO_MID_REQ,
+    MID_TO_LATE_REQ: MID_TO_LATE_REQ,
+    getChapterTier: getChapterTier,
+    getTierLabel: getTierLabel,
+    createPlayerForkState: createPlayerForkState,
+    ensurePlayerState: ensurePlayerState,
+    isMandatoryDone: isMandatoryDone,
+    currentEligibleTier: currentEligibleTier,
+    eligiblePool: eligiblePool,
+    rollThreeChoices: rollThreeChoices,
+    pickChapterFromOffer: pickChapterFromOffer,
+    onChapterCompleted: onChapterCompleted
   };
 })();
 

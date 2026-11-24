@@ -4,10 +4,12 @@ import pathlib
 from .common import (
     BANNED_ITEM_SUBSTRINGS,
     GENERATED_QUESTS,
+    adv,
     quest,
     r_choice,
     r_item,
     r_xp,
+    t_adv,
     t_check,
     t_item,
     tier_rewards,
@@ -116,14 +118,20 @@ def emit_chapter(
         return 0
     mid_y = round(((len(non_empty_lanes) - 1) / 2.0) * dy)
     root_id = f'ch{ch_code}_00_root'
+    adv(f'chapters/ch{ch_code}_unlocked', 10)
+    tier_ru = {1: 'Ранний тир', 2: 'Средний тир', 3: 'Продвинутый/Поздний тир', 4: 'Финальный тир'}.get(tier, 'Тир')
+    root_tasks = {
+        'unlock': t_adv(f'longhaul:chapters/ch{ch_code}_unlocked', 'Открыто через вилку глав (/lh chapters)'),
+        'study': t_check('Раздел изучен'),
+    }
     quest(
         root_id,
         root_title,
         group_name,
         [-dx, mid_y],
         root_icon,
-        t_check('Раздел изучен'),
-        [root_desc, 'Выполняйте задания ветки слева направо — награды сбалансированы под этапы Long Haul Legacy 2.0.'],
+        root_tasks,
+        [root_desc, f'Сложность главы: {tier_ru}. Выбирайте главу из 3 случайных вариантов во вкладке «Вилка глав» (/lh gui chapters), затем выполняйте задания слева направо.'],
         deps=[root_dep] if root_dep else [],
         subtitle=subtitle,
         rewards=tier_rewards(tier, int(ch_code)),

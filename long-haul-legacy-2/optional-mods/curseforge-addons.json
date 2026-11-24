@@ -29,6 +29,20 @@
       "license": "All Rights Reserved",
       "side": "client_and_server",
       "notes": "CurseForge-only Forge 1.20.1 mod (All Rights Reserved). Download from CurseForge and drop into optional-mods/ or your launcher's mods/ folder."
+    },
+    {
+      "name": "Realistic Walkie-Talkie",
+      "author": "Toni_Carter_Company_Mods_Inc",
+      "mod_id": "walkietalkies",
+      "curseforge_project_id": 1750447,
+      "curseforge_file_id": 9768178,
+      "recommended_filename": "walkietalkies-forge-1.3.0-1.20.1.jar",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/realistic-walkie-talkie",
+      "license": "All Rights Reserved",
+      "side": "client_and_server",
+      "requires_mod": "voicechat",
+      "config_file": "config/walkietalkies-server.properties",
+      "notes": "Frequency-tuned (100.0-999.9 MHz) Simple Voice Chat radios with radio audio effects, squelch, and text channel support. Preconfigured in overrides/config/walkietalkies-server.properties; coexists with Flaton's Modrinth walkie-talkie in alpha20.json."
     }
   ]
 }

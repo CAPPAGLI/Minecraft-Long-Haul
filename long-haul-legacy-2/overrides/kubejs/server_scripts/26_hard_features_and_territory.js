@@ -141,6 +141,7 @@ function lhProgRead(server) {
     featureOrder: [],
     workshopItems: {},
     deathsByPlayer: {},
+    playerForks: {},
     targetAvgDeaths: 275.15,
     rulesConfirmed: false,
     nuclearVerified: false,
@@ -152,6 +153,7 @@ function lhProgRead(server) {
   if (!LHProgState.featureOrder) LHProgState.featureOrder = [];
   if (!LHProgState.workshopItems) LHProgState.workshopItems = {};
   if (!LHProgState.deathsByPlayer) LHProgState.deathsByPlayer = {};
+  if (!LHProgState.playerForks) LHProgState.playerForks = {};
   if ((LHProgState.schemaVersion || 1) < 2) {
     if (!(LHProgState.targetAvgDeaths > 0) || Math.abs(LHProgState.targetAvgDeaths - 63.15) < 0.01) {
       LHProgState.targetAvgDeaths = 275.15;
@@ -674,10 +676,86 @@ function lhCasinoResolveImmediate(server, dryRun) {
   return resolved;
 }
 
+function lhChapterForkStatus(server, player, dryRun) {
+  var db = lhProgRead(server);
+  if (!player || !global.LHChapterFork) return null;
+  var pid = lhId(player);
+  var pState = global.LHChapterFork.ensurePlayerState(db.playerForks[pid]);
+  db.playerForks[pid] = pState;
+  var mandatoryDone = global.LHChapterFork.isMandatoryDone(db.chapters);
+  var hadOffers = (pState.offers || []).length;
+  var roll = null;
+  if (mandatoryDone) {
+    if (!dryRun && typeof lhUnlock === 'function') {
+      lhUnlock(player, 'longhaul:tier/mandatory_done');
+    }
+    if (!pState.activePick || db.chapters[pState.activePick]) {
+      roll = global.LHChapterFork.rollThreeChoices(pState, db.chapters);
+    }
+  }
+  if (!dryRun && typeof lhUnlock === 'function') {
+    for (var i = 0; i < pState.unlocked.length; i++) {
+      var cid = pState.unlocked[i];
+      if (global.LHChapterFork.MANDATORY_CHAPTERS.indexOf(cid) === -1) {
+        lhUnlock(player, 'longhaul:chapters/' + cid + '_unlocked');
+      }
+    }
+  }
+  lhProgSave(server);
+  if (!dryRun && mandatoryDone && hadOffers === 0 && pState.offers && pState.offers.length > 0 && typeof player.tell === 'function') {
+    var names = pState.offers.map(function (c) { return LH_CHAPTER_LABELS[c] || c; });
+    player.tell('§6§l[Вилка глав · ' + global.LHChapterFork.getTierLabel(global.LHChapterFork.currentEligibleTier(pState, db.chapters)) + '] §fДоступны 3 случайные главы: §e' + names.join(' §7| §e') + ' §7(/lh gui chapters)');
+  }
+  return {
+    mandatoryDone: mandatoryDone,
+    tier: global.LHChapterFork.currentEligibleTier(pState, db.chapters),
+    tierLabel: global.LHChapterFork.getTierLabel(global.LHChapterFork.currentEligibleTier(pState, db.chapters)),
+    unlocked: pState.unlocked.slice(),
+    activePick: pState.activePick,
+    offers: (pState.offers || []).slice(),
+    roll: roll
+  };
+}
+
+function lhChapterForkPick(server, player, chId, dryRun) {
+  var db = lhProgRead(server);
+  if (!player || !global.LHChapterFork) return { ok: false, reason: 'no_engine' };
+  var pid = lhId(player);
+  var pState = global.LHChapterFork.ensurePlayerState(db.playerForks[pid]);
+  db.playerForks[pid] = pState;
+  var res = global.LHChapterFork.pickChapterFromOffer(pState, chId, db.chapters);
+  if (!res.ok) {
+    if (!dryRun) {
+      if (res.reason === 'mandatory_incomplete') {
+        lhMsg(player, '§cСначала завершите обязательные стартовые главы: 00 (Сюжет), 01 (Правила) и 02 (Мастерская).');
+      } else if (res.reason === 'active_chapter_pending') {
+        lhMsg(player, '§eСначала завершите текущую выбранную главу: ' + (LH_CHAPTER_LABELS[res.activePick] || res.activePick) + '.');
+      } else {
+        lhMsg(player, '§cГлава ' + chId + ' не входит в вашу текущую вилку из 3 глав (' + (res.offers || []).join(', ') + ').');
+      }
+    }
+    return res;
+  }
+  lhProgSave(server);
+  if (!dryRun && typeof lhUnlock === 'function') {
+    lhUnlock(player, 'longhaul:chapters/' + chId + '_unlocked');
+    if (typeof lhLogEvent === 'function') {
+      lhLogEvent(server, 'chapter', (player.username || 'Игрок') + ' выбрал главу из вилки 3: ' + (LH_CHAPTER_LABELS[chId] || chId), { chatMode: 'never' });
+    }
+    lhMsg(player, '§a[Вилка глав] Открыта глава: §f' + (LH_CHAPTER_LABELS[chId] || chId) + ' §7[' + global.LHChapterFork.getTierLabel(res.tier) + '].');
+  }
+  return res;
+}
+
 function lhUnlockChapter(server, chapterId, triggerSpin, dryRun) {
   var db = lhProgRead(server);
   if (db.chapters[chapterId]) return false;
   db.chapters[chapterId] = true;
+  if (global.LHChapterFork && db.playerForks) {
+    Object.keys(db.playerForks).forEach(function (pid) {
+      global.LHChapterFork.onChapterCompleted(db.playerForks[pid], chapterId, db.chapters);
+    });
+  }
   lhProgSave(server);
 
   var label = LH_CHAPTER_LABELS[chapterId] || chapterId;
@@ -687,6 +765,11 @@ function lhUnlockChapter(server, chapterId, triggerSpin, dryRun) {
     } else if (server.players) {
       for (var i = 0; i < server.players.length; i++) {
         server.players[i].tell('§a§l[Глава завершена] §f' + label + ' §7-> расширяем территорию и крутим Колесо Угроз!');
+      }
+    }
+    if (server.players) {
+      for (var j = 0; j < server.players.length; j++) {
+        lhChapterForkStatus(server, server.players[j], false);
       }
     }
   }
@@ -865,6 +948,7 @@ function lhProgressionRecompute(server, player, dryRun) {
     } catch (eHeraclesProg) {}
   }
 
+  if (player) lhChapterForkStatus(server, player, !!dryRun);
   return lhTerritoryCounts(server);
 }
 
@@ -1392,6 +1476,39 @@ ServerEvents.commandRegistry(function (event) {
       return 1;
     })));
   root.then(chapterCmd);
+
+  var chaptersCmd = C.literal('chapters');
+  chaptersCmd.executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException;
+    var st = lhChapterForkStatus(server, p, false);
+    if (!st) return 0;
+    lhMsg(p, '=== Вилка глав по сложности (' + st.tierLabel + ') ===');
+    if (!st.mandatoryDone) {
+      lhMsg(p, '§eСначала завершите обязательные стартовые главы: 00 (Сюжет), 01 (Правила), 02 (Мастерская).');
+    } else if (st.activePick) {
+      lhMsg(p, '§aТекущая выбранная глава: §f' + (LH_CHAPTER_LABELS[st.activePick] || st.activePick));
+    } else if (st.offers && st.offers.length) {
+      lhMsg(p, '§6Выберите 1 из 3 случайных глав (/lh chapters pick <id> или Планшет → Главы):');
+      st.offers.forEach(function (cid) {
+        lhMsg(p, '  §e• [' + cid + '] §f' + (LH_CHAPTER_LABELS[cid] || cid));
+      });
+    } else {
+      lhMsg(p, '§aВсе доступные главы открыты!');
+    }
+    return 1;
+  });
+  chaptersCmd.then(C.literal('status').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException;
+    var st = lhChapterForkStatus(server, p, false);
+    if (!st) return 0;
+    lhMsg(p, 'Тир: ' + st.tierLabel + ' | Открыто у вас: ' + st.unlocked.length + '/61 | Активная: ' + (st.activePick || 'нет') + ' | Вилка: ' + ((st.offers || []).join(', ') || 'нет'));
+    return 1;
+  }));
+  chaptersCmd.then(C.literal('pick').then(C.argument('chapterId', LHDiffArgStr.word()).executes(function (ctx) {
+    var res = lhChapterForkPick(ctx.source.server, ctx.source.playerOrException, LHDiffArgStr.getString(ctx, 'chapterId'), false);
+    return res && res.ok ? 1 : 0;
+  })));
+  root.then(chaptersCmd);
 
   var rules = C.literal('rules');
   rules.then(C.literal('confirm').executes(function (ctx) {
