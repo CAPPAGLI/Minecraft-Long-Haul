@@ -897,9 +897,10 @@ function lhGuiRenderTerritory(gui, server, player) {
 
   var pid = typeof lhId === 'function' ? lhId(player) : String(player.uuid || '');
   var mmPref = (st.minimapPrefs && st.minimapPrefs[pid]) ? st.minimapPrefs[pid] : { enabled: true, size: 'medium' };
-  lhGuiSlot(gui, 8, 3, 'minecraft:filled_map', mmPref.enabled ? '§a🧭 HUD Миникарта: ВКЛ' : '§c🧭 HUD Миникарта: ВЫКЛ', [
-    '§7Живой радар ' + (mmPref.size === 'small' ? '7×7' : '9×9') + ' секторов в углу экрана.',
-    '§eЛКМ: Вкл/Выкл миникарту',
+  lhGuiSlot(gui, 8, 3, 'minecraft:filled_map', mmPref.enabled ? '§a🗺 Границы в Xaero: ВКЛ' : '§c🗺 Границы в Xaero: ВЫКЛ', [
+    '§7Подсветка секторов и границ мира прямо в',
+    '§bXaero\'s World Map (M) §7и §bXaero\'s Minimap§7.',
+    '§eЛКМ: Вкл/Выкл слой границ Xaero',
     '§bПКМ: Выдать карту-предмет для Map Atlases'
   ], function (pl) {
     if (!st.minimapPrefs) st.minimapPrefs = {};
@@ -907,7 +908,7 @@ function lhGuiRenderTerritory(gui, server, player) {
     cur.enabled = !cur.enabled;
     st.minimapPrefs[pid] = cur;
     lhOttdSave(server);
-    if (typeof lhSyncMinimapHud === 'function') lhSyncMinimapHud(server, pl, !cur.enabled);
+    if (typeof lhSyncXaeroTerritories === 'function') lhSyncXaeroTerritories(server, pl);
     lhOpenGui(server, pl, 'territory');
   }, function (pl) {
     lhGiveTerritoryMapItem(server, pl, false, false);

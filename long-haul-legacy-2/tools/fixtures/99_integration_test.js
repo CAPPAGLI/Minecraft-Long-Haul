@@ -942,7 +942,44 @@ function lhStartIntegrationSetup(server) {
         ok(disp.performPrefixedCommand(src, 'lh price check minecraft:iron_ingot') === 1, 'brigadier /lh price check');
         ok(disp.performPrefixedCommand(src, 'lh aspects') === 1, 'brigadier /lh aspects');
 
-        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic + openttd + eventlog + gui + economy + map_byte_fix + quest_items_' + auditList.length + ' + custom_origins_only');
+        // 28. First-join spawn & out-of-border rescue stay strictly inside active world border + Xaero sync works
+        var halfBorderNow = lhActiveBorderHalf(server);
+        var progSaved28 = JSON.stringify(lhProgRead(server));
+        var newJoiner = {
+          uuid: '00000000-0000-4000-8000-000000000099',
+          username: 'TestNewJoiner',
+          level: overworld,
+          x: 0.5, y: 80, z: 0.5,
+          teleportTo: function () {
+            if (arguments.length === 3) {
+              this.x = Number(arguments[0]); this.y = Number(arguments[1]); this.z = Number(arguments[2]);
+            }
+          },
+          tell: function () {},
+          getName: function () { return { getString: function () { return 'TestNewJoiner'; } }; }
+        };
+        lhFirstJoinRandomSpawn(server, newJoiner);
+        ok(Math.abs(newJoiner.x) <= halfBorderNow - 16 && Math.abs(newJoiner.z) <= halfBorderNow - 16,
+          'first-join spawn strictly inside world border (+/-' + (halfBorderNow - 16) + '): (' + newJoiner.x + ', ' + newJoiner.z + ')');
+        var db28 = lhProgRead(server);
+        db28.playerHomeSpawns[newJoiner.uuid] = { x: halfBorderNow + 250, y: 80, z: halfBorderNow + 250 };
+        newJoiner.x = halfBorderNow + 250;
+        newJoiner.z = halfBorderNow + 250;
+        lhEnsureSafeSpawn(server, newJoiner, true);
+        ok(Math.abs(newJoiner.x) <= halfBorderNow - 16 && Math.abs(newJoiner.z) <= halfBorderNow - 16,
+          'out-of-border player rescued strictly inside world border: (' + newJoiner.x + ', ' + newJoiner.z + ')');
+        LHProgState = JSON.parse(progSaved28);
+        lhProgSave(server);
+
+        var xaeroPackets = [];
+        var xaeroActor = {
+          uuid: lhId(fp),
+          sendData: function (ch, data) { xaeroPackets.push({ ch: ch, data: data }); }
+        };
+        ok(lhSyncXaeroTerritories(server, xaeroActor) && xaeroPackets.length === 1 && xaeroPackets[0].ch === 'lh:xaero_territories',
+          'lhSyncXaeroTerritories sends lh:xaero_territories payload');
+
+        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic + openttd + eventlog + gui + economy + map_byte_fix + border_spawn_safety + xaero_sync + quest_items_' + auditList.length + ' + custom_origins_only');
       } catch (err2) {
         console.error('LH_INTEGRATION_FAIL: live adapter ' + err2);
       }

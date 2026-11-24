@@ -37,9 +37,23 @@ function lhOttdRead(server) {
   return LHOTTDState;
 }
 
+var LHXaeroLastDigest = '';
+
 function lhOttdSave(server) {
   if (LHOTTDState !== null) {
     server.persistentData.putString('longhaul_openttd_v1', JSON.stringify(LHOTTDState));
+    try {
+      var digest = Object.keys(LHOTTDState.claims || {}).length + ':' +
+        Object.keys(LHOTTDState.buildings || {}).length + ':' +
+        Object.keys(LHOTTDState.companies || {}).length + ':' +
+        Object.keys(LHOTTDState.diplomacy || {}).length;
+      if (LHXaeroLastDigest && digest !== LHXaeroLastDigest && server.players && server.players.length > 0) {
+        LHXaeroLastDigest = digest;
+        lhSyncXaeroTerritories(server, null);
+      } else if (!LHXaeroLastDigest) {
+        LHXaeroLastDigest = digest;
+      }
+    } catch (eDig) {}
   }
 }
 
@@ -167,7 +181,7 @@ function lhRefreshRecipeEconomyGraph(server) {
     console.warn('[LH] Recipe economy graph error: ' + eRm);
   }
   LHLastRecipeGraphDebug = { seen: seen, hasOut: hasOut, hasIngs: hasIngs, edges: edges.length, firstErr: firstErr, sample: sample };
-  global.LHEconomyEngine.propagateRecipePrices(econ, edges, 5);
+  global.LHEconomyEngine.propagateRecipePrices(econ, edges, 3);
   lhEconSave(server);
   console.info('[LH] Economy recipe graph propagated: seen=' + seen + ', hasOut=' + hasOut + ', hasIngs=' + hasIngs + ', edges=' + edges.length + ', priced=' + Object.keys(econ.recipePrices || {}).length + (firstErr ? (', firstErr=' + firstErr) : ''));
   return edges.length;
@@ -1039,147 +1053,113 @@ function lhBotTick(server, dryRun) {
   return expansions;
 }
 
-function lhSyncMinimapHud(server, player, forceClear) {
-  if (!server || !player || typeof player.paint !== 'function') return false;
-  var st = lhOttdRead(server);
-  var pid = lhId(player);
-  var pref = (st.minimapPrefs && st.minimapPrefs[pid]) ? st.minimapPrefs[pid] : { enabled: true, size: 'medium' };
-  var radius = pref.size === 'small' ? 3 : 4; // 7x7 or 9x9 sectors
-  var cellPx = pref.size === 'small' ? 7 : 6;
-  var gridN = radius * 2 + 1;
-  var panelW = gridN * cellPx + 12;
-  var panelH = gridN * cellPx + 28;
-  var anchorX = -panelW - 6;
-  var anchorY = 6;
-
+function lhClearLegacyMinimapHud(player) {
+  if (!player || typeof player.paint !== 'function') return;
   try {
-    if (forceClear || !pref.enabled || String(player.level.dimension) !== 'minecraft:overworld') {
-      var clearPayload = {
-        lh_mm_bg: { remove: true },
-        lh_mm_title: { remove: true },
-        lh_mm_sub: { remove: true },
-        lh_mm_me: { remove: true }
-      };
-      for (var cr = -4; cr <= 4; cr++) {
-        for (var cc = -4; cc <= 4; cc++) {
-          clearPayload['lh_mm_c_' + (cc + 4) + '_' + (cr + 4)] = { remove: true };
-          clearPayload['lh_mm_b_' + (cc + 4) + '_' + (cr + 4)] = { remove: true };
-        }
-      }
-      player.paint(clearPayload);
-      return true;
-    }
-
-    var sc = global.LHOpenTTD.sectorCoords(player.x, player.z);
-    var comp = lhGetPlayerCompany(server, player);
-    var myCid = comp ? comp.id : null;
-    var curInfo = global.LHOpenTTD.resolveSectorOwner(st, sc.sx, sc.sz);
-    var curBldg = global.LHOpenTTD.getSectorBuilding(st, sc.sx, sc.sz);
-    var statusText = 'Нейтральный';
-    if (curInfo.kind === 'spawn') statusText = 'Спавн 3x3';
-    else if (curInfo.kind === 'claimed' && curInfo.owner && st.companies[curInfo.owner]) {
-      var oComp = st.companies[curInfo.owner];
-      statusText = oComp.name.slice(0, 12);
-      if (myCid && myCid !== curInfo.owner) {
-        statusText += global.LHOpenTTD.canTransit(st, myCid, curInfo.owner) ? ' [OK]' : ' [!]';
-      }
-    }
-
-    var paintObj = {
-      lh_mm_bg: {
-        type: 'rectangle',
-        x: anchorX,
-        y: anchorY,
-        w: panelW,
-        h: panelH,
-        alignX: 'right',
-        alignY: 'top',
-        color: '#CC10141C',
-        draw: 'ingame'
-      },
-      lh_mm_title: {
-        type: 'text',
-        text: '(' + sc.sx + ',' + sc.sz + ') ' + statusText,
-        x: anchorX + 5,
-        y: anchorY + 4,
-        scale: 0.72,
-        alignX: 'right',
-        alignY: 'top',
-        color: (curInfo.kind === 'claimed' && myCid && curInfo.owner !== myCid && !global.LHOpenTTD.canTransit(st, myCid, curInfo.owner)) ? '#FF5555' : '#FFE082',
-        shadow: true,
-        draw: 'ingame'
-      },
-      lh_mm_sub: {
-        type: 'text',
-        text: curBldg ? ('Здание: ' + (global.LHOpenTTD.BUILDING_CATALOG[curBldg.type] ? global.LHOpenTTD.BUILDING_CATALOG[curBldg.type].name : curBldg.type)) : (curInfo.kind === 'claimed' ? 'Сектор захвачен' : 'Свободная зона'),
-        x: anchorX + 5,
-        y: anchorY + panelH - 11,
-        scale: 0.65,
-        alignX: 'right',
-        alignY: 'top',
-        color: '#B8C4D0',
-        shadow: true,
-        draw: 'ingame'
-      }
+    var clearPayload = {
+      lh_mm_bg: { remove: true },
+      lh_mm_title: { remove: true },
+      lh_mm_sub: { remove: true },
+      lh_mm_me: { remove: true }
     };
+    for (var cr = -4; cr <= 4; cr++) {
+      for (var cc = -4; cc <= 4; cc++) {
+        clearPayload['lh_mm_c_' + (cc + 4) + '_' + (cr + 4)] = { remove: true };
+        clearPayload['lh_mm_b_' + (cc + 4) + '_' + (cr + 4)] = { remove: true };
+      }
+    }
+    player.paint(clearPayload);
+  } catch (eClr) {}
+}
 
-    for (var dz = -radius; dz <= radius; dz++) {
-      for (var dx = -radius; dx <= radius; dx++) {
-        var gx = dx + radius;
-        var gz = dz + radius;
-        var sx = sc.sx + dx;
-        var sz = sc.sz + dz;
-        var info = global.LHOpenTTD.resolveSectorOwner(st, sx, sz);
-        var bldg = global.LHOpenTTD.getSectorBuilding(st, sx, sz);
-        var cellColor = '#2A2E38';
-        if (info.kind === 'spawn') cellColor = '#8899AA';
-        else if (info.kind === 'claimed' && info.owner) cellColor = lhCompanyHexColor(st, info.owner, true);
-        var px = anchorX + 6 + gx * cellPx;
-        var py = anchorY + 15 + gz * cellPx;
-        paintObj['lh_mm_c_' + (dx + 4) + '_' + (dz + 4)] = {
-          type: 'rectangle',
-          x: px,
-          y: py,
-          w: cellPx - 1,
-          h: cellPx - 1,
-          alignX: 'right',
-          alignY: 'top',
-          color: cellColor,
-          draw: 'ingame'
-        };
-        if (bldg) {
-          paintObj['lh_mm_b_' + (dx + 4) + '_' + (dz + 4)] = {
-            type: 'rectangle',
-            x: px + 1,
-            y: py + 1,
-            w: 2,
-            h: 2,
-            alignX: 'right',
-            alignY: 'top',
-            color: '#FFFFFF',
-            draw: 'ingame'
-          };
+var LH_XAERO_COLOR_RGB = {
+  red: 0xEF4444,
+  blue: 0x3B82F6,
+  green: 0x22C55E,
+  yellow: 0xEAB308,
+  aqua: 0x06B6D4,
+  light_purple: 0xD946EF,
+  gold: 0xF59E0B,
+  white: 0xE5E7EB
+};
+
+function lhSyncXaeroTerritories(server, targetPlayer) {
+  if (!server || !global.LHOpenTTD) return false;
+  var st = lhOttdRead(server);
+  var borderHalf = 362;
+  try {
+    if (typeof lhTerritoryCounts === 'function') {
+      borderHalf = Math.max(32, Math.round(Number(lhTerritoryCounts(server).size || 724) / 2));
+    } else {
+      var ow = server.getLevel('minecraft:overworld');
+      if (ow && ow.worldBorder && Number(ow.worldBorder.size) > 0) {
+        borderHalf = Math.max(32, Math.round(Number(ow.worldBorder.size) / 2));
+      }
+    }
+  } catch (eB) {}
+
+  var plist = targetPlayer ? [targetPlayer] : (server.players || []);
+  for (var pi = 0; pi < plist.length; pi++) {
+    var p = plist[pi];
+    if (!p || typeof p.sendData !== 'function') continue;
+    var pid = lhId(p);
+    var pref = (st.minimapPrefs && st.minimapPrefs[pid]) ? st.minimapPrefs[pid] : { enabled: true };
+    var myComp = lhGetPlayerCompany(server, p);
+    var myCid = myComp ? myComp.id : '';
+    var claimsOut = [];
+
+    if (pref.enabled !== false) {
+      var claimKeys = Object.keys(st.claims || {});
+      for (var ci = 0; ci < claimKeys.length; ci++) {
+        var cl = st.claims[claimKeys[ci]];
+        if (!cl || !cl.owner) continue;
+        var comp = st.companies ? st.companies[cl.owner] : null;
+        var cColor = (comp && comp.color && LH_XAERO_COLOR_RGB[comp.color]) ? LH_XAERO_COLOR_RGB[comp.color] : 0xFACC15;
+        var rel = 'neutral';
+        if (myCid && myCid === cl.owner) {
+          rel = 'self';
+        } else if (myCid) {
+          var dip = global.LHOpenTTD.getDiplomacy ? global.LHOpenTTD.getDiplomacy(st, myCid, cl.owner) : null;
+          if (dip && dip.allied) rel = 'ally';
+          else if (!global.LHOpenTTD.canTransit(st, myCid, cl.owner)) rel = 'hostile';
         } else {
-          paintObj['lh_mm_b_' + (dx + 4) + '_' + (dz + 4)] = { remove: true };
+          rel = 'hostile';
         }
+        var bldg = global.LHOpenTTD.getSectorBuilding(st, cl.sx, cl.sz);
+        var bName = '';
+        if (bldg && global.LHOpenTTD.BUILDING_CATALOG && global.LHOpenTTD.BUILDING_CATALOG[bldg.type]) {
+          bName = global.LHOpenTTD.BUILDING_CATALOG[bldg.type].name;
+        }
+        claimsOut.push({
+          sx: Number(cl.sx),
+          sz: Number(cl.sz),
+          owner: String(cl.owner),
+          name: comp ? String(comp.name) : String(cl.owner),
+          color: cColor,
+          rel: rel,
+          bldg: bName
+        });
       }
     }
-    paintObj.lh_mm_me = {
-      type: 'rectangle',
-      x: anchorX + 6 + radius * cellPx + 1,
-      y: anchorY + 15 + radius * cellPx + 1,
-      w: Math.max(2, cellPx - 3),
-      h: Math.max(2, cellPx - 3),
-      alignX: 'right',
-      alignY: 'top',
-      color: '#FF3333',
-      draw: 'ingame'
-    };
-    player.paint(paintObj);
-    return true;
-  } catch (ePaint) {
-    return false;
+
+    try {
+      p.sendData('lh:xaero_territories', {
+        json: JSON.stringify({
+          enabled: pref.enabled !== false,
+          borderHalf: borderHalf,
+          myCid: myCid,
+          claims: claimsOut
+        })
+      });
+    } catch (eSend) {}
   }
+  return true;
+}
+
+function lhSyncMinimapHud(server, player, forceClear) {
+  if (!server || !player) return false;
+  if (forceClear) lhClearLegacyMinimapHud(player);
+  return lhSyncXaeroTerritories(server, player);
 }
 
 function lhBuildFacilityCmd(server, player, bType, sx, sz, dryRun) {
@@ -1204,6 +1184,8 @@ function lhBuildFacilityCmd(server, player, bType, sx, sz, dryRun) {
     if (typeof lhLogEvent === 'function') {
       lhLogEvent(server, 'building', comp.name + ' построила «' + res.spec.name + '» в (' + sc.sx + ', ' + sc.sz + ')', { chatMode: 'never' });
     }
+    lhClearLegacyMinimapHud(player);
+    lhSyncXaeroTerritories(server, player);
     lhMsg(player, '§a[Инфраструктура] Построено физическое здание: ' + res.spec.icon + ' §f' + res.spec.name + ' §7в (' + res.building.x + ', ' + res.building.y + ', ' + res.building.z + ') за ' + res.cost + ' Cr. Вы можете перестраивать его под свой стиль!');
   }
   return res;
@@ -1464,11 +1446,14 @@ ServerEvents.tick(function (event) {
     lhOttdSave(server);
   }
   if (LHOTTDTick % 2400 === 0) {
-    lhBotTick(server, false);
+    var botExps = lhBotTick(server, false);
+    if (botExps && botExps.length > 0) lhSyncXaeroTerritories(server, null);
     if (global.LHEconomyEngine) {
       var econDecay = lhEconRead(server);
-      global.LHEconomyEngine.decayMarketTick(econDecay);
-      lhEconSave(server);
+      if (Object.keys(econDecay.items || {}).length > 0) {
+        global.LHEconomyEngine.decayMarketTick(econDecay);
+        lhEconSave(server);
+      }
     }
   }
   if (LHOTTDTick % 20 !== 0) return;
@@ -1501,7 +1486,10 @@ ServerEvents.tick(function (event) {
       var res = global.LHOpenTTD.weakenOrCaptureSector(st, raid.companyId, raid.sx, raid.sz, 1, 0);
       lhOttdSave(server);
       if (res.ok) {
-        if (res.captured) lhUnlock(rPlayer, 'longhaul:openttd/claim');
+        if (res.captured) {
+          lhUnlock(rPlayer, 'longhaul:openttd/claim');
+          lhSyncXaeroTerritories(server, null);
+        }
         if (typeof lhLogEvent === 'function') {
           lhLogEvent(server, 'raid', 'Рейд в секторе (' + raid.sx + ', ' + raid.sz + ') завершён: ' +
             (res.captured ? ('сектор захвачен ' + raid.companyId + '!') : ('укрепление снижено до ' + res.newStrength)), { chatMode: 'important' });
@@ -1524,7 +1512,6 @@ ServerEvents.tick(function (event) {
   for (var i = 0; i < plist.length; i++) {
     var p = plist[i];
     if (String(p.level.dimension) !== 'minecraft:overworld') {
-      lhSyncMinimapHud(server, p, true);
       continue;
     }
     var pid = lhId(p);
@@ -1559,7 +1546,6 @@ ServerEvents.tick(function (event) {
       }
     }
     LHOTTDLastSectorByPlayer[pid] = nowTag;
-    lhSyncMinimapHud(server, p, false);
 
     // Transport specialization active perks
     if (comp && comp.transportSpec && LHOTTDTick % 60 === 0) {
@@ -1580,12 +1566,14 @@ ServerEvents.tick(function (event) {
 PlayerEvents.loggedIn(function (event) {
   var server = event.server, player = event.player;
   lhOttdRead(server);
+  lhClearLegacyMinimapHud(player);
+  lhSyncXaeroTerritories(server, player);
   var comp = lhGetPlayerCompany(server, player);
   if (comp) {
     lhMsg(player, 'Компания: ' + comp.colorCode + comp.name + ' §f(баланс: ' + comp.cash + ' Cr, транспорт: ' +
-      (comp.transportSpec || 'не выбран') + ', ресурс: ' + (comp.resourceSpec || 'не выбран') + '). Карта: /lh map · Лог: /lh events');
+      (comp.transportSpec || 'не выбран') + ', ресурс: ' + (comp.resourceSpec || 'не выбран') + '). Карта: Xaero [M] / /lh map · Лог: /lh events');
   } else {
-    lhMsg(player, 'OpenTTD-режим: создайте компанию (/lh company create <id> <название>) | Карта: /lh map | Лог событий: /lh events.');
+    lhMsg(player, 'OpenTTD-режим: создайте компанию (/lh company create <id> <название>) | Карта границ: Xaero [M] / /lh map | Лог: /lh events.');
   }
 });
 
@@ -1896,6 +1884,12 @@ ServerEvents.commandRegistry(function (event) {
   root.then(dipCmd);
 
   var mmCmd = C.literal('minimap');
+  mmCmd.executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException;
+    lhSyncXaeroTerritories(server, p);
+    lhMsg(p, 'Границы секторов и граница мира отображаются прямо в §bXaero\'s World Map (клавиша M) §fи §bXaero\'s Minimap§f. Переключить слой: /lh minimap toggle.');
+    return 1;
+  });
   mmCmd.then(C.literal('toggle').executes(function (ctx) {
     var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
     var pid = lhId(p);
@@ -1903,20 +1897,15 @@ ServerEvents.commandRegistry(function (event) {
     cur.enabled = !cur.enabled;
     st.minimapPrefs[pid] = cur;
     lhOttdSave(server);
-    lhSyncMinimapHud(server, p, !cur.enabled);
-    lhMsg(p, 'HUD-миникарта секторов: ' + (cur.enabled ? '§aвключена' : '§cвыключена') + '§f.');
+    lhClearLegacyMinimapHud(p);
+    lhSyncXaeroTerritories(server, p);
+    lhMsg(p, 'Слой границ секторов на карте Xaero: ' + (cur.enabled ? '§aвключён' : '§cвыключен') + '§f.');
     return 1;
   }));
   mmCmd.then(C.literal('size').then(C.argument('sz', LHOTTDStringArg.word()).executes(function (ctx) {
-    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
-    var pid = lhId(p);
-    var sz = LHOTTDStringArg.getString(ctx, 'sz') === 'small' ? 'small' : 'medium';
-    var cur = st.minimapPrefs[pid] || { enabled: true, size: 'medium' };
-    cur.size = sz;
-    st.minimapPrefs[pid] = cur;
-    lhOttdSave(server);
-    lhSyncMinimapHud(server, p, !cur.enabled);
-    lhMsg(p, 'Размер HUD-миникарты: ' + (sz === 'small' ? '7×7' : '9×9') + ' секторов.');
+    var server = ctx.source.server, p = ctx.source.playerOrException;
+    lhSyncXaeroTerritories(server, p);
+    lhMsg(p, 'Размер миникарты настраивается в стандартном меню §bXaero\'s Minimap §f(клавиша Y), границы секторов синхронизируются автоматически.');
     return 1;
   })));
   root.then(mmCmd);

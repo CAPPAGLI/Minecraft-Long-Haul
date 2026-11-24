@@ -31,18 +31,50 @@ def main():
         raise RuntimeError('No Java 17 runtime or compiler found in PATH, JAVA_HOME, or runtime/')
 
     cp = []
-    for pattern in ['javafmllanguage-1.20.1-47.4.10.jar', 'mixin-0.8.5.jar']:
-        found = list((R / 'server-test/libraries').rglob(pattern))
-        if len(found) != 1:
-            raise RuntimeError('Install Forge 47.4.10 server first: ' + pattern)
-        cp.append(str(found[0]))
+    lib_patterns = [
+        'javafmllanguage-1.20.1-47.4.10.jar',
+        'fmlloader-1.20.1-47.4.10.jar',
+        'forge-1.20.1-47.4.10-universal.jar',
+        'server-1.20.1-*-srg.jar',
+        'mixin-0.8.5.jar',
+        'gson-*.jar',
+        'asm-9.*.jar',
+    ]
+    required = {'javafmllanguage-1.20.1-47.4.10.jar', 'mixin-0.8.5.jar'}
+    for pattern in lib_patterns:
+        found = sorted((R / 'server-test/libraries').rglob(pattern))
+        if not found:
+            if pattern in required:
+                raise RuntimeError('Install Forge 47.4.10 server first: ' + pattern)
+            continue
+        cp.append(str(found[-1]))
+
+    xaero_wm = sorted((R / 'assembly/mods').glob('xaeroworldmap-*.jar'))
+    xaero_mm = sorted((R / 'assembly/mods').glob('xaerominimap-*.jar'))
+    has_xaero_wm = bool(xaero_wm)
+    has_xaero_mm = bool(xaero_mm)
+    has_mc_srg = any('server-1.20.1-' in p for p in cp)
+    if has_xaero_wm:
+        cp.append(str(xaero_wm[-1]))
+    if has_xaero_mm:
+        cp.append(str(xaero_mm[-1]))
 
     src = R / 'runtime-mod/src'
     classes = R / 'runtime-mod/classes'
     if classes.exists():
         shutil.rmtree(classes)
     classes.mkdir(parents=True, exist_ok=True)
-    java_sources = [str(p) for p in sorted((src / 'main/java').rglob('*.java'))]
+    all_sources = sorted((src / 'main/java').rglob('*.java'))
+    java_sources = []
+    for p in all_sources:
+        name = p.name
+        if name in ('LongHaulXaeroData.java', 'XaeroRefreshBridge.java') and not (has_mc_srg and (has_xaero_wm or has_xaero_mm)):
+            continue
+        if name in ('WorldMapSectorHighlighter.java', 'WorldMapRegistryMixin.java') and not (has_mc_srg and has_xaero_wm):
+            continue
+        if name in ('MinimapSectorHighlighter.java', 'MinimapRegistryMixin.java') and not (has_mc_srg and has_xaero_mm):
+            continue
+        java_sources.append(str(p))
 
     if javac:
         subprocess.run([javac, '--release', '17', '-proc:none', '-cp', os.pathsep.join(cp), '-d', str(classes), *java_sources], check=True)

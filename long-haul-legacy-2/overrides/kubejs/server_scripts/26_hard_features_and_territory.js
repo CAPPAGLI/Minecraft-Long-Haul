@@ -209,13 +209,35 @@ function lhDifficultyStatus(server, overridePlayers) {
   };
 }
 
+function lhActiveBorderHalf(server) {
+  var ow = server ? server.getLevel('minecraft:overworld') : null;
+  var borderSize = (ow && ow.worldBorder && Number(ow.worldBorder.size) > 0)
+    ? Number(ow.worldBorder.size)
+    : Number(lhTerritoryCounts(server).size || 724);
+  return Math.max(32, Math.floor(borderSize / 2));
+}
+
+function lhClampToSafeBorder(server, x, z, margin) {
+  var half = lhActiveBorderHalf(server);
+  var safeHalf = Math.max(16, half - Number(margin || 20));
+  return {
+    x: Math.max(-safeHalf, Math.min(safeHalf, Math.round(Number(x || 0)))),
+    z: Math.max(-safeHalf, Math.min(safeHalf, Math.round(Number(z || 0)))),
+    halfBorder: half,
+    safeHalf: safeHalf
+  };
+}
+
 function lhGetPlayerSpawnCenter(server, player) {
+  var half = lhActiveBorderHalf(server);
+  var safeMargin = Math.max(16, half - 16);
   try {
     if (player && typeof player.getRespawnPosition === 'function') {
       var rPos = player.getRespawnPosition();
       var rDim = typeof player.getRespawnDimension === 'function' ? player.getRespawnDimension() : null;
       var dimStr = rDim && typeof rDim.location === 'function' ? String(rDim.location()) : String(rDim || 'minecraft:overworld');
-      if (rPos && dimStr === 'minecraft:overworld') {
+      if (rPos && dimStr === 'minecraft:overworld' &&
+          Math.abs(Number(rPos.x)) <= safeMargin && Math.abs(Number(rPos.z)) <= safeMargin) {
         return { x: Number(rPos.x), z: Number(rPos.z) };
       }
     }
@@ -224,17 +246,20 @@ function lhGetPlayerSpawnCenter(server, player) {
     var dbHome = lhProgRead(server);
     var pidHome = player ? lhId(player) : null;
     if (pidHome && dbHome.playerHomeSpawns && dbHome.playerHomeSpawns[pidHome]) {
-      return {
-        x: Number(dbHome.playerHomeSpawns[pidHome].x),
-        z: Number(dbHome.playerHomeSpawns[pidHome].z)
-      };
+      var hx = Number(dbHome.playerHomeSpawns[pidHome].x);
+      var hz = Number(dbHome.playerHomeSpawns[pidHome].z);
+      if (Math.abs(hx) <= safeMargin && Math.abs(hz) <= safeMargin) {
+        return { x: hx, z: hz };
+      }
     }
   } catch (eH) {}
   try {
     var ow = server.getLevel('minecraft:overworld');
     if (ow && typeof ow.getSharedSpawnPos === 'function') {
       var sp = ow.getSharedSpawnPos();
-      if (sp) return { x: Number(sp.x), z: Number(sp.z) };
+      if (sp && Math.abs(Number(sp.x)) <= safeMargin && Math.abs(Number(sp.z)) <= safeMargin) {
+        return { x: Number(sp.x), z: Number(sp.z) };
+      }
     }
   } catch (eS) {}
   return { x: 0, z: 0 };
@@ -274,7 +299,14 @@ function lhFindSafeRespawnY(overworld, tx, tz, allowPlatform) {
   try {
     overworld.getChunk(tx >> 4, tz >> 4);
   } catch (eChk) {}
-  for (var y = 440; y >= 48; y--) {
+  var startY = 240;
+  try {
+    if (typeof overworld.getHeight === 'function') {
+      var hm = Number(overworld.getHeight('motion_blocking_no_leaves', tx, tz));
+      if (hm >= 48 && hm <= 430) startY = Math.min(435, hm + 4);
+    }
+  } catch (eHm) {}
+  for (var y = startY; y >= 48; y--) {
     var b = overworld.getBlock(tx, y, tz);
     var bid = String(b.id);
     if (bid === 'minecraft:air' || bid === 'minecraft:cave_air' || bid === 'minecraft:void_air' ||
@@ -303,9 +335,11 @@ function lhFindSafeRespawnY(overworld, tx, tz, allowPlatform) {
 function lhFindSafeSurfaceColumn(overworld, cx, cz) {
   var directY = lhFindSafeRespawnY(overworld, cx, cz, false);
   if (directY > 0) return { x: cx, y: directY, z: cz };
-  for (var rad = 4; rad <= 48; rad += 4) {
-    for (var step = 0; step < 12; step++) {
-      var ang = (step / 12.0) * 6.2831853;
+  var radii = [4, 12, 24];
+  for (var ri = 0; ri < radii.length; ri++) {
+    var rad = radii[ri];
+    for (var step = 0; step < 6; step++) {
+      var ang = (step / 6.0) * 6.2831853;
       var sx = Math.round(cx + Math.cos(ang) * rad);
       var sz = Math.round(cz + Math.sin(ang) * rad);
       var sy = lhFindSafeRespawnY(overworld, sx, sz, false);
@@ -315,9 +349,10 @@ function lhFindSafeSurfaceColumn(overworld, cx, cz) {
   return { x: cx, y: lhFindSafeRespawnY(overworld, cx, cz, true), z: cz };
 }
 
-function lhIsPlayerTrappedOrBedrock(overworld, px, py, pz) {
+function lhIsPlayerTrappedOrBedrock(overworld, px, py, pz, halfBorder) {
   var ix = Math.floor(px), iy = Math.floor(py), iz = Math.floor(pz);
   if (iy <= -58) return true;
+  if (halfBorder > 0 && (Math.abs(ix) >= halfBorder - 1 || Math.abs(iz) >= halfBorder - 1)) return true;
   try {
     var below = String(overworld.getBlock(ix, iy - 1, iz).id);
     var feetBlock = overworld.getBlock(ix, iy, iz);
@@ -340,17 +375,36 @@ function lhEnsureSafeSpawn(server, player, fixWorldSpawn) {
   if (creative) return false;
   var ow = server.getLevel('minecraft:overworld');
   if (!ow) return false;
+  var halfBorder = lhActiveBorderHalf(server);
   var px = Number(player.x), py = Number(player.y), pz = Number(player.z);
-  if (!lhIsPlayerTrappedOrBedrock(ow, px, py, pz)) return false;
+  var outOfBorder = Math.abs(px) >= halfBorder - 1 || Math.abs(pz) >= halfBorder - 1;
+  if (!outOfBorder && !lhIsPlayerTrappedOrBedrock(ow, px, py, pz, halfBorder)) return false;
 
-  var safe = lhFindSafeSurfaceColumn(ow, Math.floor(px), Math.floor(pz));
+  var targetCenter = lhClampToSafeBorder(server, px, pz, 24);
+  if (outOfBorder) {
+    var homeCenter = lhGetPlayerSpawnCenter(server, player);
+    if (Math.abs(homeCenter.x) <= targetCenter.safeHalf && Math.abs(homeCenter.z) <= targetCenter.safeHalf) {
+      targetCenter = { x: Math.round(homeCenter.x), z: Math.round(homeCenter.z), halfBorder: halfBorder, safeHalf: targetCenter.safeHalf };
+    }
+  }
+  var safe = lhFindSafeSurfaceColumn(ow, targetCenter.x, targetCenter.z);
   var uname = player.username || (typeof player.getName === 'function' ? player.getName().getString() : '');
   if (uname) {
     server.runCommandSilent('execute in minecraft:overworld run tp ' + uname + ' ' + (safe.x + 0.5) + ' ' + safe.y + ' ' + (safe.z + 0.5));
-    server.runCommandSilent('effect give ' + uname + ' minecraft:resistance 5 4 true');
+    server.runCommandSilent('effect give ' + uname + ' minecraft:resistance 8 4 true');
+    if (outOfBorder) {
+      server.runCommandSilent('spawnpoint ' + uname + ' ' + safe.x + ' ' + safe.y + ' ' + safe.z);
+      var dbFix = lhProgRead(server);
+      var pidFix = lhId(player);
+      var scFix = global.LHOpenTTD ? global.LHOpenTTD.sectorCoords(safe.x, safe.z) : { sx: 0, sz: 0 };
+      dbFix.playerHomeSpawns[pidFix] = { x: safe.x, y: safe.y, z: safe.z, sx: scFix.sx, sz: scFix.sz };
+      lhProgSave(server);
+    }
   }
   if (typeof player.tell === 'function') {
-    player.tell('§e[Безопасный спаун] Обнаружен спаун в бэдроке/породе (Y=' + Math.round(py) + ') — вы перемещены на поверхность (' + safe.x + ', ' + safe.y + ', ' + safe.z + ').');
+    player.tell(outOfBorder
+      ? ('§e[Безопасный спаун] Вы оказались за границей мира (±' + halfBorder + ' м) — возвращены в безопасную зону (' + safe.x + ', ' + safe.y + ', ' + safe.z + ').')
+      : ('§e[Безопасный спаун] Обнаружен спаун в бэдроке/породе (Y=' + Math.round(py) + ') — вы перемещены на поверхность (' + safe.x + ', ' + safe.y + ', ' + safe.z + ').'));
   }
   return true;
 }
@@ -367,34 +421,50 @@ function lhFirstJoinRandomSpawn(server, player) {
   if (!ow) return false;
 
   var borderInfo = lhTerritoryCounts(server);
-  var maxSectorAbs = Math.max(2, Math.floor((borderInfo.size / 2 - 48) / 256));
-  var ottdSt = typeof lhCompanyRead === 'function' ? lhCompanyRead(server) : null;
+  var halfBorder = Math.max(48, Math.floor(borderInfo.size / 2));
+  var safeHalf = Math.max(32, halfBorder - Math.min(36, Math.floor(halfBorder / 6)));
+  var ottdSt = typeof lhOttdRead === 'function' ? lhOttdRead(server) : null;
 
   var chosen = null;
-  for (var attempt = 0; attempt < 32; attempt++) {
-    var csx = Math.floor((Math.random() * 2 - 1) * maxSectorAbs);
-    var csz = Math.floor((Math.random() * 2 - 1) * maxSectorAbs);
-    if (global.LHOpenTTD && global.LHOpenTTD.isSpawnProtectedSector(csx, csz)) continue;
+  for (var attempt = 0; attempt < 3; attempt++) {
+    var wx = 0, wz = 0;
+    if (safeHalf < 560) {
+      // Initial 724x724 border (±362): pick inside the claimable L-strip [-safeHalf, -264]
+      // which is strictly inside the world border AND outside the 3x3 spawn sanctuary (-256..511).
+      if (attempt % 2 === 0) {
+        wx = -270 - Math.floor(Math.random() * Math.max(8, safeHalf - 270));
+        wz = Math.floor((Math.random() * 2 - 1) * (safeHalf - 16));
+      } else {
+        wz = -270 - Math.floor(Math.random() * Math.max(8, safeHalf - 270));
+        wx = Math.floor((Math.random() * 2 - 1) * (safeHalf - 16));
+      }
+    } else {
+      wx = Math.floor((Math.random() * 2 - 1) * safeHalf);
+      wz = Math.floor((Math.random() * 2 - 1) * safeHalf);
+    }
+    wx = Math.max(-safeHalf, Math.min(safeHalf, wx));
+    wz = Math.max(-safeHalf, Math.min(safeHalf, wz));
+    var cSc = global.LHOpenTTD ? global.LHOpenTTD.sectorCoords(wx, wz) : { sx: Math.floor(wx / 256), sz: Math.floor(wz / 256) };
     if (ottdSt && global.LHOpenTTD) {
-      var ownerInfo = global.LHOpenTTD.resolveSectorOwner(ottdSt, csx, csz);
+      var ownerInfo = global.LHOpenTTD.resolveSectorOwner(ottdSt, cSc.sx, cSc.sz);
       if (ownerInfo.kind === 'claimed') continue;
     }
-    var wx = csx * 256 + 16 + Math.floor(Math.random() * 200);
-    var wz = csz * 256 + 16 + Math.floor(Math.random() * 200);
-    var sy = lhFindSafeRespawnY(ow, wx, wz, false);
+    var sy = lhFindSafeRespawnY(ow, wx, wz, attempt === 2);
     if (sy > 52) {
-      chosen = { x: wx, y: sy, z: wz, sx: csx, sz: csz };
+      chosen = { x: wx, y: sy, z: wz, sx: cSc.sx, sz: cSc.sz };
       break;
     }
   }
   if (!chosen) {
-    // Fallback on outer safe ring
-    var fWx = 512 + Math.floor(Math.random() * 128);
-    var fWz = 512 + Math.floor(Math.random() * 128);
+    // Guaranteed inside-border fallback inside sector (-2, 0) -> x=-288, z=0
+    var fWx = Math.max(-safeHalf, Math.min(safeHalf, -288));
+    var fWz = 0;
     var fY = lhFindSafeRespawnY(ow, fWx, fWz, true);
-    var fSc = global.LHOpenTTD ? global.LHOpenTTD.sectorCoords(fWx, fWz) : { sx: 2, sz: 2 };
+    var fSc = global.LHOpenTTD ? global.LHOpenTTD.sectorCoords(fWx, fWz) : { sx: -2, sz: 0 };
     chosen = { x: fWx, y: fY, z: fWz, sx: fSc.sx, sz: fSc.sz };
   }
+  chosen.x = Math.max(-safeHalf, Math.min(safeHalf, chosen.x));
+  chosen.z = Math.max(-safeHalf, Math.min(safeHalf, chosen.z));
 
   db.firstJoinDone[pid] = true;
   db.playerHomeSpawns[pid] = chosen;
@@ -575,6 +645,9 @@ function lhApplyTerritoryBorder(server, announce) {
   if (prev > 0 && info.size > prev) {
     if (typeof lhSpawnBotOnBorderExpansion === 'function') {
       lhSpawnBotOnBorderExpansion(server, info, !!announce);
+    }
+    if (typeof lhSyncXaeroTerritories === 'function') {
+      lhSyncXaeroTerritories(server, null);
     }
     if (announce) {
       var half = Math.round(info.size / 2);
@@ -1323,8 +1396,9 @@ ServerEvents.tick(function (event) {
       (typeof p.isSpectator === 'function' && p.isSpectator());
     if (creative) continue;
 
-    // Continuous safeguard for players still below Y=0 or trapped inside bedrock
-    if (Number(p.y) <= 0) {
+    // Continuous safeguard for players below Y=0, trapped inside bedrock, or outside the world border
+    var halfB = lhActiveBorderHalf(server);
+    if (Number(p.y) <= 0 || Math.abs(Number(p.x)) >= halfB - 1 || Math.abs(Number(p.z)) >= halfB - 1) {
       lhEnsureSafeSpawn(server, p, true);
     }
 
@@ -1433,10 +1507,10 @@ ServerEvents.tick(function (event) {
 
 PlayerEvents.loggedIn(function (event) {
   var server = event.server, player = event.player;
-  lhFirstJoinRandomSpawn(server, player);
-  lhEnsureSafeSpawn(server, player, false);
   lhProgressionRecompute(server, player, false);
   var info = lhApplyTerritoryBorder(server, false);
+  lhFirstJoinRandomSpawn(server, player);
+  lhEnsureSafeSpawn(server, player, false);
   var db = lhProgRead(server);
   var diff = lhDifficultyStatus(server);
   var chap = lhChapterProgressSummary(server);

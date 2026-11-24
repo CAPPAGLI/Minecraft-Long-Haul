@@ -612,4 +612,25 @@ test('LHEconomyEngine covers items/fluids/gas/energy, recipe graph, market crash
   assert(dmgCore.ok && dmgCore.destroyed === true && !O.getSectorBuilding(stCap, pSc.sx, pSc.sz));
 });
 
+test('Spawn/border safety guards and native Xaero territory integration are wired cleanly', () => {
+  const path = require('path');
+  const ROOT = path.resolve(__dirname, '..');
+  const s26 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/26_hard_features_and_territory.js'), 'utf8');
+  const s27 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/27_openttd_companies.js'), 'utf8');
+  const c01 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/client_scripts/01_xaero_integration.js'), 'utf8');
+  assert(s26.includes('lhActiveBorderHalf') && s26.includes('lhClampToSafeBorder'), '26_hard_features_and_territory clamps spawns to active border');
+  assert(!s26.includes('lhCompanyRead'), 'no undefined lhCompanyRead call in first-join spawn');
+  assert(s27.includes('lhSyncXaeroTerritories') && !s27.includes("type: 'rectangle'") && !s27.includes("draw: 'ingame'"), '27_openttd_companies uses Xaero sync instead of custom HUD paint minimap');
+  assert(c01.includes('lh:xaero_territories') && c01.includes('LongHaulXaeroData'), 'client script forwards territory sync to Xaero bridge');
+  [
+    'runtime-mod/src/main/java/longhaul/runtime/mixin/LongHaulMixinPlugin.java',
+    'runtime-mod/src/main/java/longhaul/runtime/mixin/WorldMapRegistryMixin.java',
+    'runtime-mod/src/main/java/longhaul/runtime/mixin/MinimapRegistryMixin.java',
+    'runtime-mod/src/main/java/longhaul/runtime/xaero/LongHaulXaeroData.java',
+    'runtime-mod/src/main/java/longhaul/runtime/xaero/WorldMapSectorHighlighter.java',
+    'runtime-mod/src/main/java/longhaul/runtime/xaero/MinimapSectorHighlighter.java',
+    'runtime-mod/src/main/java/longhaul/runtime/xaero/XaeroRefreshBridge.java'
+  ].forEach(rel => assert(fs.existsSync(path.join(ROOT, rel)), 'Xaero runtime file exists: ' + rel));
+});
+
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');
