@@ -2862,12 +2862,12 @@ global.LHEconomyEngine = (function () {
       if (Number(st.recipePrices[k]) > 0 && !prices[k]) prices[k] = Number(st.recipePrices[k]);
     });
 
-    var edges = Array.isArray(recipeEdges) ? recipeEdges : [];
+    var edges = (recipeEdges && typeof recipeEdges !== 'string' && typeof recipeEdges.length === 'number') ? recipeEdges : [];
     for (var pass = 0; pass < passes; pass++) {
       var changed = false;
       for (var i = 0; i < edges.length; i++) {
         var e = edges[i];
-        if (!e || !e.outId || !Array.isArray(e.ingredients) || !e.ingredients.length) continue;
+        if (!e || !e.outId || !e.ingredients || typeof e.ingredients.length !== 'number' || !e.ingredients.length) continue;
         var outCount = Math.max(1, Number(e.outCount || 1));
         var ingSum = 0;
         for (var j = 0; j < e.ingredients.length; j++) {
