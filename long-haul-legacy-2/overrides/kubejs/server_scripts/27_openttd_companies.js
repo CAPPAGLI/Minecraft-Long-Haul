@@ -480,6 +480,8 @@ function lhGiveTerritoryMapItem(server, player, dryRun, silent) {
 
   try {
     var MapItemCls = Java.loadClass('net.minecraft.world.item.MapItem');
+    var MapItemSavedDataCls = Java.loadClass('net.minecraft.world.level.saveddata.maps.MapItemSavedData');
+    var CompoundTagCls = Java.loadClass('net.minecraft.nbt.CompoundTag');
     var ow = server.getLevel('minecraft:overworld');
     if (!ow) return 0;
 
@@ -536,8 +538,11 @@ function lhGiveTerritoryMapItem(server, player, dryRun, silent) {
       }
     }
 
-    // Lock MapItemSavedData so vanilla MapItem.update() and Map Atlases NEVER overwrite custom pixels with terrain
-    var lockedData = (typeof mapData.locked === 'function') ? mapData.locked() : mapData;
+    // Lock MapItemSavedData via NBT reload (avoids Rhino field-vs-method name collision on MapItemSavedData.locked)
+    var mapTag = new CompoundTagCls();
+    mapData.save(mapTag);
+    mapTag.putBoolean('locked', true);
+    var lockedData = MapItemSavedDataCls.load(mapTag);
     var newMapId = MapItemCls.getMapId(freshStack);
     if (newMapId !== null && typeof ow.setMapData === 'function') {
       ow.setMapData(MapItemCls.makeKey(newMapId), lockedData);
