@@ -820,12 +820,13 @@ function lhStartIntegrationSetup(server) {
           'longhaul_origins:void_drifter'
         ];
         var RLCls = Java.loadClass('net.minecraft.resources.ResourceLocation');
-        var GsonHelperCls = Java.loadClass('net.minecraft.util.GsonHelper');
         var origLayerRes = server.getResourceManager().getResource(new RLCls('origins', 'origin_layers/origin.json'));
         ok(origLayerRes.isPresent(), 'origins:origin_layers/origin.json resolved in active datapacks');
         var reader = origLayerRes.get().openAsReader();
-        var layerJson = JSON.parse(String(GsonHelperCls.parse(reader).toString()));
+        var layerTxt = '', lLine;
+        while ((lLine = reader.readLine()) !== null) layerTxt += lLine;
         reader.close();
+        var layerJson = JSON.parse(layerTxt);
         ok(layerJson.replace === true, 'origins:origin layer uses replace=true to disable all default origins');
         ok(Array.isArray(layerJson.origins) && layerJson.origins.length === 6, 'origins:origin layer lists exactly 6 custom origins');
         expectedOrigins.forEach(function (oid) {
