@@ -61,6 +61,8 @@ def main():
     java_sources = []
     for p in all_sources:
         name = p.name
+        if name == 'TerritoryMapHelper.java' and not has_mc_srg:
+            continue
         if name in ('LongHaulXaeroData.java', 'XaeroRefreshBridge.java') and not (has_mc_srg and (has_xaero_wm or has_xaero_mm)):
             continue
         if name in ('WorldMapSectorHighlighter.java', 'WorldMapRegistryMixin.java') and not (has_mc_srg and has_xaero_wm):

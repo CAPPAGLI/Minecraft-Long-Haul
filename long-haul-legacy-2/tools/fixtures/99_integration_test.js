@@ -911,15 +911,18 @@ function lhStartIntegrationSetup(server) {
         };
         ok(lhGiveTerritoryMapItem(server, mapActor, false, false) === 1, 'lhGiveTerritoryMapItem succeeds without java.lang.Byte error');
         var MapItemClsTest = Java.loadClass('net.minecraft.world.item.MapItem');
+        var TerritoryMapHelperTest = Java.loadClass('com.longhaul.runtime.map.TerritoryMapHelper');
         var savedMap = givenMapStack ? MapItemClsTest.getSavedData(givenMapStack, overworld) : null;
-        ok(savedMap !== null && savedMap.locked === true, 'territory map item MapItemSavedData is locked=true so vanilla terrain never overwrites it');
-        var gridPxBefore = savedMap.colors[0];
+        ok(savedMap !== null && TerritoryMapHelperTest.isLocked(savedMap) === true && savedMap.locked === true,
+          'territory map item MapItemSavedData is locked=true so vanilla terrain never overwrites it');
+        var gridPxBefore = TerritoryMapHelperTest.getColorUnsigned(savedMap, 0, 0);
         if (givenMapStack && typeof givenMapStack.inventoryTick === 'function') {
           givenMapStack.inventoryTick(overworld, fp, 0, true);
         }
         var savedMapAfter = MapItemClsTest.getSavedData(givenMapStack, overworld);
-        ok(savedMapAfter && savedMapAfter.colors[0] === gridPxBefore && savedMapAfter.colors[0] === 119,
-          'territory map pixels preserved across inventoryTick (grid pixel=' + (savedMapAfter ? savedMapAfter.colors[0] : 'null') + ')');
+        var gridPxAfter = TerritoryMapHelperTest.getColorUnsigned(savedMapAfter, 0, 0);
+        ok(savedMapAfter && gridPxAfter === gridPxBefore && gridPxAfter === 119,
+          'territory map pixels preserved across inventoryTick (grid pixel=' + gridPxAfter + ')');
 
         var progSaved27 = JSON.stringify(lhProgRead(server));
         var db27 = lhProgRead(server);

@@ -480,8 +480,8 @@ function lhGiveTerritoryMapItem(server, player, dryRun, silent) {
 
   try {
     var MapItemCls = Java.loadClass('net.minecraft.world.item.MapItem');
-    var MapItemSavedDataCls = Java.loadClass('net.minecraft.world.level.saveddata.maps.MapItemSavedData');
-    var CompoundTagCls = Java.loadClass('net.minecraft.nbt.CompoundTag');
+    var TerritoryMapHelperCls = null;
+    try { TerritoryMapHelperCls = Java.loadClass('com.longhaul.runtime.map.TerritoryMapHelper'); } catch (eHelper) {}
     var ow = server.getLevel('minecraft:overworld');
     if (!ow) return 0;
 
@@ -497,14 +497,8 @@ function lhGiveTerritoryMapItem(server, player, dryRun, silent) {
     }
     if (silent && !existingStack) return 0;
 
-    var freshStack = MapItemCls.create(ow, originSx * 256, originSz * 256, 4, false, false);
-    var mapData = MapItemCls.getSavedData(freshStack, ow);
-    if (!mapData || !mapData.colors) {
-      if (!silent) lhMsg(player, 'Не удалось инициализировать данные карты. Попробуйте снова.');
-      return 0;
-    }
-
-    // Paint 16x16 sectors (8x8 pixels per 256x256 sector -> 128x128 map pixels)
+    // Build 128x128 pixel array (8x8 pixels per 256x256 sector -> 16x16 sectors)
+    var pixelArr = java.lang.reflect.Array.newInstance(java.lang.Integer.TYPE, 16384);
     for (var gy = 0; gy < 16; gy++) {
       for (var gx = 0; gx < 16; gx++) {
         var sx = originSx + gx;
@@ -532,22 +526,32 @@ function lhGiveTerritoryMapItem(server, player, dryRun, silent) {
             if (isPlayerCell && px >= 3 && px <= 4 && py >= 3 && py <= 4) {
               col = 114; // Crimson player sector dot
             }
-            mapData.setColor(mx, mz, lhToSignedByte(col));
+            pixelArr[mz * 128 + mx] = col & 0xFF;
           }
         }
       }
     }
 
-    // Lock MapItemSavedData via NBT reload (avoids Rhino field-vs-method name collision on MapItemSavedData.locked)
-    var mapTag = new CompoundTagCls();
-    mapData.save(mapTag);
-    mapTag.putBoolean('locked', true);
-    var lockedData = MapItemSavedDataCls.load(mapTag);
-    var newMapId = MapItemCls.getMapId(freshStack);
-    if (newMapId !== null && typeof ow.setMapData === 'function') {
-      ow.setMapData(MapItemCls.makeKey(newMapId), lockedData);
+    var freshStack = null;
+    if (TerritoryMapHelperCls) {
+      // Java helper calls MapItemSavedData.locked() (SRG m_164775_), paints pixels onto lockedData,
+      // and registers lockedData in ServerLevel (SRG m_142325_) so vanilla terrain never overwrites it.
+      freshStack = TerritoryMapHelperCls.createLockedTerritoryMap(ow, originSx * 256, originSz * 256, 4, pixelArr);
+    } else {
+      freshStack = MapItemCls.create(ow, originSx * 256, originSz * 256, 4, false, false);
+      var mapData = MapItemCls.getSavedData(freshStack, ow);
+      if (!mapData || !mapData.colors) {
+        if (!silent) lhMsg(player, 'Не удалось инициализировать данные карты. Попробуйте снова.');
+        return 0;
+      }
+      for (var pz = 0; pz < 128; pz++) {
+        for (var px2 = 0; px2 < 128; px2++) {
+          mapData.setColor(px2, pz, lhToSignedByte(pixelArr[pz * 128 + px2]));
+        }
+      }
+      if (typeof mapData.setDirty === 'function') mapData.setDirty();
     }
-    if (typeof lockedData.setDirty === 'function') lockedData.setDirty();
+    var newMapId = MapItemCls.getMapId(freshStack);
 
     var titleComp = Text.of('§6Карта территорий компаний §7(сектора ' + originSx + '..' + (originSx + 15) + ')');
     if (!existingStack) {
@@ -567,6 +571,7 @@ function lhGiveTerritoryMapItem(server, player, dryRun, silent) {
     }
     return 1;
   } catch (eMap) {
+    console.error('[LH] lhGiveTerritoryMapItem error: ' + eMap);
     lhMsg(player, 'Ошибка генерации карты-предмета (' + eMap + '). Используйте интерактивную карту /lh map.');
     return 0;
   }
