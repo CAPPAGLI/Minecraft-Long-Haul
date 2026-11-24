@@ -45,7 +45,12 @@ public final class XaeroRefreshBridge {
                 } catch (Throwable ignored) {}
             }
             if (session == null) return;
-            Object processor = session.getClass().getMethod("getProcessor").invoke(session);
+            Object processor = null;
+            try {
+                processor = session.getClass().getMethod("getProcessor").invoke(session);
+            } catch (Throwable ignored) {
+                processor = session.getClass().getMethod("getMinimapProcessor").invoke(session);
+            }
             if (processor == null) return;
             Object writer = processor.getClass().getMethod("getMinimapWriter").invoke(processor);
             if (writer == null) return;

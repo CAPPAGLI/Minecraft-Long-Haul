@@ -30,13 +30,11 @@ public final class MinimapSectorHighlighter extends ChunkHighlighter {
         return LongHaulXaeroData.fillColors(this.resultStore, dim, cx, cz) ? this.resultStore : null;
     }
 
-    @Override
     public void addBlockHighlightTooltips(InfoDisplayCompiler compiler, ResourceKey<Level> dim, int x, int z, int width) {
         Component c = LongHaulXaeroData.tooltip(dim, x >> 4, z >> 4);
         if (c != null) compiler.addLine(c);
     }
 
-    @Override
     public void addChunkHighlightTooltips(InfoDisplayCompiler compiler, ResourceKey<Level> dim, int cx, int cz, int width) {
         Component c = LongHaulXaeroData.tooltip(dim, cx, cz);
         if (c != null) compiler.addLine(c);

@@ -31,29 +31,22 @@ def main():
         raise RuntimeError('No Java 17 runtime or compiler found in PATH, JAVA_HOME, or runtime/')
 
     cp = []
-    lib_patterns = [
-        'javafmllanguage-1.20.1-47.4.10.jar',
-        'fmlloader-1.20.1-47.4.10.jar',
-        'forge-1.20.1-47.4.10-universal.jar',
-        'server-1.20.1-*-srg.jar',
-        'mixin-0.8.5.jar',
-        'gson-*.jar',
-        'asm-9.*.jar',
-    ]
-    required = {'javafmllanguage-1.20.1-47.4.10.jar', 'mixin-0.8.5.jar'}
-    for pattern in lib_patterns:
-        found = sorted((R / 'server-test/libraries').rglob(pattern))
-        if not found:
-            if pattern in required:
-                raise RuntimeError('Install Forge 47.4.10 server first: ' + pattern)
+    lib_root = R / 'server-test/libraries'
+    if not lib_root.exists():
+        raise RuntimeError('Install Forge 47.4.10 server first: missing server-test/libraries')
+    for jar in sorted(lib_root.rglob('*.jar')):
+        n = jar.name
+        if n.endswith('-slim.jar') or n.endswith('-extra.jar') or n.endswith('-mappings.jar') or n.endswith('-installer.jar'):
             continue
-        cp.append(str(found[-1]))
+        cp.append(str(jar))
+    if not any('mixin-' in p for p in cp) or not any('javafmllanguage-' in p for p in cp):
+        raise RuntimeError('Install Forge 47.4.10 server first: missing mixin/javafmllanguage in libraries')
 
     xaero_wm = sorted((R / 'assembly/mods').glob('xaeroworldmap-*.jar'))
     xaero_mm = sorted((R / 'assembly/mods').glob('xaerominimap-*.jar'))
     has_xaero_wm = bool(xaero_wm)
     has_xaero_mm = bool(xaero_mm)
-    has_mc_srg = any('server-1.20.1-' in p for p in cp)
+    has_mc_srg = any('-srg.jar' in p for p in cp)
     if has_xaero_wm:
         cp.append(str(xaero_wm[-1]))
     if has_xaero_mm:

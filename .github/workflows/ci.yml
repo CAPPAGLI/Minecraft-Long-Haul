@@ -69,7 +69,10 @@ jobs:
         run: python3 long-haul-legacy-2/tools/prepare_server.py --mode void
 
       - name: Build longhaul-runtime mod
-        run: python3 long-haul-legacy-2/tools/build_runtime.py
+        run: |
+          set -o pipefail
+          mkdir -p /tmp/ci-logs
+          python3 long-haul-legacy-2/tools/build_runtime.py 2>&1 | tee /tmp/ci-logs/build-runtime.txt
 
       - name: Inspect JAR mod IDs & version ranges
         run: |
@@ -117,6 +120,7 @@ jobs:
               cli = sum(1 for m in mods if m.get('client_only'))
               lines.append(f"**Lock:** `{d.get('version')}` · `{len(mods)}` mods (`{len(mods)-cli}` server / `{cli}` client-only)\n")
           for label, p in [
+              ('Build Runtime Log', '/tmp/ci-logs/build-runtime.txt'),
               ('Assemble Log (tail)', '/tmp/ci-logs/assemble.txt'),
               ('Inspect JARs', '/tmp/ci-logs/inspect.txt'),
               ('Void Smoke Result', '/tmp/ci-logs/smoke-void-result.json'),
