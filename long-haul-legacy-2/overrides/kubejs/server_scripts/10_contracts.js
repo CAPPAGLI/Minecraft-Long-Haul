@@ -32,7 +32,9 @@ function lhLoadedBlock(server, t) {
   return level.getBlock(t.x, t.y, t.z);
 }
 function lhUnlock(player, adv) {
-  if (player && !player.isAdvancementDone(adv)) player.unlockAdvancement(adv);
+  if (player && typeof player.isAdvancementDone === 'function' && typeof player.unlockAdvancement === 'function' && !player.isAdvancementDone(adv)) {
+    player.unlockAdvancement(adv);
+  }
 }
 function lhAllTeamReceipts(db, profile) {
   var out = {};

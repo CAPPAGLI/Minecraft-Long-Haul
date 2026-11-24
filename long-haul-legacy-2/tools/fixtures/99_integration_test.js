@@ -956,6 +956,8 @@ function lhStartIntegrationSetup(server) {
             }
           },
           tell: function () {},
+          isAdvancementDone: function () { return false; },
+          unlockAdvancement: function () {},
           getName: function () { return { getString: function () { return 'TestNewJoiner'; } }; }
         };
         lhFirstJoinRandomSpawn(server, newJoiner);
