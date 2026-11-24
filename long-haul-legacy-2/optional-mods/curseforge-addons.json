@@ -18,6 +18,17 @@
       "url": "https://www.curseforge.com/minecraft/mc-mods/doomed-casualty-unknown-difficult-health-system/relations/dependencies",
       "side": "client_and_server",
       "notes": "Listed as a required companion dependency in DOOMED 0.3.7+ builds."
+    },
+    {
+      "name": "The Furry Project",
+      "mod_id": "thefurrymod",
+      "curseforge_project_id": 1011741,
+      "curseforge_file_id": 5307538,
+      "recommended_filename": "thefurrymod v1.0.1-forge-1.20.1.jar",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/the-furry-mod",
+      "license": "All Rights Reserved",
+      "side": "client_and_server",
+      "notes": "CurseForge-only Forge 1.20.1 mod (All Rights Reserved). Download from CurseForge and drop into optional-mods/ or your launcher's mods/ folder."
     }
   ]
 }

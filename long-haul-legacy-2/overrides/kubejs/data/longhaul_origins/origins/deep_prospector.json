@@ -1,0 +1,14 @@
+{
+  "name": "Глубинный проходчик",
+  "description": "Мастер подземных моно-рудников: видит в темноте, быстрее бурит в глубинах и получает больше опыта.",
+  "powers": [
+    "longhaul_origins:prospector_mining",
+    "longhaul_origins:prospector_darkvision",
+    "longhaul_origins:prospector_sun_fatigue"
+  ],
+  "icon": {
+    "item": "minecraft:iron_pickaxe"
+  },
+  "order": 2,
+  "impact": 2
+}

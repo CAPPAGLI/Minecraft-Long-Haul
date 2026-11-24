@@ -43,6 +43,7 @@ def supports_forge_47410(cand):
 
 def resolve_profile(profile_path: pathlib.Path):
     profile = json.loads(profile_path.read_text(encoding='utf-8'))
+    cutoff = profile.get('cutoff_date', '2026-11-30T23:59:59Z')
     roots = list(BASE_ROOTS) + list(dict.fromkeys(s for group in profile['categories'].values() for s in group))
     client = set(BASE_CLIENT) | set(profile.get('client_only', []))
     rows = json.loads((R / 'audit/candidates.json').read_text(encoding='utf-8'))
@@ -61,7 +62,7 @@ def resolve_profile(profile_path: pathlib.Path):
                 v = cand_row
         if v is None:
             vs = get('project/' + slug + '/version?loaders=%5B%22forge%22%5D&game_versions=%5B%221.20.1%22%5D') or []
-            vs = [v for v in vs if v['date_published'] <= '2026-11-15T15:59:59Z' and any(f['filename'].endswith('.jar') for f in v['files'])]
+            vs = [v for v in vs if v['date_published'] <= cutoff and any(f['filename'].endswith('.jar') for f in v['files'])]
             if not vs:
                 raise RuntimeError(f'No supported version for {slug} (required by {parent})')
             stable = [v for v in vs if v['version_type'] == 'release']
@@ -76,7 +77,7 @@ def resolve_profile(profile_path: pathlib.Path):
                 # Hex Casting 0.11.4 requires inline >= 1.20.1-1.2.2 (CurseForge-only), whereas Modrinth latest is 1.20.1-1.2.0-forge.
                 # Prefer 0.11.3 (requires inline >= 1.0.1) unless Modrinth actually serves inline >= 1.2.2 for Forge 1.20.1.
                 inl_vs = get('project/inline/version?loaders=%5B%22forge%22%5D&game_versions=%5B%221.20.1%22%5D') or []
-                has_inl_122 = any('1.2.2' in iv.get('version_number', '') for iv in inl_vs if iv.get('date_published', '') <= '2026-11-15T15:59:59Z')
+                has_inl_122 = any('1.2.2' in iv.get('version_number', '') for iv in inl_vs if iv.get('date_published', '') <= cutoff)
                 if not has_inl_122:
                     safe_hex = [cand for cand in cands if '0.11.3' in cand.get('version_number', '')]
                     if safe_hex:
@@ -131,6 +132,31 @@ def resolve_profile(profile_path: pathlib.Path):
                 dep = dv['project_id']
             if dep and dep not in known:
                 work.append((dep, meta['slug']))
+    for ext in profile.get('external_mods', []):
+        slug = ext['slug']
+        pid = 'ext:' + slug
+        if pid in known:
+            continue
+        f_entry = {
+            'filename': ext['filename'],
+            'url': ext['url'],
+            'primary': True,
+            'size': ext.get('size', 0),
+            'hashes': ext.get('hashes', {}),
+        }
+        known[pid] = {
+            'slug': slug,
+            'title': ext['title'],
+            'project_id': pid,
+            'version_id': ext['version'],
+            'version': ext['version'],
+            'source': ext.get('source', 'github'),
+            'homepage': ext.get('homepage', ''),
+            'license': ext.get('license', ''),
+            'dependencies': [],
+            'files': [f_entry],
+            'client_only': bool(ext.get('client_only', False)) or slug in client,
+        }
     return profile.get('version', '2.0-alpha.2'), roots, list(known.values())
 
 def select_file(row):
@@ -157,9 +183,18 @@ def download_one(row):
         if last_err is not None:
             raise last_err
     b = p.read_bytes()
-    assert hashlib.sha512(b).hexdigest() == f['hashes']['sha512'], p
-    assert hashlib.sha1(b).hexdigest() == f['hashes']['sha1'], p
-    assert len(b) == f['size'], p
+    actual_sha512 = hashlib.sha512(b).hexdigest()
+    actual_sha1 = hashlib.sha1(b).hexdigest()
+    if f.get('hashes', {}).get('sha512'):
+        assert actual_sha512 == f['hashes']['sha512'], p
+    if f.get('hashes', {}).get('sha1'):
+        assert actual_sha1 == f['hashes']['sha1'], p
+    if f.get('size'):
+        assert len(b) == f['size'], p
+    f['hashes'] = {'sha512': actual_sha512, 'sha1': actual_sha1}
+    f['size'] = len(b)
+    if row.get('source') in ('github', 'external'):
+        assert supports_forge_47410({'files': [f]}), f'Incompatible Forge 47.4.10 range in {p}'
     row['selected_file'] = f
     print(row['slug'], row['version'], flush=True)
     return row

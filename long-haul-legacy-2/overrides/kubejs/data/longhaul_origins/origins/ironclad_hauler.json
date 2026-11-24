@@ -1,0 +1,13 @@
+{
+  "name": "Бронегрузчик Консорциума",
+  "description": "Тяжёлый экспедиционный специалист: больше здоровья, брони и силы, но медленный шаг и высокий аппетит.",
+  "powers": [
+    "longhaul_origins:hauler_frame",
+    "longhaul_origins:hauler_heavy_step"
+  ],
+  "icon": {
+    "item": "minecraft:chest_minecart"
+  },
+  "order": 0,
+  "impact": 2
+}

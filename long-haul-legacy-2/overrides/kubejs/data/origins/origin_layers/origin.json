@@ -1,0 +1,17 @@
+{
+  "replace": true,
+  "order": 0,
+  "enabled": true,
+  "origins": [
+    "longhaul_origins:ironclad_hauler",
+    "longhaul_origins:sky_courier",
+    "longhaul_origins:deep_prospector",
+    "longhaul_origins:field_alchemist",
+    "longhaul_origins:arc_mechanist",
+    "longhaul_origins:void_drifter"
+  ],
+  "allow_random": true,
+  "exclude_random": [],
+  "allow_random_unchoosable": false,
+  "hidden": false
+}

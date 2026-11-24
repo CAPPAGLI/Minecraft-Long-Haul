@@ -17,7 +17,8 @@ lines = [
 ]
 for m in mods:
     side = 'Нет: клиентский профиль' if m.get('client_only') else 'Да'
-    lines.append(f"| [{m['title']}](https://modrinth.com/mod/{m['slug']}) | {m['version']} | {side} |")
+    url = m.get('homepage') or f"https://modrinth.com/mod/{m['slug']}"
+    lines.append(f"| [{m['title']}]({url}) | {m['version']} | {side} |")
 
 lines += [
     '| Long Haul Runtime | 0.1.0 (собственный MIT) | Да |',

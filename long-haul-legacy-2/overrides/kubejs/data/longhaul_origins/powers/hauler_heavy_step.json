@@ -1,0 +1,22 @@
+{
+  "name": "Тяжёлая походка",
+  "description": "Ваша скорость пешего хода ниже на 10%, а расход сытости при нагрузках выше на 20%.",
+  "type": "origins:multiple",
+  "slow_stride": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Hauler Slow",
+      "attribute": "minecraft:generic.movement_speed",
+      "value": -0.1,
+      "operation": "multiply_base"
+    }
+  },
+  "extra_appetite": {
+    "type": "origins:modify_exhaustion",
+    "modifier": {
+      "name": "Hauler Hunger",
+      "operation": "multiply_base",
+      "value": 0.2
+    }
+  }
+}

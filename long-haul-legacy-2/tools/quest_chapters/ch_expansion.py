@@ -262,6 +262,16 @@ def build_expansion_chapters():
         ] + [(it, en, 1) for it, en in pool('comforts', limit=6)] + [
             (it, en, 1) for it, en in pool('supplementaries', limit=3)
         ] + [(it, en, 1) for it, en in pool('torchmaster', limit=4)]),
+        ('Neon Glowsticks, Hands-On Vanilla и Origins', [
+            ('neon_glowsticks:white_glowstick', 'Neon Glowsticks: Белая палочка', 4),
+            ('neon_glowsticks:green_glowstick', 'Neon Glowsticks: Зелёная палочка', 4),
+            ('neon_glowsticks:cyan_glowstick', 'Neon Glowsticks: Бирюзовая палочка', 4),
+            ('neon_glowsticks:yellow_glowstick', 'Neon Glowsticks: Жёлтая палочка', 4),
+            ('neon_glowsticks:red_glowstick', 'Neon Glowsticks: Красная палочка', 4),
+            ('neon_glowsticks:black_glowstick', 'Neon Glowsticks: Чёрная (УФ) палочка', 4),
+            ('origins:orb_of_origin', 'Origins: Сфера кастомного происхождения', 1),
+            ('minecraft:white_wool', 'The Furry Project (CurseForge optional-mods)', 8),
+        ]),
         ('Фермерство и приручение', [
             ('minecraft:wheat_seeds', 'Семена пшеницы', 16),
             ('minecraft:wheat', 'Урожай пшеницы', 32),
@@ -285,7 +295,7 @@ def build_expansion_chapters():
     total += emit_chapter(
         '15', '15 · Выживание: Стартовые ремёсла', 'Основы выживания Long Haul',
         'Лагерь первопроходца', 'minecraft:campfire',
-        'Первые ресурсы, инструменты, ночлег Comforts и факелы TorchMaster (без шалкеров и рюкзаков).',
+        'Первые ресурсы, тактильные верстаки Hands-On Vanilla, Neon Glowsticks, TorchMaster, Comforts и кастомные Origins (опциональный The Furry Project см. optional-mods/).',
         'story_02_bakery_burned', ch15_lanes, tier=1,
     )
 
@@ -675,7 +685,7 @@ def build_expansion_chapters():
     )
 
     # =======================================================================
-    # 33 · Хранение и Печи: Functional Storage & Iron Furnaces (~65 quests)
+    # 33 · Хранение, Печи и AE2: Functional, Iron Furnaces & AE2 (~80 quests)
     # =======================================================================
     used_fs, used_if = set(), set()
     ch33_lanes = take_from('ironfurnaces', [
@@ -684,12 +694,32 @@ def build_expansion_chapters():
     ], 34, used_if) + take_from('functionalstorage', [
         ('Ящики Functional Storage', ['oak_', 'spruce_', 'birch_', 'fluid_', 'compacting', 'controller']),
         ('Улучшения ящиков (без эндера)', ['upgrade', 'collector', 'puller', 'pusher', 'void', 'linking']),
-    ], 27, used_fs)
+    ], 27, used_fs) + [
+        ('AE2: Кристаллы, зарядник и прессы', [
+            ('ae2:meteorite_compass', 'Метеоритный компас', 1),
+            ('ae2:certus_quartz_crystal', 'Кристалл истинного кварца', 16),
+            ('ae2:charger', 'Зарядник AE2', 1),
+            ('ae2:inscriber', 'Высекатель схем', 1),
+            ('ae2:fluix_crystal', 'Кристалл флюикса', 16),
+            ('ae2:item_storage_cell_1k', 'Ячейка памяти 1k', 1),
+            ('ae2:item_storage_cell_4k', 'Ячейка памяти 4k', 1),
+        ]),
+        ('AE2: ME-сеть, диски и автокрафт', [
+            ('ae2:controller', 'ME Контроллер', 1),
+            ('ae2:drive', 'ME Накопитель', 1),
+            ('ae2:crafting_terminal', 'ME Терминал создания', 1),
+            ('ae2:item_storage_cell_16k', 'Ячейка памяти 16k', 1),
+            ('ae2:item_storage_cell_64k', 'Ячейка памяти 64k', 1),
+            ('ae2:pattern_provider', 'Поставщик шаблонов', 1),
+            ('ae2:molecular_assembler', 'Молекулярный сборщик', 1),
+            ('ae2:wireless_terminal', 'Беспроводной терминал AE2', 1),
+        ]),
+    ]
     total += emit_chapter(
-        '33', '33 · Склады и Печи: Functional & Iron Furnaces', 'Промышленное хранение и плавка',
-        'Складской комплекс', 'minecraft:blast_furnace',
-        'Высокоскоростные печи Iron Furnaces и модульные ящики Functional Storage (без эндер-ящиков).',
-        'tutorial_brass', ch33_lanes, tier=2,
+        '33', '33 · Склады и Печи: Functional & Iron Furnaces', 'Хранение, плавка и ME-сети AE2',
+        'Складской комплекс и AE2', 'ae2:controller',
+        'Высокоскоростные печи Iron Furnaces, модульные ящики Functional Storage (без эндер-ящиков) и цифровые сети Applied Energistics 2.',
+        'mod_ae2_overview', ch33_lanes, tier=2,
     )
 
     # =======================================================================
@@ -767,11 +797,18 @@ def build_expansion_chapters():
         ('Культуры, семена и заготовки', ['cabbage', 'tomato', 'onion', 'rice', 'dough', 'pasta', 'minced', 'bacon', 'cod_slice', 'salmon_slice']),
         ('Супы, похлёбки и жаркое', ['stew', 'soup', 'broth', 'curry', 'noodle', 'pasta_with', 'ratatouille', 'roast']),
         ('Полевые блюда и разделка', ['ham', 'chicken', 'mutton', 'steak', 'rice_roll', 'kelp_roll', 'dumplings', 'stuffed']),
-    ], 102, used_fd)
+    ], 102, used_fd) + [
+        ('Hands-On Delight: Тактильная кухня', [
+            ('farmersdelight:cutting_board', 'Hands-On: Разделка ножом на доске', 1),
+            ('farmersdelight:stove', 'Hands-On: Жарка на кухонной плите', 1),
+            ('farmersdelight:skillet', 'Hands-On: Полевая сковорода', 1),
+            ('farmersdelight:cooking_pot', 'Hands-On: Варка без меню (вручную)', 1),
+        ]),
+    ]
     total += emit_chapter(
         '38', '38 · Farmer\'s Delight: Полевая кухня', 'Кулинария и агрономия · Часть I',
         'Полевая кухня Farmer\'s Delight', 'farmersdelight:cooking_pot',
-        'Овощеводство, разделочная доска, кастрюли, сковороды и сытные экспедиционные блюда.',
+        'Овощеводство, разделочная доска, кастрюли, сковороды и тактильная готовка Hands-On Delight прямо в мире.',
         'tutorial_cookpot', fd38_lanes, tier=1,
     )
 
@@ -960,7 +997,7 @@ def build_expansion_chapters():
     )
 
     # =======================================================================
-    # 51 · Фауна мира: Alex's Mobs (~112 quests)
+    # 51 · Фауна мира: Alex's Mobs и Rats (~126 quests)
     # =======================================================================
     used_amobs = set()
     amobs_lanes = take_from('alexsmobs', [
@@ -968,11 +1005,30 @@ def build_expansion_chapters():
         ('Трофеи суши и саванн', ['grizzly', 'kangaroo', 'gazelle', 'roadrunner', 'moose', 'bison', 'komodo', 'emu', 'elephant']),
         ('Морские и подземные существа', ['whale', 'orca', 'lobster', 'shark', 'squid', 'mantis', 'centipede', 'cockroach']),
         ('Энд, Незер и артефакты фауны', ['void_worm', 'straddler', 'bone_serpent', 'soul_vulture', 'crimson_mosquito', 'dimensional', 'tendon']),
-    ], 110, used_amobs)
+    ], 110, used_amobs) + [
+        ('Rats: Сыр, ловушки и приручение', [
+            ('rats:cheese', 'Rats: Сыр для приручения', 8),
+            ('rats:block_of_cheese', 'Rats: Сырный блок', 2),
+            ('rats:rat_trap', 'Rats: Крысоловка', 2),
+            ('rats:rat_cage', 'Rats: Клетка для крысы', 1),
+            ('rats:rat_flute', 'Rats: Флейта крысолова', 1),
+            ('rats:auto_curdler', 'Rats: Сыроварня (Curdling Station)', 1),
+            ('rats:rat_crafting_table', 'Rats: Крысиный верстак', 1),
+        ]),
+        ('Rats: Улучшения крыс и Ratlantis', [
+            ('rats:rat_upgrade_basic', 'Rats: Базовое улучшение крысы', 2),
+            ('rats:rat_upgrade_chef', 'Rats: Улучшение «Шеф-повар»', 1),
+            ('rats:rat_upgrade_speed', 'Rats: Улучшение скорости', 1),
+            ('rats:piper_hat', 'Rats: Шляпа Гамельнского крысолова', 1),
+            ('rats:plague_essence', 'Rats: Чумная эссенция', 4),
+            ('rats:marbled_cheese', 'Rats: Мраморный сыр', 16),
+            ('rats:chunky_cheese_token', 'Rats: Жетон в Ратлантиду', 1),
+        ]),
+    ]
     total += emit_chapter(
-        '51', '51 · Фауна мира: Alex\'s Mobs', 'Исследование дикой природы',
-        'Справочник биолога Alex\'s Mobs', 'minecraft:leather',
-        'Уникальная фауна всех биомов, редкие ингредиенты и трофеи Пустотного червя.',
+        '51', '51 · Фауна мира: Alex\'s Mobs', 'Исследование фауны и фермы Rats',
+        'Справочник биолога Alex\'s Mobs и Rats', 'rats:cheese',
+        'Уникальная фауна Alex\'s Mobs, приручение и автоматизация через крыс Rats вплоть до Ратлантиды.',
         'mod_caves_bosses', amobs_lanes, tier=2,
     )
 
@@ -1048,11 +1104,19 @@ def build_expansion_chapters():
         ('Кирпичи, черепица и мозаика', ['bricks', 'shingles', 'vertical', 'chiseled', 'polished', 'cobblestone', 'thatch']),
         ('Коллекционные породы дерева', ['ancient_', 'azalea_', 'blossom_', 'bamboo_']),
         ('Редстоун и механизмы Quark', ['redstone', 'piston', 'grate', 'chute', 'pipe', 'ender_watcher', 'trowel', 'abacus']),
-    ], 82, used_qk)
+    ], 82, used_qk) + [
+        ('Lumen Rigs: Прожекторы и световой пульт', [
+            ('lumen_rigs:spotlight', 'Lumen Rigs: Прожектор', 2),
+            ('lumen_rigs:floodlight', 'Lumen Rigs: Заливной прожектор', 2),
+            ('lumen_rigs:searchlight', 'Lumen Rigs: Поисковый прожектор', 1),
+            ('lumen_rigs:soft_panel', 'Lumen Rigs: Световая панель', 2),
+            ('lumen_rigs:lighting_remote', 'Lumen Rigs: Световой пульт', 1),
+        ]),
+    ]
     total += emit_chapter(
-        '56', '56 · Механика и Декор: Quark (Блоки)', 'Ваниль+ и Инженерия Quark · I',
-        'Инженерные блоки Quark', 'minecraft:bricks',
-        'Новые горные породы, древние леса, счёты, мастерок и компактный редстоун.',
+        '56', '56 · Механика и Декор: Quark (Блоки)', 'Ваниль+, Quark и Lumen Rigs · I',
+        'Инженерные блоки Quark и Lumen Rigs', 'lumen_rigs:spotlight',
+        'Новые горные породы, компактный редстоун Quark и настраиваемые прожекторы Lumen Rigs.',
         'mod_architecture', qk56_lanes, tier=2,
     )
 
@@ -1060,11 +1124,21 @@ def build_expansion_chapters():
         ('Освещение, свечи и бумага', ['candle', 'paper', 'blaze_lantern', 'duskbound', 'midori']),
         ('Сундуки, рамки и полки', ['chest', 'bookshelf', 'ladder', 'post', 'stool', 'hedge']),
         ('Кристаллы, руны и трофеи', ['corundum', 'rune', 'soul_bead', 'crab', 'diamond_heart', 'seed_pouch', 'bottled']),
-    ], 76, used_qk)
+    ], 76, used_qk) + [
+        ('Hands-On Furniture: Мебель и техника', [
+            ('refurbished_furniture:workbench', 'Мебельный верстак Refurbished', 1),
+            ('refurbished_furniture:oak_kitchen_cabinetry', 'Hands-On: Кухонная тумба', 2),
+            ('refurbished_furniture:light_fridge', 'Hands-On: Холодильник', 1),
+            ('refurbished_furniture:light_stove', 'Hands-On: Плита Refurbished', 1),
+            ('refurbished_furniture:light_microwave', 'Hands-On: Микроволновка', 1),
+            ('refurbished_furniture:light_electricity_generator', 'Генератор мебели Refurbished', 1),
+            ('refurbished_furniture:post_box', 'Почтовый ящик Refurbished', 1),
+        ]),
+    ]
     total += emit_chapter(
-        '57', '57 · Механика и Декор: Quark (Детали и Трофеи)', 'Ваниль+ и Инженерия Quark · II',
-        'Коллекция артефактов Quark', 'minecraft:amethyst_block',
-        'Корундовые кристаллы, цветные руны, сундуки из разных пород дерева и декор интерьеров.',
+        '57', '57 · Механика и Декор: Quark (Детали и Трофеи)', 'Декор, Quark и Hands-On Furniture · II',
+        'Артефакты Quark и Hands-On Furniture', 'refurbished_furniture:workbench',
+        'Кристаллы, руны Quark и тактильное взаимодействие с мебелью MrCrayfish Refurbished через Hands-On Furniture.',
         'ch56_99_master', qk57_lanes, tier=2,
     )
 
@@ -1124,6 +1198,8 @@ def build_expansion_chapters():
             ('createaddition:copper_wire', 'Силовая медная проводка', 64),
             ('createaddition:gold_wire', 'Золотая проводка', 32),
             ('createaddition:capacitor', 'Конденсаторные сборки', 16),
+            ('ae2:fluix_crystal', 'Флюикс-кристаллы AE2', 32),
+            ('ae2:controller', 'ME Контроллеры AE2', 2),
             ('minecraft:obsidian', 'Тяжёлая защита обсидианом', 32),
             ('minecraft:diamond', 'Промышленные алмазы', 16),
             ('minecraft:emerald', 'Торговый резерв изумрудов', 32),
@@ -1393,6 +1469,9 @@ def build_expansion_chapters():
             ('immersive_aircraft:airship', 'Транспортный дирижабль', 1),
             ('ironfurnaces:netherite_furnace', 'Незеритовая плавка', 1),
             ('functionalstorage:storage_controller', 'Единый контроллер склада', 1),
+            ('ae2:item_storage_cell_64k', 'Цифровой массив AE2 64k', 2),
+            ('ae2:pattern_provider', 'Автокрафт ME AE2', 4),
+            ('lumen_rigs:searchlight', 'Поисковые прожекторы баз', 2),
         ]),
         ('Синтез Атома и Звёзд', [
             ('bigreactors:basic_reactorcontroller', 'Реактор Extreme Reactors', 1),
@@ -1418,6 +1497,7 @@ def build_expansion_chapters():
             ('primalmagick:grimoire', 'Гримуар стихий', 1),
             ('primalmagick:hallowsteel_ingot', 'Слитки священной стали', 8),
             ('minecraft:honeycomb', 'Продукция всех ульев', 64),
+            ('rats:chunky_cheese_token', 'Сырный триумф Rats (Ratlantis)', 1),
             ('farmersdelight:beef_stew', 'Пиршество консорциума', 16),
             ('aquaculture:neptunium_ingot', 'Нептуниевый слиток морей', 4),
             ('cataclysm:ignitium_ingot', 'Игнизиум титана Игниса', 4),

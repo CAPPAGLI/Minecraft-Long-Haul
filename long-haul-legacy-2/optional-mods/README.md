@@ -11,8 +11,8 @@
 ## Как подключить свои CurseForge `.jar` (2 простых способа)
 
 ### Способ 1 — прямо в лаунчере (быстрее всего)
-1. Импортируйте `Long-Haul-Legacy-2.0-alpha.17.mrpack` в Prism Launcher / Modrinth App.
-2. Скачайте `.jar` нужных CurseForge-модов (для `DOOMED` см. `curseforge-addons.json`) и положите их в папку `mods/` созданного профиля.
+1. Импортируйте `Long-Haul-Legacy-2.0-alpha.20.mrpack` в Prism Launcher / Modrinth App.
+2. Скачайте `.jar` нужных CurseForge-модов (для `DOOMED` и `The Furry Project` см. `curseforge-addons.json`) и положите их в папку `mods/` созданного профиля.
 
 ### Способ 2 — локальная пересборка `.mrpack` / серверного теста из этого репозитория
 1. Положите скачанные `.jar` в `long-haul-legacy-2/optional-mods/` (или в `long-haul-legacy-2/overrides/mods/`).
@@ -21,7 +21,7 @@
 ```bash
 python3 long-haul-legacy-2/tools/prepare_server.py --mode void --include-optional-mods
 python3 long-haul-legacy-2/tools/inspect_alpha.py --include-optional-mods
-python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.17 --include-optional-mods
+python3 long-haul-legacy-2/tools/package_alpha.py --version 2.0-alpha.20 --include-optional-mods
 ```
 
 Флаг `--include-optional-mods` добавит все `.jar` из `optional-mods/` в проверку `inspect_alpha.py`, серверный запуск `prepare_server.py` и внутрь `overrides/mods/` итогового `.mrpack` (если вы распространяете архив только для себя/своего сервера).

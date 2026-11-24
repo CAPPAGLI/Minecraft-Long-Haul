@@ -63,7 +63,8 @@
       "nuclear-science",
       "ballistix",
       "nuclearcraft-neoteric",
-      "extreme-reactors"
+      "extreme-reactors",
+      "ae2"
     ],
     "biomes": [
       "biomes-o-plenty",
@@ -157,7 +158,8 @@
       "visuality-forge",
       "make_bubbles_pop",
       "wakes-reforged",
-      "cave-dust"
+      "cave-dust",
+      "rats"
     ],
     "building": [
       "supplementaries",
@@ -237,13 +239,16 @@
       "brewin-and-chewin",
       "lets-do-herbalbrews",
       "lets-do-vinery",
-      "delightful-sandwiches"
+      "delightful-sandwiches",
+      "diegesis-api",
+      "handson-delight"
     ],
     "performance": [
       "embeddium",
       "oculus",
       "entityculling",
       "immediatelyfast",
+      "radium",
       "entity-model-features",
       "clumps",
       "alternate-current",
@@ -370,7 +375,10 @@
       "raised",
       "better-animations-collection",
       "wavey-capes",
-      "itemphysic-lite"
+      "itemphysic-lite",
+      "carry-on",
+      "what-are-they-up-to",
+      "origins-forge"
     ],
     "arcane": [
       "primal-magick",
@@ -382,13 +390,13 @@
     ]
   },
   "reasons": {
-    "industrial": "Create 6.0.6-6.0.8 addons, IE/IP/IG heavy industry, road vehicles (Ultimate Car Mod), CC peripherals, SFM/Modular Routers/Integrated Dynamics, stationary chests/barrels, and Exposure expansions without AE2/Tom's Storage. Added Functional Storage stationary drawers (ender_drawer disabled). Added Create Stuff & Additions (jetpacks blocked) and Create Liquid Fuel. Added harsh environmental pollution and chimney venting (pollution-of-the-realms, advanced-chimneys). Added Create 6.0.6+ Enchantment Industry, Central Kitchen, Create Deco, and AttributeFix. Added Create 6.0.8 expansions & fixes (create-encased, create-vibrant-vaults, create_factory_logistics, escalated, create-6.0.8-backported-fixes). Added Create 6.0.8+ transport & telemetry addons (create-radars, hypertube, create-mobile-packages). Added Create: Pattern Schematics and Create: Additional Lights. Added late-game nuclear/ballistic & high-energy tech: Draconic Evolution (dislocators disabled for logistics rules), Electrodynamics + Nuclear Science + Ballistix, NuclearCraft Neoteric, Extreme Reactors (excluded hbms-nuclear-tech-1.20.1-port due to dedicated-server ClientLevel crash).",
+    "industrial": "Create 6.0.6-6.0.8 addons, IE/IP/IG heavy industry, road vehicles (Ultimate Car Mod), CC peripherals, SFM/Modular Routers/Integrated Dynamics, stationary chests/barrels, Applied Energistics 2 (AE2), Torchmaster, and Exposure expansions. Added Functional Storage stationary drawers (ender_drawer disabled). Added Create Stuff & Additions (jetpacks blocked) and Create Liquid Fuel. Added harsh environmental pollution and chimney venting (pollution-of-the-realms, advanced-chimneys). Added Create 6.0.6+ Enchantment Industry, Central Kitchen, Create Deco, and AttributeFix. Added Create 6.0.8 expansions & fixes (create-encased, create-vibrant-vaults, create_factory_logistics, escalated, create-6.0.8-backported-fixes). Added Create 6.0.8+ transport & telemetry addons (create-radars, hypertube, create-mobile-packages). Added Create: Pattern Schematics and Create: Additional Lights. Added late-game nuclear/ballistic & high-energy tech: Draconic Evolution (dislocators disabled for logistics rules), Electrodynamics + Nuclear Science + Ballistix, NuclearCraft Neoteric, Extreme Reactors (excluded hbms-nuclear-tech-1.20.1-port due to dedicated-server ClientLevel crash).",
     "biomes": "Regions Unexplored + Biomes O' Plenty + Terralith + Tectonic + Alex's Caves + thematic sub-biomes with vanilla vertical limits. Added YUNG's Cave Biomes.",
     "structures": "YUNG full suite + Towns & Towers + IDAS + Dungeons and Taverns + Hopo + When Dungeons Arise + Structory + Formations + Archeology + Bountiful. Added Structurify density control and Easy NPC site dispatchers. Added floating sky islands and sky villages (embers-floating-islands, create-sky-village). Added Aquamirae and instanced Lootr dungeon chests. Added Obscure API for Aquamirae. Added Repurposed Structures. Added MVS - Moog's Voyager Structures. Added Moog's End/Nether/Soaring Structures (MES/MNS/MSS), CTOV, and L_Ender's Cataclysm. Added Friends&Foes Beekeeper Hut and It Takes a Pillage. Added Create: Structures Arise (Create 6.0.4+).",
     "world": "Ambient wildlife, bosses/encounters, weathering, snow physics, and client audiovisual atmosphere. Added Smart Mobs (wall-breaching creepers, digging/pillaring zombies, sniping skeletons). Added Friends&Foes (Forge), Flowery Mooblooms, and Villager Names. Added Nyf's Spiders (wall/ceiling climbing). Added Villager Recruits and Subtle Effects (client-only; excluded Villager Workers due to VillagerPriceTable mixin clash with Forgified Fabric API + MoreJS). Added lightweight graphics enhancements: Particular Reforged, Visuality Reforged, Make Bubbles Pop (client-only), Cave Dust (client-only), and Wakes Reforged (water wakes with Valkyrien Skies compat).",
     "building": "Architecture, framing, chipped/rechiseled, Macaw suite, Quark, Sully's Mod, Immersive Paintings, and wood/stone/clay variants. Added Macaw's Bridges, Paths, Roofs, Doors, and Fences. Added Macaw's Stairs. Added Straw Statues (excluded Every Compat due to Valkyrien Skies MassDatapackResolver blockstate heap bloat).",
     "food": "Expanded Farmer's Delight ecosystem, Fruit Trees, Productive Bees, Culinary Construct, Diet, and Aquaculture without temperature locks. Added Create Confectionery. Added End's Delight. Added Farmer's Delight expansions (Nether's, Ocean's, Miner's, Cultural Delights). Added Brewin' And Chewin' keg fermentation. Added [Let's Do] HerbalBrews (tea/coffee/flasks without DoAPI). Added [Let's Do] Vinery (vineyards and winemaking). Added Delightful Sandwiches.",
-    "performance": "Client/server optimization stack with Embeddium/Oculus/Noisium/ModernFix/FastWorkbench/RyoamicLights (radium excluded due to Valkyrien Skies POI mixin conflict; saturn removed as redundant with ModernFix+FerriteCore; fps-reducer removed as redundant with dynamic-fps; does-it-tick removed due to Valkyrien Skies seat dismount lock; servercore excluded due to Valkyrien Skies ticking entity mixin crash #1395). Includes FastFurnace, Smooth Boot Reloaded, Neruina, Let Me Despawn, Embeddium Extra, Distant Horizons (3.3.x pre-tuned to PRE_EXISTING_ONLY, 96-chunk radius, 2 threads), Cull Leaves, Mobtimizations, Model Gap Fix, [ETF] Entity Texture Features (Slow update frequency), Structure Layout Optimizer (faster Jigsaw/NBT worldgen), Redirected (Enum RAM deduplication), Fast IP Ping, and Krypton Reno (Netty/network optimization).",
+    "performance": "Client/server optimization stack with Embeddium/Oculus/Noisium/ModernFix/FastWorkbench/ImmediatelyFast/RyoamicLights and Radium Reforged (Lithium Forge port with mixin.ai.poi=false in config/radium.properties for Valkyrien Skies POI compatibility; saturn removed as redundant with ModernFix+FerriteCore; fps-reducer removed as redundant with dynamic-fps; does-it-tick removed due to Valkyrien Skies seat dismount lock; servercore excluded due to Valkyrien Skies ticking entity mixin crash #1395). Includes FastFurnace, Smooth Boot Reloaded, Neruina, Let Me Despawn, Embeddium Extra, Distant Horizons (3.3.x pre-tuned to PRE_EXISTING_ONLY, 96-chunk radius, 2 threads), Cull Leaves, Mobtimizations, Model Gap Fix, [ETF] Entity Texture Features (Slow update frequency), Structure Layout Optimizer (faster Jigsaw/NBT worldgen), Redirected (Enum RAM deduplication), Fast IP Ping, and Krypton Reno (Netty/network optimization).",
     "qol": "Compasses, Tetra+Extras, Combat Roll, JEI/EMI integrations, manuals, tooltips, UI polish, and voice chat addons without bulk backpacks or teleportation. Added Corpse, Better Spawner Control, Paxi, EntityJS, Game/Recipe/Item Stages, and FancyMenu/Drippy/ResourcePackOverrides/JustZoom client polish. Added Default Server Properties and Simple Discord RPC (client-only). Added Timeless and Classics Zero (TaCZ) industrial firearms. Added ParCool! parkour movement. Added corpse graves (corpse) to preserve items across Death Stranding voidout explosions. Added Map Atlases, Akashic Tome, Visual Workbench, TrashSlot, BetterF3, Dynamic Lights, Entity Culling, Sound Physics Remastered, and Presence Footsteps. Added Jade Addons, Exposure camera, Comforts sleeping bags, and Just Enough Resources. Added NetherPortalFix, Easy Anvils, Easy Magic, Enchanting Infuser, and Trading Post. Added No Chat Reports; unified guidebook handling on Eccentric Tome (removed duplicate akashic-tome) and fixed Heracles Component JSON formatting. Added 3D Skin Layers, Not Enough Animations, Extreme Sound Muffler, and Just Enough Breeding (client-only). Added Ultimate Chess (ultimate-chess: playable Chess & Checkers boards/pieces, replacing removed Modrinth chess-and-checks) and Eating Animations (client-only). Added Jade VS (Valkyrien Skies Jade info), Shulker Box Tooltip, Overflowing Bars, and Raised (client-only). Added Better Animations Collection, Wavey Capes, and ItemPhysic Lite (client-only smooth animations/UI). Removed duplicate dynamic-lights (kept ryoamiclights), better-f3 (kept betterf3), and trash-slot (kept trashslot).",
     "arcane": "Thaumcraft-inspired research, alchemy, primal essences, and stack-based programmable spellcasting compatible with Forge 1.20.1: Primal Magick, Thaumon, and Hex Casting (official Thaumcraft 6/7 is not released on 1.20.1 Forge)."
   },
@@ -468,6 +476,75 @@
     "cave-dust",
     "better-animations-collection",
     "wavey-capes",
-    "itemphysic-lite"
+    "itemphysic-lite",
+    "handson-vanilla"
+  ],
+  "external_mods": [
+    {
+      "slug": "framework",
+      "title": "Framework",
+      "version": "1.20.1-0.8.0",
+      "filename": "framework-forge-1.20.1-0.8.0-signed.jar",
+      "url": "https://github.com/MrCrayfish/Framework/releases/download/v1.20.1-0.8.0/framework-forge-1.20.1-0.8.0-signed.jar",
+      "homepage": "https://github.com/MrCrayfish/Framework",
+      "license": "LGPL-2.1",
+      "source": "github",
+      "client_only": false
+    },
+    {
+      "slug": "refurbished-furniture",
+      "title": "MrCrayfish's Furniture Mod: Refurbished",
+      "version": "1.20.1-1.0.20",
+      "filename": "refurbished_furniture-forge-1.20.1-1.0.20-signed.jar",
+      "url": "https://github.com/MrCrayfish/MrCrayfishFurnitureMod-Refurbished/releases/download/v1.20.1-1.0.20/refurbished_furniture-forge-1.20.1-1.0.20-signed.jar",
+      "homepage": "https://github.com/MrCrayfish/MrCrayfishFurnitureMod-Refurbished",
+      "license": "MIT code / ARR assets (unmodified signed JAR modpack distribution permitted)",
+      "source": "github",
+      "client_only": false
+    },
+    {
+      "slug": "handson-furniture",
+      "title": "Hands-On Furniture",
+      "version": "1.2.1",
+      "filename": "handson_furniture-forge-1.20.1-1.2.1.jar",
+      "url": "https://github.com/Pocky-l/handson-furniture/releases/download/v1.2.1/handson_furniture-forge-1.20.1-1.2.1.jar",
+      "homepage": "https://github.com/Pocky-l/handson-furniture",
+      "license": "MIT",
+      "source": "github",
+      "client_only": false
+    },
+    {
+      "slug": "handson-vanilla",
+      "title": "Hands-On Vanilla",
+      "version": "1.2.4",
+      "filename": "handson_vanilla-forge-1.20.1-1.2.4.jar",
+      "url": "https://github.com/Pocky-l/handson-vanilla/releases/download/v1.2.4/handson_vanilla-forge-1.20.1-1.2.4.jar",
+      "homepage": "https://github.com/Pocky-l/handson-vanilla",
+      "license": "MIT",
+      "source": "github",
+      "client_only": true
+    },
+    {
+      "slug": "neon-glowsticks",
+      "title": "Neon Glowsticks",
+      "version": "1.0.1",
+      "filename": "neon_glowsticks-forge-1.20.1-1.0.1.jar",
+      "url": "https://github.com/Pocky-l/neon-glowsticks/releases/download/v1.0.1%2B1.20.1/neon_glowsticks-forge-1.20.1-1.0.1.jar",
+      "homepage": "https://github.com/Pocky-l/neon-glowsticks",
+      "license": "MIT",
+      "source": "github",
+      "client_only": false
+    },
+    {
+      "slug": "lumen-rigs",
+      "title": "Lumen Rigs",
+      "version": "1.1.0",
+      "filename": "lumen_rigs-forge-1.20.1-1.1.0.jar",
+      "url": "https://github.com/Pocky-l/lumen-rigs/releases/download/v1.1.0%2B1.20.1/lumen_rigs-forge-1.20.1-1.1.0.jar",
+      "homepage": "https://github.com/Pocky-l/lumen-rigs",
+      "license": "MIT",
+      "source": "github",
+      "client_only": false
+    }
   ]
 }

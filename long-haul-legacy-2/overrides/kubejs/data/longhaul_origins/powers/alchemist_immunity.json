@@ -1,0 +1,25 @@
+{
+  "name": "Биохимическая стойкость",
+  "description": "Полный иммунитет к эффектам Отравления и Голода; пища даёт +2 сытости и +25% насыщения.",
+  "type": "origins:multiple",
+  "immunities": {
+    "type": "origins:effect_immunity",
+    "effects": [
+      "minecraft:poison",
+      "minecraft:hunger"
+    ]
+  },
+  "nutrient_efficiency": {
+    "type": "origins:modify_food",
+    "food_modifier": {
+      "name": "Alchemist Food",
+      "operation": "addition",
+      "value": 2.0
+    },
+    "saturation_modifier": {
+      "name": "Alchemist Saturation",
+      "operation": "multiply_base",
+      "value": 0.25
+    }
+  }
+}

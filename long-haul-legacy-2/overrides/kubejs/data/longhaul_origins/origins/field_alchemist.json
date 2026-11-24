@@ -1,0 +1,14 @@
+{
+  "name": "Полевой биохимик",
+  "description": "Стойкий выживальщик токсичных зон: иммунитет к яду и голоду, усиленное питание и повышенная удача.",
+  "powers": [
+    "longhaul_origins:alchemist_immunity",
+    "longhaul_origins:alchemist_luck",
+    "longhaul_origins:alchemist_soft_strike"
+  ],
+  "icon": {
+    "item": "minecraft:brewing_stand"
+  },
+  "order": 3,
+  "impact": 2
+}

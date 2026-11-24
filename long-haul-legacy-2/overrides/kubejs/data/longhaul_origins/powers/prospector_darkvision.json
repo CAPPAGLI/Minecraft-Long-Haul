@@ -1,0 +1,11 @@
+{
+  "name": "Шахтёрское зрение",
+  "description": "Отчётливо видите в тёмных пещерах и туннелях.",
+  "type": "origins:night_vision",
+  "strength": 0.85,
+  "condition": {
+    "type": "origins:submerged_in",
+    "fluid": "minecraft:water",
+    "inverted": true
+  }
+}

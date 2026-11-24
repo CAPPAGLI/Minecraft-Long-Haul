@@ -1,0 +1,13 @@
+{
+  "name": "Инженер-механист",
+  "description": "Заводской оператор Create и AE2: ускоренные рефлексы, защита от усталости и бонус опыта.",
+  "powers": [
+    "longhaul_origins:mechanist_overclock",
+    "longhaul_origins:mechanist_fragile_core"
+  ],
+  "icon": {
+    "item": "minecraft:redstone"
+  },
+  "order": 4,
+  "impact": 2
+}

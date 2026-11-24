@@ -124,6 +124,23 @@ def build_core_chapters():
          t_item('minecraft:campfire', 1), [
              'Перед первым выходом в дальнюю разведку подготовьте костёр, спальник Comforts и запас еды Farmer\'s Delight.',
          ], ['alpha_storage_basics'], {'xp': r_xp(70, 'POINTS'), 'item': r_item('minecraft:cooked_beef', 6)}),
+        ('alpha_custom_origins', 'Происхождение Long Haul (Origins)', 'origins:orb_of_origin', [-320, -110],
+         t_check('Происхождение выбрано'), [
+             'В сборке используется мод Origins с полностью переработанным набором: ВСЕ стандартные ванильные Origins отключены.',
+             'Доступны 6 авторских специализаций Long Haul: Бронегрузчик, Небесный курьер, Глубинный проходчик, Полевой биохимик, Инженер-механист и Странник Пустоты.',
+         ], ['alpha_welcome'], {'xp': r_xp(70, 'POINTS'), 'item': r_item('minecraft:bread', 4)}),
+        ('alpha_watut_presence', 'Телеметрия команды: What Are They Up To', 'minecraft:spyglass', [400, -110],
+         t_check('Синхронизация статусов изучена'), [
+             'Мод What Are They Up To (Watut) отображает у союзников анимации печати в чате, просмотра инвентаря/сундуков и статус AFK прямо в мире.',
+         ], ['alpha_coop_guide'], {'xp': r_xp(60, 'POINTS'), 'item': r_item('minecraft:name_tag', 2)}),
+        ('alpha_perf_stack', 'Оптимизация: ImmediatelyFast и Radium (Lithium)', 'minecraft:feather', [-320, 110],
+         t_check('Профиль производительности изучен'), [
+             'На клиенте работает ImmediatelyFast (ускорение отрисовки карт, табличек, инвентаря и сущностей), на сервере и клиенте — Radium Reforged (Forge-порт Lithium с безопасной настройкой для Valkyrien Skies).',
+         ], ['alpha_welcome'], {'xp': r_xp(60, 'POINTS'), 'item': r_item('minecraft:torch', 16)}),
+        ('alpha_carry_on', 'Ручная погрузка грузов (Carry On)', 'minecraft:barrel', [160, 210],
+         t_check('Механика Carry On проверена'), [
+             'Carry On позволяет поднимать сундуки, бочки, станки и небольших животных вручную (Shift + ПКМ пустыми руками) для перегрузки на повозки, баржи и поезда.',
+         ], ['alpha_storage_basics'], {'xp': r_xp(70, 'POINTS'), 'item': r_item('minecraft:barrel', 2)}),
     ]
     for qid, title, icon, pos, tasks, desc, deps, rew in ch01_nodes:
         quest(qid, title, '01 · Начало и правила', pos, icon, tasks, desc, deps=deps, rewards=rew)
@@ -183,6 +200,10 @@ def build_core_chapters():
          t_item('computercraft:computer_normal', 1), [
              'CC: Tweaked, CC:C Bridge и Tom\'s Peripherals связывают поезда Create и склады (подробнее в Главе 32).',
          ], ['tutorial_precision'], {'xp': r_xp(2, 'LEVEL'), 'item': r_item('computercraft:cable', 8)}),
+        ('mod_ae2_overview', '2.7 · Цифровые сети Applied Energistics 2', 'ae2:controller', [420, -60],
+         t_check('Основы ME-сетей AE2 изучены'), [
+             'Applied Energistics 2 (AE2): метеоритные прессы, кристаллы сертуса и флюикса, ME-накопители и автокрафт (Глава 33).',
+         ], ['tutorial_computer'], {'xp': r_xp(2, 'LEVEL'), 'item': r_item('ae2:meteorite_compass', 1)}),
 
         # Lane 3 (y = +60): Food, Biomes, Caves/Bosses, Gear & Architecture
         ('tutorial_cookpot', '3.1 · Полевая кухня и рыболовство', 'farmersdelight:cooking_pot', [-300, 60],
@@ -209,6 +230,10 @@ def build_core_chapters():
          t_check('Изучены строительные и QoL-моды'), [
              'FramedBlocks, Chipped, Rechiseled, Quark, Supplementaries, Macaw\'s Suite, Effortless Building, Ultimate Chess (Главы 53–57).',
          ], ['mod_gear_combat'], {'xp': r_xp(2, 'LEVEL'), 'item': r_item('framedblocks:framed_cube', 16)}),
+        ('mod_diegetic_lights', '3.7 · Hands-On станции, освещение и фауна', 'lumen_rigs:spotlight', [420, 60],
+         t_check('Изучены тактильные станции и свет'), [
+             'Hands-On Vanilla/Delight/Furniture (тактильная работа на станках, кухне и мебели MrCrayfish), Neon Glowsticks, Lumen Rigs, Torchmaster и Rats (Главы 15, 38, 51, 56–57).',
+         ], ['mod_architecture'], {'xp': r_xp(2, 'LEVEL'), 'item': r_item('neon_glowsticks:cyan_glowstick', 8)}),
 
         # Lane 4 (y = +180): Arcane Sciences
         ('arcane_01_intro', '4.1 · Истоки арканы: аметист и кристаллы', 'minecraft:amethyst_shard', [-300, 180],

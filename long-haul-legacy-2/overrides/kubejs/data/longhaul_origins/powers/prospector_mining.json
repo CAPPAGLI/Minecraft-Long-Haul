@@ -1,0 +1,25 @@
+{
+  "name": "Подземный проходчик",
+  "description": "Под открытым небом не работает: в шахтах и помещениях вы копаете на 45% быстрее и получаете на 25% больше опыта.",
+  "type": "origins:multiple",
+  "tunnel_speed": {
+    "type": "origins:modify_break_speed",
+    "modifier": {
+      "name": "Prospector Speed",
+      "operation": "multiply_base",
+      "value": 0.45
+    },
+    "condition": {
+      "type": "origins:exposed_to_sky",
+      "inverted": true
+    }
+  },
+  "xp_bonus": {
+    "type": "origins:modify_xp_gain",
+    "modifier": {
+      "name": "Prospector XP",
+      "operation": "multiply_base",
+      "value": 0.25
+    }
+  }
+}

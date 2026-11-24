@@ -1,0 +1,42 @@
+{
+  "name": "Разгон рефлексов",
+  "description": "+15% скорости атаки, +8% скорости передвижения, +2 брони и +20% опыта за инженерную и боевую практику.",
+  "type": "origins:multiple",
+  "stats": {
+    "type": "origins:attribute",
+    "modifiers": [
+      {
+        "name": "Mechanist Attack Speed",
+        "attribute": "minecraft:generic.attack_speed",
+        "value": 0.15,
+        "operation": "multiply_base"
+      },
+      {
+        "name": "Mechanist Speed",
+        "attribute": "minecraft:generic.movement_speed",
+        "value": 0.08,
+        "operation": "multiply_base"
+      },
+      {
+        "name": "Mechanist Armor",
+        "attribute": "minecraft:generic.armor",
+        "value": 2.0,
+        "operation": "addition"
+      }
+    ]
+  },
+  "xp": {
+    "type": "origins:modify_xp_gain",
+    "modifier": {
+      "name": "Mechanist XP",
+      "operation": "multiply_base",
+      "value": 0.2
+    }
+  },
+  "no_fatigue": {
+    "type": "origins:effect_immunity",
+    "effects": [
+      "minecraft:mining_fatigue"
+    ]
+  }
+}

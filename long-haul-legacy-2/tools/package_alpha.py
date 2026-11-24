@@ -25,6 +25,7 @@ def main():
 
     files = []
     paths = set()
+    bundled_external_jars = []
     for mod in mods:
         f = mod['selected_file']
         p = R / 'assembly/mods' / f['filename']
@@ -36,14 +37,17 @@ def main():
         path = 'mods/' + f['filename']
         assert path not in paths
         paths.add(path)
-        assert f['url'].startswith('https://cdn.modrinth.com/'), f['url']
-        files.append({
-            'path': path,
-            'hashes': {k: f['hashes'][k] for k in ['sha1', 'sha512']},
-            'env': {'client': 'required', 'server': 'unsupported' if mod['client_only'] else 'required'},
-            'downloads': [f['url']],
-            'fileSize': f['size'],
-        })
+        if f['url'].startswith('https://cdn.modrinth.com/'):
+            files.append({
+                'path': path,
+                'hashes': {k: f['hashes'][k] for k in ['sha1', 'sha512']},
+                'env': {'client': 'required', 'server': 'unsupported' if mod['client_only'] else 'required'},
+                'downloads': [f['url']],
+                'fileSize': f['size'],
+            })
+        else:
+            assert mod.get('source') in ('github', 'external'), f['url']
+            bundled_external_jars.append((p, f'overrides/mods/{f["filename"]}'))
 
     quest_files = sorted((R / 'overrides/config/heracles/quests').glob('*.json'))
     local_jars = sorted((R / 'overrides/mods').glob('*.jar'))
@@ -52,7 +56,7 @@ def main():
     if args.include_optional_mods and (R / 'optional-mods').exists():
         existing_names = {j.name for j in local_jars}
         optional_jars = [j for j in sorted((R / 'optional-mods').glob('*.jar')) if j.name not in existing_names]
-    total_local_jars = len(local_jars) + len(optional_jars)
+    total_local_jars = len(local_jars) + len(optional_jars) + len(bundled_external_jars)
 
     manifest = {
         'formatVersion': 1,
@@ -72,6 +76,9 @@ def main():
             if p.is_file():
                 assert '99_integration' not in p.name and p.suffix not in {'.log', '.dat'}, p
                 z.write(p, p.relative_to(R))
+        for ext_p, arcname in bundled_external_jars:
+            if not args.skip_jar_bytes_check or ext_p.exists():
+                z.write(ext_p, arcname)
         for opt_jar in optional_jars:
             z.write(opt_jar, f'overrides/mods/{opt_jar.name}')
         for name in ['README.md', 'TEST-REPORT.md', 'DOOMED.md', 'MODLIST.md', 'STATUS.json']:
