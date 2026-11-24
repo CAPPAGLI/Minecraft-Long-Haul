@@ -8,7 +8,12 @@
     "longhaul_origins:deep_prospector",
     "longhaul_origins:field_alchemist",
     "longhaul_origins:arc_mechanist",
-    "longhaul_origins:void_drifter"
+    "longhaul_origins:void_drifter",
+    "longhaul_origins:abyss_navigator",
+    "longhaul_origins:subterranean_mole",
+    "longhaul_origins:nether_strider",
+    "longhaul_origins:urbanist_architect",
+    "longhaul_origins:trailblazer_pathfinder"
   ],
   "allow_random": true,
   "exclude_random": [],

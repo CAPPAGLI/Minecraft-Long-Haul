@@ -1,0 +1,14 @@
+{
+  "name": "Урбанист-градостроитель",
+  "description": "Архитектор городов, вокзалов и промзон: быстрее строит и ломает блоки, обладает увеличенной дистанцией и удачей.",
+  "powers": [
+    "longhaul_origins:urbanist_builder",
+    "longhaul_origins:urbanist_civic_grace",
+    "longhaul_origins:urbanist_soft_frame"
+  ],
+  "icon": {
+    "item": "minecraft:bricks"
+  },
+  "order": 9,
+  "impact": 2
+}

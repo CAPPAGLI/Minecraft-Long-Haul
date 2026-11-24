@@ -536,4 +536,80 @@ test('LHChapterFork enforces mandatory start -> early (5) -> mid (6) -> late 3-c
   rollMid.offers.forEach(c => assert(F.MID_CHAPTERS.includes(c), 'offer is from MID tier: ' + c));
 });
 
+test('LHEconomyEngine covers items/fluids/gas/energy, recipe graph, market crash, admin overrides, physical facility pickup, and balanced trader', () => {
+  const E = sandbox.global.LHEconomyEngine;
+  const O = sandbox.global.LHOpenTTD;
+  assert(E, 'LHEconomyEngine loaded');
+
+  const econ = E.createInitialEconomyState();
+  // 1. Recipe graph propagates ingredient prices into crafted items
+  E.propagateRecipePrices(econ, [
+    { outId: 'test:steel_gear', outCount: 2, ingredients: [{ id: 'minecraft:iron_ingot', count: 4 }, { id: 'minecraft:coal', count: 2 }] }
+  ]);
+  const gearQ = E.getMarketQuote(econ, 'test:steel_gear');
+  assert(gearQ.basePrice >= 35, 'crafted item inherits ingredient value: ' + gearQ.basePrice);
+  assert(E.getMarketQuote(econ, 'fluid:immersivepetroleum:crudeoil').price > 0, 'fluid priced');
+  assert(E.getMarketQuote(econ, 'gas:mekanism:hydrogen').price > 0, 'gas priced');
+  assert(E.getMarketQuote(econ, 'energy:fe_10k').price > 0, 'energy FE priced');
+
+  // 2. Oversupply triggers Market Crash (обвал рынка) and drops multiplier sharply
+  const dump = E.recordTradePressure(econ, 'minecraft:iron_ingot', 'sell', E.CRASH_NET_SUPPLY_THRESHOLD + 10);
+  assert.equal(dump.crashedJustNow, true, 'oversupply triggers market crash');
+  assert(dump.quote.crashed && dump.quote.multiplier <= 0.35, 'crashed multiplier drops sharply: ' + dump.quote.multiplier);
+  for (let i = 0; i < E.CRASH_DURATION_TICKS; i++) E.decayMarketTick(econ);
+  assert.equal(E.getMarketQuote(econ, 'minecraft:iron_ingot').crashed, false, 'market recovers after crash ticks');
+
+  // 3. Admin price overrides & bounds
+  assert.equal(E.setAdminPrice(econ, 'minecraft:diamond', 500).price, 500);
+  assert.equal(E.clearAdminPrice(econ, 'minecraft:diamond').adminLocked, false);
+  const bnd = E.setAdminBounds(econ, 'minecraft:diamond', 120, 140);
+  assert(bnd.price >= 120 && bnd.price <= 140);
+
+  // 4. Physical facility trading requires physical pickup at building coords
+  const st = O.createInitialState();
+  const c1 = O.companyCreate(st, 'u1', 'seller_co', 'Продавец', 768, 0).company;
+  const c2 = O.companyCreate(st, 'u2', 'buyer_co', 'Покупатель', 0, 768).company;
+  const sc = O.sectorCoords(768, 0);
+  const bRes = O.buildCompanyBuilding(st, c1.id, sc.sx, sc.sz, 'warehouse', 768, 70, 0);
+  assert(bRes.ok);
+  const listRes = E.createFacilityListing(econ, c1.id, bRes.building, 'minecraft:iron_ingot', 16, 18);
+  assert(listRes.ok && listRes.marketQuote.price > 0);
+  const buyRes = E.buyFacilityListing(st, econ, c2.id, listRes.listing.id, 8);
+  assert(buyRes.ok && buyRes.order.status === 'ready');
+  // Remote pickup rejected; physical proximity accepted
+  const farPick = E.pickupLogisticsOrder(econ, c2.id, buyRes.order.id, 0, 70, 768, 24);
+  assert(!farPick.ok && farPick.reason === 'too_far');
+  const nearPick = E.pickupLogisticsOrder(econ, c2.id, buyRes.order.id, 771, 70, 3, 24);
+  assert(nearPick.ok && nearPick.order.status === 'collected');
+
+  // 5. Wandering Trader offers span -60% to +200% with balanced total value
+  const wt = E.generateWanderingTraderOffers(econ, () => 0.42);
+  assert.equal(wt.offers.length, 8);
+  assert(wt.offers.some(o => o.offsetPct === -60), 'has -60% offer');
+  assert(wt.offers.some(o => o.offsetPct === 200), 'has +200% offer');
+  assert(wt.imbalancePct <= 25, 'discount and markup value roughly balanced: ' + wt.imbalancePct + '%');
+
+  // 6. Bot claim cap tied to player claims + dynamic bot on border expansion + physical building destruction
+  const stCap = O.createInitialState();
+  assert.equal(O.countBotClaimsTotal(stCap), 3, 'bots start with only 3 HQ claims');
+  assert.equal(O.maxBotClaimsAllowed(stCap), 3, 'with 0 player claims bots cannot claim extra sectors');
+  const botTry = O.botExpandStep(stCap, 6, () => 0.1);
+  assert.equal(botTry.length, 0, 'bots blocked from claiming extra sectors when players have 0 claims');
+  O.companyCreate(stCap, 'pu1', 'alpha', 'Альфа', 512, 512);
+  assert(O.maxBotClaimsAllowed(stCap) > 3, 'player HQ claim expands bot claim allowance');
+  const dyn = O.spawnDynamicBotCompany(stCap, 8, () => 0.35);
+  assert(dyn.ok && dyn.bot.isBot && stCap.claims[O.sectorKey(dyn.sx, dyn.sz)].owner === dyn.bot.id);
+
+  // Building damage & repair
+  const pSc = O.sectorCoords(512, 512);
+  const pb = O.buildCompanyBuilding(stCap, 'alpha', pSc.sx, pSc.sz, 'mine_shaft', 512, 70, 512);
+  assert(pb.ok);
+  const dmg1 = O.damageBuildingIntegrity(stCap, pSc.sx, pSc.sz, 14, false);
+  assert(dmg1.ok && dmg1.integrityPct === 30 && dmg1.operational === false);
+  const rep1 = O.repairBuildingIntegrity(stCap, 'alpha', pSc.sx, pSc.sz);
+  assert(rep1.ok && rep1.integrityPct === 100);
+  const dmgCore = O.damageBuildingIntegrity(stCap, pSc.sx, pSc.sz, 1, true);
+  assert(dmgCore.ok && dmgCore.destroyed === true && !O.getSectorBuilding(stCap, pSc.sx, pSc.sz));
+});
+
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');

@@ -1,0 +1,31 @@
+{
+  "name": "Спелеологический шаг",
+  "description": "Под землёй (без неба над головой) вы двигаетесь на 20% быстрее и копаете на 30% быстрее.",
+  "type": "origins:multiple",
+  "cave_speed": {
+    "type": "origins:conditioned_attribute",
+    "tick_rate": 20,
+    "modifier": {
+      "name": "Mole Speed",
+      "attribute": "minecraft:generic.movement_speed",
+      "value": 0.2,
+      "operation": "multiply_base"
+    },
+    "condition": {
+      "type": "origins:exposed_to_sky",
+      "inverted": true
+    }
+  },
+  "cave_dig": {
+    "type": "origins:modify_break_speed",
+    "modifier": {
+      "name": "Mole Dig",
+      "operation": "multiply_base",
+      "value": 0.3
+    },
+    "condition": {
+      "type": "origins:exposed_to_sky",
+      "inverted": true
+    }
+  }
+}

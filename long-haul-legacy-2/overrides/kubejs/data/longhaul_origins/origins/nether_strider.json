@@ -1,0 +1,14 @@
+{
+  "name": "Странник Незера",
+  "description": "Мастер адских логистических маршрутов: невосприимчив к огню и лаве и ускоряется в Незере, но уязвим к воде.",
+  "powers": [
+    "longhaul_origins:nether_heatproof",
+    "longhaul_origins:nether_ember_vigor",
+    "longhaul_origins:nether_hydro_allergy"
+  ],
+  "icon": {
+    "item": "minecraft:netherite_boots"
+  },
+  "order": 8,
+  "impact": 3
+}

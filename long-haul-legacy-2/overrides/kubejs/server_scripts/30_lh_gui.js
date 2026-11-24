@@ -794,7 +794,7 @@ function lhGuiRenderTerritory(gui, server, player) {
         var sz = view.cz + dzCell * zoom;
         var info = global.LHOpenTTD.resolveSectorOwner(st, sx, sz);
         var bldg = global.LHOpenTTD.getSectorBuilding(st, sx, sz);
-        var comp = info.owner ? st.companies[info.owner] : null;
+        var comp = (info.kind === 'claimed' && info.owner) ? st.companies[info.owner] : null;
         var isHere = (Math.abs(sc.sx - sx) < zoom && Math.abs(sc.sz - sz) < zoom &&
           sc.sx >= sx && sc.sx < sx + zoom && sc.sz >= sz && sc.sz < sz + zoom);
         var isSanctuary = global.LHOpenTTD.isSpawnProtectedSector && global.LHOpenTTD.isSpawnProtectedSector(sx, sz);
@@ -809,11 +809,11 @@ function lhGuiRenderTerritory(gui, server, player) {
         var lore = [
           (isHere ? '§e◆ ВЫ ЗДЕСЬ · ' : '') + '§fСектор (' + sx + ', ' + sz + ')' + (zoom > 1 ? (' §7[' + zoom + '×' + zoom + ']') : ''),
           '§7Центр: ' + (sx * 256) + ', ' + (sz * 256),
-          '§fВладелец: ' + (comp ? (comp.colorCode + comp.name) : '§7Свободен')
+          '§fВладелец: ' + (comp ? (comp.colorCode + comp.name) : '§7Свободен (не запривачен)')
         ];
         if (isSanctuary) lore.push('§eСтартовый заповедник спауна (покупка запрещена)');
         else if (info.kind === 'claimed') lore.push('§7Статус: Захвачен (защита ' + info.strength + '/4)');
-        else if (info.kind === 'voronoi') lore.push('§7Статус: Зона влияния');
+        else lore.push('§cДобыча и лутинг запрещены до привата');
 
         if (bldg && global.LHOpenTTD.BUILDING_CATALOG[bldg.type]) {
           lore.push('§bЗдание: §f' + global.LHOpenTTD.BUILDING_CATALOG[bldg.type].name + ' §7(Ур.' + bldg.level + ')');
@@ -971,12 +971,28 @@ function lhGuiRenderBuildings(gui, server, player) {
   // Row 2: Active building in current sector + 2-way Upgrade Fork (Tier 1 & Tier 2)
   if (curBldg && myComp && curBldg.owner === myComp.id) {
     var bSpec = global.LHOpenTTD.BUILDING_CATALOG[curBldg.type];
+    var intPct = typeof curBldg.integrityPct === 'number' ? curBldg.integrityPct : 100;
     lhGuiSlot(gui, 0, 2, bIcons[curBldg.type] || 'minecraft:anvil', '§aЗдание здесь: ' + bSpec.name, [
       '§fСектор: §e(' + sc.sx + ', ' + sc.sz + ') §7| Уровень: §b' + curBldg.level + '/3',
+      '§fКоординаты: §7' + curBldg.x + ', ' + curBldg.y + ', ' + curBldg.z,
+      '§fПрочность: ' + (intPct >= 75 ? '§a' : (intPct >= 35 ? '§e' : '§c')) + intPct + '% ' + (curBldg.operational === false ? '§c[НЕ РАБОТАЕТ]' : '§7(перестройка свободная)'),
       '§fНакоплено: §e' + (curBldg.cashBuffer || 0) + ' Cr',
       curBldg.branch1 ? ('§aT1 ветка: ' + curBldg.branch1) : '§7T1: выберите 1 из 2 веток справа →',
-      curBldg.branch2 ? ('§aT2 ветка: ' + curBldg.branch2) : (curBldg.level === 2 ? '§7T2: выберите 1 из 2 веток справа →' : '§7T2: откроется после T1')
-    ]);
+      curBldg.branch2 ? ('§aT2 ветка: ' + curBldg.branch2) : (curBldg.level === 2 ? '§7T2: выберите 1 из 2 веток справа →' : '§7T2: откроется после T1'),
+      intPct < 100 ? '§e▶ ЛКМ: восстановить физическое здание (/lh building repair)' : '§7Выставить товар на витрину: /lh shop sell hand <кол-во> <цена>'
+    ], function (pl) {
+      if (intPct < 100) {
+        var rep = global.LHOpenTTD.repairBuildingIntegrity(st, myComp.id, sc.sx, sc.sz);
+        if (rep.ok) {
+          lhOttdSave(server);
+          if (typeof lhPlacePhysicalBuildingBlocks === 'function') lhPlacePhysicalBuildingBlocks(server, rep.building);
+          lhMsg(pl, '§a[Ремонт] Здание восстановлено до 100% за ' + rep.cost + ' Cr!');
+        } else {
+          lhMsg(pl, '§cОшибка ремонта: ' + rep.reason);
+        }
+        lhOpenGui(server, pl, 'buildings');
+      }
+    });
 
     // Tier 1 Fork (2 mutually exclusive options)
     (bSpec.tier1Fork || []).forEach(function (opt, oi) {
@@ -1146,18 +1162,49 @@ function lhGuiRenderChapters(gui, server, player) {
 
 function lhGuiRenderMarket(gui, server, player) {
   var st = lhOttdRead(server);
+  var econ = (typeof lhEconRead === 'function' && global.LHEconomyEngine) ? lhEconRead(server) : null;
+  var myComp = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, player) : null;
+
+  // Row 0: Live Economy Benchmarks (Items, Fluids, Gases, FE Energy) + Physical Pickup Info
+  if (econ && global.LHEconomyEngine) {
+    var benchIds = [
+      'minecraft:iron_ingot', 'minecraft:diamond', 'fluid:immersivepetroleum:crudeoil',
+      'fluid:immersivepetroleum:diesel', 'gas:mekanism:hydrogen', 'energy:fe_10k'
+    ];
+    benchIds.forEach(function (bid, bIdx) {
+      var q = global.LHEconomyEngine.getMarketQuote(econ, bid);
+      var icon = bid.indexOf('fluid:') === 0 ? 'minecraft:bucket'
+        : (bid.indexOf('gas:') === 0 ? 'minecraft:glass_bottle'
+        : (bid.indexOf('energy:') === 0 ? 'minecraft:redstone_block' : bid));
+      lhGuiSlot(gui, bIdx, 0, icon, (q.crashed ? '§c[ОБВАЛ] ' : '§e') + bid, [
+        '§fБаза (редкость/крафт): §7' + q.basePrice + ' Cr',
+        '§fРыночная цена: §a' + q.price + ' Cr §7(×' + q.multiplier + ')',
+        '§7Спрос: §a' + q.demand + ' §7| Предложение: §c' + q.supply,
+        q.crashed ? ('§c⚠ Обвал ещё ' + q.crashTicks + ' цикл.') : '§7Команда: /lh price check <id>'
+      ]);
+    });
+    lhGuiSlot(gui, 8, 0, 'minecraft:chest_minecart', '§6Логистика самовывоза', [
+      '§7Покупка с витрины компании требует',
+      '§7физически забрать груз со склада!',
+      '§eКоманда: /lh shop sell hand <кол> <цена>',
+      '§aЗабрать: /lh shop pickup <id>'
+    ]);
+  }
+
   var orders = (st.marketOrders || []).filter(function (o) { return o.remainingBatches > 0; });
   orders.slice(0, 18).forEach(function (o, idx) {
     var x = idx % 9;
     var y = 1 + Math.floor(idx / 9);
     var c = st.companies[o.companyId];
     var sub = st.subsidy && st.subsidy.orderId === o.id;
+    var qLive = (econ && global.LHEconomyEngine) ? global.LHEconomyEngine.getMarketQuote(econ, o.item) : null;
     var lore = [
       (o.side === 'buy' ? '§aСКУПКА (вы продаёте)' : '§bПРОДАЖА (вы покупаете)'),
       '§fПартия: §e' + o.qty + '× ' + o.item,
-      '§fЦена: §6' + o.price + ' Cr §7(осталось лотов: ' + o.remainingBatches + ')',
+      '§fБазовая цена лота: §6' + o.price + ' Cr §7(ост: ' + o.remainingBatches + ')',
+      qLive ? ('§fЖивой рынок: §e×' + qLive.multiplier + (qLive.crashed ? ' §c[ОБВАЛ]' : '')) : '',
       '§7Контрагент: ' + (c ? c.name : o.companyId)
-    ];
+    ].filter(Boolean);
     if (sub) lore.push('§e★ ГОССУБСИДИЯ ×1.75!');
     lore.push(o.side === 'buy' ? '§e▶ ЛКМ: продать партию из инвентаря' : '§e▶ ЛКМ: купить партию за Cr');
     lhGuiSlot(gui, x, y, o.item, (o.side === 'buy' ? '§a[СКУПКА] ' : '§b[ПРОДАЖА] ') + o.id, lore, function (pl) {
@@ -1167,9 +1214,62 @@ function lhGuiRenderMarket(gui, server, player) {
     }, null, Math.min(64, o.qty));
   });
 
+  // Row 3: Physical Company Facility Listings (Custom Price vs Live Market Reference)
+  if (econ && global.LHEconomyEngine) {
+    var listings = (econ.listings || []).filter(function (l) { return l.status === 'open' && l.qtyAvailable > 0; });
+    listings.slice(0, 9).forEach(function (l, lIdx) {
+      var q = global.LHEconomyEngine.getMarketQuote(econ, l.itemId);
+      var seller = st.companies[l.sellerCid];
+      var iconL = l.kind === 'fluid' ? 'minecraft:bucket'
+        : (l.kind === 'gas' ? 'minecraft:glass_bottle'
+        : (l.kind === 'energy' ? 'minecraft:redstone_block' : l.itemId));
+      lhGuiSlot(gui, lIdx, 3, iconL, '§6Витрина ' + l.id + ': §f' + l.itemId, [
+        '§fПродавец: ' + (seller ? seller.name : l.sellerCid),
+        '§fЦена владельца: §e' + l.unitPrice + ' Cr/шт §7(рынок: §b' + q.price + ' Cr§7)',
+        '§fВ наличии: §a' + l.qtyAvailable + ' §7| Склад: §7(' + l.x + ',' + l.y + ',' + l.z + ')',
+        '§e▶ ЛКМ: оплатить 1 ед. (забрать лично на складе)'
+      ], function (pl) {
+        var bComp = lhGetPlayerCompany(server, pl);
+        if (!bComp) { lhMsg(pl, 'Сначала создайте компанию.'); return; }
+        var res = global.LHEconomyEngine.buyFacilityListing(st, econ, bComp.id, l.id, 1);
+        if (!res.ok) { lhMsg(pl, '§cОшибка покупки: ' + res.reason); }
+        else {
+          lhOttdSave(server);
+          lhEconSave(server);
+          lhMsg(pl, '§a[Заказ ' + res.order.id + '] Оплачено! Заберите лично на (' + res.order.x + ',' + res.order.y + ',' + res.order.z + '): /lh shop pickup ' + res.order.id);
+        }
+        lhOpenGui(server, pl, 'market');
+      });
+    });
+  }
+
+  // Row 4: Ready Physical Pickup Orders (left) + Open P2P Trades (right)
+  var readyPickups = (econ && myComp && global.LHEconomyEngine) ? global.LHEconomyEngine.listReadyPickups(econ, myComp.id) : [];
+  readyPickups.slice(0, 4).forEach(function (po, pIdx) {
+    lhGuiSlot(gui, pIdx, 4, 'minecraft:barrel', '§aСамовывоз ' + po.id, [
+      '§fГруз: §e' + po.qty + '× ' + po.itemId,
+      '§fСклад: §b(' + po.x + ', ' + po.y + ', ' + po.z + ')',
+      '§e▶ ЛКМ: забрать груз (нужно быть рядом ≤ 24 м)'
+    ], function (pl) {
+      var res = global.LHEconomyEngine.pickupLogisticsOrder(econ, myComp.id, po.id, pl.x, pl.y, pl.z, 24);
+      if (!res.ok) {
+        lhMsg(pl, res.reason === 'too_far'
+          ? ('§cВы в ' + res.distance + ' м от склада (' + res.target.x + ',' + res.target.y + ',' + res.target.z + ')!')
+          : ('§cОшибка: ' + res.reason));
+      } else {
+        lhEconSave(server);
+        if (po.kind === 'item' && typeof Item !== 'undefined' && typeof pl.give === 'function') {
+          pl.give(Item.of(po.itemId, Math.min(256, po.qty)));
+        }
+        lhMsg(pl, '§a[Самовывоз ' + po.id + '] Получено ' + po.qty + '× ' + po.itemId + '!');
+      }
+      lhOpenGui(server, pl, 'market');
+    });
+  });
+
   var openTrades = (st.tradeOffers || []).filter(function (t) { return t.status === 'open'; });
-  openTrades.slice(0, 9).forEach(function (tr, idx) {
-    lhGuiSlot(gui, idx, 4, tr.item || 'minecraft:emerald', '§dСделка: ' + tr.id, [
+  openTrades.slice(0, 5).forEach(function (tr, idx) {
+    lhGuiSlot(gui, 4 + idx, 4, tr.item || 'minecraft:emerald', '§dСделка: ' + tr.id, [
       '§f' + tr.sellerCompany + ' → ' + tr.targetCompany,
       '§fЛот: §e' + tr.qty + '× ' + tr.item + ' за §6' + tr.price + ' Cr',
       '§e▶ ЛКМ: принять сделку (/lh trade accept ' + tr.id + ')'

@@ -1,0 +1,16 @@
+{
+  "name": "Боязнь влаги",
+  "description": "Получает периодический урон при контакте с водой и -2 сердца здоровья в обычном мире под дождём.",
+  "type": "origins:damage_over_time",
+  "interval": 25,
+  "onset_delay": 10,
+  "damage": 1.5,
+  "damage_source": {
+    "name": "hurt_by_water",
+    "unblockable": true
+  },
+  "condition": {
+    "type": "origins:submerged_in",
+    "fluid": "minecraft:water"
+  }
+}

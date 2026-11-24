@@ -43,6 +43,160 @@ function lhOttdSave(server) {
   }
 }
 
+var LHEconState = null;
+
+function lhEconRead(server) {
+  if (LHEconState !== null) {
+    if (global.LHEconomyEngine) global.LHEconomyEngine.ensureEconomyState(LHEconState);
+    return LHEconState;
+  }
+  var raw = server.persistentData.getString('longhaul_economy_v1');
+  LHEconState = raw
+    ? JSON.parse(String(raw))
+    : (global.LHEconomyEngine ? global.LHEconomyEngine.createInitialEconomyState() : { items: {}, adminOverrides: {}, recipePrices: {}, listings: [], pickupOrders: [] });
+  if (global.LHEconomyEngine) global.LHEconomyEngine.ensureEconomyState(LHEconState);
+  return LHEconState;
+}
+
+function lhEconSave(server) {
+  if (LHEconState !== null) {
+    server.persistentData.putString('longhaul_economy_v1', JSON.stringify(LHEconState));
+  }
+}
+
+function lhRefreshRecipeEconomyGraph(server) {
+  if (!server || !global.LHEconomyEngine) return 0;
+  var econ = lhEconRead(server);
+  var edges = [];
+  try {
+    var rm = server.recipeManager;
+    var regAccess = server.registryAccess ? server.registryAccess() : null;
+    if (rm && typeof rm.getRecipes === 'function') {
+      var iter = rm.getRecipes().iterator();
+      var count = 0;
+      while (iter.hasNext() && count < 4500) {
+        count++;
+        try {
+          var rec = iter.next();
+          var resStack = regAccess && typeof rec.getResultItem === 'function' ? rec.getResultItem(regAccess) : null;
+          if (!resStack || resStack.empty) continue;
+          var outId = String(resStack.id);
+          var outCount = Math.max(1, Number(resStack.count || 1));
+          var ings = typeof rec.getIngredients === 'function' ? rec.getIngredients() : null;
+          if (!ings || ings.size() === 0) continue;
+          var parsedIngs = [];
+          for (var ii = 0; ii < ings.size(); ii++) {
+            var ing = ings.get(ii);
+            if (!ing || ing.empty) continue;
+            var items = typeof ing.getItems === 'function' ? ing.getItems() : null;
+            if (items && items.length > 0 && items[0] && !items[0].empty) {
+              parsedIngs.push({ id: String(items[0].id), count: 1 });
+            }
+          }
+          if (parsedIngs.length > 0) {
+            edges.push({ outId: outId, outCount: outCount, ingredients: parsedIngs });
+          }
+        } catch (eRecOne) {}
+      }
+    }
+  } catch (eRm) {}
+  global.LHEconomyEngine.propagateRecipePrices(econ, edges, 5);
+  lhEconSave(server);
+  return edges.length;
+}
+
+function lhSpawnBotOnBorderExpansion(server, borderInfo, announce) {
+  if (!server || !global.LHOpenTTD || typeof global.LHOpenTTD.spawnDynamicBotCompany !== 'function') return null;
+  var st = lhOttdRead(server);
+  var maxSectorAbs = Math.max(3, Math.floor(((borderInfo ? borderInfo.size : 724) / 2 - 48) / 256));
+  var res = global.LHOpenTTD.spawnDynamicBotCompany(st, maxSectorAbs);
+  if (!res || !res.ok) return null;
+  lhOttdSave(server);
+  if (announce) {
+    var msg = 'На новых землях вышла на рынок новая корпорация ' + res.bot.colorCode + res.bot.name +
+      ' §f(штаб в секторе ' + res.sx + ',' + res.sz + ')!';
+    if (typeof lhLogEvent === 'function') {
+      lhLogEvent(server, 'company', msg, { chatMode: 'important' });
+    } else if (server.players) {
+      for (var i = 0; i < server.players.length; i++) {
+        server.players[i].tell('§6§l[Новый конкурент] §f' + msg);
+      }
+    }
+  }
+  return res.bot;
+}
+
+function lhAutoCreateCompanyAtSpawn(server, player, wx, wz) {
+  if (!server || !player || !global.LHOpenTTD) return null;
+  var st = lhOttdRead(server);
+  var pid = lhId(player);
+  if (st.playerCompany && st.playerCompany[pid] && st.companies[st.playerCompany[pid]]) {
+    return st.companies[st.playerCompany[pid]];
+  }
+  var uname = player.username || (typeof player.getName === 'function' ? player.getName().getString() : 'corp');
+  var rawId = String(uname).toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 12) || 'corp';
+  if (rawId.indexOf('bot_') === 0) rawId = 'p_' + rawId;
+  var candId = rawId;
+  var suffix = 1;
+  while (st.companies[candId]) {
+    suffix++;
+    candId = rawId.slice(0, 9) + '_' + suffix;
+  }
+  var dispName = uname + ' Corp';
+  var res = global.LHOpenTTD.companyCreate(st, pid, candId, dispName, wx, wz);
+  if (res && res.ok) {
+    lhOttdSave(server);
+    lhUnlock(player, 'longhaul:openttd/company');
+    if (typeof lhTeamJoin === 'function') lhTeamJoin(server, player, res.company.id);
+    return res.company;
+  }
+  return null;
+}
+
+function lhBuildingContainsBlock(bldg, bx, by, bz) {
+  if (!bldg) return false;
+  var span = Number(bldg.halfSpan || 3);
+  var x0 = Number(bldg.x || 0), y0 = Number(bldg.y || 64), z0 = Number(bldg.z || 0);
+  return Math.abs(bx - x0) <= span && Math.abs(bz - z0) <= span && by >= (y0 - 1) && by <= (y0 + 5);
+}
+
+function lhPlacePhysicalBuildingBlocks(server, bldg) {
+  if (!server || !bldg) return false;
+  try {
+    var ow = server.getLevel('minecraft:overworld');
+    if (!ow) return false;
+    var bx = Math.round(Number(bldg.x)), by = Math.round(Number(bldg.y)), bz = Math.round(Number(bldg.z));
+    var wallMat = bldg.category === 'extraction' ? 'minecraft:stone_bricks'
+      : (bldg.category === 'logistics' ? 'minecraft:bricks' : 'minecraft:deepslate_bricks');
+    var trimMat = bldg.category === 'production' ? 'minecraft:iron_block' : 'minecraft:oak_planks';
+
+    // Build a customizable 5x4 physical company pavilion with a central terminal barrel
+    for (var dx = -2; dx <= 2; dx++) {
+      for (var dz = -2; dz <= 2; dz++) {
+        ow.getBlock(bx + dx, by - 1, bz + dz).set(wallMat);
+        for (var dy = 0; dy <= 3; dy++) {
+          var isCorner = Math.abs(dx) === 2 && Math.abs(dz) === 2;
+          var isEdge = Math.abs(dx) === 2 || Math.abs(dz) === 2;
+          if (dy === 3) {
+            ow.getBlock(bx + dx, by + dy, bz + dz).set(isEdge ? trimMat : 'minecraft:glass');
+          } else if (isCorner) {
+            ow.getBlock(bx + dx, by + dy, bz + dz).set(wallMat);
+          } else if (isEdge && dy === 0 && !(dx === 0 && Math.abs(dz) === 2)) {
+            ow.getBlock(bx + dx, by + dy, bz + dz).set(wallMat);
+          } else {
+            ow.getBlock(bx + dx, by + dy, bz + dz).set('minecraft:air');
+          }
+        }
+      }
+    }
+    ow.getBlock(bx, by, bz).set('minecraft:barrel');
+    ow.getBlock(bx, by + 2, bz + 2).set('minecraft:lantern');
+    return true;
+  } catch (eBuild) {
+    return false;
+  }
+}
+
 function lhGetPlayerCompany(server, player) {
   if (!server || !player) return null;
   var st = lhOttdRead(server);
@@ -136,16 +290,21 @@ function lhCompanyMcColor(comp) {
   return LHOTTD_COLOR_TO_MC[comp.colorCode] || comp.color || 'white';
 }
 
+function lhToSignedByte(n) {
+  var v = Number(n || 0) & 255;
+  return v > 127 ? v - 256 : v;
+}
+
 function lhCompanyMapColorByte(st, cid, isClaimed, isHq) {
-  if (isHq) return 46; // Snow white HQ dot
-  if (!cid) return 85; // Neutral light gray
+  if (isHq) return lhToSignedByte(46); // Snow white HQ dot
+  if (!cid || !isClaimed) return lhToSignedByte(85); // Neutral unclaimed land
   var baseId = LHOTTD_MAP_BASE_IDS[cid];
   if (!baseId) {
     var keys = Object.keys(st.companies || {}).filter(function (k) { return !st.companies[k].isBot; }).sort();
     var idx = Math.max(0, keys.indexOf(cid));
     baseId = LHOTTD_PLAYER_MAP_IDS[idx % LHOTTD_PLAYER_MAP_IDS.length];
   }
-  return baseId * 4 + (isClaimed ? 2 : 0);
+  return lhToSignedByte(baseId * 4 + 2);
 }
 
 function lhCompanyTerritoryMap(server, player, radiusArg) {
@@ -153,13 +312,12 @@ function lhCompanyTerritoryMap(server, player, radiusArg) {
   var myComp = lhGetPlayerCompany(server, player);
   var sc = global.LHOpenTTD.sectorCoords(player.x, player.z);
   var curInfo = global.LHOpenTTD.resolveSectorOwner(st, sc.sx, sc.sz);
-  var curComp = curInfo.owner ? st.companies[curInfo.owner] : null;
+  var curComp = (curInfo.kind === 'claimed' && curInfo.owner) ? st.companies[curInfo.owner] : null;
   var r = Math.max(3, Math.min(9, Number(radiusArg || 5)));
 
   lhMsg(player, '=== Карта территорий (' + (2 * r + 1) + '×' + (2 * r + 1) + ' секторов 256×256) вокруг (' + sc.sx + ', ' + sc.sz + ') ===');
-  lhMsg(player, 'Вы в (' + sc.sx + ', ' + sc.sz + '): ' + (curComp ? (curComp.colorCode + curComp.name) : '§7Нейтральный сектор') +
-    ' §7(' + (curInfo.kind === 'claimed' ? ('Захвачен, защита ' + curInfo.strength + (curInfo.isHq ? ' [Штаб]' : '')) :
-      (curInfo.kind === 'voronoi' ? 'Зона влияния Вороного' : 'Свободен')) + ')');
+  lhMsg(player, 'Вы в (' + sc.sx + ', ' + sc.sz + '): ' + (curComp ? (curComp.colorCode + curComp.name) : '§7Нейтральный (не запривачен)') +
+    ' §7(' + (curInfo.kind === 'claimed' ? ('Захвачен, защита ' + curInfo.strength + (curInfo.isHq ? ' [Штаб]' : '')) : 'Свободен') + ')');
 
   var uname = player.username || (typeof player.getName === 'function' ? player.getName().getString() : '');
   var useTellraw = !!(uname && server && typeof server.runCommandSilent === 'function');
@@ -171,14 +329,14 @@ function lhCompanyTerritoryMap(server, player, radiusArg) {
       var sx = sc.sx + dx;
       var sz = sc.sz + dz;
       var info = global.LHOpenTTD.resolveSectorOwner(st, sx, sz);
-      var comp = info.owner ? st.companies[info.owner] : null;
-      var sym = (dx === 0 && dz === 0) ? '◆' : (info.isHq ? '★' : (info.kind === 'claimed' ? '█' : (info.kind === 'voronoi' ? '▒' : '·')));
+      var comp = (info.kind === 'claimed' && info.owner) ? st.companies[info.owner] : null;
+      var sym = (dx === 0 && dz === 0) ? '◆' : (info.isHq ? '★' : (info.kind === 'claimed' ? '█' : '·'));
       var cc = comp ? (comp.colorCode || '§7') : '§8';
       linePlain += cc + sym + ' ';
 
       var hoverLines = [
         'Сектор (' + sx + ', ' + sz + ') [блоки ' + (sx * 256 - 128) + '..' + (sx * 256 + 127) + ', ' + (sz * 256 - 128) + '..' + (sz * 256 + 127) + ']',
-        'Владелец: ' + (comp ? comp.name : 'Ничей') + ' (' + (info.kind === 'claimed' ? ('Захвачен, ур.' + info.strength) : (info.kind === 'voronoi' ? 'Влияние' : 'Нейтральный')) + ')'
+        'Владелец: ' + (comp ? comp.name : 'Ничей (не запривачен)') + ' (' + (info.kind === 'claimed' ? ('Захвачен, ур.' + info.strength) : 'Свободный сектор') + ')'
       ];
       if (myComp) {
         var cInfo = global.LHOpenTTD.computeClaimCost(st, myComp.id, sx, sz);
@@ -208,7 +366,7 @@ function lhCompanyTerritoryMap(server, player, radiusArg) {
     var c = st.companies[cid];
     return c.colorCode + '█ ' + c.name + (c.isBot ? ' [BOT]' : '') + '§7';
   });
-  player.tell('§7Легенда: ◆=Вы, ★=Штаб, █=Захвачен, ▒=Влияние, ·=Нейтральный | ' + legend.join(' | '));
+  player.tell('§7Легенда: ◆=Вы, ★=Штаб, █=Захвачен, ·=Свободный | ' + legend.join(' | '));
   if (useTellraw) {
     var actions = [
       { text: 'Действия: ', color: 'gray' },
@@ -269,21 +427,17 @@ function lhGiveTerritoryMapItem(server, player, dryRun, silent) {
         var sz = originSz + gy;
         var info = global.LHOpenTTD.resolveSectorOwner(st, sx, sz);
         var bldg = global.LHOpenTTD.getSectorBuilding(st, sx, sz);
-        var solidByte = lhCompanyMapColorByte(st, info.owner, info.kind === 'claimed', false);
-        var vorByte = lhCompanyMapColorByte(st, info.owner, false, false);
+        var isClaimed = (info.kind === 'claimed');
+        var solidByte = lhCompanyMapColorByte(st, info.owner, isClaimed, false);
         var isPlayerCell = (sx === sc.sx && sz === sc.sz);
 
         for (var py = 0; py < 8; py++) {
           for (var px = 0; px < 8; px++) {
             var mx = gx * 8 + px;
             var mz = gy * 8 + py;
-            var col = solidByte;
+            var col = isClaimed ? solidByte : 85;
             if (px === 0 || py === 0) {
               col = 119; // Sector grid line
-            } else if (info.kind === 'voronoi') {
-              col = ((px + py) % 2 === 0) ? vorByte : 85;
-            } else if (info.kind === 'unclaimed') {
-              col = 85;
             }
             if (info.isHq && px >= 3 && px <= 5 && py >= 3 && py <= 5) {
               col = 46; // White HQ marker
@@ -294,7 +448,7 @@ function lhGiveTerritoryMapItem(server, player, dryRun, silent) {
             if (isPlayerCell && px >= 3 && px <= 4 && py >= 3 && py <= 4) {
               col = 114; // Crimson player sector dot
             }
-            mapData.setColor(mx, mz, col);
+            mapData.setColor(mx, mz, lhToSignedByte(col));
           }
         }
       }
@@ -642,17 +796,29 @@ function lhMarketSell(server, player, orderId, dryRun) {
   }
   var isSubsidy = st.subsidy && st.subsidy.item === order.item && st.subsidy.companyId === order.companyId;
   var bonusMult = isSubsidy ? 1.75 : 1.20;
-  var payout = Math.round(order.price * bonusMult);
+  var econ = lhEconRead(server);
+  var marketInfo = global.LHEconomyEngine
+    ? global.LHEconomyEngine.recordTradePressure(econ, order.item, 'sell', order.qty)
+    : null;
+  var marketMult = marketInfo && marketInfo.quote ? Math.max(0.18, Math.min(2.40, marketInfo.quote.multiplier)) : 1.0;
+  var payout = Math.max(1, Math.round(order.price * bonusMult * marketMult));
   buyer.cash -= order.price;
   myComp.cash += payout;
   myComp.stats.tradeVolume = (myComp.stats.tradeVolume || 0) + payout;
   buyer.stats.tradeVolume = (buyer.stats.tradeVolume || 0) + order.price;
   order.remainingBatches -= 1;
   lhOttdSave(server);
+  lhEconSave(server);
   if (!dryRun) {
     lhUnlock(player, 'longhaul:openttd/trade');
     lhMsg(player, '§a[Рынок] Продано ' + order.qty + '× ' + order.item + ' компании ' + buyer.name +
-      ' за §f' + payout + ' Cr' + (isSubsidy ? ' §e(СУБСИДИЯ ×1.75!)' : ' §7(+20% межкорпоративный бонус)') + '. Баланс: ' + myComp.cash + ' Cr.');
+      ' за §f' + payout + ' Cr' + (isSubsidy ? ' §e(СУБСИДИЯ ×1.75!)' : ' §7(+20% бонус, рынок ×' + marketMult + ')') + '. Баланс: ' + myComp.cash + ' Cr.');
+    if (marketInfo && marketInfo.crashedJustNow) {
+      var crashMsg = '§c§l[ОБВАЛ РЫНКА] §fПерепроизводство ' + order.item + ' обрушило цену до ×' + marketInfo.quote.multiplier + '!';
+      if (server.players) {
+        for (var mp = 0; mp < server.players.length; mp++) server.players[mp].tell(crashMsg);
+      }
+    }
   }
   return payout;
 }
@@ -674,16 +840,22 @@ function lhMarketBuy(server, player, orderId, dryRun) {
     return 0;
   }
   var seller = st.companies[order.companyId];
+  var econ = lhEconRead(server);
+  var marketInfo = global.LHEconomyEngine
+    ? global.LHEconomyEngine.recordTradePressure(econ, order.item, 'buy', order.qty)
+    : null;
+  var marketMult = marketInfo && marketInfo.quote ? Math.max(0.24, Math.min(2.40, marketInfo.quote.multiplier)) : 1.0;
   var taxFree = global.LHOpenTTD.hasPact(st, myComp.id, order.companyId);
-  var totalCost = taxFree ? order.price : Math.round(order.price * 1.10);
+  var baseBuy = Math.max(1, Math.round(order.price * marketMult));
+  var totalCost = taxFree ? baseBuy : Math.round(baseBuy * 1.10);
   if (myComp.cash < totalCost) {
     if (!dryRun) lhMsg(player, 'Недостаточно средств: нужно ' + totalCost + ' Cr, у вас ' + myComp.cash + ' Cr.');
     return 0;
   }
   myComp.cash -= totalCost;
   if (seller) {
-    seller.cash += order.price;
-    seller.stats.tradeVolume = (seller.stats.tradeVolume || 0) + order.price;
+    seller.cash += baseBuy;
+    seller.stats.tradeVolume = (seller.stats.tradeVolume || 0) + baseBuy;
   }
   myComp.stats.tradeVolume = (myComp.stats.tradeVolume || 0) + totalCost;
   order.remainingBatches -= 1;
@@ -691,6 +863,7 @@ function lhMarketBuy(server, player, orderId, dryRun) {
     player.give(Item.of(order.item, order.qty));
   }
   lhOttdSave(server);
+  lhEconSave(server);
   if (!dryRun) {
     lhUnlock(player, 'longhaul:openttd/trade');
     lhMsg(player, '§a[Рынок] Куплено ' + order.qty + '× ' + order.item + ' у ' + (seller ? seller.name : order.companyId) +
@@ -836,10 +1009,10 @@ function lhSyncMinimapHud(server, player, forceClear) {
     var curBldg = global.LHOpenTTD.getSectorBuilding(st, sc.sx, sc.sz);
     var statusText = 'Нейтральный';
     if (curInfo.kind === 'spawn') statusText = 'Спавн 3x3';
-    else if (curInfo.owner && st.companies[curInfo.owner]) {
+    else if (curInfo.kind === 'claimed' && curInfo.owner && st.companies[curInfo.owner]) {
       var oComp = st.companies[curInfo.owner];
       statusText = oComp.name.slice(0, 12);
-      if (myCid && myCid !== curInfo.owner && curInfo.kind === 'claimed') {
+      if (myCid && myCid !== curInfo.owner) {
         statusText += global.LHOpenTTD.canTransit(st, myCid, curInfo.owner) ? ' [OK]' : ' [!]';
       }
     }
@@ -892,7 +1065,7 @@ function lhSyncMinimapHud(server, player, forceClear) {
         var bldg = global.LHOpenTTD.getSectorBuilding(st, sx, sz);
         var cellColor = '#2A2E38';
         if (info.kind === 'spawn') cellColor = '#8899AA';
-        else if (info.owner) cellColor = lhCompanyHexColor(st, info.owner, info.kind === 'claimed');
+        else if (info.kind === 'claimed' && info.owner) cellColor = lhCompanyHexColor(st, info.owner, true);
         var px = anchorX + 6 + gx * cellPx;
         var py = anchorY + 15 + gz * cellPx;
         paintObj['lh_mm_c_' + (dx + 4) + '_' + (dz + 4)] = {
@@ -958,11 +1131,12 @@ function lhBuildFacilityCmd(server, player, bType, sx, sz, dryRun) {
   }
   lhOttdSave(server);
   if (!dryRun) {
+    lhPlacePhysicalBuildingBlocks(server, res.building);
     lhGiveTerritoryMapItem(server, player, false, true);
     if (typeof lhLogEvent === 'function') {
       lhLogEvent(server, 'building', comp.name + ' построила «' + res.spec.name + '» в (' + sc.sx + ', ' + sc.sz + ')', { chatMode: 'never' });
     }
-    lhMsg(player, '§a[Инфраструктура] Построено: ' + res.spec.icon + ' §f' + res.spec.name + ' §7в (' + sc.sx + ', ' + sc.sz + ') за ' + res.cost + ' Cr.');
+    lhMsg(player, '§a[Инфраструктура] Построено физическое здание: ' + res.spec.icon + ' §f' + res.spec.name + ' §7в (' + res.building.x + ', ' + res.building.y + ', ' + res.building.z + ') за ' + res.cost + ' Cr. Вы можете перестраивать его под свой стиль!');
   }
   return res;
 }
@@ -1053,20 +1227,71 @@ function lhDiplomacyAction(server, player, action, targetCid, extra, dryRun) {
   return res;
 }
 
+function lhIsFragilePassableBreak(bid) {
+  return bid === 'minecraft:tall_grass' || bid === 'minecraft:grass' || bid === 'minecraft:fern' ||
+    bid === 'minecraft:large_fern' || bid === 'minecraft:vine' || bid === 'minecraft:snow' ||
+    bid === 'minecraft:cobweb' || bid === 'minecraft:torch' || bid === 'minecraft:wall_torch' ||
+    bid === 'minecraft:ladder' || bid === 'minecraft:scaffolding' ||
+    bid.indexOf('flower') !== -1 || bid.indexOf('leaves') !== -1 || bid.indexOf('sapling') !== -1;
+}
+
+function lhIsLootContainerBlock(bid) {
+  return bid.indexOf('chest') !== -1 || bid.indexOf('barrel') !== -1 || bid.indexOf('shulker_box') !== -1 ||
+    bid.indexOf('lootr') !== -1 || bid.indexOf('crate') !== -1 || bid.indexOf('drawer') !== -1 ||
+    bid.indexOf('hopper') !== -1 || bid.indexOf('dispenser') !== -1 || bid.indexOf('dropper') !== -1 ||
+    bid.indexOf('furnace') !== -1 || bid.indexOf('cabinet') !== -1;
+}
+
 BlockEvents.broken(function (event) {
   var server = event.server, player = event.player, block = event.block;
   if (!server || !player || !block) return;
   var creative = (typeof player.isCreative === 'function' && player.isCreative()) ||
     (typeof player.isSpectator === 'function' && player.isSpectator());
   if (creative) return;
+  if (String(block.level.dimension) !== 'minecraft:overworld') return;
 
   var comp = lhGetPlayerCompany(server, player);
   var st = lhOttdRead(server);
   var sc = global.LHOpenTTD.sectorCoords(block.x, block.z);
   var sec = global.LHOpenTTD.resolveSectorOwner(st, sc.sx, sc.sz);
+  var bidStr = String(block.id);
 
   var isOre = block.hasTag('forge:ores');
   var isLog = block.hasTag('minecraft:logs');
+
+  // Prohibit resource extraction and looting in unclaimed territories
+  if (sec.kind !== 'claimed' && !lhIsFragilePassableBreak(bidStr)) {
+    var pidUncl = lhId(player);
+    if (!LHOTTDLastBreakWarnByPlayer[pidUncl] || (LHOTTDTick - LHOTTDLastBreakWarnByPlayer[pidUncl]) >= 60) {
+      LHOTTDLastBreakWarnByPlayer[pidUncl] = LHOTTDTick;
+      lhMsg(player, '§c[Незаприваченный сектор (' + sc.sx + ',' + sc.sz + ')] §fДобыча ресурсов и разбор блоков запрещены на ничьей земле! Сначала заприватьте сектор (/lh territory claim).');
+    }
+    event.cancel();
+    return;
+  }
+
+  // Physical company building integrity: owners can remodel freely; enemies breaking blocks damage/destroy the facility!
+  var sectorBldg = global.LHOpenTTD.getSectorBuilding(st, sc.sx, sc.sz);
+  if (sectorBldg && lhBuildingContainsBlock(sectorBldg, block.x, block.y, block.z)) {
+    if (!comp || sectorBldg.owner !== comp.id) {
+      var isCore = (Math.floor(block.x) === Math.floor(sectorBldg.x) &&
+        Math.floor(block.y) === Math.floor(sectorBldg.y) &&
+        Math.floor(block.z) === Math.floor(sectorBldg.z));
+      var dmg = global.LHOpenTTD.damageBuildingIntegrity(st, sc.sx, sc.sz, 1, isCore);
+      lhOttdSave(server);
+      if (dmg.ok) {
+        if (dmg.destroyed) {
+          lhMsg(player, '§c§l[Разрушение объекта] §fЗдание компании в (' + sc.sx + ',' + sc.sz + ') полностью разрушено!');
+          if (typeof lhLogEvent === 'function') {
+            lhLogEvent(server, 'raid', 'Здание ' + sectorBldg.type + ' в (' + sc.sx + ',' + sc.sz + ') уничтожено при атаке!', { chatMode: 'important' });
+          }
+        } else {
+          lhMsg(player, '§e[Повреждение объекта] §fПрочность здания: ' + dmg.integrityPct + '%' +
+            (dmg.operational ? '' : ' §c[ВЫВЕДЕНО ИЗ СТРОЯ]'));
+        }
+      }
+    }
+  }
 
   // Strict Territory Control: breaking ANY block or harvesting resources in rival claimed sector without mining rights triggers company anger!
   if (sec.kind === 'claimed' && sec.owner && (!comp || sec.owner !== comp.id)) {
@@ -1108,6 +1333,60 @@ BlockEvents.broken(function (event) {
   }
 });
 
+BlockEvents.rightClicked(function (event) {
+  var server = event.server, player = event.player, block = event.block;
+  if (!server || !player || !block) return;
+  var creative = (typeof player.isCreative === 'function' && player.isCreative()) ||
+    (typeof player.isSpectator === 'function' && player.isSpectator());
+  if (creative) return;
+  if (String(block.level.dimension) !== 'minecraft:overworld') return;
+
+  var bidStr = String(block.id);
+  if (!lhIsLootContainerBlock(bidStr)) return;
+  var st = lhOttdRead(server);
+  var sc = global.LHOpenTTD.sectorCoords(block.x, block.z);
+  var sec = global.LHOpenTTD.resolveSectorOwner(st, sc.sx, sc.sz);
+  if (sec.kind !== 'claimed') {
+    lhMsg(player, '§c[Незаприваченный сектор (' + sc.sx + ',' + sc.sz + ')] §fЛутинг контейнеров запрещён на незаприваченной территории! Заприватьте сектор (/lh territory claim).');
+    event.cancel();
+  }
+});
+
+EntityEvents.spawned(function (event) {
+  var ent = event.entity;
+  var level = event.level;
+  if (!ent || !level || !level.server) return;
+  if (String(ent.type) !== 'minecraft:wandering_trader') return;
+  if (!global.LHEconomyEngine) return;
+  try {
+    var econ = lhEconRead(level.server);
+    var gen = global.LHEconomyEngine.generateWanderingTraderOffers(econ);
+    var MerchantOffersCls = Java.loadClass('net.minecraft.world.item.trading.MerchantOffers');
+    var MerchantOfferCls = Java.loadClass('net.minecraft.world.item.trading.MerchantOffer');
+    var mOffers = new MerchantOffersCls();
+
+    for (var i = 0; i < gen.offers.length; i++) {
+      var o = gen.offers[i];
+      var emeraldCount = Math.max(1, Math.min(64, Math.round(o.offerPrice / 15)));
+      var emeraldStack = Item.of('minecraft:emerald', emeraldCount);
+      var itemStack = Item.of(o.itemId, Math.max(1, Math.min(64, o.qty)));
+      if (!emeraldStack || emeraldStack.empty || !itemStack || itemStack.empty) continue;
+      if (o.side === 'sell_to_player') {
+        mOffers.add(new MerchantOfferCls(emeraldStack, Item.empty, itemStack, 0, 8, 5, 0.0));
+      } else {
+        mOffers.add(new MerchantOfferCls(itemStack, Item.empty, emeraldStack, 0, 8, 5, 0.0));
+      }
+    }
+    if (mOffers.size() > 0 && typeof ent.setOffers === 'function') {
+      ent.setOffers(mOffers);
+    } else if (mOffers.size() > 0 && ent.offers) {
+      ent.offers.clear();
+      ent.offers.addAll(mOffers);
+    }
+    ent.setCustomName(Text.of('§6Бродячий Биржевик §7(-60%..+200%)'));
+  } catch (eWt) {}
+});
+
 ServerEvents.tick(function (event) {
   LHOTTDTick++;
   var server = event.server;
@@ -1118,6 +1397,11 @@ ServerEvents.tick(function (event) {
   }
   if (LHOTTDTick % 2400 === 0) {
     lhBotTick(server, false);
+    if (global.LHEconomyEngine) {
+      var econDecay = lhEconRead(server);
+      global.LHEconomyEngine.decayMarketTick(econDecay);
+      lhEconSave(server);
+    }
   }
   if (LHOTTDTick % 20 !== 0) return;
 
@@ -1473,6 +1757,18 @@ ServerEvents.commandRegistry(function (event) {
     var res = lhCollectFacilityCmd(ctx.source.server, ctx.source.playerOrException, false);
     return res && res.ok ? 1 : 0;
   }));
+  bldgCmd.then(C.literal('repair').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
+    var comp = lhGetPlayerCompany(server, p);
+    if (!comp) { lhMsg(p, 'Сначала создайте компанию.'); return 0; }
+    var sc = global.LHOpenTTD.sectorCoords(p.x, p.z);
+    var res = global.LHOpenTTD.repairBuildingIntegrity(st, comp.id, sc.sx, sc.sz);
+    if (!res.ok) { lhMsg(p, 'Не удалось починить здание (' + res.reason + (res.cost ? (', нужно ' + res.cost + ' Cr') : '') + ').'); return 0; }
+    lhOttdSave(server);
+    lhPlacePhysicalBuildingBlocks(server, res.building);
+    lhMsg(p, '§a[Ремонт] Здание восстановлено до 100% за ' + res.cost + ' Cr!');
+    return 1;
+  }));
   root.then(bldgCmd);
 
   var dipCmd = C.literal('diplomacy');
@@ -1557,10 +1853,190 @@ ServerEvents.commandRegistry(function (event) {
   })));
   root.then(mmCmd);
 
+  var priceCmd = C.literal('price');
+  priceCmd.then(C.literal('check').then(C.argument('item', LHOTTDStringArg.word()).executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException;
+    if (!global.LHEconomyEngine) return 0;
+    var econ = lhEconRead(server);
+    var itemArg = LHOTTDStringArg.getString(ctx, 'item');
+    if (itemArg === 'hand' && p.mainHandItem && !p.mainHandItem.empty) itemArg = String(p.mainHandItem.id);
+    var q = global.LHEconomyEngine.getMarketQuote(econ, itemArg);
+    lhMsg(p, '§6[Биржа] §f' + q.itemId + ' [' + q.kind + '] | База: ' + q.basePrice + ' Cr | Рынок: §e' + q.price +
+      ' Cr §7(×' + q.multiplier + ', спрос=' + q.demand + ', предл=' + q.supply +
+      (q.crashed ? (' §c[ОБВАЛ ' + q.crashTicks + ' цикл.]') : '') +
+      (q.adminLocked ? ' §b[ADMIN FIX]' : '') + ')');
+    return 1;
+  })));
+  priceCmd.then(C.literal('set').requires(function (s) { return s.hasPermission(2); })
+    .then(C.argument('item', LHOTTDStringArg.word())
+      .then(C.argument('value', LHOTTDStringArg.word()).executes(function (ctx) {
+        var server = ctx.source.server, p = ctx.source.playerOrException;
+        if (!global.LHEconomyEngine) return 0;
+        var val = parseInt(LHOTTDStringArg.getString(ctx, 'value'), 10);
+        if (!(val > 0)) return 0;
+        var econ = lhEconRead(server);
+        var q = global.LHEconomyEngine.setAdminPrice(econ, LHOTTDStringArg.getString(ctx, 'item'), val);
+        lhEconSave(server);
+        lhMsg(p, '§b[Admin Price] §fЦена ' + q.itemId + ' зафиксирована на §e' + q.price + ' Cr.');
+        return 1;
+      }))));
+  priceCmd.then(C.literal('bounds').requires(function (s) { return s.hasPermission(2); })
+    .then(C.argument('item', LHOTTDStringArg.word())
+      .then(C.argument('min', LHOTTDStringArg.word())
+        .then(C.argument('max', LHOTTDStringArg.word()).executes(function (ctx) {
+          var server = ctx.source.server, p = ctx.source.playerOrException;
+          if (!global.LHEconomyEngine) return 0;
+          var mn = parseInt(LHOTTDStringArg.getString(ctx, 'min'), 10);
+          var mx = parseInt(LHOTTDStringArg.getString(ctx, 'max'), 10);
+          if (!(mn > 0) || mx < mn) return 0;
+          var econ = lhEconRead(server);
+          var q = global.LHEconomyEngine.setAdminBounds(econ, LHOTTDStringArg.getString(ctx, 'item'), mn, mx);
+          lhEconSave(server);
+          lhMsg(p, '§b[Admin Price] §fКоридор для ' + q.itemId + ': ' + mn + '..' + mx + ' Cr (тек: ' + q.price + ').');
+          return 1;
+        })))));
+  priceCmd.then(C.literal('clear').requires(function (s) { return s.hasPermission(2); })
+    .then(C.argument('item', LHOTTDStringArg.word()).executes(function (ctx) {
+      var server = ctx.source.server, p = ctx.source.playerOrException;
+      if (!global.LHEconomyEngine) return 0;
+      var econ = lhEconRead(server);
+      var q = global.LHEconomyEngine.clearAdminPrice(econ, LHOTTDStringArg.getString(ctx, 'item'));
+      lhEconSave(server);
+      lhMsg(p, '§b[Admin Price] §fСброшено для ' + q.itemId + ', текущая рыночная: ' + q.price + ' Cr.');
+      return 1;
+    })));
+  priceCmd.then(C.literal('crash').requires(function (s) { return s.hasPermission(2); })
+    .then(C.argument('item', LHOTTDStringArg.word()).executes(function (ctx) {
+      var server = ctx.source.server, p = ctx.source.playerOrException;
+      if (!global.LHEconomyEngine) return 0;
+      var econ = lhEconRead(server);
+      var q = global.LHEconomyEngine.forceCrash(econ, LHOTTDStringArg.getString(ctx, 'item'), 12);
+      lhEconSave(server);
+      lhMsg(p, '§c[Обвал рынка] §fДля ' + q.itemId + ' принудительно включён обвал: цена ' + q.price + ' Cr (×' + q.multiplier + ').');
+      return 1;
+    })));
+  root.then(priceCmd);
+
+  var shopCmd = C.literal('shop');
+  shopCmd.then(C.literal('list').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException;
+    if (!global.LHEconomyEngine) return 0;
+    var econ = lhEconRead(server);
+    var st = lhOttdRead(server);
+    var open = (econ.listings || []).filter(function (l) { return l.status === 'open' && l.qtyAvailable > 0; });
+    lhMsg(p, '=== Физические витрины компаний (' + open.length + ') ===');
+    open.slice(0, 12).forEach(function (l) {
+      var q = global.LHEconomyEngine.getMarketQuote(econ, l.itemId);
+      var seller = st.companies[l.sellerCid];
+      lhMsg(p, l.id + ' | ' + (seller ? seller.name : l.sellerCid) + ' @ (' + l.x + ',' + l.y + ',' + l.z + '): §f' +
+        l.qtyAvailable + '× ' + l.itemId + ' за §e' + l.unitPrice + ' Cr/шт §7(рынок: ' + q.price + ' Cr)');
+    });
+    return 1;
+  }));
+  shopCmd.then(C.literal('sell')
+    .then(C.argument('item', LHOTTDStringArg.word())
+      .then(C.argument('qty', LHOTTDStringArg.word())
+        .then(C.argument('unitPrice', LHOTTDStringArg.word()).executes(function (ctx) {
+          var server = ctx.source.server, p = ctx.source.playerOrException;
+          if (!global.LHEconomyEngine) return 0;
+          var st = lhOttdRead(server);
+          var econ = lhEconRead(server);
+          var comp = lhGetPlayerCompany(server, p);
+          if (!comp) { lhMsg(p, 'Сначала создайте компанию.'); return 0; }
+          var sc = global.LHOpenTTD.sectorCoords(p.x, p.z);
+          var bldg = global.LHOpenTTD.getSectorBuilding(st, sc.sx, sc.sz);
+          if (!bldg || bldg.owner !== comp.id) {
+            lhMsg(p, 'Вы должны находиться в секторе со своим зданием компании (/lh building build).');
+            return 0;
+          }
+          var itemArg = LHOTTDStringArg.getString(ctx, 'item');
+          if (itemArg === 'hand') {
+            if (!p.mainHandItem || p.mainHandItem.empty) { lhMsg(p, 'Возьмите предмет в руку или укажите ID.'); return 0; }
+            itemArg = String(p.mainHandItem.id);
+          }
+          var qty = parseInt(LHOTTDStringArg.getString(ctx, 'qty'), 10);
+          var unitP = parseInt(LHOTTDStringArg.getString(ctx, 'unitPrice'), 10);
+          if (!(qty > 0) || !(unitP > 0)) return 0;
+          if (global.LHEconomyEngine.inferCommodityKind(itemArg) === 'item') {
+            var cons = lhConsumeInvItem(p.inventory, itemArg, qty);
+            if (!cons.ok) { lhMsg(p, 'Недостаточно ' + itemArg + ' (есть ' + cons.have + '/' + qty + ').'); return 0; }
+          }
+          var res = global.LHEconomyEngine.createFacilityListing(econ, comp.id, bldg, itemArg, qty, unitP);
+          lhEconSave(server);
+          lhMsg(p, '§a[Витрина ' + res.listing.id + '] Выставлено ' + qty + '× ' + itemArg + ' по §e' + unitP +
+            ' Cr §7(рыночная справка: ' + res.marketQuote.price + ' Cr). Точка выдачи: (' + bldg.x + ',' + bldg.y + ',' + bldg.z + ').');
+          return 1;
+        })))));
+  shopCmd.then(C.literal('buy')
+    .then(C.argument('listingId', LHOTTDStringArg.word())
+      .then(C.argument('qty', LHOTTDStringArg.word()).executes(function (ctx) {
+        var server = ctx.source.server, p = ctx.source.playerOrException;
+        if (!global.LHEconomyEngine) return 0;
+        var st = lhOttdRead(server);
+        var econ = lhEconRead(server);
+        var comp = lhGetPlayerCompany(server, p);
+        if (!comp) { lhMsg(p, 'Сначала создайте компанию.'); return 0; }
+        var lid = LHOTTDStringArg.getString(ctx, 'listingId');
+        var qty = parseInt(LHOTTDStringArg.getString(ctx, 'qty'), 10);
+        if (!(qty > 0)) return 0;
+        var res = global.LHEconomyEngine.buyFacilityListing(st, econ, comp.id, lid, qty);
+        if (!res.ok) { lhMsg(p, '§cПокупка не удалась: ' + res.reason); return 0; }
+        lhOttdSave(server);
+        lhEconSave(server);
+        lhMsg(p, '§a[Заказ ' + res.order.id + '] Оплачено ' + res.totalPrice + ' Cr! §eГруз НЕ телепортируется — заберите его лично на объекте (' +
+          res.order.x + ', ' + res.order.y + ', ' + res.order.z + ') командой /lh shop pickup ' + res.order.id + '.');
+        return 1;
+      }))));
+  shopCmd.then(C.literal('pickup')
+    .executes(function (ctx) {
+      var server = ctx.source.server, p = ctx.source.playerOrException;
+      if (!global.LHEconomyEngine) return 0;
+      var econ = lhEconRead(server);
+      var comp = lhGetPlayerCompany(server, p);
+      if (!comp) return 0;
+      var ready = global.LHEconomyEngine.listReadyPickups(econ, comp.id);
+      if (!ready.length) { lhMsg(p, 'У вашей компании нет готовых заказов к самовывозу.'); return 0; }
+      ready.forEach(function (o) {
+        lhMsg(p, o.id + ': ' + o.qty + '× ' + o.itemId + ' ждёт на (' + o.x + ',' + o.y + ',' + o.z + ') -> /lh shop pickup ' + o.id);
+      });
+      return 1;
+    })
+    .then(C.argument('orderId', LHOTTDStringArg.word()).executes(function (ctx) {
+      var server = ctx.source.server, p = ctx.source.playerOrException;
+      if (!global.LHEconomyEngine) return 0;
+      var econ = lhEconRead(server);
+      var comp = lhGetPlayerCompany(server, p);
+      if (!comp) return 0;
+      var oid = LHOTTDStringArg.getString(ctx, 'orderId');
+      var res = global.LHEconomyEngine.pickupLogisticsOrder(econ, comp.id, oid, p.x, p.y, p.z, 24);
+      if (!res.ok) {
+        if (res.reason === 'too_far') {
+          lhMsg(p, '§cВы слишком далеко (' + res.distance + ' м > ' + res.maxDist + ' м)! Подойдите к складу (' +
+            res.target.x + ', ' + res.target.y + ', ' + res.target.z + ').');
+        } else {
+          lhMsg(p, '§cЗаказ ' + oid + ' не найден.');
+        }
+        return 0;
+      }
+      lhEconSave(server);
+      var o = res.order;
+      if (o.kind === 'item' && typeof Item !== 'undefined' && typeof p.give === 'function') {
+        p.give(Item.of(o.itemId, Math.min(256, o.qty)));
+      } else if (o.kind === 'fluid' && o.itemId === 'fluid:minecraft:lava' && typeof Item !== 'undefined' && typeof p.give === 'function') {
+        p.give(Item.of('minecraft:lava_bucket', Math.min(16, o.qty)));
+      } else if (o.kind === 'fluid' && o.itemId === 'fluid:minecraft:water' && typeof Item !== 'undefined' && typeof p.give === 'function') {
+        p.give(Item.of('minecraft:water_bucket', Math.min(16, o.qty)));
+      }
+      lhMsg(p, '§a[Самовывоз ' + o.id + '] Получено со склада (' + o.x + ',' + o.y + ',' + o.z + '): ' + o.qty + '× ' + o.itemId + '!');
+      return 1;
+    })));
+  root.then(shopCmd);
+
   event.register(root);
 });
 
 ServerEvents.loaded(function (event) {
   lhOttdRead(event.server);
-  console.info('[LH] OpenTTD Companies, Specializations, Voronoi+Claim Sectors, Market & AI Bots loaded.');
+  lhRefreshRecipeEconomyGraph(event.server);
+  console.info('[LH] OpenTTD Companies, Dynamic Economy, Physical Buildings, Facility Shops & AI Bots loaded.');
 });

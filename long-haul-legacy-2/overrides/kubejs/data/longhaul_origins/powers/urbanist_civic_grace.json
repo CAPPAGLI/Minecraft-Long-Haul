@@ -1,0 +1,24 @@
+{
+  "name": "Городской планировщик",
+  "description": "+20% опыта за работу с инфраструктурой и +1.0 к удаче.",
+  "type": "origins:multiple",
+  "xp": {
+    "type": "origins:modify_xp_gain",
+    "modifier": {
+      "name": "Urbanist XP",
+      "operation": "multiply_base",
+      "value": 0.2
+    }
+  },
+  "luck": {
+    "type": "origins:attribute",
+    "modifiers": [
+      {
+        "name": "Urbanist Luck",
+        "attribute": "minecraft:generic.luck",
+        "value": 1.0,
+        "operation": "addition"
+      }
+    ]
+  }
+}

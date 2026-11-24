@@ -624,6 +624,25 @@ def build_core_chapters():
               ['Полевое обеспечение дальних выездов между регионами.'], deps=[prev_exp], rewards=tier_rewards(2, i))
         prev_exp = qid
 
+    # Add 5 Exploration & Origin Aspect quests (y = 245)
+    aspect_specs = [
+        ('exp_aspect_underwater', 'Аспект: Подводные экспедиции (400 м)', 'minecraft:heart_of_the_sea', 'aspects/underwater',
+         'Преодолейте 400 м под водой (или выберите Origin Подводный навигатор). Прогресс: /lh aspects.'),
+        ('exp_aspect_underground', 'Аспект: Подземные магистрали (700 м)', 'minecraft:deepslate_diamond_ore', 'aspects/underground',
+         'Пройдите 700 м под землёй (ниже Y=32; или выберите Origin Глубинный спелеолог). Прогресс: /lh aspects.'),
+        ('exp_aspect_nether', 'Аспект: Трассы Незера (500 м)', 'minecraft:netherite_boots', 'aspects/nether',
+         'Преодолейте 500 м в измерении Незера (или выберите Origin Странник Незера). Прогресс: /lh aspects.'),
+        ('exp_aspect_urbanist', 'Аспект: Урбанист и градостроительство (100 бл.)', 'minecraft:bricks', 'aspects/urbanist',
+         'Разместите 100 строительных/рельсовых блоков на своей территории (или Origin Урбанист). Прогресс: /lh aspects.'),
+        ('exp_aspect_pathfinder', 'Аспект: Первооткрыватель секторов (10 сект.)', 'minecraft:compass', 'aspects/pathfinder',
+         'Исследуйте 10 уникальных секторов 256×256 (или Origin Первооткрыватель). Прогресс: /lh aspects.'),
+    ]
+    for i, (qid, title, icon, adv_id, desc_txt) in enumerate(aspect_specs):
+        adv(adv_id, 30)
+        quest(qid, title, '10 · Кампания: Лагеря и экспедиции', [(i - 2) * 120, 245], icon,
+              t_adv('longhaul:' + adv_id, title), [desc_txt],
+              deps=['exp_field_02'], subtitle='Новые Origins и аспекты путешествий', rewards=tier_rewards(3, i))
+
     # -----------------------------------------------------------------------
     # 11 · Ядерная энергетика и Драконик (20 quests)
     # -----------------------------------------------------------------------

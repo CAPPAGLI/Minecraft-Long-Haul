@@ -1,0 +1,22 @@
+{
+  "name": "Адская закалка",
+  "description": "Полный иммунитет к огню и лаве, а также +20% скорости в измерении Незера.",
+  "type": "origins:multiple",
+  "fire_imm": {
+    "type": "origins:fire_immunity"
+  },
+  "nether_speed": {
+    "type": "origins:conditioned_attribute",
+    "tick_rate": 20,
+    "modifier": {
+      "name": "Nether Strider Speed",
+      "attribute": "minecraft:generic.movement_speed",
+      "value": 0.2,
+      "operation": "multiply_base"
+    },
+    "condition": {
+      "type": "origins:dimension",
+      "dimension": "minecraft:the_nether"
+    }
+  }
+}

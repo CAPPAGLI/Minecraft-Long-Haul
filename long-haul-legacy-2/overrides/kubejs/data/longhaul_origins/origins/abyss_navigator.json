@@ -1,0 +1,14 @@
+{
+  "name": "Подводный навигатор",
+  "description": "Повелитель океанских трасс и затонувших руин: дышит под водой, стремительно плывёт и видит на глубине.",
+  "powers": [
+    "longhaul_origins:abyss_lungs",
+    "longhaul_origins:abyss_vision",
+    "longhaul_origins:abyss_dry_land"
+  ],
+  "icon": {
+    "item": "minecraft:heart_of_the_sea"
+  },
+  "order": 6,
+  "impact": 2
+}

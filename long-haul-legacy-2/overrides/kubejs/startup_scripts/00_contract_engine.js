@@ -1463,6 +1463,11 @@ global.LHOpenTTD = (function () {
       x: Math.round(Number(wx || sx * SECTOR_SIZE)),
       y: Math.round(Number(wy || 64)),
       z: Math.round(Number(wz || sz * SECTOR_SIZE)),
+      halfSpan: 3,
+      maxBlocks: 20,
+      intactBlocks: 20,
+      integrityPct: 100,
+      operational: true,
       level: 1,
       branch1: null,
       locked1: null,
@@ -1474,6 +1479,52 @@ global.LHOpenTTD = (function () {
     };
     state.buildings[k] = bldg;
     return { ok: true, building: bldg, spec: spec, cost: spec.cost };
+  }
+
+  function damageBuildingIntegrity(state, sx, sz, blockDelta, isCoreBroken) {
+    ensureDiplomacyState(state);
+    var b = getSectorBuilding(state, sx, sz);
+    if (!b) return { ok: false, reason: 'no_building' };
+    var maxB = Math.max(1, Number(b.maxBlocks || 20));
+    var cur = typeof b.intactBlocks === 'number' ? b.intactBlocks : maxB;
+    var delta = Math.max(1, Math.round(Number(blockDelta || 1)));
+    cur = Math.max(0, cur - delta);
+    if (isCoreBroken) cur = 0;
+    b.intactBlocks = cur;
+    b.integrityPct = Math.round((cur / maxB) * 100);
+    b.operational = b.integrityPct >= 35 && !isCoreBroken;
+    var destroyed = b.integrityPct <= 0 || !!isCoreBroken;
+    if (destroyed) {
+      delete state.buildings[sectorKey(sx, sz)];
+    }
+    return {
+      ok: true,
+      buildingId: b.id,
+      type: b.type,
+      owner: b.owner,
+      intactBlocks: cur,
+      integrityPct: b.integrityPct,
+      operational: b.operational,
+      destroyed: destroyed
+    };
+  }
+
+  function repairBuildingIntegrity(state, cid, sx, sz) {
+    ensureDiplomacyState(state);
+    var comp = state.companies && state.companies[cid];
+    var b = getSectorBuilding(state, sx, sz);
+    if (!comp || !b || b.owner !== cid) return { ok: false, reason: 'not_found' };
+    var maxB = Math.max(1, Number(b.maxBlocks || 20));
+    var cur = typeof b.intactBlocks === 'number' ? b.intactBlocks : maxB;
+    if (cur >= maxB && b.operational !== false) return { ok: false, reason: 'already_intact' };
+    var missing = Math.max(1, maxB - cur);
+    var cost = missing * 12;
+    if (comp.cash < cost) return { ok: false, reason: 'no_cash', cost: cost, cash: comp.cash };
+    comp.cash -= cost;
+    b.intactBlocks = maxB;
+    b.integrityPct = 100;
+    b.operational = true;
+    return { ok: true, cost: cost, integrityPct: 100, building: b };
   }
 
   function upgradeCompanyBuilding(state, cid, sx, sz, choiceId) {
@@ -1549,7 +1600,7 @@ global.LHOpenTTD = (function () {
     var producedCount = 0;
     for (var i = 0; i < keys.length; i++) {
       var b = state.buildings[keys[i]];
-      if (!b || !state.companies[b.owner]) continue;
+      if (!b || !state.companies[b.owner] || b.operational === false) continue;
       var prof = getBuildingYieldProfile(b);
       var capCash = prof.income * 8;
       if ((b.cashBuffer || 0) < capCash) {
@@ -2150,20 +2201,150 @@ global.LHOpenTTD = (function () {
     return { ok: true, strength: cl.strength, cost: cost };
   }
 
+  function countPlayerClaimsTotal(state) {
+    var cnt = 0;
+    var keys = Object.keys(state.claims || {});
+    for (var i = 0; i < keys.length; i++) {
+      var cl = state.claims[keys[i]];
+      if (!cl || !cl.owner) continue;
+      var comp = state.companies && state.companies[cl.owner];
+      if (comp && !comp.isBot) cnt++;
+    }
+    return cnt;
+  }
+
+  function countBotClaimsTotal(state) {
+    var cnt = 0;
+    var keys = Object.keys(state.claims || {});
+    for (var i = 0; i < keys.length; i++) {
+      var cl = state.claims[keys[i]];
+      if (!cl || !cl.owner) continue;
+      var comp = state.companies && state.companies[cl.owner];
+      if (comp && comp.isBot) cnt++;
+    }
+    return cnt;
+  }
+
+  function countActiveBots(state) {
+    var cnt = 0;
+    var cids = Object.keys(state.companies || {});
+    for (var i = 0; i < cids.length; i++) {
+      if (state.companies[cids[i]] && state.companies[cids[i]].isBot) cnt++;
+    }
+    return cnt;
+  }
+
+  function maxBotClaimsAllowed(state) {
+    // Bots hold 1 HQ each, and any extra claimed sectors across all bots combined
+    // cannot exceed the sum of sectors claimed by all players.
+    return countActiveBots(state) + countPlayerClaimsTotal(state);
+  }
+
+  var DYNAMIC_BOT_NAMES = [
+    'Север-Транс', 'УралРуда', 'БайкалЛогист', 'Волга-Карго', 'СибЭнерго',
+    'ДальМорПорт', 'АрктикСнаб', 'КамаИндустри', 'ОбьЭкспресс', 'ТайгаТрест',
+    'СтепьМагистраль', 'ЕнисейСтрой', 'КрымНефть', 'КолымаЗолото', 'АлтайКарго',
+    'ДонХимПром', 'АмурМост', 'НеваЭнерджи', 'МагаданПорт', 'СахалинГаз'
+  ];
+
+  function spawnDynamicBotCompany(state, maxSectorAbs, rngFn) {
+    ensureBots(state);
+    var rng = rngFn || Math.random;
+    var limit = Math.max(3, Math.floor(Number(maxSectorAbs || 3)));
+    if (!state.nextBotSeq) state.nextBotSeq = 1;
+
+    var seq = state.nextBotSeq++;
+    var bid = 'bot_dyn_' + seq;
+    while (state.companies[bid]) {
+      seq = state.nextBotSeq++;
+      bid = 'bot_dyn_' + seq;
+    }
+
+    // Pick an unclaimed sector in the outer half of the unlocked territory
+    var minRing = Math.max(2, Math.floor(limit * 0.45));
+    var hqSx = null;
+    var hqSz = null;
+    for (var attempt = 0; attempt < 48; attempt++) {
+      var angle = rng() * 6.283185307179586;
+      var rad = minRing + rng() * Math.max(1, limit - minRing);
+      var csx = Math.round(Math.cos(angle) * rad);
+      var csz = Math.round(Math.sin(angle) * rad);
+      if (isSpawnProtectedSector(csx, csz)) continue;
+      if (Math.abs(csx) > limit || Math.abs(csz) > limit) continue;
+      if (!state.claims[sectorKey(csx, csz)]) {
+        hqSx = csx;
+        hqSz = csz;
+        break;
+      }
+    }
+    if (hqSx === null) {
+      for (var ring = 2; ring <= limit && hqSx === null; ring++) {
+        var ringPts = [[ring, 0], [-ring, 0], [0, ring], [0, -ring], [ring, ring], [-ring, -ring]];
+        for (var rp = 0; rp < ringPts.length; rp++) {
+          var rx = ringPts[rp][0], rz = ringPts[rp][1];
+          if (!isSpawnProtectedSector(rx, rz) && !state.claims[sectorKey(rx, rz)]) {
+            hqSx = rx;
+            hqSz = rz;
+            break;
+          }
+        }
+      }
+    }
+    if (hqSx === null) return { ok: false, reason: 'no_free_sector' };
+
+    var tKeys = Object.keys(TRANSPORT_SPECS);
+    var rKeys = Object.keys(RESOURCE_SPECS);
+    var nameBase = DYNAMIC_BOT_NAMES[(seq - 1) % DYNAMIC_BOT_NAMES.length];
+    var displayName = seq > DYNAMIC_BOT_NAMES.length ? (nameBase + ' #' + seq) : nameBase;
+    var colorCode = PLAYER_COLORS[(seq + 2) % PLAYER_COLORS.length];
+    var bot = {
+      id: bid,
+      name: displayName,
+      color: 'aqua',
+      colorCode: colorCode,
+      tag: ('B' + seq).slice(0, 4),
+      isBot: true,
+      owner: 'AI',
+      members: [],
+      cash: 1100 + Math.min(2000, seq * 120),
+      transportSpec: tKeys[seq % tKeys.length],
+      resourceSpec: rKeys[seq % rKeys.length],
+      hqSx: hqSx,
+      hqSz: hqSz,
+      stats: { deliveries: 0, tradeVolume: 0, blocksMined: 0, sectorsCaptured: 1, contractsDone: 0, routesDone: 0 }
+    };
+    state.companies[bid] = bot;
+    state.claims[sectorKey(hqSx, hqSz)] = {
+      sx: hqSx,
+      sz: hqSz,
+      owner: bid,
+      strength: 2,
+      isHq: true
+    };
+    return { ok: true, bot: bot, sx: hqSx, sz: hqSz };
+  }
+
   function botExpandStep(state, maxSectorAbs, rngFn) {
     ensureBots(state);
     state.botCycle = (state.botCycle || 0) + 1;
     var rng = rngFn || Math.random;
     var limit = Math.max(1, Math.floor(Number(maxSectorAbs || 1)));
     var events = [];
+    var allBotIds = Object.keys(state.companies || {}).filter(function (cid) {
+      return state.companies[cid] && state.companies[cid].isBot;
+    });
 
-    for (var i = 0; i < DEFAULT_BOT_COMPANIES.length; i++) {
-      var bot = state.companies[DEFAULT_BOT_COMPANIES[i].id];
+    for (var i = 0; i < allBotIds.length; i++) {
+      var bot = state.companies[allBotIds[i]];
       if (!bot) continue;
       var ownedCount = countClaims(state, bot.id);
       var income = 70 + ownedCount * 28;
       bot.cash += income;
       bot.stats.deliveries += 1;
+
+      if (countBotClaimsTotal(state) >= maxBotClaimsAllowed(state)) {
+        continue;
+      }
 
       if (bot.cash >= 650) {
         // Pick an unclaimed sector adjacent to an owned sector within active worldborder, never inside the 3x3 spawn ring
@@ -2279,6 +2460,10 @@ global.LHOpenTTD = (function () {
     hasPact: hasPact,
     togglePact: togglePact,
     countClaims: countClaims,
+    countPlayerClaimsTotal: countPlayerClaimsTotal,
+    countBotClaimsTotal: countBotClaimsTotal,
+    maxBotClaimsAllowed: maxBotClaimsAllowed,
+    spawnDynamicBotCompany: spawnDynamicBotCompany,
     computeValuation: computeValuation,
     resolveSectorOwner: resolveSectorOwner,
     isSpawnProtectedSector: isSpawnProtectedSector,
@@ -2313,6 +2498,8 @@ global.LHOpenTTD = (function () {
     listCompanyBuildings: listCompanyBuildings,
     buildCompanyBuilding: buildCompanyBuilding,
     upgradeCompanyBuilding: upgradeCompanyBuilding,
+    damageBuildingIntegrity: damageBuildingIntegrity,
+    repairBuildingIntegrity: repairBuildingIntegrity,
     getBuildingYieldProfile: getBuildingYieldProfile,
     tickCompanyBuildings: tickCompanyBuildings,
     collectBuildingOutput: collectBuildingOutput,
@@ -2522,4 +2709,562 @@ global.LHChapterFork = (function () {
     onChapterCompleted: onChapterCompleted
   };
 })();
+
+global.LHEconomyEngine = (function () {
+  var CRASH_NET_SUPPLY_THRESHOLD = 80;
+  var CRASH_DURATION_TICKS = 12;
+  var CRASH_PRICE_MULT = 0.24;
+
+  // Rarity & source metadata for base commodities:
+  // kind: 'item' | 'fluid' | 'gas' | 'energy'
+  // worldSpawn: 0..10 (10 = abundant surface block, 1 = ultra-rare ore/biome)
+  // lootChest: 0..10 (10 = very common, 0 = never in chests, 1 = ultra-rare)
+  // mobRarity: 0..10 (0 = not mob drop, 10 = boss/rare mob)
+  // mobDropRate: 0..1 (1 = guaranteed, 0.05 = 5% drop)
+  var BASE_COMMODITY_CATALOG = {
+    'minecraft:cobblestone':        { name: 'Булыжник', kind: 'item', worldSpawn: 10, lootChest: 8, mobRarity: 0, mobDropRate: 0, floor: 1 },
+    'minecraft:oak_log':            { name: 'Дубовое бревно', kind: 'item', worldSpawn: 9, lootChest: 7, mobRarity: 0, mobDropRate: 0, floor: 2 },
+    'minecraft:coal':               { name: 'Уголь', kind: 'item', worldSpawn: 8, lootChest: 7, mobRarity: 2, mobDropRate: 0.4, floor: 4 },
+    'minecraft:raw_copper':         { name: 'Сырая медь', kind: 'item', worldSpawn: 7, lootChest: 5, mobRarity: 0, mobDropRate: 0, floor: 7 },
+    'minecraft:copper_ingot':       { name: 'Медный слиток', kind: 'item', worldSpawn: 7, lootChest: 6, mobRarity: 2, mobDropRate: 0.11, floor: 9 },
+    'minecraft:raw_iron':           { name: 'Сырое железо', kind: 'item', worldSpawn: 6, lootChest: 5, mobRarity: 0, mobDropRate: 0, floor: 11 },
+    'minecraft:iron_ingot':         { name: 'Железный слиток', kind: 'item', worldSpawn: 6, lootChest: 6, mobRarity: 3, mobDropRate: 0.08, floor: 14 },
+    'minecraft:redstone':           { name: 'Красная пыль', kind: 'item', worldSpawn: 5, lootChest: 5, mobRarity: 3, mobDropRate: 0.5, floor: 12 },
+    'minecraft:lapis_lazuli':       { name: 'Лазурит', kind: 'item', worldSpawn: 4, lootChest: 4, mobRarity: 0, mobDropRate: 0, floor: 18 },
+    'minecraft:raw_gold':           { name: 'Сырое золото', kind: 'item', worldSpawn: 4, lootChest: 4, mobRarity: 0, mobDropRate: 0, floor: 24 },
+    'minecraft:gold_ingot':         { name: 'Золотой слиток', kind: 'item', worldSpawn: 4, lootChest: 5, mobRarity: 4, mobDropRate: 0.12, floor: 30 },
+    'minecraft:quartz':             { name: 'Кварц Незера', kind: 'item', worldSpawn: 5, lootChest: 4, mobRarity: 0, mobDropRate: 0, floor: 20 },
+    'minecraft:diamond':            { name: 'Алмаз', kind: 'item', worldSpawn: 2, lootChest: 2, mobRarity: 0, mobDropRate: 0, floor: 85 },
+    'minecraft:emerald':            { name: 'Изумруд', kind: 'item', worldSpawn: 2, lootChest: 3, mobRarity: 5, mobDropRate: 0.25, floor: 65 },
+    'minecraft:ancient_debris':     { name: 'Древние обломки', kind: 'item', worldSpawn: 1, lootChest: 1, mobRarity: 0, mobDropRate: 0, floor: 260 },
+    'minecraft:netherite_scrap':    { name: 'Незеритовый лом', kind: 'item', worldSpawn: 1, lootChest: 1, mobRarity: 0, mobDropRate: 0, floor: 290 },
+    'minecraft:ender_pearl':        { name: 'Жемчуг Энда', kind: 'item', worldSpawn: 0, lootChest: 2, mobRarity: 5, mobDropRate: 0.5, floor: 42 },
+    'minecraft:blaze_rod':          { name: 'Огненный стержень', kind: 'item', worldSpawn: 0, lootChest: 1, mobRarity: 6, mobDropRate: 0.5, floor: 68 },
+    'minecraft:ghast_tear':         { name: 'Слеза гаста', kind: 'item', worldSpawn: 0, lootChest: 1, mobRarity: 7, mobDropRate: 0.4, floor: 95 },
+    'minecraft:phantom_membrane':   { name: 'Мембрана фантома', kind: 'item', worldSpawn: 0, lootChest: 0, mobRarity: 5, mobDropRate: 0.5, floor: 46 },
+    'minecraft:shulker_shell':      { name: 'Панцирь шалкера', kind: 'item', worldSpawn: 0, lootChest: 0, mobRarity: 8, mobDropRate: 0.5, floor: 155 },
+    'minecraft:wither_skeleton_skull': { name: 'Череп визер-скелета', kind: 'item', worldSpawn: 0, lootChest: 0, mobRarity: 8, mobDropRate: 0.05, floor: 380 },
+    'minecraft:nether_star':        { name: 'Звезда Незера', kind: 'item', worldSpawn: 0, lootChest: 0, mobRarity: 10, mobDropRate: 1.0, floor: 920 },
+    'minecraft:golden_apple':       { name: 'Золотое яблоко', kind: 'item', worldSpawn: 0, lootChest: 3, mobRarity: 0, mobDropRate: 0, floor: 180 },
+    'minecraft:enchanted_golden_apple': { name: 'Зачарованное золотое яблоко', kind: 'item', worldSpawn: 0, lootChest: 1, mobRarity: 0, mobDropRate: 0, floor: 780 },
+    'minecraft:saddle':             { name: 'Седло', kind: 'item', worldSpawn: 0, lootChest: 3, mobRarity: 6, mobDropRate: 0.3, floor: 52 },
+    'minecraft:name_tag':           { name: 'Бирка', kind: 'item', worldSpawn: 0, lootChest: 3, mobRarity: 0, mobDropRate: 0, floor: 48 },
+    'create:andesite_alloy':        { name: 'Андезитовый сплав', kind: 'item', worldSpawn: 5, lootChest: 4, mobRarity: 0, mobDropRate: 0, floor: 18 },
+    'create:brass_ingot':           { name: 'Латунный слиток', kind: 'item', worldSpawn: 3, lootChest: 2, mobRarity: 0, mobDropRate: 0, floor: 46 },
+    'immersiveengineering:ingot_steel': { name: 'Стальной слиток', kind: 'item', worldSpawn: 3, lootChest: 2, mobRarity: 0, mobDropRate: 0, floor: 42 },
+    'ae2:certus_quartz_crystal':    { name: 'Кристалл истинного кварца', kind: 'item', worldSpawn: 3, lootChest: 2, mobRarity: 0, mobDropRate: 0, floor: 36 },
+    'longhaul:freight_crate':       { name: 'Грузовой контейнер', kind: 'item', worldSpawn: 0, lootChest: 2, mobRarity: 0, mobDropRate: 0, floor: 95 },
+    'longhaul:transit_voucher':     { name: 'Транзитный ваучер', kind: 'item', worldSpawn: 0, lootChest: 2, mobRarity: 0, mobDropRate: 0, floor: 70 },
+    // Fluids (per 1000 mB / 1 Bucket)
+    'fluid:minecraft:water':        { name: 'Вода (1000 mB)', kind: 'fluid', worldSpawn: 10, lootChest: 0, mobRarity: 0, mobDropRate: 0, floor: 2 },
+    'fluid:minecraft:lava':         { name: 'Лава (1000 mB)', kind: 'fluid', worldSpawn: 5, lootChest: 0, mobRarity: 0, mobDropRate: 0, floor: 26 },
+    'fluid:minecraft:milk':         { name: 'Молоко (1000 mB)', kind: 'fluid', worldSpawn: 7, lootChest: 0, mobRarity: 1, mobDropRate: 1.0, floor: 14 },
+    'fluid:immersivepetroleum:crudeoil': { name: 'Сырая нефть (1000 mB)', kind: 'fluid', worldSpawn: 2, lootChest: 0, mobRarity: 0, mobDropRate: 0, floor: 52 },
+    'fluid:immersivepetroleum:diesel': { name: 'Дизель (1000 mB)', kind: 'fluid', worldSpawn: 0, lootChest: 0, mobRarity: 0, mobDropRate: 0, floor: 88 },
+    'fluid:createdieselgenerators:biodiesel': { name: 'Биодизель (1000 mB)', kind: 'fluid', worldSpawn: 0, lootChest: 0, mobRarity: 0, mobDropRate: 0, floor: 76 },
+    'fluid:nuclearcraft:heavy_water': { name: 'Тяжёлая вода (1000 mB)', kind: 'fluid', worldSpawn: 1, lootChest: 0, mobRarity: 0, mobDropRate: 0, floor: 135 },
+    // Gases (per 1000 mB)
+    'gas:mekanism:hydrogen':        { name: 'Водород (1000 mB)', kind: 'gas', worldSpawn: 0, lootChest: 0, mobRarity: 0, mobDropRate: 0, floor: 32 },
+    'gas:mekanism:oxygen':          { name: 'Кислород (1000 mB)', kind: 'gas', worldSpawn: 0, lootChest: 0, mobRarity: 0, mobDropRate: 0, floor: 28 },
+    'gas:nuclearcraft:steam':       { name: 'Пар высокого давления (1000 mB)', kind: 'gas', worldSpawn: 0, lootChest: 0, mobRarity: 0, mobDropRate: 0, floor: 24 },
+    'gas:nuclearcraft:deuterium':   { name: 'Дейтерий (1000 mB)', kind: 'gas', worldSpawn: 0, lootChest: 0, mobRarity: 0, mobDropRate: 0, floor: 145 },
+    'gas:electrodynamics:chlorine': { name: 'Хлор (1000 mB)', kind: 'gas', worldSpawn: 0, lootChest: 0, mobRarity: 0, mobDropRate: 0, floor: 64 },
+    // Energy (per 10 kFE / 100 kFE)
+    'energy:fe_10k':                { name: 'Электроэнергия (10 kFE)', kind: 'energy', worldSpawn: 0, lootChest: 0, mobRarity: 0, mobDropRate: 0, floor: 14 },
+    'energy:fe_100k':               { name: 'Электроэнергия (100 kFE)', kind: 'energy', worldSpawn: 0, lootChest: 0, mobRarity: 0, mobDropRate: 0, floor: 128 }
+  };
+
+  function inferCommodityKind(id) {
+    var s = String(id || '');
+    if (s.indexOf('fluid:') === 0) return 'fluid';
+    if (s.indexOf('gas:') === 0) return 'gas';
+    if (s.indexOf('energy:') === 0) return 'energy';
+    return 'item';
+  }
+
+  function computeRarityScorePrice(meta) {
+    if (!meta) return 20;
+    var base = Number(meta.floor || 10);
+    var ws = Number(meta.worldSpawn || 0);
+    var lc = Number(meta.lootChest || 0);
+    var mr = Number(meta.mobRarity || 0);
+    var mdr = Number(meta.mobDropRate || 0);
+
+    var rarityBonus = 0;
+    if (ws > 0) rarityBonus += Math.max(0, (10 - ws) * 4);
+    else if (lc > 0) rarityBonus += Math.max(0, (8 - lc) * 7);
+    if (mr > 0) {
+      var dropMult = mdr > 0 ? Math.min(8, 1 / Math.max(0.05, mdr)) : 1;
+      rarityBonus += Math.round(mr * 5 * Math.sqrt(dropMult));
+    }
+    return Math.max(1, Math.round(Math.max(base, base * 0.7 + rarityBonus)));
+  }
+
+  function inferFallbackBasePrice(id) {
+    var s = String(id || '').toLowerCase();
+    var meta = BASE_COMMODITY_CATALOG[s];
+    if (meta) return computeRarityScorePrice(meta);
+
+    var p = 18;
+    if (s.indexOf('fluid:') === 0) p = 30;
+    else if (s.indexOf('gas:') === 0) p = 48;
+    else if (s.indexOf('energy:') === 0) p = 16;
+
+    if (s.indexOf('draconicevolution:') === 0 || s.indexOf('awakened') !== -1) p = 320;
+    else if (s.indexOf('nuclearcraft:') === 0 || s.indexOf('nuclearscience:') === 0 || s.indexOf('bigreactors:') === 0) p = 110;
+    else if (s.indexOf('electrodynamics:') === 0 || s.indexOf('mekanism:') === 0) p = 85;
+    else if (s.indexOf('ae2:') === 0 || s.indexOf('pneumaticcraft:') === 0) p = 64;
+    else if (s.indexOf('immersive') === 0 || s.indexOf('create:') === 0 || s.indexOf('tfmg:') === 0) p = 34;
+
+    if (s.indexOf('netherite') !== -1 || s.indexOf('nether_star') !== -1 || s.indexOf('dragon') !== -1) p = Math.max(p, 280);
+    else if (s.indexOf('diamond') !== -1 || s.indexOf('uranium') !== -1 || s.indexOf('plutonium') !== -1) p = Math.max(p, 95);
+    else if (s.indexOf('steel') !== -1 || s.indexOf('titanium') !== -1 || s.indexOf('processor') !== -1) p = Math.max(p, 52);
+    else if (s.indexOf('block') !== -1) p = Math.round(p * 1.4);
+    else if (s.indexOf('nugget') !== -1) p = Math.max(1, Math.round(p * 0.15));
+    return Math.max(1, Math.round(p));
+  }
+
+  function createInitialEconomyState() {
+    return {
+      items: {},
+      adminOverrides: {},
+      recipePrices: {},
+      listings: [],
+      pickupOrders: [],
+      nextListingSeq: 1,
+      nextPickupSeq: 1,
+      traderSeed: 1,
+      totalCrashes: 0
+    };
+  }
+
+  function ensureEconomyState(st) {
+    if (!st) return createInitialEconomyState();
+    if (!st.items) st.items = {};
+    if (!st.adminOverrides) st.adminOverrides = {};
+    if (!st.recipePrices) st.recipePrices = {};
+    if (!st.listings) st.listings = [];
+    if (!st.pickupOrders) st.pickupOrders = [];
+    if (!st.nextListingSeq) st.nextListingSeq = 1;
+    if (!st.nextPickupSeq) st.nextPickupSeq = 1;
+    if (typeof st.totalCrashes !== 'number') st.totalCrashes = 0;
+    return st;
+  }
+
+  function propagateRecipePrices(st, recipeEdges, maxPasses) {
+    ensureEconomyState(st);
+    var passes = Math.max(1, Math.min(8, Number(maxPasses || 5)));
+    var prices = {};
+    Object.keys(BASE_COMMODITY_CATALOG).forEach(function (cid) {
+      prices[cid] = computeRarityScorePrice(BASE_COMMODITY_CATALOG[cid]);
+    });
+    Object.keys(st.recipePrices || {}).forEach(function (k) {
+      if (Number(st.recipePrices[k]) > 0 && !prices[k]) prices[k] = Number(st.recipePrices[k]);
+    });
+
+    var edges = Array.isArray(recipeEdges) ? recipeEdges : [];
+    for (var pass = 0; pass < passes; pass++) {
+      var changed = false;
+      for (var i = 0; i < edges.length; i++) {
+        var e = edges[i];
+        if (!e || !e.outId || !Array.isArray(e.ingredients) || !e.ingredients.length) continue;
+        var outCount = Math.max(1, Number(e.outCount || 1));
+        var ingSum = 0;
+        for (var j = 0; j < e.ingredients.length; j++) {
+          var ing = e.ingredients[j];
+          if (!ing || !ing.id) continue;
+          var cnt = Math.max(1, Number(ing.count || 1));
+          var unitP = prices[ing.id] || inferFallbackBasePrice(ing.id);
+          ingSum += unitP * cnt;
+        }
+        if (ingSum <= 0) continue;
+        var craftUnit = Math.max(1, Math.round((ingSum / outCount) * 1.12));
+        var floorP = BASE_COMMODITY_CATALOG[e.outId]
+          ? computeRarityScorePrice(BASE_COMMODITY_CATALOG[e.outId])
+          : 1;
+        var nextP = Math.max(floorP, craftUnit);
+        // Prevent runaway self-cycle inflation
+        if (nextP > 250000) nextP = 250000;
+        if (!prices[e.outId] || Math.abs(prices[e.outId] - nextP) >= 1) {
+          // Take min across alternative cheaper recipes once known, or update upward from raw floor
+          if (!prices[e.outId] || nextP < prices[e.outId] || pass === 0) {
+            prices[e.outId] = nextP;
+            changed = true;
+          }
+        }
+      }
+      if (!changed) break;
+    }
+    st.recipePrices = prices;
+    return prices;
+  }
+
+  function getCommodityState(st, itemId) {
+    ensureEconomyState(st);
+    var id = String(itemId || '');
+    if (!st.items[id]) {
+      st.items[id] = {
+        supply: 0,
+        demand: 0,
+        crashTicks: 0,
+        crashCount: 0,
+        volumeTraded: 0
+      };
+    }
+    return st.items[id];
+  }
+
+  function getBasePrice(st, itemId) {
+    ensureEconomyState(st);
+    var id = String(itemId || '');
+    if (st.recipePrices && st.recipePrices[id] > 0) return Number(st.recipePrices[id]);
+    return inferFallbackBasePrice(id);
+  }
+
+  function getMarketQuote(st, itemId) {
+    ensureEconomyState(st);
+    var id = String(itemId || '');
+    var basePrice = getBasePrice(st, id);
+    var ov = st.adminOverrides && st.adminOverrides[id];
+    var cs = getCommodityState(st, id);
+
+    if (ov && ov.locked && Number(ov.price) > 0) {
+      return {
+        itemId: id,
+        kind: inferCommodityKind(id),
+        basePrice: basePrice,
+        price: Math.max(1, Math.round(Number(ov.price))),
+        multiplier: Number((Number(ov.price) / Math.max(1, basePrice)).toFixed(2)),
+        crashed: false,
+        crashTicks: 0,
+        adminLocked: true,
+        supply: cs.supply,
+        demand: cs.demand
+      };
+    }
+
+    var netPressure = Number(cs.demand || 0) - Number(cs.supply || 0);
+    // Smooth logarithmic/atan-like supply-demand curve between 0.45x and 2.40x
+    var sdMult = 1.0 + Math.max(-0.55, Math.min(1.40, netPressure / 110.0));
+    var crashed = Number(cs.crashTicks || 0) > 0;
+    var finalMult = crashed ? Math.min(CRASH_PRICE_MULT, sdMult * 0.45) : sdMult;
+    var price = Math.max(1, Math.round(basePrice * finalMult));
+
+    if (ov) {
+      if (Number(ov.minPrice) > 0) price = Math.max(Math.round(ov.minPrice), price);
+      if (Number(ov.maxPrice) > 0) price = Math.min(Math.round(ov.maxPrice), price);
+    }
+
+    return {
+      itemId: id,
+      kind: inferCommodityKind(id),
+      basePrice: basePrice,
+      price: price,
+      multiplier: Number((price / Math.max(1, basePrice)).toFixed(2)),
+      crashed: crashed,
+      crashTicks: Number(cs.crashTicks || 0),
+      adminLocked: false,
+      supply: Number(cs.supply || 0),
+      demand: Number(cs.demand || 0)
+    };
+  }
+
+  function recordTradePressure(st, itemId, side, qty) {
+    ensureEconomyState(st);
+    var id = String(itemId || '');
+    var q = Math.max(1, Math.round(Number(qty || 1)));
+    var cs = getCommodityState(st, id);
+    cs.volumeTraded = (cs.volumeTraded || 0) + q;
+    var crashedJustNow = false;
+
+    if (side === 'sell') {
+      cs.supply = Number(cs.supply || 0) + q;
+      var netOversupply = cs.supply - Number(cs.demand || 0);
+      if (netOversupply >= CRASH_NET_SUPPLY_THRESHOLD && cs.crashTicks <= 0) {
+        cs.crashTicks = CRASH_DURATION_TICKS;
+        cs.crashCount = (cs.crashCount || 0) + 1;
+        st.totalCrashes = (st.totalCrashes || 0) + 1;
+        crashedJustNow = true;
+      }
+    } else if (side === 'buy') {
+      cs.demand = Number(cs.demand || 0) + q;
+    }
+    var qAfter = getMarketQuote(st, id);
+    return {
+      crashedJustNow: crashedJustNow,
+      quote: qAfter
+    };
+  }
+
+  function decayMarketTick(st) {
+    ensureEconomyState(st);
+    var keys = Object.keys(st.items);
+    var recovered = [];
+    for (var i = 0; i < keys.length; i++) {
+      var id = keys[i];
+      var cs = st.items[id];
+      cs.supply = Math.max(0, Math.floor(Number(cs.supply || 0) * 0.85));
+      cs.demand = Math.max(0, Math.floor(Number(cs.demand || 0) * 0.85));
+      if (cs.crashTicks > 0) {
+        cs.crashTicks--;
+        if (cs.crashTicks === 0) recovered.push(id);
+      }
+    }
+    return recovered;
+  }
+
+  function setAdminPrice(st, itemId, price) {
+    ensureEconomyState(st);
+    var id = String(itemId || '');
+    var p = Math.max(1, Math.round(Number(price || 1)));
+    st.adminOverrides[id] = { price: p, locked: true, minPrice: 0, maxPrice: 0 };
+    return getMarketQuote(st, id);
+  }
+
+  function setAdminBounds(st, itemId, minPrice, maxPrice) {
+    ensureEconomyState(st);
+    var id = String(itemId || '');
+    var mn = Math.max(1, Math.round(Number(minPrice || 1)));
+    var mx = Math.max(mn, Math.round(Number(maxPrice || mn)));
+    st.adminOverrides[id] = { price: 0, locked: false, minPrice: mn, maxPrice: mx };
+    return getMarketQuote(st, id);
+  }
+
+  function clearAdminPrice(st, itemId) {
+    ensureEconomyState(st);
+    delete st.adminOverrides[String(itemId || '')];
+    return getMarketQuote(st, itemId);
+  }
+
+  function forceCrash(st, itemId, ticks) {
+    ensureEconomyState(st);
+    var id = String(itemId || '');
+    var cs = getCommodityState(st, id);
+    cs.crashTicks = Math.max(1, Math.round(Number(ticks || CRASH_DURATION_TICKS)));
+    cs.supply = Math.max(cs.supply, CRASH_NET_SUPPLY_THRESHOLD + 16);
+    cs.crashCount = (cs.crashCount || 0) + 1;
+    st.totalCrashes = (st.totalCrashes || 0) + 1;
+    return getMarketQuote(st, id);
+  }
+
+  // Physical Facility Trading (Owner lists at facility with custom price + market reference;
+  // buyer must physically visit facility coordinates to pick up purchased cargo)
+  function createFacilityListing(st, sellerCid, building, itemId, qty, customUnitPrice) {
+    ensureEconomyState(st);
+    if (!sellerCid || !building) return { ok: false, reason: 'no_facility' };
+    var q = Math.max(1, Math.round(Number(qty || 1)));
+    var unitP = Math.max(1, Math.round(Number(customUnitPrice || 1)));
+    var quote = getMarketQuote(st, itemId);
+    var listing = {
+      id: 'L' + (st.nextListingSeq++),
+      sellerCid: sellerCid,
+      buildingId: building.id,
+      buildingType: building.type,
+      sx: building.sx,
+      sz: building.sz,
+      x: Number(building.x || building.sx * 256),
+      y: Number(building.y || 64),
+      z: Number(building.z || building.sz * 256),
+      itemId: String(itemId),
+      kind: inferCommodityKind(itemId),
+      qtyAvailable: q,
+      unitPrice: unitP,
+      marketPriceSnapshot: quote.price,
+      status: 'open'
+    };
+    st.listings.push(listing);
+    return { ok: true, listing: listing, marketQuote: quote };
+  }
+
+  function buyFacilityListing(ottdState, econState, buyerCid, listingId, qty) {
+    ensureEconomyState(econState);
+    var buyer = ottdState.companies && ottdState.companies[buyerCid];
+    if (!buyer) return { ok: false, reason: 'no_buyer_company' };
+    var listing = null;
+    for (var i = 0; i < econState.listings.length; i++) {
+      if (econState.listings[i].id === listingId && econState.listings[i].status === 'open') {
+        listing = econState.listings[i];
+        break;
+      }
+    }
+    if (!listing) return { ok: false, reason: 'not_found' };
+    if (listing.sellerCid === buyerCid) return { ok: false, reason: 'own_listing' };
+    var seller = ottdState.companies && ottdState.companies[listing.sellerCid];
+    if (!seller) return { ok: false, reason: 'no_seller' };
+    var q = Math.max(1, Math.min(listing.qtyAvailable, Math.round(Number(qty || 1))));
+    var totalPrice = q * listing.unitPrice;
+    if (buyer.cash < totalPrice) return { ok: false, reason: 'no_cash', cost: totalPrice, cash: buyer.cash };
+
+    buyer.cash -= totalPrice;
+    seller.cash += totalPrice;
+    buyer.stats.tradeVolume = (buyer.stats.tradeVolume || 0) + totalPrice;
+    seller.stats.tradeVolume = (seller.stats.tradeVolume || 0) + totalPrice;
+
+    listing.qtyAvailable -= q;
+    if (listing.qtyAvailable <= 0) listing.status = 'sold_out';
+
+    recordTradePressure(econState, listing.itemId, 'buy', q);
+
+    var order = {
+      id: 'P' + (econState.nextPickupSeq++),
+      listingId: listing.id,
+      buyerCid: buyerCid,
+      sellerCid: listing.sellerCid,
+      buildingId: listing.buildingId,
+      sx: listing.sx,
+      sz: listing.sz,
+      x: listing.x,
+      y: listing.y,
+      z: listing.z,
+      itemId: listing.itemId,
+      kind: listing.kind,
+      qty: q,
+      totalPrice: totalPrice,
+      status: 'ready'
+    };
+    econState.pickupOrders.push(order);
+    return { ok: true, order: order, totalPrice: totalPrice };
+  }
+
+  function pickupLogisticsOrder(econState, buyerCid, orderId, playerX, playerY, playerZ, maxDist) {
+    ensureEconomyState(econState);
+    var distLimit = Number(maxDist || 24);
+    var order = null;
+    for (var i = 0; i < econState.pickupOrders.length; i++) {
+      if (econState.pickupOrders[i].id === orderId && econState.pickupOrders[i].status === 'ready') {
+        order = econState.pickupOrders[i];
+        break;
+      }
+    }
+    if (!order || order.buyerCid !== buyerCid) return { ok: false, reason: 'not_found' };
+    var dx = Number(playerX) - Number(order.x);
+    var dz = Number(playerZ) - Number(order.z);
+    var dist = Math.sqrt(dx * dx + dz * dz);
+    if (dist > distLimit) {
+      return {
+        ok: false,
+        reason: 'too_far',
+        distance: Math.round(dist),
+        maxDist: distLimit,
+        target: { x: order.x, y: order.y, z: order.z }
+      };
+    }
+    order.status = 'collected';
+    return { ok: true, order: order, distance: Math.round(dist) };
+  }
+
+  function listReadyPickups(econState, buyerCid) {
+    ensureEconomyState(econState);
+    return econState.pickupOrders.filter(function (o) {
+      return o.buyerCid === buyerCid && o.status === 'ready';
+    });
+  }
+
+  // Wandering Trader offers: offsets from -60% (0.40x) to +200% (3.00x),
+  // balanced so total discounted value ~ total marked-up value.
+  function generateWanderingTraderOffers(st, rngFn) {
+    ensureEconomyState(st);
+    var rng = rngFn || Math.random;
+    var pool = Object.keys(BASE_COMMODITY_CATALOG).filter(function (id) {
+      return inferCommodityKind(id) === 'item';
+    });
+    // Fisher-Yates partial pick of 8 unique items
+    var copy = pool.slice();
+    for (var i = copy.length - 1; i > 0; i--) {
+      var j = Math.floor(rng() * (i + 1));
+      var tmp = copy[i];
+      copy[i] = copy[j];
+      copy[j] = tmp;
+    }
+    var chosen = copy.slice(0, 8);
+    var offers = [];
+    // Paired offsets ensuring symmetry in value deltas:
+    // Discount group: -60%.. -15% (0.40x..0.85x)
+    // Markup group:   +20%..+200% (1.20x..3.00x)
+    var discountMults = [0.40, 0.55, 0.70, 0.85];
+    var markupMults   = [3.00, 2.20, 1.65, 1.25];
+    var totalDiscountDelta = 0;
+    var totalMarkupDelta = 0;
+
+    for (var idx = 0; idx < 4; idx++) {
+      var dItem = chosen[idx * 2];
+      var mItem = chosen[idx * 2 + 1];
+      var dQuote = getMarketQuote(st, dItem);
+      var mQuote = getMarketQuote(st, mItem);
+      var dMult = discountMults[idx];
+      var mMult = markupMults[idx];
+
+      // Determine qty so total discount delta and markup delta stay balanced
+      var dBase = Math.max(2, dQuote.price);
+      var mBase = Math.max(2, mQuote.price);
+      var dQty = Math.max(1, Math.min(32, Math.round(160 / dBase)));
+      var targetDelta = Math.max(10, Math.round(dQty * dBase * (1.0 - dMult)));
+      var mUnitDelta = Math.max(1, Math.round(mBase * (mMult - 1.0)));
+      var mQty = Math.max(1, Math.min(32, Math.round(targetDelta / mUnitDelta)));
+
+      var dPrice = Math.max(1, Math.round(dBase * dMult));
+      var mPrice = Math.max(1, Math.round(mBase * mMult));
+      totalDiscountDelta += (dBase - dPrice) * dQty;
+      totalMarkupDelta += (mPrice - mBase) * mQty;
+
+      offers.push({
+        id: 'wt_' + (idx * 2 + 1),
+        side: idx % 2 === 0 ? 'sell_to_player' : 'buy_from_player',
+        itemId: dItem,
+        qty: dQty,
+        marketPrice: dBase,
+        offerPrice: dPrice,
+        offsetPct: Math.round((dMult - 1.0) * 100),
+        tag: 'СКИДКА'
+      });
+      offers.push({
+        id: 'wt_' + (idx * 2 + 2),
+        side: idx % 2 === 0 ? 'buy_from_player' : 'sell_to_player',
+        itemId: mItem,
+        qty: mQty,
+        marketPrice: mBase,
+        offerPrice: mPrice,
+        offsetPct: Math.round((mMult - 1.0) * 100),
+        tag: 'НАЦЕНКА'
+      });
+    }
+    return {
+      offers: offers,
+      totalDiscountDelta: totalDiscountDelta,
+      totalMarkupDelta: totalMarkupDelta,
+      imbalancePct: Math.round(
+        (Math.abs(totalDiscountDelta - totalMarkupDelta) /
+        Math.max(1, Math.max(totalDiscountDelta, totalMarkupDelta))) * 100
+      )
+    };
+  }
+
+  return {
+    CRASH_NET_SUPPLY_THRESHOLD: CRASH_NET_SUPPLY_THRESHOLD,
+    CRASH_DURATION_TICKS: CRASH_DURATION_TICKS,
+    CRASH_PRICE_MULT: CRASH_PRICE_MULT,
+    BASE_COMMODITY_CATALOG: BASE_COMMODITY_CATALOG,
+    inferCommodityKind: inferCommodityKind,
+    computeRarityScorePrice: computeRarityScorePrice,
+    inferFallbackBasePrice: inferFallbackBasePrice,
+    createInitialEconomyState: createInitialEconomyState,
+    ensureEconomyState: ensureEconomyState,
+    propagateRecipePrices: propagateRecipePrices,
+    getCommodityState: getCommodityState,
+    getBasePrice: getBasePrice,
+    getMarketQuote: getMarketQuote,
+    recordTradePressure: recordTradePressure,
+    decayMarketTick: decayMarketTick,
+    setAdminPrice: setAdminPrice,
+    setAdminBounds: setAdminBounds,
+    clearAdminPrice: clearAdminPrice,
+    forceCrash: forceCrash,
+    createFacilityListing: createFacilityListing,
+    buyFacilityListing: buyFacilityListing,
+    pickupLogisticsOrder: pickupLogisticsOrder,
+    listReadyPickups: listReadyPickups,
+    generateWanderingTraderOffers: generateWanderingTraderOffers
+  };
+})();
+
 

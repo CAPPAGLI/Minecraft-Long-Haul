@@ -1,0 +1,45 @@
+{
+  "name": "Океанские жабры",
+  "description": "Подводное дыхание, скорость плавания +45% и ускоренная добыча под водой.",
+  "type": "origins:multiple",
+  "swim_boost": {
+    "type": "origins:modify_swim_speed",
+    "modifier": {
+      "name": "Abyss Swim",
+      "operation": "multiply_base",
+      "value": 0.45
+    }
+  },
+  "water_breath": {
+    "type": "origins:stacking_status_effect",
+    "min_stacks": 0,
+    "max_stacks": 1,
+    "duration_per_stack": 40,
+    "effect": {
+      "effect": "minecraft:water_breathing",
+      "is_ambient": true,
+      "show_particles": false,
+      "show_icon": false
+    },
+    "condition": {
+      "type": "origins:submerged_in",
+      "fluid": "minecraft:water"
+    }
+  },
+  "conduit_grace": {
+    "type": "origins:stacking_status_effect",
+    "min_stacks": 0,
+    "max_stacks": 1,
+    "duration_per_stack": 40,
+    "effect": {
+      "effect": "minecraft:dolphins_grace",
+      "is_ambient": true,
+      "show_particles": false,
+      "show_icon": false
+    },
+    "condition": {
+      "type": "origins:submerged_in",
+      "fluid": "minecraft:water"
+    }
+  }
+}

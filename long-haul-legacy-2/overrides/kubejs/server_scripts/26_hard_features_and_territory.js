@@ -142,6 +142,9 @@ function lhProgRead(server) {
     workshopItems: {},
     deathsByPlayer: {},
     playerForks: {},
+    chaptersByPlayer: {},
+    playerHomeSpawns: {},
+    firstJoinDone: {},
     targetAvgDeaths: 275.15,
     rulesConfirmed: false,
     nuclearVerified: false,
@@ -154,6 +157,9 @@ function lhProgRead(server) {
   if (!LHProgState.workshopItems) LHProgState.workshopItems = {};
   if (!LHProgState.deathsByPlayer) LHProgState.deathsByPlayer = {};
   if (!LHProgState.playerForks) LHProgState.playerForks = {};
+  if (!LHProgState.chaptersByPlayer) LHProgState.chaptersByPlayer = {};
+  if (!LHProgState.playerHomeSpawns) LHProgState.playerHomeSpawns = {};
+  if (!LHProgState.firstJoinDone) LHProgState.firstJoinDone = {};
   if ((LHProgState.schemaVersion || 1) < 2) {
     if (!(LHProgState.targetAvgDeaths > 0) || Math.abs(LHProgState.targetAvgDeaths - 63.15) < 0.01) {
       LHProgState.targetAvgDeaths = 275.15;
@@ -214,6 +220,16 @@ function lhGetPlayerSpawnCenter(server, player) {
       }
     }
   } catch (eR) {}
+  try {
+    var dbHome = lhProgRead(server);
+    var pidHome = player ? lhId(player) : null;
+    if (pidHome && dbHome.playerHomeSpawns && dbHome.playerHomeSpawns[pidHome]) {
+      return {
+        x: Number(dbHome.playerHomeSpawns[pidHome].x),
+        z: Number(dbHome.playerHomeSpawns[pidHome].z)
+      };
+    }
+  } catch (eH) {}
   try {
     var ow = server.getLevel('minecraft:overworld');
     if (ow && typeof ow.getSharedSpawnPos === 'function') {
@@ -301,13 +317,17 @@ function lhFindSafeSurfaceColumn(overworld, cx, cz) {
 
 function lhIsPlayerTrappedOrBedrock(overworld, px, py, pz) {
   var ix = Math.floor(px), iy = Math.floor(py), iz = Math.floor(pz);
-  if (iy <= 0) return true;
+  if (iy <= -58) return true;
   try {
     var below = String(overworld.getBlock(ix, iy - 1, iz).id);
-    var feet = String(overworld.getBlock(ix, iy, iz).id);
-    var head = String(overworld.getBlock(ix, iy + 1, iz).id);
+    var feetBlock = overworld.getBlock(ix, iy, iz);
+    var headBlock = overworld.getBlock(ix, iy + 1, iz);
+    var feet = String(feetBlock.id);
+    var head = String(headBlock.id);
     if (below === 'minecraft:bedrock' || feet === 'minecraft:bedrock' || head === 'minecraft:bedrock') return true;
-    if (!lhIsPassableSpawnSpace(feet) && !lhIsPassableSpawnSpace(head) && feet !== 'minecraft:water' && head !== 'minecraft:water') return true;
+    var feetSolid = feet === 'minecraft:stone' || feet === 'minecraft:deepslate' || feet === 'minecraft:dirt' || feet === 'minecraft:netherrack';
+    var headSolid = head === 'minecraft:stone' || head === 'minecraft:deepslate' || head === 'minecraft:dirt' || head === 'minecraft:netherrack';
+    if (feetSolid && headSolid) return true;
   } catch (eTrap) {}
   return false;
 }
@@ -328,17 +348,90 @@ function lhEnsureSafeSpawn(server, player, fixWorldSpawn) {
   if (uname) {
     server.runCommandSilent('execute in minecraft:overworld run tp ' + uname + ' ' + (safe.x + 0.5) + ' ' + safe.y + ' ' + (safe.z + 0.5));
     server.runCommandSilent('effect give ' + uname + ' minecraft:resistance 5 4 true');
-    if (fixWorldSpawn) {
-      try {
-        var sp = typeof ow.getSharedSpawnPos === 'function' ? ow.getSharedSpawnPos() : null;
-        if (!sp || Number(sp.y) <= 0) {
-          server.runCommandSilent('setworldspawn ' + safe.x + ' ' + safe.y + ' ' + safe.z);
-        }
-      } catch (eSp) {}
-    }
   }
   if (typeof player.tell === 'function') {
-    player.tell('§e[Безопасный спаун] Обнаружен спаун в бэдроке/под землёй (Y=' + Math.round(py) + ') — вы перемещены на поверхность (' + safe.x + ', ' + safe.y + ', ' + safe.z + ').');
+    player.tell('§e[Безопасный спаун] Обнаружен спаун в бэдроке/породе (Y=' + Math.round(py) + ') — вы перемещены на поверхность (' + safe.x + ', ' + safe.y + ', ' + safe.z + ').');
+  }
+  return true;
+}
+
+function lhFirstJoinRandomSpawn(server, player) {
+  if (!server || !player) return false;
+  var db = lhProgRead(server);
+  var pid = lhId(player);
+  if (db.firstJoinDone[pid]) return false;
+
+  var creative = (typeof player.isCreative === 'function' && player.isCreative()) ||
+    (typeof player.isSpectator === 'function' && player.isSpectator());
+  var ow = server.getLevel('minecraft:overworld');
+  if (!ow) return false;
+
+  var borderInfo = lhTerritoryCounts(server);
+  var maxSectorAbs = Math.max(2, Math.floor((borderInfo.size / 2 - 48) / 256));
+  var ottdSt = typeof lhCompanyRead === 'function' ? lhCompanyRead(server) : null;
+
+  var chosen = null;
+  for (var attempt = 0; attempt < 32; attempt++) {
+    var csx = Math.floor((Math.random() * 2 - 1) * maxSectorAbs);
+    var csz = Math.floor((Math.random() * 2 - 1) * maxSectorAbs);
+    if (global.LHOpenTTD && global.LHOpenTTD.isSpawnProtectedSector(csx, csz)) continue;
+    if (ottdSt && global.LHOpenTTD) {
+      var ownerInfo = global.LHOpenTTD.resolveSectorOwner(ottdSt, csx, csz);
+      if (ownerInfo.kind === 'claimed') continue;
+    }
+    var wx = csx * 256 + 16 + Math.floor(Math.random() * 200);
+    var wz = csz * 256 + 16 + Math.floor(Math.random() * 200);
+    var sy = lhFindSafeRespawnY(ow, wx, wz, false);
+    if (sy > 52) {
+      chosen = { x: wx, y: sy, z: wz, sx: csx, sz: csz };
+      break;
+    }
+  }
+  if (!chosen) {
+    // Fallback on outer safe ring
+    var fWx = 512 + Math.floor(Math.random() * 128);
+    var fWz = 512 + Math.floor(Math.random() * 128);
+    var fY = lhFindSafeRespawnY(ow, fWx, fWz, true);
+    var fSc = global.LHOpenTTD ? global.LHOpenTTD.sectorCoords(fWx, fWz) : { sx: 2, sz: 2 };
+    chosen = { x: fWx, y: fY, z: fWz, sx: fSc.sx, sz: fSc.sz };
+  }
+
+  db.firstJoinDone[pid] = true;
+  db.playerHomeSpawns[pid] = chosen;
+  lhProgSave(server);
+
+  if (!creative) {
+    // Place company terminal barrel directly beneath player's landing tile
+    try {
+      var termY = chosen.y - 1;
+      var termBlock = ow.getBlock(chosen.x, termY, chosen.z);
+      termBlock.set('minecraft:barrel');
+      ow.getBlock(chosen.x, termY + 1, chosen.z).set('minecraft:air');
+      ow.getBlock(chosen.x, termY + 2, chosen.z).set('minecraft:air');
+    } catch (eBar) {}
+
+    if (typeof lhRegisterTerminalForPlayer === 'function') {
+      lhRegisterTerminalForPlayer(server, player, chosen.x, chosen.y - 1, chosen.z, 'minecraft:overworld');
+    } else if (typeof lhProfile === 'function' && typeof lhSave === 'function') {
+      var cProf = lhProfile(server, player);
+      if (cProf && !cProf.terminal) {
+        cProf.terminal = { dim: 'minecraft:overworld', x: chosen.x, y: chosen.y - 1, z: chosen.z };
+        lhSave(server);
+        if (typeof lhUnlock === 'function') lhUnlock(player, 'longhaul:story/03_dinner_telegram');
+      }
+    }
+    if (typeof lhAutoCreateCompanyAtSpawn === 'function') {
+      lhAutoCreateCompanyAtSpawn(server, player, chosen.x, chosen.z);
+    }
+
+    var uname = player.username || (typeof player.getName === 'function' ? player.getName().getString() : '');
+    if (uname) {
+      server.runCommandSilent('execute in minecraft:overworld run tp ' + uname + ' ' + (chosen.x + 0.5) + ' ' + chosen.y + ' ' + (chosen.z + 0.5));
+      server.runCommandSilent('spawnpoint ' + uname + ' ' + chosen.x + ' ' + chosen.y + ' ' + chosen.z);
+      server.runCommandSilent('effect give ' + uname + ' minecraft:resistance 8 4 true');
+    }
+    lhMsg(player, '§a§l[Высадка компании] §fВы высажены на свободный участок §b(' + chosen.x + ', ' + chosen.y + ', ' + chosen.z +
+      ') §7в секторе (' + chosen.sx + ',' + chosen.sz + '). Прямо под вами установлен §eТерминал компании§7, а сектор закреплён как ваша штаб-квартира!');
   }
   return true;
 }
@@ -429,18 +522,41 @@ function lhChapterProgressSummary(server) {
   };
 }
 
+function lhCountEffectiveMainForMap(chMap) {
+  var totalMain = LH_MAIN_CHAPTER_KEYS.length; // 61
+  var map = chMap || {};
+  var otherMainUnlocked = 0;
+  LH_MAIN_CHAPTER_KEYS.forEach(function (cid) {
+    if (cid !== 'ch04' && map[cid]) otherMainUnlocked++;
+  });
+  return map.ch04
+    ? Math.min(totalMain, otherMainUnlocked + 1)
+    : Math.min(totalMain - 1, otherMainUnlocked);
+}
+
 function lhTerritoryCounts(server) {
   var db = lhProgRead(server);
   // Photo chapter (ch13) remains strictly optional and never affects border progression;
-  // all 61 main chapters (ch00..ch12 + ch14..ch61) drive the 61-stage expansion.
+  // world border expands strictly according to the HIGHEST count of main chapters
+  // completed by any SINGLE player (never pooled across multiple players).
   var totalMain = LH_MAIN_CHAPTER_KEYS.length; // 61
-  var otherMainUnlocked = 0;
-  LH_MAIN_CHAPTER_KEYS.forEach(function (cid) {
-    if (cid !== 'ch04' && db.chapters[cid]) otherMainUnlocked++;
-  });
-  var effectiveUnlocked = db.chapters.ch04
-    ? Math.min(totalMain, otherMainUnlocked + 1)
-    : Math.min(totalMain - 1, otherMainUnlocked);
+  var byPlayer = db.chaptersByPlayer || {};
+  var playerIds = Object.keys(byPlayer);
+  var effectiveUnlocked = 0;
+
+  if (playerIds.length > 0) {
+    for (var i = 0; i < playerIds.length; i++) {
+      var cnt = lhCountEffectiveMainForMap(byPlayer[playerIds[i]]);
+      if (cnt > effectiveUnlocked) effectiveUnlocked = cnt;
+    }
+    // Include explicit operator /lh chapter unlock overrides only if higher
+    if (db.adminChapters) {
+      var adminCnt = lhCountEffectiveMainForMap(db.adminChapters);
+      if (adminCnt > effectiveUnlocked) effectiveUnlocked = adminCnt;
+    }
+  } else {
+    effectiveUnlocked = lhCountEffectiveMainForMap(db.chapters);
+  }
   return global.LHTerritoryMath.computeBorder(totalMain, effectiveUnlocked);
 }
 
@@ -456,14 +572,19 @@ function lhApplyTerritoryBorder(server, announce) {
   db.lastBorderSize = info.size;
   lhProgSave(server);
 
-  if (announce && prev > 0 && info.size > prev) {
-    var half = Math.round(info.size / 2);
-    var msgB = 'Территория расширена до ' + info.size + '×' + info.size + ' (±' + half + ' м, этапы расширения: ' + info.unlocked + '/' + info.total + ').';
-    if (typeof lhLogEvent === 'function') {
-      lhLogEvent(server, 'territory', msgB, { chatMode: 'important' });
-    } else if (server.players) {
-      for (var i = 0; i < server.players.length; i++) {
-        server.players[i].tell('§b§l[Граница мира] §a' + msgB);
+  if (prev > 0 && info.size > prev) {
+    if (typeof lhSpawnBotOnBorderExpansion === 'function') {
+      lhSpawnBotOnBorderExpansion(server, info, !!announce);
+    }
+    if (announce) {
+      var half = Math.round(info.size / 2);
+      var msgB = 'Территория расширена до ' + info.size + '×' + info.size + ' (±' + half + ' м, этапы расширения: ' + info.unlocked + '/' + info.total + ').';
+      if (typeof lhLogEvent === 'function') {
+        lhLogEvent(server, 'territory', msgB, { chatMode: 'important' });
+      } else if (server.players) {
+        for (var i = 0; i < server.players.length; i++) {
+          server.players[i].tell('§b§l[Граница мира] §a' + msgB);
+        }
       }
     }
   }
@@ -747,13 +868,32 @@ function lhChapterForkPick(server, player, chId, dryRun) {
   return res;
 }
 
-function lhUnlockChapter(server, chapterId, triggerSpin, dryRun) {
+function lhMarkPlayerChapter(db, pid, chapterId) {
+  if (!db || !pid || !chapterId) return;
+  if (!db.chaptersByPlayer) db.chaptersByPlayer = {};
+  if (!db.chaptersByPlayer[pid]) db.chaptersByPlayer[pid] = {};
+  db.chaptersByPlayer[pid][chapterId] = true;
+}
+
+function lhUnlockChapter(server, chapterId, triggerSpin, dryRun, playerOrPid) {
   var db = lhProgRead(server);
-  if (db.chapters[chapterId]) return false;
+  var pid = null;
+  if (playerOrPid) {
+    pid = typeof playerOrPid === 'string' ? playerOrPid : lhId(playerOrPid);
+    lhMarkPlayerChapter(db, pid, chapterId);
+  } else {
+    if (!db.adminChapters) db.adminChapters = {};
+    db.adminChapters[chapterId] = true;
+  }
+  if (db.chapters[chapterId]) {
+    lhProgSave(server);
+    lhApplyTerritoryBorder(server, !dryRun);
+    return false;
+  }
   db.chapters[chapterId] = true;
   if (global.LHChapterFork && db.playerForks) {
-    Object.keys(db.playerForks).forEach(function (pid) {
-      global.LHChapterFork.onChapterCompleted(db.playerForks[pid], chapterId, db.chapters);
+    Object.keys(db.playerForks).forEach(function (fpid) {
+      global.LHChapterFork.onChapterCompleted(db.playerForks[fpid], chapterId, db.chapters);
     });
   }
   lhProgSave(server);
@@ -793,14 +933,6 @@ function lhScanWorkshopItems(server, player) {
       db.workshopItems[sid] = true;
       changed = true;
     }
-    if (sid.indexOf('draconicevolution:') === 0 || sid.indexOf('nuclearcraft:') === 0 ||
-        sid.indexOf('electrodynamics:') === 0 || sid.indexOf('nuclearscience:') === 0 ||
-        sid.indexOf('ballistix:') === 0 || sid.indexOf('bigreactors:') === 0) {
-      if (!db.nuclearVerified) {
-        db.nuclearVerified = true;
-        changed = true;
-      }
-    }
   }
   if (changed) lhProgSave(server);
   return Object.keys(db.workshopItems).length;
@@ -837,7 +969,7 @@ function lhProgressionRecompute(server, player, dryRun) {
   });
 
   // ch00: Chapter 00 (Story prologue; 03_dinner_telegram moved to Chapter 01)
-  if (!db.chapters.ch00 && player && typeof player.isAdvancementDone === 'function') {
+  if (player && typeof player.isAdvancementDone === 'function') {
     var storyOk = [
       'longhaul:story/01_left_for_bread',
       'longhaul:story/02_bakery_burned',
@@ -845,60 +977,54 @@ function lhProgressionRecompute(server, player, dryRun) {
       'longhaul:story/05_continental_bakery',
       'longhaul:story/06_forgot_the_milk'
     ].every(function (a) { return player.isAdvancementDone(a); });
-    if (storyOk) lhUnlockChapter(server, 'ch00', true, dryRun);
+    if (storyOk) lhUnlockChapter(server, 'ch00', true, dryRun, player);
   }
 
   // ch01: Rules & Start (auto-completes once rules confirmed OR ch00 done + terminal placed)
-  if (!db.chapters.ch01 && (db.rulesConfirmed || (db.chapters.ch00 && hasTerminal))) {
-    lhUnlockChapter(server, 'ch01', true, dryRun);
+  if (db.rulesConfirmed || (db.chapters.ch00 && hasTerminal)) {
+    lhUnlockChapter(server, 'ch01', true, dryRun, player);
   }
 
   // ch02: Workshop & Expedition (>= 6 of 9 core industrial milestone items obtained)
-  if (!db.chapters.ch02 && Object.keys(db.workshopItems || {}).length >= 6) {
-    lhUnlockChapter(server, 'ch02', true, dryRun);
+  if (Object.keys(db.workshopItems || {}).length >= 6) {
+    lhUnlockChapter(server, 'ch02', true, dryRun, player);
   }
 
   // ch03: Home Contracts (all 5 core + 3 shift contracts, or >= 6 contracts completed)
   var receiptCount = Object.keys(allReceipts).length;
-  if (!db.chapters.ch03 && receiptCount >= 6) {
-    lhUnlockChapter(server, 'ch03', true, dryRun);
+  if (receiptCount >= 6) {
+    lhUnlockChapter(server, 'ch03', true, dryRun, player);
   }
 
   // ch05: Routes & Camps (deploy >= 3 active camps or camp + completed route)
-  if (!db.chapters.ch05) {
-    var anyThreeCamps = Object.keys(logDb.camps || {}).some(function (pid) {
-      var list = logDb.camps[pid] || [];
-      return list.filter(function (c) { return c.active; }).length >= 3;
-    });
-    var anyCompletedRoute = Object.keys(logDb.routes || {}).some(function (rk) {
-      return !!(logDb.routes[rk] && logDb.routes[rk].completed);
-    });
-    if (anyThreeCamps && anyCompletedRoute) {
-      lhUnlockChapter(server, 'ch05', true, dryRun);
-    }
+  var anyThreeCamps = Object.keys(logDb.camps || {}).some(function (pid) {
+    var list = logDb.camps[pid] || [];
+    return list.filter(function (c) { return c.active; }).length >= 3;
+  });
+  var anyCompletedRoute = Object.keys(logDb.routes || {}).some(function (rk) {
+    return !!(logDb.routes[rk] && logDb.routes[rk].completed);
+  });
+  if (anyThreeCamps && anyCompletedRoute) {
+    lhUnlockChapter(server, 'ch05', true, dryRun, player);
   }
 
   // ch04: Economic Centers (hub produced >= 1 or >= 6 sites commissioned)
-  if (!db.chapters.ch04) {
-    var commCount = 0;
-    Object.keys(sitesDb.sites || {}).forEach(function (sid) {
-      if (sitesDb.sites[sid] && sitesDb.sites[sid].commissioned) commCount++;
-    });
-    var hub = sitesDb.sites && sitesDb.sites.continental_hub;
-    if ((hub && (hub.producedTotal || 0) >= 1) || commCount >= 6) {
-      lhUnlockChapter(server, 'ch04', true, dryRun);
-    }
+  var commCount = 0;
+  Object.keys(sitesDb.sites || {}).forEach(function (sid) {
+    if (sitesDb.sites[sid] && sitesDb.sites[sid].commissioned) commCount++;
+  });
+  var hub = sitesDb.sites && sitesDb.sites.continental_hub;
+  if ((hub && (hub.producedTotal || 0) >= 1) || commCount >= 6) {
+    lhUnlockChapter(server, 'ch04', true, dryRun, player);
   }
 
   // ch06: Recoveries & CC Telemetry
-  if (!db.chapters.ch06) {
-    var restCount = 0;
-    Object.keys(recDb.items || {}).forEach(function (rid) {
-      if (recDb.items[rid] && recDb.items[rid].restored) restCount++;
-    });
-    if (restCount >= 3 && Object.keys(fieldDb.ccVerified || {}).length >= 2) {
-      lhUnlockChapter(server, 'ch06', true, dryRun);
-    }
+  var restCount = 0;
+  Object.keys(recDb.items || {}).forEach(function (rid) {
+    if (recDb.items[rid] && recDb.items[rid].restored) restCount++;
+  });
+  if (restCount >= 3 && Object.keys(fieldDb.ccVerified || {}).length >= 2) {
+    lhUnlockChapter(server, 'ch06', true, dryRun, player);
   }
 
   // ch07..ch10 (main campaign) + ch13 (optional photo): at least 4 verified orders
@@ -912,24 +1038,24 @@ function lhProgressionRecompute(server, player, dryRun) {
     else if (qid.indexOf('photo_') === 0) catCounts.ch13++;
   });
   Object.keys(catCounts).forEach(function (cid) {
-    if (!db.chapters[cid] && catCounts[cid] >= 4) {
-      lhUnlockChapter(server, cid, true, dryRun);
+    if (catCounts[cid] >= 4) {
+      lhUnlockChapter(server, cid, true, dryRun, player);
     }
   });
 
-  // ch11: Nuclear & Draconic milestone
-  if (!db.chapters.ch11 && db.nuclearVerified) {
-    lhUnlockChapter(server, 'ch11', true, dryRun);
+  // ch11: Nuclear & Draconic milestone (ONLY explicit /lh nuclear verify or advancement, never chest loot)
+  if (db.nuclearVerified || (player && typeof player.isAdvancementDone === 'function' && player.isAdvancementDone('longhaul:nuclear/verified'))) {
+    lhUnlockChapter(server, 'ch11', true, dryRun, player);
   }
 
   // ch12: OpenTTD Empire milestone
-  if (!db.chapters.ch12 && player && typeof player.isAdvancementDone === 'function' && player.isAdvancementDone('longhaul:openttd/empire')) {
-    lhUnlockChapter(server, 'ch12', true, dryRun);
+  if (player && typeof player.isAdvancementDone === 'function' && player.isAdvancementDone('longhaul:openttd/empire')) {
+    lhUnlockChapter(server, 'ch12', true, dryRun, player);
   }
 
   // ch14: DOOMED Hardcore Survival (mandatory main chapter)
-  if (!db.chapters.ch14 && db.doomedVerified) {
-    lhUnlockChapter(server, 'ch14', true, dryRun);
+  if (db.doomedVerified) {
+    lhUnlockChapter(server, 'ch14', true, dryRun, player);
   }
 
   // ch15..ch61: Expansion chapters verified directly from live Heracles capstone quest completion (chXX_99_master)
@@ -940,8 +1066,8 @@ function lhProgressionRecompute(server, player, dryRun) {
         for (var ei = 0; ei < LH_EXPANSION_CHAPTER_CODES.length; ei++) {
           var code = LH_EXPANSION_CHAPTER_CODES[ei];
           var chId = 'ch' + code;
-          if (!db.chapters[chId] && qProg.isComplete(chId + '_99_master')) {
-            lhUnlockChapter(server, chId, true, dryRun);
+          if (qProg.isComplete(chId + '_99_master')) {
+            lhUnlockChapter(server, chId, true, dryRun, player);
           }
         }
       }
@@ -1307,7 +1433,8 @@ ServerEvents.tick(function (event) {
 
 PlayerEvents.loggedIn(function (event) {
   var server = event.server, player = event.player;
-  lhEnsureSafeSpawn(server, player, true);
+  lhFirstJoinRandomSpawn(server, player);
+  lhEnsureSafeSpawn(server, player, false);
   lhProgressionRecompute(server, player, false);
   var info = lhApplyTerritoryBorder(server, false);
   var db = lhProgRead(server);

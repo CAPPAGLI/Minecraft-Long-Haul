@@ -856,7 +856,12 @@ function lhStartIntegrationSetup(server) {
           'longhaul_origins:deep_prospector',
           'longhaul_origins:field_alchemist',
           'longhaul_origins:arc_mechanist',
-          'longhaul_origins:void_drifter'
+          'longhaul_origins:void_drifter',
+          'longhaul_origins:abyss_navigator',
+          'longhaul_origins:subterranean_mole',
+          'longhaul_origins:nether_strider',
+          'longhaul_origins:urbanist_architect',
+          'longhaul_origins:trailblazer_pathfinder'
         ];
         var RLCls = Java.loadClass('net.minecraft.resources.ResourceLocation');
         var origLayerRes = server.getResourceManager().getResource(new RLCls('origins', 'origin_layers/origin.json'));
@@ -867,7 +872,7 @@ function lhStartIntegrationSetup(server) {
         reader.close();
         var layerJson = JSON.parse(layerTxt);
         ok(layerJson.replace === true, 'origins:origin layer uses replace=true to disable all default origins');
-        ok(Array.isArray(layerJson.origins) && layerJson.origins.length === 6, 'origins:origin layer lists exactly 6 custom origins');
+        ok(Array.isArray(layerJson.origins) && layerJson.origins.length === 11, 'origins:origin layer lists exactly 11 custom origins');
         expectedOrigins.forEach(function (oid) {
           ok(layerJson.origins.indexOf(oid) !== -1, 'custom origin present in layer: ' + oid);
         });
@@ -886,11 +891,57 @@ function lhStartIntegrationSetup(server) {
             var hk = itOrig.next();
             regOrigIds.push(String(hk.unwrapKey().get().location()));
           }
-          ok(regOrigIds.length === 6, 'live OriginsAPI layer has 6 origins (' + regOrigIds.join(', ') + ')');
+          ok(regOrigIds.length === 11, 'live OriginsAPI layer has 11 origins (' + regOrigIds.join(', ') + ')');
           ok(!regOrigIds.some(function (id) { return id.indexOf('origins:') === 0; }), 'live OriginsAPI layer contains zero default origins');
         }
 
-        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic + openttd + eventlog + gui + quest_items_' + auditList.length + ' + custom_origins_only');
+        // 27. Map byte crash fix, Ch.11 looting bug fix, per-player border max, dynamic bot spawn, and live economy recipe graph
+        var stByteTest = lhOttdRead(server);
+        Object.keys(stByteTest.companies).forEach(function (cid) {
+          var sb = lhCompanyMapColorByte(stByteTest, cid, true, false);
+          ok(sb >= -128 && sb <= 127, 'signed map byte valid for ' + cid + ': ' + sb);
+        });
+        var mapActor = {
+          uuid: '00000000-0000-4000-8000-000000000077',
+          x: 0, y: 80, z: 0,
+          inventory: { slots: 36, getStackInSlot: function () { return Item.empty; } },
+          give: function () {},
+          tell: function () {}
+        };
+        ok(lhGiveTerritoryMapItem(server, mapActor, false, false) === 1, 'lhGiveTerritoryMapItem succeeds without java.lang.Byte error');
+
+        var progSaved27 = JSON.stringify(lhProgRead(server));
+        var db27 = lhProgRead(server);
+        db27.nuclearVerified = false;
+        db27.chapters.ch11 = false;
+        var lootActor = {
+          uuid: '00000000-0000-4000-8000-000000000078',
+          inventory: {
+            slots: 2,
+            getStackInSlot: function (s) {
+              return s === 0 ? Item.of('draconicevolution:draconium_ingot', 4) : Item.of('nuclearcraft:steel_ingot', 4);
+            }
+          }
+        };
+        lhScanWorkshopItems(server, lootActor);
+        ok(db27.nuclearVerified === false, 'holding looted draconic/nuclear items does NOT auto-verify ch11');
+
+        db27.chaptersByPlayer = {
+          pA: { ch00: true, ch01: true, ch02: true },
+          pB: { ch03: true, ch05: true }
+        };
+        db27.adminChapters = {};
+        var maxBorder = lhTerritoryCounts(server);
+        ok(maxBorder.unlocked === 3, 'border uses max single-player completed chapters (3), not sum (5): ' + maxBorder.unlocked);
+        LHProgState = JSON.parse(progSaved27);
+        lhProgSave(server);
+
+        var econLive = lhEconRead(server);
+        ok(Object.keys(econLive.recipePrices || {}).length >= 100, 'live Forge recipe graph propagated into economy (' + Object.keys(econLive.recipePrices).length + ' items)');
+        ok(disp.performPrefixedCommand(src, 'lh price check minecraft:iron_ingot') === 1, 'brigadier /lh price check');
+        ok(disp.performPrefixedCommand(src, 'lh aspects') === 1, 'brigadier /lh aspects');
+
+        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic + openttd + eventlog + gui + economy + map_byte_fix + quest_items_' + auditList.length + ' + custom_origins_only');
       } catch (err2) {
         console.error('LH_INTEGRATION_FAIL: live adapter ' + err2);
       }

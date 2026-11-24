@@ -1,0 +1,14 @@
+{
+  "name": "Первооткрыватель",
+  "description": "Разведчик неизведанных секторов: быстрее бегает, выше прыгает и получает бонус опыта и удачи при экспедициях.",
+  "powers": [
+    "longhaul_origins:pathfinder_stride",
+    "longhaul_origins:pathfinder_cartographer",
+    "longhaul_origins:pathfinder_light_kit"
+  ],
+  "icon": {
+    "item": "minecraft:compass"
+  },
+  "order": 10,
+  "impact": 2
+}

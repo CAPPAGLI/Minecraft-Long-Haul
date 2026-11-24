@@ -1,0 +1,24 @@
+{
+  "name": "Чутьё первооткрывателя",
+  "description": "+25% получаемого опыта и +1.5 удачи при разведке новых территорий.",
+  "type": "origins:multiple",
+  "xp": {
+    "type": "origins:modify_xp_gain",
+    "modifier": {
+      "name": "Pathfinder XP",
+      "operation": "multiply_base",
+      "value": 0.25
+    }
+  },
+  "luck": {
+    "type": "origins:attribute",
+    "modifiers": [
+      {
+        "name": "Pathfinder Luck",
+        "attribute": "minecraft:generic.luck",
+        "value": 1.5,
+        "operation": "addition"
+      }
+    ]
+  }
+}
