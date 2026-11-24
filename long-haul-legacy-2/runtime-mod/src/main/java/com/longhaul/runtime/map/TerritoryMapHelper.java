@@ -36,13 +36,13 @@ public final class TerritoryMapHelper {
     }
 
     public static boolean isLocked(MapItemSavedData data) {
-        return data != null && data.f_77890_;
+        return data != null && data.f_77892_;
     }
 
     public static int getColorUnsigned(MapItemSavedData data, int x, int z) {
-        if (data == null || data.f_77893_ == null) return -1;
+        if (data == null || data.f_77891_ == null) return -1;
         int idx = x + z * 128;
-        if (idx < 0 || idx >= data.f_77893_.length) return -1;
-        return data.f_77893_[idx] & 0xFF;
+        if (idx < 0 || idx >= data.f_77891_.length) return -1;
+        return data.f_77891_[idx] & 0xFF;
     }
 }
