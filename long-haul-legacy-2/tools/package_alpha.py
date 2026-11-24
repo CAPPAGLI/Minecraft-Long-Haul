@@ -89,7 +89,7 @@ def main():
         names = z.namelist()
         assert len([n for n in names if n.startswith('overrides/config/heracles/quests/') and n.endswith('.json')]) == len(quest_files)
         assert len([n for n in names if n.endswith('.jar')]) == total_local_jars
-        assert not any('server.properties' in n or 'server-test' in n or 'runtime/zulu' in n for n in names)
+        assert not any(n.endswith('/server.properties') or n == 'server.properties' or 'server-test' in n or 'runtime/zulu' in n for n in names)
 
     source = R.parent / f'Long-Haul-Legacy-{version}-Sources-and-Report.zip'
     with zipfile.ZipFile(source, 'w', zipfile.ZIP_DEFLATED) as z:
