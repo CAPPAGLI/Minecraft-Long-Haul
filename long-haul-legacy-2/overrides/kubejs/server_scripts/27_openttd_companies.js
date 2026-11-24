@@ -64,10 +64,13 @@ function lhEconSave(server) {
   }
 }
 
+var LHLastRecipeGraphDebug = { edges: 0, firstErr: '' };
+
 function lhRefreshRecipeEconomyGraph(server) {
   if (!server || !global.LHEconomyEngine) return 0;
   var econ = lhEconRead(server);
   var edges = [];
+  var firstErr = '';
   try {
     var rm = server.recipeManager;
     var regAccess = server.registryAccess();
@@ -79,33 +82,41 @@ function lhRefreshRecipeEconomyGraph(server) {
         try {
           var rec = iter.next();
           var resStack = rec.getResultItem(regAccess);
-          if (!resStack || resStack.isEmpty()) continue;
-          var outId = String(resStack.id);
+          if (!resStack) continue;
+          var outId = String(resStack.id || '');
           if (!outId || outId === 'minecraft:air') continue;
           var outCount = Math.max(1, Number(resStack.count || 1));
-          var ings = rec.getIngredients();
-          if (!ings || ings.size() === 0) continue;
           var parsedIngs = [];
-          for (var ii = 0; ii < ings.size(); ii++) {
-            var ing = ings.get(ii);
-            if (!ing) continue;
-            var items = ing.getItems();
-            if (items && items.length > 0 && items[0] && !items[0].isEmpty()) {
-              parsedIngs.push({ id: String(items[0].id), count: 1 });
+          var ings = rec.getIngredients();
+          if (ings && ings.size() > 0) {
+            for (var ii = 0; ii < ings.size(); ii++) {
+              var ing = ings.get(ii);
+              if (!ing) continue;
+              var items = ing.items || (typeof ing.getItems === 'function' ? ing.getItems() : null);
+              if (items && items.length > 0 && items[0]) {
+                var ingId = String(items[0].id || '');
+                if (ingId && ingId !== 'minecraft:air') {
+                  parsedIngs.push({ id: ingId, count: 1 });
+                }
+              }
             }
           }
           if (parsedIngs.length > 0) {
             edges.push({ outId: outId, outCount: outCount, ingredients: parsedIngs });
           }
-        } catch (eRecOne) {}
+        } catch (eRecOne) {
+          if (!firstErr) firstErr = String(eRecOne);
+        }
       }
     }
   } catch (eRm) {
+    if (!firstErr) firstErr = 'outer: ' + eRm;
     console.warn('[LH] Recipe economy graph error: ' + eRm);
   }
+  LHLastRecipeGraphDebug = { edges: edges.length, firstErr: firstErr };
   global.LHEconomyEngine.propagateRecipePrices(econ, edges, 5);
   lhEconSave(server);
-  console.info('[LH] Economy recipe graph propagated: edges=' + edges.length + ', priced=' + Object.keys(econ.recipePrices || {}).length);
+  console.info('[LH] Economy recipe graph propagated: edges=' + edges.length + ', priced=' + Object.keys(econ.recipePrices || {}).length + (firstErr ? (', firstErr=' + firstErr) : ''));
   return edges.length;
 }
 

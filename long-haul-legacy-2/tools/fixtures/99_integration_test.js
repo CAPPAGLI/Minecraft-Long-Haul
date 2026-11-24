@@ -938,7 +938,7 @@ function lhStartIntegrationSetup(server) {
 
         lhRefreshRecipeEconomyGraph(server);
         var econLive = lhEconRead(server);
-        ok(Object.keys(econLive.recipePrices || {}).length >= 100, 'live Forge recipe graph propagated into economy (' + Object.keys(econLive.recipePrices).length + ' items)');
+        ok(Object.keys(econLive.recipePrices || {}).length >= 100, 'live Forge recipe graph propagated into economy (' + Object.keys(econLive.recipePrices).length + ' items, debug=' + JSON.stringify(LHLastRecipeGraphDebug) + ')');
         ok(disp.performPrefixedCommand(src, 'lh price check minecraft:iron_ingot') === 1, 'brigadier /lh price check');
         ok(disp.performPrefixedCommand(src, 'lh aspects') === 1, 'brigadier /lh aspects');
 
