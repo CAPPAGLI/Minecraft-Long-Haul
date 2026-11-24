@@ -37,7 +37,9 @@ jobs:
       - name: Cache Modrinth JARs
         uses: actions/cache@v4
         with:
-          path: long-haul-legacy-2/assembly/mods
+          path: |
+            long-haul-legacy-2/assembly/mods
+            long-haul-legacy-2/assembly/resourcepacks
           key: modrinth-mods-${{ hashFiles('long-haul-legacy-2/profiles/alpha20.json', 'long-haul-legacy-2/assembly/lock.json') }}
           restore-keys: |
             modrinth-mods-

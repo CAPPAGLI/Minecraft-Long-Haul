@@ -843,7 +843,7 @@ function lhStartIntegrationSetup(server) {
         // 26. Verify all requested server mods loaded + custom-only Origins layer (no default origins)
         var reqModIds = [
           'ae2', 'rats', 'citadel', 'carryon', 'watut', 'coroutil',
-          'origins', 'caelus', 'radium', 'torchmaster',
+          'origins', 'caelus', 'radium', 'torchmaster', 'mimi',
           'handson_furniture', 'handson_delight', 'diegesis',
           'neon_glowsticks', 'lumen_rigs', 'refurbished_furniture', 'framework'
         ];
@@ -901,14 +901,25 @@ function lhStartIntegrationSetup(server) {
           var sb = lhCompanyMapColorByte(stByteTest, cid, true, false);
           ok(sb >= -128 && sb <= 127, 'signed map byte valid for ' + cid + ': ' + sb);
         });
+        var givenMapStack = null;
         var mapActor = {
           uuid: '00000000-0000-4000-8000-000000000077',
           x: 0, y: 80, z: 0,
           inventory: { slots: 36, getStackInSlot: function () { return Item.empty; } },
-          give: function () {},
+          give: function (it) { givenMapStack = it; },
           tell: function () {}
         };
         ok(lhGiveTerritoryMapItem(server, mapActor, false, false) === 1, 'lhGiveTerritoryMapItem succeeds without java.lang.Byte error');
+        var MapItemClsTest = Java.loadClass('net.minecraft.world.item.MapItem');
+        var savedMap = givenMapStack ? MapItemClsTest.getSavedData(givenMapStack, overworld) : null;
+        ok(savedMap !== null && savedMap.locked === true, 'territory map item MapItemSavedData is locked=true so vanilla terrain never overwrites it');
+        var gridPxBefore = savedMap.colors[0];
+        if (givenMapStack && typeof givenMapStack.inventoryTick === 'function') {
+          givenMapStack.inventoryTick(overworld, fp, 0, true);
+        }
+        var savedMapAfter = MapItemClsTest.getSavedData(givenMapStack, overworld);
+        ok(savedMapAfter && savedMapAfter.colors[0] === gridPxBefore && savedMapAfter.colors[0] === 119,
+          'territory map pixels preserved across inventoryTick (grid pixel=' + (savedMapAfter ? savedMapAfter.colors[0] : 'null') + ')');
 
         var progSaved27 = JSON.stringify(lhProgRead(server));
         var db27 = lhProgRead(server);

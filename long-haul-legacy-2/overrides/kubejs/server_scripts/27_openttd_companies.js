@@ -495,8 +495,8 @@ function lhGiveTerritoryMapItem(server, player, dryRun, silent) {
     }
     if (silent && !existingStack) return 0;
 
-    var mapStack = existingStack || MapItemCls.create(ow, originSx * 256, originSz * 256, 4, false, false);
-    var mapData = MapItemCls.getSavedData(mapStack, ow);
+    var freshStack = MapItemCls.create(ow, originSx * 256, originSz * 256, 4, false, false);
+    var mapData = MapItemCls.getSavedData(freshStack, ow);
     if (!mapData || !mapData.colors) {
       if (!silent) lhMsg(player, 'Не удалось инициализировать данные карты. Попробуйте снова.');
       return 0;
@@ -535,17 +535,30 @@ function lhGiveTerritoryMapItem(server, player, dryRun, silent) {
         }
       }
     }
-    if (typeof mapData.setDirty === 'function') mapData.setDirty();
 
+    // Lock MapItemSavedData so vanilla MapItem.update() and Map Atlases NEVER overwrite custom pixels with terrain
+    var lockedData = (typeof mapData.locked === 'function') ? mapData.locked() : mapData;
+    var newMapId = MapItemCls.getMapId(freshStack);
+    if (newMapId !== null && typeof ow.setMapData === 'function') {
+      ow.setMapData(MapItemCls.makeKey(newMapId), lockedData);
+    }
+    if (typeof lockedData.setDirty === 'function') lockedData.setDirty();
+
+    var titleComp = Text.of('§6Карта территорий компаний §7(сектора ' + originSx + '..' + (originSx + 15) + ')');
     if (!existingStack) {
-      var nbt = mapStack.getOrCreateTag();
+      var nbt = freshStack.getOrCreateTag();
       nbt.putBoolean('lhTerritoryMap', true);
       nbt.putString('lhMapRange', originSx + ',' + originSz);
-      mapStack.setHoverName(Text.of('§6Карта территорий компаний §7(сектора ' + originSx + '..' + (originSx + 15) + ')'));
-      player.give(mapStack);
-      lhMsg(player, '§aВыдана физическая карта территорий! Она совместима с рамками и Map Atlases. Обновление: /lh map item');
+      freshStack.setHoverName(titleComp);
+      player.give(freshStack);
+      if (!silent) lhMsg(player, '§aВыдана заблокированная карта территорий (поверх неё не рисуется обычная карта). Обновление: /lh map item');
     } else {
-      lhMsg(player, '§aВаша карта территорий компаний обновлена в инвентаре!');
+      var exNbt = existingStack.getOrCreateTag();
+      if (newMapId !== null) exNbt.putInt('map', Number(newMapId));
+      exNbt.putBoolean('lhTerritoryMap', true);
+      exNbt.putString('lhMapRange', originSx + ',' + originSz);
+      existingStack.setHoverName(titleComp);
+      if (!silent) lhMsg(player, '§aВаша карта территорий компаний обновлена в инвентаре!');
     }
     return 1;
   } catch (eMap) {

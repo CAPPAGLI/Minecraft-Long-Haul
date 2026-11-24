@@ -378,7 +378,9 @@
       "itemphysic-lite",
       "carry-on",
       "what-are-they-up-to",
-      "origins-forge"
+      "origins-forge",
+      "mimi",
+      "reactive-music"
     ],
     "arcane": [
       "primal-magick",
@@ -477,7 +479,11 @@
     "better-animations-collection",
     "wavey-capes",
     "itemphysic-lite",
-    "handson-vanilla"
+    "handson-vanilla",
+    "reactive-music"
+  ],
+  "resourcepacks": [
+    "U85lsKF1"
   ],
   "external_mods": [
     {

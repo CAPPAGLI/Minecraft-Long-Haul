@@ -621,6 +621,10 @@ test('Spawn/border safety guards and native Xaero territory integration are wire
   assert(s26.includes('lhActiveBorderHalf') && s26.includes('lhClampToSafeBorder'), '26_hard_features_and_territory clamps spawns to active border');
   assert(!s26.includes('lhCompanyRead'), 'no undefined lhCompanyRead call in first-join spawn');
   assert(s27.includes('lhSyncXaeroTerritories') && !s27.includes("type: 'rectangle'") && !s27.includes("draw: 'ingame'"), '27_openttd_companies uses Xaero sync instead of custom HUD paint minimap');
+  assert(s27.includes('mapData.locked()') && s27.includes('setMapData'), 'lhGiveTerritoryMapItem locks MapItemSavedData so vanilla terrain never overwrites it');
+  const prof = JSON.parse(fs.readFileSync(path.join(ROOT, 'profiles/alpha20.json'), 'utf8'));
+  assert(prof.categories.qol.includes('mimi') && prof.categories.qol.includes('reactive-music'), 'alpha20 includes MIMI and Reactive Music');
+  assert(prof.client_only.includes('reactive-music') && Array.isArray(prof.resourcepacks) && prof.resourcepacks.includes('U85lsKF1'), 'alpha20 marks reactive-music client-only and pins Deepwoken Music resourcepack');
   assert(c01.includes('lh:xaero_territories') && c01.includes('LongHaulXaeroData'), 'client script forwards territory sync to Xaero bridge');
   [
     'runtime-mod/src/main/java/longhaul/runtime/mixin/LongHaulMixinPlugin.java',

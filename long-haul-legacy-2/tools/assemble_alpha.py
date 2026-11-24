@@ -3,13 +3,15 @@
 API pins are not blindly treated as version constraints; actual Forge jar dependencies
 are inspected separately via inspect_alpha.py and server smoke tests.
 """
-import argparse, concurrent.futures, hashlib, io, json, pathlib, time, tomllib, urllib.request, zipfile
+import argparse, concurrent.futures, hashlib, io, json, pathlib, re, time, tomllib, urllib.request, zipfile
 from audit_mods import get
 from inspect_alpha import fits
 
 R = pathlib.Path(__file__).resolve().parents[1]
 DIR = R / 'assembly/mods'
 DIR.mkdir(parents=True, exist_ok=True)
+RP_DIR = R / 'assembly/resourcepacks'
+RP_DIR.mkdir(parents=True, exist_ok=True)
 
 BASE_ROOTS = '''create create-steam-n-rails createaddition create-enchantment-industry
 create-connected create-deco slice-and-dice create-central-kitchen valkyrien-skies
@@ -163,6 +165,76 @@ def select_file(row):
     files = [f for f in row['files'] if f['filename'].endswith('.jar')]
     return row.get('selected_file') or next((f for f in files if f.get('primary')), files[0])
 
+def select_rp_file(row):
+    files = [f for f in row['files'] if f['filename'].endswith('.zip')]
+    return row.get('selected_file') or next((f for f in files if f.get('primary')), files[0])
+
+def resolve_resourcepacks(profile_path: pathlib.Path):
+    profile = json.loads(profile_path.read_text(encoding='utf-8'))
+    cutoff = profile.get('cutoff_date', '2026-11-30T23:59:59Z')
+    out = []
+    for rp_slug in profile.get('resourcepacks', []):
+        meta = get('project/' + rp_slug)
+        vs = get('project/' + rp_slug + '/version?game_versions=%5B%221.20.1%22%5D') or get('project/' + rp_slug + '/version') or []
+        vs = [v for v in vs if v.get('date_published', '') <= cutoff and any(f['filename'].endswith('.zip') for f in v.get('files', []))]
+        if not vs:
+            raise RuntimeError(f'No supported resourcepack version for {rp_slug}')
+        stable = [v for v in vs if v.get('version_type') == 'release']
+        v = (stable or vs)[0]
+        out.append({
+            'slug': meta['slug'],
+            'title': meta['title'],
+            'project_id': meta['id'],
+            'version_id': v['id'],
+            'version': v['version_number'],
+            'files': v['files'],
+        })
+    return out
+
+def download_resourcepack(row):
+    f = select_rp_file(row)
+    p = RP_DIR / f['filename']
+    if not p.exists():
+        last_err = None
+        for attempt in range(1, 5):
+            try:
+                req = urllib.request.Request(f['url'], headers={'User-Agent': 'LongHaulLegacy/2.0 assembler'})
+                with urllib.request.urlopen(req, timeout=300) as res:
+                    p.write_bytes(res.read())
+                last_err = None
+                break
+            except Exception as exc:
+                last_err = exc
+                if p.exists():
+                    p.unlink()
+                time.sleep(1.5 * attempt)
+        if last_err is not None:
+            raise last_err
+    b = p.read_bytes()
+    actual_sha512 = hashlib.sha512(b).hexdigest()
+    actual_sha1 = hashlib.sha1(b).hexdigest()
+    if f.get('hashes', {}).get('sha512'):
+        assert actual_sha512 == f['hashes']['sha512'], p
+    if f.get('hashes', {}).get('sha1'):
+        assert actual_sha1 == f['hashes']['sha1'], p
+    if f.get('size'):
+        assert len(b) == f['size'], p
+    f['hashes'] = {'sha512': actual_sha512, 'sha1': actual_sha1}
+    f['size'] = len(b)
+    row['selected_file'] = f
+    try:
+        with zipfile.ZipFile(io.BytesIO(b)) as zf:
+            rm_yml = next((n for n in zf.namelist() if n.endswith('ReactiveMusic.yaml')), None)
+            if rm_yml:
+                raw_yml = zf.read(rm_yml).decode('utf-8', errors='replace')
+                m = re.search(r'(?m)^\s*name:\s*["\']?([^"\'\r\n]+)["\']?\s*$', raw_yml)
+                if m:
+                    row['songpack_name'] = m.group(1).strip()
+    except Exception:
+        pass
+    print('RP', row['slug'], row['version'], row.get('songpack_name', ''), flush=True)
+    return row
+
 def download_one(row):
     f = select_file(row)
     p = DIR / f['filename']
@@ -171,7 +243,7 @@ def download_one(row):
         for attempt in range(1, 5):
             try:
                 req = urllib.request.Request(f['url'], headers={'User-Agent': 'LongHaulLegacy/2.0 assembler'})
-                with urllib.request.urlopen(req, timeout=120) as res:
+                with urllib.request.urlopen(req, timeout=300) as res:
                     p.write_bytes(res.read())
                 last_err = None
                 break
@@ -211,9 +283,11 @@ def main():
         version = lock.get('version', '2.0-alpha.2')
         roots = lock.get('roots', [])
         mods = lock['mods']
+        rps = lock.get('resourcepacks', [])
         status = lock.get('status', 'ASSEMBLED_NOT_RUNTIME_TESTED')
     else:
         version, roots, mods = resolve_profile(pathlib.Path(args.profile))
+        rps = resolve_resourcepacks(pathlib.Path(args.profile))
         status = 'ASSEMBLED_NOT_RUNTIME_TESTED'
 
     if args.lock_only:
@@ -221,8 +295,13 @@ def main():
         for row in mods:
             row['selected_file'] = select_file(row)
             out.append(row)
+        rp_out = []
+        for row in rps:
+            row['selected_file'] = select_rp_file(row)
+            rp_out.append(row)
     else:
         out = list(concurrent.futures.ThreadPoolExecutor(max_workers=3).map(download_one, mods))
+        rp_out = list(concurrent.futures.ThreadPoolExecutor(max_workers=2).map(download_resourcepack, rps))
     (R / 'assembly/lock.json').write_text(json.dumps({
         'version': version,
         'status': status,
@@ -230,11 +309,12 @@ def main():
         'forge': '47.4.10',
         'roots': roots,
         'mods': out,
+        'resourcepacks': rp_out,
     }, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     if args.lock_only:
-        print('RESOLVED', len(out), 'mods into assembly/lock.json (no JAR downloads).')
+        print('RESOLVED', len(out), 'mods and', len(rp_out), 'resourcepacks into assembly/lock.json (no downloads).')
     else:
-        print('DOWNLOADED', len(out), 'verified SHA512 files; not yet a compatibility claim.')
+        print('DOWNLOADED', len(out), 'verified SHA512 files and', len(rp_out), 'resourcepacks; not yet a compatibility claim.')
 
 if __name__ == '__main__':
     main()

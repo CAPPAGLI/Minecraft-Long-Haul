@@ -23,6 +23,20 @@ for m in mods:
 lines += [
     '| Long Haul Runtime | 0.1.0 (собственный MIT) | Да |',
     '',
+]
+rps = lock.get('resourcepacks', [])
+if rps:
+    lines += [
+        '## Клиентские музыкальные пакеты (Resource Packs)',
+        '',
+        '| Ресурспак | Версия | Songpack |',
+        '|---|---|---|',
+    ]
+    for rp in rps:
+        lines.append(f"| [{rp['title']}](https://modrinth.com/resourcepack/{rp['slug']}) | {rp['version']} | {rp.get('songpack_name') or '-'} |")
+    lines.append('')
+
+lines += [
     '## Исключения после проверки',
     '',
     '- Extended Cogwheels 2.1.1: обращения к удалённым классам Create 0.5; несовместим с выбранным Create 6.',

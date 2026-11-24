@@ -49,6 +49,29 @@ def main():
             assert mod.get('source') in ('github', 'external'), f['url']
             bundled_external_jars.append((p, f'overrides/mods/{f["filename"]}'))
 
+    default_songpack = None
+    for rp in lock.get('resourcepacks', []):
+        f = rp['selected_file']
+        p = R / 'assembly/resourcepacks' / f['filename']
+        if not args.skip_jar_bytes_check:
+            b = p.read_bytes()
+            assert hashlib.sha512(b).hexdigest() == f['hashes']['sha512'], p
+            assert hashlib.sha1(b).hexdigest() == f['hashes']['sha1'], p
+            assert len(b) == f['size'], p
+        path = 'resourcepacks/' + f['filename']
+        assert path not in paths
+        paths.add(path)
+        assert f['url'].startswith('https://cdn.modrinth.com/'), f['url']
+        files.append({
+            'path': path,
+            'hashes': {k: f['hashes'][k] for k in ['sha1', 'sha512']},
+            'env': {'client': 'required', 'server': 'unsupported'},
+            'downloads': [f['url']],
+            'fileSize': f['size'],
+        })
+        if not default_songpack and rp.get('songpack_name'):
+            default_songpack = rp['songpack_name']
+
     quest_files = sorted((R / 'overrides/config/heracles/quests').glob('*.json'))
     local_jars = sorted((R / 'overrides/mods').glob('*.jar'))
     assert any(j.name.startswith('longhaul-runtime-') for j in local_jars), f'Missing longhaul-runtime-*.jar in {local_jars}'
@@ -81,6 +104,9 @@ def main():
                 z.write(ext_p, arcname)
         for opt_jar in optional_jars:
             z.write(opt_jar, f'overrides/mods/{opt_jar.name}')
+        rm_cfg_path = R / 'overrides/config/ReactiveMusic.json5'
+        if default_songpack and not rm_cfg_path.exists():
+            z.writestr('overrides/config/ReactiveMusic.json5', json.dumps({'loadedUserSongpack': default_songpack}, ensure_ascii=False, indent=2) + '\n')
         for name in ['README.md', 'TEST-REPORT.md', 'DOOMED.md', 'MODLIST.md', 'STATUS.json']:
             z.write(R / name, 'overrides/longhaul-docs/' + name)
 
