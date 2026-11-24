@@ -936,6 +936,7 @@ function lhStartIntegrationSetup(server) {
         LHProgState = JSON.parse(progSaved27);
         lhProgSave(server);
 
+        lhRefreshRecipeEconomyGraph(server);
         var econLive = lhEconRead(server);
         ok(Object.keys(econLive.recipePrices || {}).length >= 100, 'live Forge recipe graph propagated into economy (' + Object.keys(econLive.recipePrices).length + ' items)');
         ok(disp.performPrefixedCommand(src, 'lh price check minecraft:iron_ingot') === 1, 'brigadier /lh price check');
