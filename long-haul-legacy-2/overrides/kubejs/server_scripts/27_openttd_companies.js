@@ -498,7 +498,7 @@ function lhGiveTerritoryMapItem(server, player, dryRun, silent) {
     if (silent && !existingStack) return 0;
 
     // Build 128x128 pixel array (8x8 pixels per 256x256 sector -> 16x16 sectors)
-    var pixelArr = java.lang.reflect.Array.newInstance(java.lang.Integer.TYPE, 16384);
+    var pixelArr = TerritoryMapHelperCls ? TerritoryMapHelperCls.allocPixels() : [];
     for (var gy = 0; gy < 16; gy++) {
       for (var gx = 0; gx < 16; gx++) {
         var sx = originSx + gx;

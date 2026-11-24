@@ -8,6 +8,10 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 public final class TerritoryMapHelper {
     private TerritoryMapHelper() {}
 
+    public static int[] allocPixels() {
+        return new int[16384];
+    }
+
     /**
      * Creates a filled_map ItemStack, locks its MapItemSavedData via
      * MapItemSavedData.locked() (SRG m_164775_), paints the 128x128 territory
