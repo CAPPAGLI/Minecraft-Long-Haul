@@ -820,15 +820,12 @@ function lhStartIntegrationSetup(server) {
           'longhaul_origins:void_drifter'
         ];
         var RLCls = Java.loadClass('net.minecraft.resources.ResourceLocation');
+        var GsonHelperCls = Java.loadClass('net.minecraft.util.GsonHelper');
         var origLayerRes = server.getResourceManager().getResource(new RLCls('origins', 'origin_layers/origin.json'));
         ok(origLayerRes.isPresent(), 'origins:origin_layers/origin.json resolved in active datapacks');
-        var InputStreamReaderCls = Java.loadClass('java.io.InputStreamReader');
-        var BufferedReaderCls = Java.loadClass('java.io.BufferedReader');
-        var br = new BufferedReaderCls(new InputStreamReaderCls(origLayerRes.get().open(), 'UTF-8'));
-        var layerTxt = '', lLine;
-        while ((lLine = br.readLine()) !== null) layerTxt += lLine;
-        br.close();
-        var layerJson = JSON.parse(layerTxt);
+        var reader = origLayerRes.get().openAsReader();
+        var layerJson = JSON.parse(String(GsonHelperCls.parse(reader).toString()));
+        reader.close();
         ok(layerJson.replace === true, 'origins:origin layer uses replace=true to disable all default origins');
         ok(Array.isArray(layerJson.origins) && layerJson.origins.length === 6, 'origins:origin layer lists exactly 6 custom origins');
         expectedOrigins.forEach(function (oid) {
@@ -838,22 +835,19 @@ function lhStartIntegrationSetup(server) {
         ok(!hasDefaultOrig, 'no default origins:* remain in origins:origin layer');
 
         // Also check live OriginsForge OriginLayer registry if registered in server.registryAccess()
-        var OriginsAPICls = null;
-        try { OriginsAPICls = Java.loadClass('io.github.edwinmindcraft.origins.api.OriginsAPI'); } catch (_e) {}
-        if (OriginsAPICls) {
-          var layerReg = OriginsAPICls.getLayersRegistry(server);
-          var mainLayer = layerReg.get(new RLCls('origins', 'origin'));
-          ok(mainLayer !== null, 'OriginsAPI main layer origins:origin exists');
-          if (mainLayer) {
-            var regOrigIds = [];
-            var itOrig = mainLayer.origins().iterator();
-            while (itOrig.hasNext()) {
-              var hk = itOrig.next();
-              regOrigIds.push(String(hk.unwrapKey().get().location()));
-            }
-            ok(regOrigIds.length === 6, 'live OriginsAPI layer has 6 origins (' + regOrigIds.join(', ') + ')');
-            ok(!regOrigIds.some(function (id) { return id.indexOf('origins:') === 0; }), 'live OriginsAPI layer contains zero default origins');
+        var OriginsAPICls = Java.loadClass('io.github.edwinmindcraft.origins.api.OriginsAPI');
+        var layerReg = OriginsAPICls.getLayersRegistry(server);
+        var mainLayer = layerReg.get(new RLCls('origins', 'origin'));
+        ok(mainLayer !== null, 'OriginsAPI main layer origins:origin exists');
+        if (mainLayer) {
+          var regOrigIds = [];
+          var itOrig = mainLayer.origins().iterator();
+          while (itOrig.hasNext()) {
+            var hk = itOrig.next();
+            regOrigIds.push(String(hk.unwrapKey().get().location()));
           }
+          ok(regOrigIds.length === 6, 'live OriginsAPI layer has 6 origins (' + regOrigIds.join(', ') + ')');
+          ok(!regOrigIds.some(function (id) { return id.indexOf('origins:') === 0; }), 'live OriginsAPI layer contains zero default origins');
         }
 
         console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic + openttd + eventlog + gui + quest_items_' + auditList.length + ' + custom_origins_only');
