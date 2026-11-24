@@ -389,17 +389,24 @@ function lhEnsureSafeSpawn(server, player, fixWorldSpawn) {
   }
   var safe = lhFindSafeSurfaceColumn(ow, targetCenter.x, targetCenter.z);
   var uname = player.username || (typeof player.getName === 'function' ? player.getName().getString() : '');
+  try {
+    if (typeof player.teleportTo === 'function') {
+      player.teleportTo(safe.x + 0.5, safe.y, safe.z + 0.5);
+    }
+  } catch (eTpDirect) {}
   if (uname) {
     server.runCommandSilent('execute in minecraft:overworld run tp ' + uname + ' ' + (safe.x + 0.5) + ' ' + safe.y + ' ' + (safe.z + 0.5));
     server.runCommandSilent('effect give ' + uname + ' minecraft:resistance 8 4 true');
     if (outOfBorder) {
       server.runCommandSilent('spawnpoint ' + uname + ' ' + safe.x + ' ' + safe.y + ' ' + safe.z);
-      var dbFix = lhProgRead(server);
-      var pidFix = lhId(player);
-      var scFix = global.LHOpenTTD ? global.LHOpenTTD.sectorCoords(safe.x, safe.z) : { sx: 0, sz: 0 };
-      dbFix.playerHomeSpawns[pidFix] = { x: safe.x, y: safe.y, z: safe.z, sx: scFix.sx, sz: scFix.sz };
-      lhProgSave(server);
     }
+  }
+  if (outOfBorder) {
+    var dbFix = lhProgRead(server);
+    var pidFix = lhId(player);
+    var scFix = global.LHOpenTTD ? global.LHOpenTTD.sectorCoords(safe.x, safe.z) : { sx: 0, sz: 0 };
+    dbFix.playerHomeSpawns[pidFix] = { x: safe.x, y: safe.y, z: safe.z, sx: scFix.sx, sz: scFix.sz };
+    lhProgSave(server);
   }
   if (typeof player.tell === 'function') {
     player.tell(outOfBorder
