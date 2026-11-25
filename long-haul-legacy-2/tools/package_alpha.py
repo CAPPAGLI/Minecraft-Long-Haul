@@ -13,11 +13,13 @@ FORBIDDEN = {
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--version', default=None, help='Override pack version (defaults to lock.json version or 2.0-alpha.2)')
+    ap.add_argument('--lock-file', default=str(R / 'assembly/lock.json'), help='Path to lock JSON (default: assembly/lock.json)')
+    ap.add_argument('--runtime-jar', default=None, help='Optional built longhaul-runtime-*.jar path to bundle instead of overrides/mods/longhaul-runtime-*.jar')
     ap.add_argument('--skip-jar-bytes-check', action='store_true', help='Trust hashes in lock.json when assembly/mods is absent locally')
     ap.add_argument('--include-optional-mods', action='store_true', help='Bundle local JARs from optional-mods/ into overrides/mods/ inside .mrpack')
     args = ap.parse_args()
 
-    lock = json.loads((R / 'assembly/lock.json').read_text(encoding='utf-8'))
+    lock = json.loads(pathlib.Path(args.lock_file).read_text(encoding='utf-8'))
     version = args.version or lock.get('version', '2.0-alpha.2')
     mods = lock['mods']
     bad = FORBIDDEN.intersection(m['slug'] for m in mods)
@@ -74,6 +76,10 @@ def main():
 
     quest_files = sorted((R / 'overrides/config/heracles/quests').glob('*.json'))
     local_jars = sorted((R / 'overrides/mods').glob('*.jar'))
+    runtime_override = pathlib.Path(args.runtime_jar) if args.runtime_jar else None
+    if runtime_override:
+        assert runtime_override.exists(), f'Missing --runtime-jar: {runtime_override}'
+        local_jars = [j for j in local_jars if not j.name.startswith('longhaul-runtime-')] + [runtime_override]
     assert any(j.name.startswith('longhaul-runtime-') for j in local_jars), f'Missing longhaul-runtime-*.jar in {local_jars}'
     optional_jars = []
     if args.include_optional_mods and (R / 'optional-mods').exists():
@@ -98,7 +104,11 @@ def main():
         for p in sorted((R / 'overrides').rglob('*')):
             if p.is_file():
                 assert '99_integration' not in p.name and p.suffix not in {'.log', '.dat'}, p
-                z.write(p, p.relative_to(R))
+                if runtime_override and p.parent == (R / 'overrides/mods') and p.name.startswith('longhaul-runtime-'):
+                    continue
+                z.write(p, p.relative_to(R).as_posix())
+        if runtime_override:
+            z.write(runtime_override, f'overrides/mods/{runtime_override.name}')
         for ext_p, arcname in bundled_external_jars:
             if not args.skip_jar_bytes_check or ext_p.exists():
                 z.write(ext_p, arcname)
@@ -124,7 +134,7 @@ def main():
         for directory in ['tools', 'design', 'overrides', 'runtime-mod', 'audit', 'profiles']:
             for p in sorted((R / directory).rglob('*')):
                 if p.is_file() and not any(t in p.parts for t in ['__pycache__', 'classes', 'api-cache']) and p.suffix not in {'.pyc', '.jar'}:
-                    z.write(p, p.relative_to(R))
+                    z.write(p, p.relative_to(R).as_posix())
         for name in ['lock.json', 'jar-registry.json', 'modrinth.index.json']:
             if (R / 'assembly' / name).exists():
                 z.write(R / 'assembly' / name, 'assembly/' + name)

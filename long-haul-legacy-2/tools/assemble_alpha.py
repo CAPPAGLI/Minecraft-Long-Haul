@@ -265,15 +265,42 @@ def download_one(row):
     print(row['slug'], row['version'], flush=True)
     return row
 
+def seed_from_dir(seed_dir: pathlib.Path, target_dir: pathlib.Path, ext: str):
+    if not seed_dir or not seed_dir.exists():
+        return 0
+    import shutil
+    copied = 0
+    for src in seed_dir.glob('*' + ext):
+        if not src.is_file():
+            continue
+        dst = target_dir / src.name
+        if not dst.exists() or dst.stat().st_size != src.stat().st_size:
+            shutil.copy2(src, dst)
+            copied += 1
+    return copied
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--from-lock', action='store_true', help='Download and verify directly from assembly/lock.json')
     ap.add_argument('--lock-only', action='store_true', help='Resolve profile into assembly/lock.json without downloading JARs')
     ap.add_argument('--profile', default=str(R / 'profiles/alpha2.json'))
+    ap.add_argument('--lock-out', default=str(R / 'assembly/lock.json'), help='Path to write resolved lock JSON')
+    ap.add_argument('--lock-in', default=str(R / 'assembly/lock.json'), help='Path to read lock JSON when --from-lock is used')
+    ap.add_argument('--seed-mods-dir', default=None, help='Existing mods dir (e.g. Minecraft instance/mods) to reuse JARs without re-downloading')
+    ap.add_argument('--seed-rp-dir', default=None, help='Existing resourcepacks dir to reuse ZIPs without re-downloading')
     args = ap.parse_args()
 
+    if args.seed_mods_dir:
+        c_mods = seed_from_dir(pathlib.Path(args.seed_mods_dir), DIR, '.jar')
+        if c_mods:
+            print(f'Seeded {c_mods} cached mod JAR(s) from {args.seed_mods_dir}', flush=True)
+    if args.seed_rp_dir:
+        c_rps = seed_from_dir(pathlib.Path(args.seed_rp_dir), RP_DIR, '.zip')
+        if c_rps:
+            print(f'Seeded {c_rps} cached resourcepack(s) from {args.seed_rp_dir}', flush=True)
+
     if args.from_lock:
-        lock = json.loads((R / 'assembly/lock.json').read_text(encoding='utf-8'))
+        lock = json.loads(pathlib.Path(args.lock_in).read_text(encoding='utf-8'))
         version = lock.get('version', '2.0-alpha.2')
         roots = lock.get('roots', [])
         mods = lock['mods']
@@ -296,7 +323,9 @@ def main():
     else:
         out = list(concurrent.futures.ThreadPoolExecutor(max_workers=3).map(download_one, mods))
         rp_out = list(concurrent.futures.ThreadPoolExecutor(max_workers=2).map(download_resourcepack, rps))
-    (R / 'assembly/lock.json').write_text(json.dumps({
+    lock_out_path = pathlib.Path(args.lock_out)
+    lock_out_path.parent.mkdir(parents=True, exist_ok=True)
+    lock_out_path.write_text(json.dumps({
         'version': version,
         'status': status,
         'minecraft': '1.20.1',
@@ -306,7 +335,7 @@ def main():
         'resourcepacks': rp_out,
     }, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     if args.lock_only:
-        print('RESOLVED', len(out), 'mods and', len(rp_out), 'resourcepacks into assembly/lock.json (no downloads).')
+        print('RESOLVED', len(out), 'mods and', len(rp_out), f'resourcepacks into {lock_out_path} (no downloads).')
     else:
         print('DOWNLOADED', len(out), 'verified SHA512 files and', len(rp_out), 'resourcepacks; not yet a compatibility claim.')
 

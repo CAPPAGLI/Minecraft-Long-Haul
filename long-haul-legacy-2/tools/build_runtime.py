@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Build the pinned Forge runtime mod.
 Uses system javac (Java 17+) when available, otherwise falls back to ECJ 3.33.0.
-Requires installed Forge 47.4.10 server-test/libraries for compile-time APIs.
+Requires Forge 47.4.10 libraries (server-test/libraries or --libs-dir) for compile-time APIs.
 """
-import hashlib, os, pathlib, shutil, subprocess, tomllib, urllib.request, zipfile
+import argparse, hashlib, os, pathlib, shutil, subprocess, tomllib, urllib.request, zipfile
 
 R = pathlib.Path(__file__).resolve().parents[1]
 
@@ -26,24 +26,31 @@ def find_java_tools():
     return java, javac
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--libs-dir', default=None, help='Path to Forge libraries folder (default: server-test/libraries)')
+    ap.add_argument('--mods-dir', default=None, help='Path to mods folder containing Xaero JARs (default: assembly/mods)')
+    ap.add_argument('--out-dir', default=None, help='Output directory for longhaul-runtime-*.jar (default: overrides/mods)')
+    args = ap.parse_args()
+
     java, javac = find_java_tools()
     if not java and not javac:
         raise RuntimeError('No Java 17 runtime or compiler found in PATH, JAVA_HOME, or runtime/')
 
     cp = []
-    lib_root = R / 'server-test/libraries'
+    lib_root = pathlib.Path(args.libs_dir) if args.libs_dir else (R / 'server-test/libraries')
     if not lib_root.exists():
-        raise RuntimeError('Install Forge 47.4.10 server first: missing server-test/libraries')
+        raise RuntimeError(f'Missing Forge 47.4.10 libraries at {lib_root}; run prepare_server.py or pass --libs-dir')
     for jar in sorted(lib_root.rglob('*.jar')):
         n = jar.name
         if n.endswith('-slim.jar') or n.endswith('-extra.jar') or n.endswith('-mappings.jar') or n.endswith('-installer.jar'):
             continue
         cp.append(str(jar))
     if not any('mixin-' in p for p in cp) or not any('javafmllanguage-' in p for p in cp):
-        raise RuntimeError('Install Forge 47.4.10 server first: missing mixin/javafmllanguage in libraries')
+        raise RuntimeError(f'Missing mixin/javafmllanguage in libraries at {lib_root}')
 
-    xaero_wm = sorted((R / 'assembly/mods').glob('xaeroworldmap-*.jar'))
-    xaero_mm = sorted((R / 'assembly/mods').glob('xaerominimap-*.jar'))
+    mods_lookup = pathlib.Path(args.mods_dir) if args.mods_dir else (R / 'assembly/mods')
+    xaero_wm = sorted(mods_lookup.glob('xaeroworldmap-*.jar')) if mods_lookup.exists() else []
+    xaero_mm = sorted(mods_lookup.glob('xaerominimap-*.jar')) if mods_lookup.exists() else []
     has_xaero_wm = bool(xaero_wm)
     has_xaero_mm = bool(xaero_mm)
     has_mc_srg = any('-srg.jar' in p for p in cp)
@@ -81,14 +88,14 @@ def main():
                 compiler.write_bytes(r.read())
         subprocess.run([java, '-Xmx256m', '-jar', str(compiler), '-17', '-proc:none', '-cp', os.pathsep.join(cp), '-d', str(classes), *java_sources], check=True)
 
-    mods_toml = tomllib.loads((src / 'main/resources/META-INF/mods.toml').read_text())
+    mods_toml = tomllib.loads((src / 'main/resources/META-INF/mods.toml').read_text(encoding='utf-8'))
     version = mods_toml['mods'][0]['version']
-    mods_dir = R / 'overrides/mods'
+    mods_dir = pathlib.Path(args.out_dir) if args.out_dir else (R / 'overrides/mods')
     mods_dir.mkdir(parents=True, exist_ok=True)
     for old in mods_dir.glob('longhaul-runtime-*.jar'):
         old.unlink()
     output = mods_dir / f'longhaul-runtime-1.20.1-{version}.jar'
-    license_text = (R / 'runtime-mod/LICENSE').read_text()
+    license_text = (R / 'runtime-mod/LICENSE').read_text(encoding='utf-8')
     with zipfile.ZipFile(output, 'w', zipfile.ZIP_DEFLATED) as z:
         z.writestr('META-INF/MANIFEST.MF', 'Manifest-Version: 1.0\nMixinConfigs: longhaul-runtime.mixins.json\n\n')
         z.writestr('LICENSE', license_text)
@@ -97,6 +104,9 @@ def main():
                 if p.is_file():
                     z.write(p, p.relative_to(base))
     print(output, hashlib.sha512(output.read_bytes()).hexdigest())
+
+if __name__ == '__main__':
+    main()
 
 if __name__ == '__main__':
     main()

@@ -1,8 +1,14 @@
 # Downloaded mods, Java runtimes, Forge server libraries, test worlds & caches
 long-haul-legacy-2/assembly/mods/
+long-haul-legacy-2/assembly/resourcepacks/
+long-haul-legacy-2/assembly/local-lock.json
+long-haul-legacy-2/assembly/package-validation.json
+long-haul-legacy-2/assembly/modrinth.index.json
 long-haul-legacy-2/runtime/
 long-haul-legacy-2/.cache/
 long-haul-legacy-2/runtime-mod/classes/
+Long-Haul-Legacy-*.mrpack
+Long-Haul-Legacy-*-Sources-and-Report.zip
 
 long-haul-legacy-2/server-test/libraries/
 long-haul-legacy-2/server-test/mods/

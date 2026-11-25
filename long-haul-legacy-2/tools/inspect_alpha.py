@@ -40,9 +40,11 @@ def fits(v, r):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--include-optional-mods', action='store_true', help='Also inspect JARs in optional-mods/')
+    ap.add_argument('--lock-file', default=str(R / 'assembly/lock.json'), help='Path to lock JSON')
+    ap.add_argument('--runtime-jar', default=None, help='Optional built longhaul-runtime-*.jar path')
     args = ap.parse_args()
 
-    lock = json.loads((R / 'assembly/lock.json').read_text())
+    lock = json.loads(pathlib.Path(args.lock_file).read_text(encoding='utf-8'))
     bad_slugs = FORBIDDEN.intersection(m['slug'] for m in lock['mods'])
     if bad_slugs:
         raise RuntimeError('Forbidden mod slugs in lock.json: ' + str(sorted(bad_slugs)))
@@ -87,6 +89,11 @@ def main():
         f = mod['selected_file']['filename']
         inspect((R / 'assembly/mods' / f).read_bytes(), f, mod['client_only'])
     local_jars = sorted((R / 'overrides/mods').glob('*.jar'))
+    if args.runtime_jar:
+        rj = pathlib.Path(args.runtime_jar)
+        if not rj.exists():
+            raise RuntimeError(f'Missing --runtime-jar: {rj}')
+        local_jars = [j for j in local_jars if not j.name.startswith('longhaul-runtime-')] + [rj]
     runtime_jars = [j for j in local_jars if j.name.startswith('longhaul-runtime-')]
     if not runtime_jars:
         raise RuntimeError('Missing longhaul-runtime-*.jar in overrides/mods/')
