@@ -1,0 +1,19 @@
+{
+  "name": "Тонкая натура",
+  "description": "-2 сердца максимального здоровья и -1.0 урона в ближнем бою.",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "Artist HP",
+      "attribute": "minecraft:generic.max_health",
+      "value": -4.0,
+      "operation": "addition"
+    },
+    {
+      "name": "Artist Dmg",
+      "attribute": "minecraft:generic.attack_damage",
+      "value": -1.0,
+      "operation": "addition"
+    }
+  ]
+}

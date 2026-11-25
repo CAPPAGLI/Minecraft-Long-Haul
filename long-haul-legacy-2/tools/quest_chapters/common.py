@@ -76,6 +76,16 @@ def r_item(item_id: str, count: int = 1) -> dict:
     return {'type': 'heracles:item', 'item': {'id': item_id, 'count': int(count)}}
 
 
+def r_command(command: str, title: str, icon_id: str = 'minecraft:compass') -> dict:
+    assert_not_banned(icon_id, 'command_reward_icon')
+    return {
+        'type': 'heracles:command',
+        'title': title,
+        'icon': {'type': 'heracles:item', 'item': {'id': icon_id, 'count': 1}},
+        'command': command,
+    }
+
+
 def r_choice(options: list, amount: int = 1, title: str = 'Награда на выбор') -> dict:
     rewards_map = {}
     for idx, (item_id, count) in enumerate(options):

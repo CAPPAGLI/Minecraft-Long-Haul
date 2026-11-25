@@ -1,0 +1,13 @@
+{
+  "name": "Ветеран",
+  "description": "Прошёл огонь и воду: +3 сердца, +2 брони, -25% урона от взрывов и пуль, но медленно лечится и боится гроз.",
+  "powers": [
+    "longhaul_origins:veteran_combat",
+    "longhaul_origins:veteran_ptsd"
+  ],
+  "icon": {
+    "item": "minecraft:iron_sword"
+  },
+  "order": 22,
+  "impact": 3
+}

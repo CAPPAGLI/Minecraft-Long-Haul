@@ -1,0 +1,13 @@
+{
+  "name": "Осаждённая крепость",
+  "description": "+25% расхода голода и +25% наценка при торговле с ботами / странствующим торговцем (KubeJS).",
+  "type": "origins:multiple",
+  "exh": {
+    "type": "origins:modify_exhaustion",
+    "modifier": {
+      "name": "Patriot Exhaustion",
+      "operation": "multiply_base",
+      "value": 0.25
+    }
+  }
+}

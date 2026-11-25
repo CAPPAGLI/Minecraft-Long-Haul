@@ -1,0 +1,22 @@
+{
+  "name": "Дорожная закалка",
+  "description": "+12% скорости передвижения, -25% расхода голода, +25% к прогрессу аспекта «Первооткрыватель» и защита от холода у костра (KubeJS).",
+  "type": "origins:multiple",
+  "spd": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Vagabond Speed",
+      "attribute": "minecraft:generic.movement_speed",
+      "value": 0.12,
+      "operation": "multiply_base"
+    }
+  },
+  "exh": {
+    "type": "origins:modify_exhaustion",
+    "modifier": {
+      "name": "Vagabond Exhaustion",
+      "operation": "multiply_base",
+      "value": -0.25
+    }
+  }
+}

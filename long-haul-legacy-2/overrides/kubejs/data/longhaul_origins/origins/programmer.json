@@ -1,0 +1,13 @@
+{
+  "name": "Программист",
+  "description": "Привык к монитору по ночам: видит в темноте, +25% опыта и +30% к наградам CC:Tweaked, но слаб днём на солнце.",
+  "powers": [
+    "longhaul_origins:programmer_code",
+    "longhaul_origins:programmer_sun"
+  ],
+  "icon": {
+    "item": "computercraft:computer_advanced"
+  },
+  "order": 17,
+  "impact": 2
+}

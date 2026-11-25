@@ -322,6 +322,9 @@ function lhCompanyReward(server, player, baseCredits, category, transportHint) {
   if (typeof lhHardIsActive === 'function' && lhHardIsActive(server, 'logistics_toll')) {
     mult *= 0.90;
   }
+  if (typeof lhOriginRoutePayoutMult === 'function') {
+    mult *= lhOriginRoutePayoutMult(player, transportHint, category);
+  }
 
   var earned = Math.max(1, Math.round(Number(baseCredits || 0) * mult));
   comp.cash += earned;
@@ -907,6 +910,10 @@ function lhMarketSell(server, player, orderId, dryRun) {
     : null;
   var marketMult = marketInfo && marketInfo.quote ? Math.max(0.18, Math.min(2.40, marketInfo.quote.multiplier)) : 1.0;
   var payout = Math.max(1, Math.round(order.price * bonusMult * marketMult));
+  if (typeof lhOriginFeeMult === 'function') {
+    var feeMult = lhOriginFeeMult(player);
+    if (feeMult > 1.0) payout = Math.max(1, Math.round(payout / feeMult));
+  }
   buyer.cash -= order.price;
   myComp.cash += payout;
   myComp.stats.tradeVolume = (myComp.stats.tradeVolume || 0) + payout;
@@ -1509,6 +1516,15 @@ ServerEvents.tick(function (event) {
     if (raid.ticksLeft <= 0) {
       delete LHOTTDActiveRaids[rPid];
       var res = global.LHOpenTTD.weakenOrCaptureSector(st, raid.companyId, raid.sx, raid.sz, 1, 0);
+      if (res.ok && typeof lhPlayerHasOrigin === 'function' && lhPlayerHasOrigin(rPlayer, 'bandit')) {
+        var bComp = st.companies[raid.companyId];
+        if (bComp) {
+          bComp.cash += 35;
+          if (typeof rPlayer.tell === 'function') {
+            rPlayer.tell('§6[Бандит] §aТрофеи с рейда: +35 Cr в казну компании!');
+          }
+        }
+      }
       lhOttdSave(server);
       if (res.ok) {
         if (res.captured) {
@@ -1645,6 +1661,9 @@ ServerEvents.commandRegistry(function (event) {
         if (!res.ok) {
           lhMsg(p, res.reason === 'exists' ? 'Компания с таким ID уже существует.' : 'Некорректный ID (латиница/цифры, не bot_*).');
           return 0;
+        }
+        if (typeof lhOriginFeeMult === 'function' && lhOriginFeeMult(p) > 1.0) {
+          res.company.cash = Math.max(100, Math.round(res.company.cash / lhOriginFeeMult(p)));
         }
         lhOttdSave(server);
         lhUnlock(p, 'longhaul:openttd/company');

@@ -1,0 +1,13 @@
+{
+  "name": "Бандит",
+  "description": "Специалист по налётам и оружию (TaCZ/арбалеты): быстрее бегает, +15% стрелкового урона и +25% добычи с рейдов OpenTTD.",
+  "powers": [
+    "longhaul_origins:bandit_raid",
+    "longhaul_origins:bandit_risk"
+  ],
+  "icon": {
+    "item": "minecraft:crossbow"
+  },
+  "order": 23,
+  "impact": 2
+}

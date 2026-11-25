@@ -1,0 +1,13 @@
+{
+  "name": "Алкоголик",
+  "description": "Иммунитет к тошноте и бонусы от вин/напитков Vinery & Brewin', но дрожащие руки и высокий расход голода.",
+  "powers": [
+    "longhaul_origins:alcoholic_tolerance",
+    "longhaul_origins:alcoholic_tremor"
+  ],
+  "icon": {
+    "item": "minecraft:glass_bottle"
+  },
+  "order": 7,
+  "impact": 2
+}

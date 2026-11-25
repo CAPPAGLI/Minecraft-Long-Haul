@@ -1,0 +1,13 @@
+{
+  "name": "Повар",
+  "description": "Полевая кухня на колёсах: пища сытнее, иммунитет к Яду, еда не портится от спор, а блюда Farmer's Delight лечат.",
+  "powers": [
+    "longhaul_origins:cook_kitchen",
+    "longhaul_origins:cook_peaceful"
+  ],
+  "icon": {
+    "item": "farmersdelight:cooking_pot"
+  },
+  "order": 26,
+  "impact": 1
+}

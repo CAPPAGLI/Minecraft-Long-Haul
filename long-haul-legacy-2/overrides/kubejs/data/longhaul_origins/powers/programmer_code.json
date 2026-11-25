@@ -1,0 +1,17 @@
+{
+  "name": "Ночной деплой",
+  "description": "+25% опыта, ночное зрение и +30% к наградам за проверки CC:Tweaked (/lh cc verify) и логистику AE2 (KubeJS).",
+  "type": "origins:multiple",
+  "xp": {
+    "type": "origins:modify_xp_gain",
+    "modifier": {
+      "name": "Dev XP",
+      "operation": "multiply_base",
+      "value": 0.25
+    }
+  },
+  "nv": {
+    "type": "origins:night_vision",
+    "strength": 0.85
+  }
+}

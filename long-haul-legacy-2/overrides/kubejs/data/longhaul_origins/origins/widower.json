@@ -1,0 +1,13 @@
+{
+  "name": "Вдовец",
+  "description": "Человек, переживший пустоту: видит в темноте, не боится Иссушения/Тьмы и ходит бесшумно, но раны заживают медленно.",
+  "powers": [
+    "longhaul_origins:widower_numb",
+    "longhaul_origins:widower_grief"
+  ],
+  "icon": {
+    "item": "minecraft:wither_rose"
+  },
+  "order": 6,
+  "impact": 2
+}

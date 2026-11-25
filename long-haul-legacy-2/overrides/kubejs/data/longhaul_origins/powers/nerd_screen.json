@@ -1,0 +1,17 @@
+{
+  "name": "Свет монитора",
+  "description": "Ночное зрение и +15% получаемого опыта.",
+  "type": "origins:multiple",
+  "nv": {
+    "type": "origins:night_vision",
+    "strength": 0.75
+  },
+  "xp": {
+    "type": "origins:modify_xp_gain",
+    "modifier": {
+      "name": "Nerd XP",
+      "operation": "multiply_base",
+      "value": 0.15
+    }
+  }
+}

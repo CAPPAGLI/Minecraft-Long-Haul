@@ -1,0 +1,26 @@
+{
+  "name": "Дурная слава",
+  "description": "-1.5 удачи, +20% урона от снарядов и наценка +20% при торговле/регистрации OpenTTD (KubeJS).",
+  "type": "origins:multiple",
+  "luck": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Skinhead Luck",
+      "attribute": "minecraft:generic.luck",
+      "value": -1.5,
+      "operation": "addition"
+    }
+  },
+  "proj": {
+    "type": "origins:modify_damage_taken",
+    "damage_condition": {
+      "type": "origins:in_tag",
+      "tag": "minecraft:is_projectile"
+    },
+    "modifier": {
+      "name": "Skinhead Proj",
+      "operation": "multiply_base",
+      "value": 0.2
+    }
+  }
+}

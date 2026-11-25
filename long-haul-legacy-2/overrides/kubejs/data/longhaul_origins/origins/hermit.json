@@ -1,0 +1,13 @@
+{
+  "name": "Отшельник",
+  "description": "Живёт вдали от людей: ночное зрение, экономия сытости и регенерация в одиночестве, но теряется в толпе.",
+  "powers": [
+    "longhaul_origins:hermit_solitude",
+    "longhaul_origins:hermit_crowd"
+  ],
+  "icon": {
+    "item": "minecraft:lantern"
+  },
+  "order": 10,
+  "impact": 2
+}

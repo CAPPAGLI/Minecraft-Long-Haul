@@ -1,0 +1,13 @@
+{
+  "name": "Боязнь толпы",
+  "description": "-1 сердце максимального здоровья и Слабость при нахождении вплотную к другим игрокам (<16 м, KubeJS).",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "Hermit HP",
+      "attribute": "minecraft:generic.max_health",
+      "value": -2.0,
+      "operation": "addition"
+    }
+  ]
+}

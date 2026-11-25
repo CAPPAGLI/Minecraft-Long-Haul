@@ -840,10 +840,10 @@ function lhStartIntegrationSetup(server) {
         }
         ok(missingQuestItems.length === 0, 'unregistered quest items in Forge 1.20.1 (' + missingQuestItems.length + '): ' + missingQuestItems.join(', '));
 
-        // 26. Verify all requested server mods loaded + custom-only Origins layer (no default origins)
+        // 26. Verify all requested server mods loaded + custom-only Origins layer (34 custom origins, no default origins)
         var reqModIds = [
           'ae2', 'rats', 'citadel', 'carryon', 'watut', 'coroutil',
-          'origins', 'caelus', 'radium', 'torchmaster', 'mimi',
+          'origins', 'pehkui', 'caelus', 'radium', 'torchmaster', 'mimi',
           'handson_furniture', 'handson_delight', 'diegesis',
           'neon_glowsticks', 'lumen_rigs', 'refurbished_furniture', 'framework'
         ];
@@ -851,17 +851,40 @@ function lhStartIntegrationSetup(server) {
         ok(missingMods.length === 0, 'all new requested server mods loaded (missing: ' + missingMods.join(', ') + ')');
 
         var expectedOrigins = [
-          'longhaul_origins:ironclad_hauler',
-          'longhaul_origins:sky_courier',
-          'longhaul_origins:deep_prospector',
-          'longhaul_origins:field_alchemist',
-          'longhaul_origins:arc_mechanist',
-          'longhaul_origins:void_drifter',
-          'longhaul_origins:abyss_navigator',
-          'longhaul_origins:subterranean_mole',
-          'longhaul_origins:nether_strider',
-          'longhaul_origins:urbanist_architect',
-          'longhaul_origins:trailblazer_pathfinder'
+          'longhaul_origins:office_clerk',
+          'longhaul_origins:biker',
+          'longhaul_origins:factory_worker',
+          'longhaul_origins:airline_pilot',
+          'longhaul_origins:family_father',
+          'longhaul_origins:widower',
+          'longhaul_origins:alcoholic',
+          'longhaul_origins:addict',
+          'longhaul_origins:skinhead',
+          'longhaul_origins:hermit',
+          'longhaul_origins:vagabond',
+          'longhaul_origins:henpecked',
+          'longhaul_origins:illegal_immigrant',
+          'longhaul_origins:political_emigre',
+          'longhaul_origins:ex_convict',
+          'longhaul_origins:heavyweight',
+          'longhaul_origins:programmer',
+          'longhaul_origins:sailor',
+          'longhaul_origins:lighthouse_keeper',
+          'longhaul_origins:gamekeeper',
+          'longhaul_origins:disabled_veteran',
+          'longhaul_origins:war_veteran',
+          'longhaul_origins:bandit',
+          'longhaul_origins:turbo_patriot',
+          'longhaul_origins:musician',
+          'longhaul_origins:cook',
+          'longhaul_origins:artist',
+          'longhaul_origins:hikikomori_nerd',
+          'longhaul_origins:furry',
+          'longhaul_origins:reddit_admin',
+          'longhaul_origins:domovenok',
+          'longhaul_origins:dwarf',
+          'longhaul_origins:nonbinary',
+          'longhaul_origins:robo_woman'
         ];
         var RLCls = Java.loadClass('net.minecraft.resources.ResourceLocation');
         var origLayerRes = server.getResourceManager().getResource(new RLCls('origins', 'origin_layers/origin.json'));
@@ -872,7 +895,7 @@ function lhStartIntegrationSetup(server) {
         reader.close();
         var layerJson = JSON.parse(layerTxt);
         ok(layerJson.replace === true, 'origins:origin layer uses replace=true to disable all default origins');
-        ok(Array.isArray(layerJson.origins) && layerJson.origins.length === 11, 'origins:origin layer lists exactly 11 custom origins');
+        ok(Array.isArray(layerJson.origins) && layerJson.origins.length === 34, 'origins:origin layer lists exactly 34 custom origins');
         expectedOrigins.forEach(function (oid) {
           ok(layerJson.origins.indexOf(oid) !== -1, 'custom origin present in layer: ' + oid);
         });
@@ -891,7 +914,7 @@ function lhStartIntegrationSetup(server) {
             var hk = itOrig.next();
             regOrigIds.push(String(hk.unwrapKey().get().location()));
           }
-          ok(regOrigIds.length === 11, 'live OriginsAPI layer has 11 origins (' + regOrigIds.join(', ') + ')');
+          ok(regOrigIds.length === 34, 'live OriginsAPI layer has 34 origins (got ' + regOrigIds.length + ')');
           ok(!regOrigIds.some(function (id) { return id.indexOf('origins:') === 0; }), 'live OriginsAPI layer contains zero default origins');
         }
 

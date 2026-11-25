@@ -1,43 +1,141 @@
-"""Core chapters 00..14 of Long Haul Legacy 2.0 (~443 quests) with full rewards & clean layouts."""
+"""Core chapters 00..14 of Long Haul Legacy 2.0 (~450 quests) with full rewards & clean layouts."""
 import json
 from .common import (
-    GENERATED_QUESTS, R, O, adv, quest, r_xp, r_item, r_choice, tier_rewards,
+    GENERATED_QUESTS, R, O, adv, quest, r_xp, r_item, r_choice, r_command, tier_rewards,
     t_item, t_check, t_adv,
 )
 
 
 def build_core_chapters():
     # -----------------------------------------------------------------------
-    # 00 · Сюжет: Ушёл за хлебом (5 quests)
+    # 00 · Сюжет: Ушёл за хлебом (12 theatrical acts, ~5 min Fight-Club prologue)
     # -----------------------------------------------------------------------
+    # Note: Every task in Chapter 00 uses ONLY manual confirmation (heracles:check)
+    # or non-consumable items awarded by preceding quests in Chapter 00.
     story_ch00 = [
-        ('story_01_left_for_bread', 'Глава I: Ушёл в магазин за хлебом', 'minecraft:bread', [-220, 0], [
-            'Поздравляем — у вас родился сын! Жена попросила сходить в ближайшую лавку за свежей буханкой хлеба и бутылкой молока.',
-            'Задача главы: выйти в мир (выдаётся автоматически при входе в мир; если не засчиталось — выполните /lh stage).',
-        ], [], {'xp': r_xp(50, 'POINTS'), 'item': r_item('minecraft:bread', 4)}),
-        ('story_02_bakery_burned', 'Глава II: Пекарня сгорела — нужен свой хлеб', 'minecraft:wheat', [-110, 0], [
-            'Ближайшая пекарня оказалась закрыта на переучёт, так что придётся раздобыть или испечь первую буханку хлеба самостоятельно.',
-            'Задача: держите в инвентаре буханку хлеба (minecraft:bread) — сервер автоматически засчитает этап.',
-        ], ['story_01_left_for_bread'], {'xp': r_xp(60, 'POINTS'), 'choice': r_choice([('minecraft:wheat', 16), ('minecraft:oak_log', 16), ('minecraft:coal', 8)])}),
-        ('story_04_snail_at_door', 'Глава IV: Заодно и молоко', 'minecraft:milk_bucket', [0, 0], [
-            'Пока вы решали вопрос с хлебом, вспомнили про вторую половину просьбы — ведро свежего молока.',
-            'Задача: наберите ведро молока (minecraft:milk_bucket) в инвентарь (сервер зачтёт этап автоматически).',
-        ], ['story_02_bakery_burned'], {'xp': r_xp(80, 'POINTS'), 'item': r_item('minecraft:iron_ingot', 4)}),
-        ('story_05_continental_bakery', 'Глава V: Первая штамповка для пекарни', 'create:mechanical_press', [110, 0], [
-            'Чтобы открыть путь дальше в окрестности, пора перейти от ручной работы к первому механизму Create или стартовой поставке.',
-            'Задача: скрафтите Механический пресс (create:mechanical_press) ИЛИ закройте контракт /lh accept plates (64 железные пластины).',
-        ], ['story_04_snail_at_door'], {'xp': r_xp(1, 'LEVEL'), 'item': r_item('create:andesite_alloy', 12)}),
-        ('story_06_forgot_the_milk', 'Эпилог пролога: Долгая дорога начинается', 'minecraft:compass', [220, 0], [
-            'Хлеб и молоко собраны, базовый инструмент готов, а граница мира готова к первому крупному расширению!',
-            'Задача: скрафтите Компас (minecraft:compass) и выполните /lh stage. Завершение Главы 00 расширяет территорию и запускает Колесо Угроз!',
-        ], ['story_05_continental_bakery'], {'xp': r_xp(2, 'LEVEL'), 'item': r_item('longhaul:field_rations', 4)}),
+        ('story_01_left_for_bread', 'Акт I · Три часа ночи на кухне', 'minecraft:paper', [-390, -60],
+         t_check('Проснуться и встать с постели'), [
+             'Бессонница. Холодный свет холодильника, пустая раковина, список дел на завтра, от которого сводит зубы.',
+             'Семья, ипотека, чужие ожидания, одинаковые будни — ты был винтиком в чужом механизме, пока внутри что-то не перегорело дотла.',
+             'На столе лежит старый бумажный чек. Подтверди шаг и забери его — пора уходить.',
+         ], [], {
+             'xp': r_xp(25, 'POINTS'),
+             'item': r_item('minecraft:paper', 1),
+             'bread': r_item('minecraft:bread', 2),
+         }),
+        ('story_02_bakery_burned', 'Акт II · Вещи, которыми ты владеешь', 'minecraft:bread', [-260, -60],
+         t_item('minecraft:paper', 1), [
+             '«Вещи, которыми ты владеешь, в конце концов начинают владеть тобой.»',
+             'Ты сжимаешь старый чек (выдан в Акте I): «Хлеб, молоко». Квартира давит стенами, воздух стал вязким. Нужно выйти хотя бы на пять минут.',
+         ], ['story_01_left_for_bread'], {
+             'xp': r_xp(30, 'POINTS'),
+             'item': r_item('minecraft:wheat', 6),
+             'milk': r_item('minecraft:milk_bucket', 1),
+         }),
+        ('story_02b_smoke_break', 'Акт III · За хлебом, молоком и сигаретами', 'minecraft:flint_and_steel', [-130, -60],
+         t_check('Выйти за порог с пачкой сигарет'), [
+             'Ты бросаешь ключи в прихожей. «Я выйду — за хлебом, молоком и пачкой сигарет». Голос звучит чужим, будто из соседней комнаты.',
+             'Забери награду: получишь зажигалку, а при установленном опциональном моде DOOMED — настоящую пачку сигарет Matulls и карманную зажигалку.',
+         ], ['story_02_bakery_burned'], {
+             'xp': r_xp(40, 'POINTS'),
+             'item': r_item('minecraft:flint_and_steel', 1),
+             'smoke': r_command('lh prologue smoke', 'Получить сигареты DOOMED (если мод установлен)', 'minecraft:flint_and_steel'),
+         }),
+        ('story_02c_stairwell_ash', 'Акт IV · Дым на лестничной клетке', 'minecraft:campfire', [0, -60],
+         t_item('minecraft:flint_and_steel', 1), [
+             'Щелчок зажигалки (выдана в Акте III). Первая затяжка обжигает горло, а серый пепел падает на облупленный бетон подъезда.',
+             'Именно в эту секунду ты понимаешь: ты не хочешь возвращаться на этот этаж. Вообще никогда.',
+         ], ['story_02b_smoke_break'], {
+             'xp': r_xp(40, 'POINTS'),
+             'item': r_item('minecraft:charcoal', 2),
+             'camp': r_item('minecraft:campfire', 1),
+         }),
+        ('story_04_snail_at_door', 'Акт V · Осколки старой жизни', 'minecraft:charcoal', [130, -60],
+         t_item('minecraft:charcoal', 2), [
+             'Там, за железной дверью, остался человек, который пытался всем угодить и выгорел до угольков.',
+             'Держи горсть пепла (выдана в Акте IV) как доказательство: старая жизнь уже догорела.',
+         ], ['story_02c_stairwell_ash'], {
+             'xp': r_xp(50, 'POINTS'),
+             'item': r_item('minecraft:leather_boots', 1),
+             'lantern': r_item('minecraft:lantern', 1),
+         }),
+        ('story_04b_last_bus', 'Акт VI · Ночной автобус в никуда', 'minecraft:leather_boots', [260, -60],
+         t_item('minecraft:leather_boots', 1), [
+             'Мокрый асфальт, жёлтые фонари и последний ночной рейс, уходящий далеко за городскую черту.',
+             'Старые ботинки (выданы в Акте V) ещё держатся. Никаких обратных билетов и никаких будильников в 07:00.',
+         ], ['story_04_snail_at_door'], {
+             'xp': r_xp(50, 'POINTS'),
+             'item': r_item('minecraft:map', 1),
+             'food': r_item('minecraft:cooked_beef', 4),
+         }),
+        ('story_04c_empty_pockets', 'Акт VII · Пустые карманы — чистый лист', 'minecraft:lantern', [260, 60],
+         t_item('minecraft:lantern', 1), [
+             '«Лишь утратив всё до конца, мы обретаем свободу делать что угодно.»',
+             'Тёплый фонарь в руках (выдан в Акте V) светит честнее, чем все бетонные стены прошлой квартиры.',
+         ], ['story_04b_last_bus'], {
+             'xp': r_xp(60, 'POINTS'),
+             'item': r_item('minecraft:spyglass', 1),
+             'torches': r_item('minecraft:torch', 16),
+         }),
+        ('story_05_continental_bakery', 'Акт VIII · Горизонт больше, чем квартал', 'minecraft:spyglass', [130, 60],
+         t_item('minecraft:spyglass', 1), [
+             'Годами ты смотрел в стену напротив. В подзорную трубу (выдана в Акте VII) видно: за старой чертой города лежит целый континент.',
+             'И больше никто не скажет тебе, куда идти, что строить и кем быть.',
+         ], ['story_04c_empty_pockets'], {
+             'xp': r_xp(60, 'POINTS'),
+             'item': r_item('minecraft:compass', 1),
+             'iron': r_item('minecraft:iron_ingot', 4),
+         }),
+        ('story_05b_no_looking_back', 'Акт IX · Первое правило дороги', 'minecraft:map', [0, 60],
+         t_item('minecraft:map', 1), [
+             'Первое правило новой жизни: не оглядываться назад. Второе правило: не застревать на одном месте.',
+             'Чистая карта (выдана в Акте VI) ждёт твоих первых трасс, морей, железных дорог и далёких маршрутов.',
+         ], ['story_05_continental_bakery'], {
+             'xp': r_xp(70, 'POINTS'),
+             'item': r_item('create:andesite_alloy', 8),
+             'logs': r_item('minecraft:oak_log', 8),
+         }),
+        ('story_05c_road_gear', 'Акт X · Всё своё ношу с собой', 'minecraft:emerald', [-130, 60],
+         t_check('Собраться в бесконечное путешествие'), [
+             'Хлеб, молоко, пачка сигарет и пара простых инструментов — вот и весь твой новый багаж.',
+             'Впереди — вечные путешествия, новые биомы, компании OpenTTD и изучение мира без оглядки на прошлое.',
+         ], ['story_05b_no_looking_back'], {
+             'xp': r_xp(80, 'POINTS'),
+             'item': r_item('minecraft:emerald', 2),
+             'permit': r_item('longhaul:transport_permit', 1),
+         }),
+        ('story_05d_point_of_no_return', 'Акт XI · Точка невозврата', 'minecraft:oak_door', [-260, 60],
+         t_check('Перешагнуть старую черту'), [
+             'Тот выгоревший человек остался на кухне с остывшим чаем. Перед дверью в большой мир стоит уже совсем другой странник.',
+             'Тесная стартовая граница 724×724 вот-вот рухнет под ногами.',
+         ], ['story_05c_road_gear'], {
+             'xp': r_xp(1, 'LEVEL'),
+             'item': r_item('minecraft:copper_ingot', 6),
+             'coal': r_item('minecraft:coal', 8),
+         }),
+        ('story_06_forgot_the_milk', 'Финал пролога · Свобода открытой дороги', 'minecraft:compass', [-390, 60],
+         t_item('minecraft:compass', 1), [
+             '«Лишь утратив всё до конца, мы обретаем свободу.»',
+             'Ты вышел за хлебом, молоком и сигаретами — и ушёл в вечное путешествие к новой жизни. Держи компас (выдан в Акте VIII) и забери награду!',
+             'Завершение Пролога СУЩЕСТВЕННО расширяет границу мира (с 724×724 до 31825×31825), открывает земли для будущих игроков и привата чанков и запускает Колесо Угроз!',
+         ], ['story_05d_point_of_no_return'], {
+             'xp': r_xp(2, 'LEVEL'),
+             'item': r_item('longhaul:field_rations', 4),
+             'voucher': r_item('longhaul:route_voucher', 1),
+             'prologue_done': r_command('lh prologue complete', 'Расширить границу мира и начать новую жизнь', 'minecraft:compass'),
+         }),
     ]
-    for i, (qid, title, icon, pos, desc, deps, rew) in enumerate(story_ch00):
-        adv_name = 'story/' + qid[len('story_'):]
-        adv(adv_name, 30 + i * 20)
+    for _adv_story, _xp in (
+        ('story/01_left_for_bread', 30),
+        ('story/02_bakery_burned', 50),
+        ('story/04_snail_at_door', 70),
+        ('story/05_continental_bakery', 90),
+        ('story/06_forgot_the_milk', 110),
+    ):
+        adv(_adv_story, _xp)
+    for qid, title, icon, pos, tasks, desc, deps, rew in story_ch00:
         quest(qid, title, '00 · Сюжет: Ушёл за хлебом', pos, icon,
-              {'story': {'type': 'heracles:advancement', 'title': 'Хроника «Ушёл за хлебом»', 'advancements': ['longhaul:' + adv_name]}},
-              desc, deps=deps, subtitle='Long Haul Legacy 2.0 · Пролог', rewards=rew)
+              tasks, desc, deps=deps, subtitle='Long Haul Legacy 2.0 · Пролог', rewards=rew)
 
     # -----------------------------------------------------------------------
     # 01 · Начало и правила (16 quests, 3 clean lanes + Глава III)
@@ -130,7 +228,7 @@ def build_core_chapters():
         ('alpha_custom_origins', 'Происхождение Long Haul (Origins)', 'origins:orb_of_origin', [-320, -110],
          t_check('Происхождение выбрано'), [
              'В сборке используется мод Origins с полностью переработанным набором: ВСЕ стандартные ванильные Origins отключены.',
-             'Доступны 6 авторских специализаций Long Haul: Бронегрузчик, Небесный курьер, Глубинный проходчик, Полевой биохимик, Инженер-механист и Странник Пустоты.',
+             'Доступны 34 авторских происхождения Long Haul (27 основных архетипов + 7 усложнённых/ослабленных для хардкорного челленджа) с интеграцией Pehkui, Create, OpenTTD, Farmer\'s Delight, Vinery, MIMI, CC:Tweaked, TaCZ и DOOMED.',
          ], ['alpha_welcome'], {'xp': r_xp(70, 'POINTS'), 'item': r_item('minecraft:bread', 4)}),
         ('alpha_watut_presence', 'Телеметрия команды: What Are They Up To', 'minecraft:spyglass', [400, -110],
          t_check('Синхронизация статусов изучена'), [
@@ -627,15 +725,15 @@ def build_core_chapters():
     # Add 5 Exploration & Origin Aspect quests (y = 245)
     aspect_specs = [
         ('exp_aspect_underwater', 'Аспект: Подводные экспедиции (400 м)', 'minecraft:heart_of_the_sea', 'aspects/underwater',
-         'Преодолейте 400 м под водой (или выберите Origin Подводный навигатор). Прогресс: /lh aspects.'),
+         'Преодолейте 400 м под водой (особенно выгодно для Моряка и Смотрителя маяка). Прогресс: /lh aspects.'),
         ('exp_aspect_underground', 'Аспект: Подземные магистрали (700 м)', 'minecraft:deepslate_diamond_ore', 'aspects/underground',
-         'Пройдите 700 м под землёй (ниже Y=32; или выберите Origin Глубинный спелеолог). Прогресс: /lh aspects.'),
+         'Пройдите 700 м под землёй (ниже Y=32; особенно выгодно для Заводчанина и Дворфа). Прогресс: /lh aspects.'),
         ('exp_aspect_nether', 'Аспект: Трассы Незера (500 м)', 'minecraft:netherite_boots', 'aspects/nether',
-         'Преодолейте 500 м в измерении Незера (или выберите Origin Странник Незера). Прогресс: /lh aspects.'),
+         'Преодолейте 500 м в измерении Незера. Прогресс: /lh aspects.'),
         ('exp_aspect_urbanist', 'Аспект: Урбанист и градостроительство (100 бл.)', 'minecraft:bricks', 'aspects/urbanist',
-         'Разместите 100 строительных/рельсовых блоков на своей территории (или Origin Урбанист). Прогресс: /lh aspects.'),
+         'Разместите 100 строительных/рельсовых блоков на своей территории (особенно выгодно для Художника). Прогресс: /lh aspects.'),
         ('exp_aspect_pathfinder', 'Аспект: Первооткрыватель секторов (10 сект.)', 'minecraft:compass', 'aspects/pathfinder',
-         'Исследуйте 10 уникальных секторов 256×256 (или Origin Первооткрыватель). Прогресс: /lh aspects.'),
+         'Исследуйте 10 уникальных секторов 256×256 (особенно выгодно для Бродяги и Пилота). Прогресс: /lh aspects.'),
     ]
     for i, (qid, title, icon, adv_id, desc_txt) in enumerate(aspect_specs):
         adv(adv_id, 30)

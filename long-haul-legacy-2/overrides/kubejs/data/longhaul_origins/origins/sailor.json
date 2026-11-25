@@ -1,0 +1,13 @@
+{
+  "name": "Моряк",
+  "description": "Солёный волк: молниеносно плавает, +30% дохода на водных маршрутах OpenTTD и судах Small Ships.",
+  "powers": [
+    "longhaul_origins:sailor_sea",
+    "longhaul_origins:sailor_land"
+  ],
+  "icon": {
+    "item": "minecraft:oak_boat"
+  },
+  "order": 18,
+  "impact": 2
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Жирдяй",
+  "description": "Солидная масса (ширина 1.28x через Pehkui): +4 сердца, +3 брони и не сдвинуть с места, но медленный и прожорливый.",
+  "powers": [
+    "longhaul_origins:heavy_bulk",
+    "longhaul_origins:heavy_breath"
+  ],
+  "icon": {
+    "item": "minecraft:cooked_porkchop"
+  },
+  "order": 16,
+  "impact": 2
+}

@@ -639,9 +639,52 @@ test('Spawn/border safety guards and native Xaero territory integration are wire
   assert(s27.includes('TerritoryMapHelper') && fs.existsSync(path.join(ROOT, 'runtime-mod/src/main/java/com/longhaul/runtime/map/TerritoryMapHelper.java')), 'lhGiveTerritoryMapItem uses TerritoryMapHelper to lock MapItemSavedData so vanilla terrain never overwrites it');
   assert((s27.match(/!isSpawnZone && sec\.kind !== 'claimed'/g) || []).length === 2, '27_openttd_companies must allow both block breaking and container looting inside the 3x3 neutral spawn zone');
   const prof = JSON.parse(fs.readFileSync(path.join(ROOT, 'profiles/alpha20.json'), 'utf8'));
-  assert(prof.categories.qol.includes('mimi') && prof.categories.qol.includes('reactive-music'), 'alpha20 includes MIMI and Reactive Music');
+  assert(prof.categories.qol.includes('mimi') && prof.categories.qol.includes('reactive-music') && prof.categories.qol.includes('pehkui'), 'alpha20 includes MIMI, Reactive Music, and Pehkui');
   assert(prof.client_only.includes('reactive-music') && Array.isArray(prof.resourcepacks) && prof.resourcepacks.includes('U85lsKF1'), 'alpha20 marks reactive-music client-only and pins Deepwoken Music resourcepack');
   assert(c01.includes('lh:xaero_territories') && c01.includes('LongHaulXaeroData'), 'client script forwards territory sync to Xaero bridge');
+  assert(s26.includes("prologue") && s26.includes("doomedmatu:cigarette_pack"), '26_hard_features_and_territory wires prologue smoke & border completion');
+
+  // Verify Chapter 00 prologue (12 quests, only check/item tasks backed by prior quest rewards)
+  const qDir = path.join(ROOT, 'overrides/config/heracles/quests');
+  const ch00Quests = fs.readdirSync(qDir).filter(f => f.endsWith('.json')).map(f => ({
+    id: f.replace(/\.json$/, ''),
+    q: JSON.parse(fs.readFileSync(path.join(qDir, f), 'utf8'))
+  })).filter(e => e.q.display && e.q.display.groups && e.q.display.groups['00 · Сюжет: Ушёл за хлебом']);
+  assert.equal(ch00Quests.length, 12, 'Chapter 00 has 12 theatrical prologue quests');
+  const rewardedItems = new Set();
+  ch00Quests.forEach(e => {
+    Object.values(e.q.rewards || {}).forEach(r => {
+      if (r.type === 'heracles:item' && r.item && r.item.id) rewardedItems.add(r.item.id);
+    });
+  });
+  ch00Quests.forEach(e => {
+    Object.values(e.q.tasks || {}).forEach(t => {
+      assert(t.type === 'heracles:check' || t.type === 'heracles:item', 'Ch.00 task must be check or item: ' + e.id);
+      if (t.type === 'heracles:item') {
+        assert(rewardedItems.has(t.item), 'Ch.00 item task must use item rewarded by Ch.00: ' + e.id + ' -> ' + t.item);
+      }
+    });
+  });
+
+  // Verify 34 custom longhaul_origins + Pehkui/mod integration script
+  const layerJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'overrides/kubejs/data/origins/origin_layers/origin.json'), 'utf8'));
+  assert.equal(layerJson.replace, true);
+  assert.equal(layerJson.origins.length, 34, 'origins layer must have 34 custom origins');
+  const oriFiles = fs.readdirSync(path.join(ROOT, 'overrides/kubejs/data/longhaul_origins/origins')).filter(f => f.endsWith('.json'));
+  assert.equal(oriFiles.length, 34, '34 origin JSON files exist');
+  const ruLang = JSON.parse(fs.readFileSync(path.join(ROOT, 'overrides/kubejs/assets/longhaul_origins/lang/ru_ru.json'), 'utf8'));
+  layerJson.origins.forEach(fullId => {
+    const slug = fullId.split(':')[1];
+    const ori = JSON.parse(fs.readFileSync(path.join(ROOT, 'overrides/kubejs/data/longhaul_origins/origins', slug + '.json'), 'utf8'));
+    assert(ruLang['origin.longhaul_origins.' + slug + '.name'], 'ru_ru has name for ' + slug);
+    (ori.powers || []).forEach(pFull => {
+      const pSlug = pFull.split(':')[1];
+      assert(fs.existsSync(path.join(ROOT, 'overrides/kubejs/data/longhaul_origins/powers', pSlug + '.json')), 'power exists: ' + pSlug);
+      assert(ruLang['power.longhaul_origins.' + pSlug + '.name'], 'ru_ru has power name for ' + pSlug);
+    });
+  });
+  const s29 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/29_origins_mod_integrations.js'), 'utf8');
+  assert(s29.includes('OriginsAPI') && s29.includes('pehkui:base') && s29.includes('doomedmatu:cigarette'), '29_origins_mod_integrations wires OriginsAPI + Pehkui + mod integrations');
   [
     'runtime-mod/src/main/java/longhaul/runtime/mixin/LongHaulMixinPlugin.java',
     'runtime-mod/src/main/java/longhaul/runtime/mixin/WorldMapRegistryMixin.java',

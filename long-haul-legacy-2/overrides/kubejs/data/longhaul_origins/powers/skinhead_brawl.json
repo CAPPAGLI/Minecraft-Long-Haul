@@ -1,0 +1,25 @@
+{
+  "name": "Уличный кулак",
+  "description": "+2.0 урона в ближнем бою, +10% скорости атаки и +25% сопротивления отбрасыванию.",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "Skinhead Dmg",
+      "attribute": "minecraft:generic.attack_damage",
+      "value": 2.0,
+      "operation": "addition"
+    },
+    {
+      "name": "Skinhead AtkSpd",
+      "attribute": "minecraft:generic.attack_speed",
+      "value": 0.1,
+      "operation": "multiply_base"
+    },
+    {
+      "name": "Skinhead KB",
+      "attribute": "minecraft:generic.knockback_resistance",
+      "value": 0.25,
+      "operation": "addition"
+    }
+  ]
+}

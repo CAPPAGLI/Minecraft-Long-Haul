@@ -1,0 +1,13 @@
+{
+  "name": "Лёгкий шаг",
+  "description": "+10% скорости передвижения.",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "NB Speed",
+      "attribute": "minecraft:generic.movement_speed",
+      "value": 0.1,
+      "operation": "multiply_base"
+    }
+  ]
+}

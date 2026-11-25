@@ -1,0 +1,13 @@
+{
+  "name": "Верный выстрел",
+  "description": "+20% урона от луков и снарядов и ускорение в лесных/таёжных биомах (KubeJS).",
+  "type": "origins:multiple",
+  "proj": {
+    "type": "origins:modify_projectile_damage",
+    "modifier": {
+      "name": "Gamekeeper Bow",
+      "operation": "multiply_base",
+      "value": 0.2
+    }
+  }
+}

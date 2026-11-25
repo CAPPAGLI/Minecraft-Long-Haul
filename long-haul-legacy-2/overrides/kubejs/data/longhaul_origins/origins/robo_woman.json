@@ -1,0 +1,13 @@
+{
+  "name": "Робо-Женщина",
+  "description": "[Ослабленное] Замыкает в воде и под дождём, -2 сердца и -30% лечения, зато +2 брони и иммунитет к яду.",
+  "powers": [
+    "longhaul_origins:robowoman_short",
+    "longhaul_origins:robowoman_chassis"
+  ],
+  "icon": {
+    "item": "minecraft:iron_ingot"
+  },
+  "order": 34,
+  "impact": 3
+}

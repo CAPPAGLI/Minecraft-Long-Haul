@@ -1,0 +1,34 @@
+{
+  "name": "Лагерная закалка",
+  "description": "+2 сердца здоровья, +2 природной брони, +1.5 урона в ближнем бою и иммунитет к Яду.",
+  "type": "origins:multiple",
+  "attr": {
+    "type": "origins:attribute",
+    "modifiers": [
+      {
+        "name": "Convict HP",
+        "attribute": "minecraft:generic.max_health",
+        "value": 4.0,
+        "operation": "addition"
+      },
+      {
+        "name": "Convict Armor",
+        "attribute": "minecraft:generic.armor",
+        "value": 2.0,
+        "operation": "addition"
+      },
+      {
+        "name": "Convict Dmg",
+        "attribute": "minecraft:generic.attack_damage",
+        "value": 1.5,
+        "operation": "addition"
+      }
+    ]
+  },
+  "imm": {
+    "type": "origins:effect_immunity",
+    "effects": [
+      "minecraft:poison"
+    ]
+  }
+}

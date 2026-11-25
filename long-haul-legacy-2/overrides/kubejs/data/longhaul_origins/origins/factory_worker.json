@@ -1,0 +1,13 @@
+{
+  "name": "Заводчанин",
+  "description": "Ударник цеха: быстрее копает киркой, не знает усталости, меньше теряет руды и получает Спешку у станков Create.",
+  "powers": [
+    "longhaul_origins:worker_shift",
+    "longhaul_origins:worker_wear"
+  ],
+  "icon": {
+    "item": "create:wrench"
+  },
+  "order": 3,
+  "impact": 2
+}

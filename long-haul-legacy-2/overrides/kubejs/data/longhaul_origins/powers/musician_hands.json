@@ -1,0 +1,19 @@
+{
+  "name": "Тонкие пальцы",
+  "description": "-1.5 урона в ближнем бою и -1.5 сердца максимального здоровья.",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "Musician Dmg",
+      "attribute": "minecraft:generic.attack_damage",
+      "value": -1.5,
+      "operation": "addition"
+    },
+    {
+      "name": "Musician HP",
+      "attribute": "minecraft:generic.max_health",
+      "value": -3.0,
+      "operation": "addition"
+    }
+  ]
+}

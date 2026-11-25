@@ -1,0 +1,13 @@
+{
+  "name": "Турбо-Патриот",
+  "description": "В бою становится только злее при низком HP (+урон и +броня), но ссорится с торговцами и быстро тратит силы.",
+  "powers": [
+    "longhaul_origins:patriot_zeal",
+    "longhaul_origins:patriot_isol"
+  ],
+  "icon": {
+    "item": "minecraft:red_banner"
+  },
+  "order": 24,
+  "impact": 2
+}

@@ -1,0 +1,26 @@
+{
+  "name": "Земля качается",
+  "description": "На суше скорость передвижения ниже на 8%, а входящий урон от огня выше на 15%.",
+  "type": "origins:multiple",
+  "spd": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Sailor Land",
+      "attribute": "minecraft:generic.movement_speed",
+      "value": -0.08,
+      "operation": "multiply_base"
+    }
+  },
+  "fire": {
+    "type": "origins:modify_damage_taken",
+    "damage_condition": {
+      "type": "origins:in_tag",
+      "tag": "minecraft:is_fire"
+    },
+    "modifier": {
+      "name": "Sailor Fire",
+      "operation": "multiply_base",
+      "value": 0.15
+    }
+  }
+}

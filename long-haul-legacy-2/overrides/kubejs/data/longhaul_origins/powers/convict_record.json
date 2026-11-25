@@ -1,0 +1,13 @@
+{
+  "name": "Судимость в базе",
+  "description": "-1.0 удачи и +25% к стоимости регистрации компании / операций OpenTTD (KubeJS).",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "Convict Luck",
+      "attribute": "minecraft:generic.luck",
+      "value": -1.0,
+      "operation": "addition"
+    }
+  ]
+}

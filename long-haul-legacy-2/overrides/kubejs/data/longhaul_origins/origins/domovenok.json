@@ -1,0 +1,13 @@
+{
+  "name": "Домовёнок",
+  "description": "[Ослабленное] Крошечный дух (рост 0.65x через Pehkui): всего 6 сердец (-4), -2.0 урона и боится открытого неба, зато тихий.",
+  "powers": [
+    "longhaul_origins:domovenok_tiny",
+    "longhaul_origins:domovenok_quiet"
+  ],
+  "icon": {
+    "item": "minecraft:candle"
+  },
+  "order": 31,
+  "impact": 3
+}

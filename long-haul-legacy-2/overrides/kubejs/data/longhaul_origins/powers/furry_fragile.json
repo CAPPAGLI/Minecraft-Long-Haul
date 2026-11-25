@@ -1,0 +1,43 @@
+{
+  "name": "Плюшевая уязвимость",
+  "description": "-3 сердца здоровья, +35% входящего урона от огня и снарядов и +30% расхода голода.",
+  "type": "origins:multiple",
+  "hp": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Furry HP",
+      "attribute": "minecraft:generic.max_health",
+      "value": -6.0,
+      "operation": "addition"
+    }
+  },
+  "exh": {
+    "type": "origins:modify_exhaustion",
+    "modifier": {
+      "name": "Furry Exhaustion",
+      "operation": "multiply_base",
+      "value": 0.3
+    }
+  },
+  "vuln": {
+    "type": "origins:modify_damage_taken",
+    "damage_condition": {
+      "type": "origins:or",
+      "conditions": [
+        {
+          "type": "origins:in_tag",
+          "tag": "minecraft:is_fire"
+        },
+        {
+          "type": "origins:in_tag",
+          "tag": "minecraft:is_projectile"
+        }
+      ]
+    },
+    "modifier": {
+      "name": "Furry Vuln",
+      "operation": "multiply_base",
+      "value": 0.35
+    }
+  }
+}

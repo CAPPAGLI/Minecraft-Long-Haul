@@ -1,0 +1,13 @@
+{
+  "name": "Наркоман",
+  "description": "Взрывная скорость и реакция (особенно от стимуляторов и сигарет DOOMED), но сильно подорванное здоровье.",
+  "powers": [
+    "longhaul_origins:addict_rush",
+    "longhaul_origins:addict_crash"
+  ],
+  "icon": {
+    "item": "minecraft:sugar"
+  },
+  "order": 8,
+  "impact": 3
+}

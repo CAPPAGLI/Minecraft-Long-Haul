@@ -82,7 +82,8 @@ BlockEvents.placed(function (event) {
   var sec = global.LHOpenTTD.resolveSectorOwner(st, sc.sx, sc.sz);
   if (sec.kind === 'claimed' && sec.owner === comp.id) {
     var prof = lhAspectsProfile(server, player);
-    prof.urbanist = Number(prof.urbanist || 0) + 1;
+    var uStep = (typeof lhOriginAspectBonus === 'function') ? Number(lhOriginAspectBonus(player, 'urbanist', bid) || 1) : 1;
+    prof.urbanist = Number(prof.urbanist || 0) + uStep;
     if (prof.urbanist % 25 === 0) {
       comp.cash += 15;
       if (typeof lhOttdSave === 'function') lhOttdSave(server);
@@ -132,7 +133,8 @@ ServerEvents.tick(function (event) {
         var sc = global.LHOpenTTD.sectorCoords(px, pz);
         if (!prof.visitedSectors[sc.key]) {
           prof.visitedSectors[sc.key] = true;
-          prof.pathfinder = Object.keys(prof.visitedSectors).length;
+          var pathMult = (typeof lhOriginAspectBonus === 'function') ? Number(lhOriginAspectBonus(p, 'pathfinder', '') || 1) : 1;
+          prof.pathfinder = Math.round(Object.keys(prof.visitedSectors).length * pathMult);
           lhAspectsCheckComplete(server, p, prof, 'pathfinder');
           dirty = true;
         }

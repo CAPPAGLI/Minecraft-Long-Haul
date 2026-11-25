@@ -1,0 +1,22 @@
+{
+  "name": "Адаптация и опыт",
+  "description": "+20% опыта, +2 природной брони и увеличенная дальность взаимодействия с блоками 1.25x (Pehkui, KubeJS).",
+  "type": "origins:multiple",
+  "xp": {
+    "type": "origins:modify_xp_gain",
+    "modifier": {
+      "name": "Disabled XP",
+      "operation": "multiply_base",
+      "value": 0.2
+    }
+  },
+  "arm": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Disabled Armor",
+      "attribute": "minecraft:generic.armor",
+      "value": 2.0,
+      "operation": "addition"
+    }
+  }
+}

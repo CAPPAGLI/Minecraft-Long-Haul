@@ -1,0 +1,44 @@
+{
+  "name": "Короткое замыкание",
+  "description": "Получает урон в воде и под дождём, -2 сердца здоровья и -30% естественного лечения.",
+  "type": "origins:multiple",
+  "hp": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Robo HP",
+      "attribute": "minecraft:generic.max_health",
+      "value": -4.0,
+      "operation": "addition"
+    }
+  },
+  "heal": {
+    "type": "origins:modify_healing",
+    "modifier": {
+      "name": "Robo Heal",
+      "operation": "multiply_base",
+      "value": -0.3
+    }
+  },
+  "water_dot": {
+    "type": "origins:damage_over_time",
+    "interval": 25,
+    "onset_delay": 10,
+    "damage": 1.5,
+    "damage_source": {
+      "name": "hurt_by_water",
+      "unblockable": true
+    },
+    "condition": {
+      "type": "origins:or",
+      "conditions": [
+        {
+          "type": "origins:submerged_in",
+          "fluid": "minecraft:water"
+        },
+        {
+          "type": "origins:in_rain"
+        }
+      ]
+    }
+  }
+}

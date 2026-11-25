@@ -1,0 +1,13 @@
+{
+  "name": "Фурри",
+  "description": "[Ослабленное] Хрупкий и заметный (-3 сердца, +35% урона от огня и снарядов, +30% расхода голода), слегка выше скорость и прыжок.",
+  "powers": [
+    "longhaul_origins:furry_fragile",
+    "longhaul_origins:furry_paws"
+  ],
+  "icon": {
+    "item": "minecraft:rabbit_foot"
+  },
+  "order": 29,
+  "impact": 3
+}

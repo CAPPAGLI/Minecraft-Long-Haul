@@ -1,0 +1,13 @@
+{
+  "name": "Инвалид",
+  "description": "Тело подводит, но голова и руки цепки: -25% скорости, -2 сердца и слабый прыжок, зато +20% опыта, +2 брони и дальний хват (Pehkui).",
+  "powers": [
+    "longhaul_origins:disabled_adapt",
+    "longhaul_origins:disabled_mobility"
+  ],
+  "icon": {
+    "item": "minecraft:shield"
+  },
+  "order": 21,
+  "impact": 3
+}

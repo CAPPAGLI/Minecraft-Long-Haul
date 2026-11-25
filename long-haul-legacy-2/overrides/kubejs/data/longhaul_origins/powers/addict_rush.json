@@ -1,0 +1,19 @@
+{
+  "name": "Адреналиновый всплеск",
+  "description": "+15% скорости передвижения и +15% скорости атаки; сигареты DOOMED, сахар, кофе и зелья дают кратковременный рывок Speed II + Absorption (KubeJS).",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "Addict Speed",
+      "attribute": "minecraft:generic.movement_speed",
+      "value": 0.15,
+      "operation": "multiply_base"
+    },
+    {
+      "name": "Addict AtkSpd",
+      "attribute": "minecraft:generic.attack_speed",
+      "value": 0.15,
+      "operation": "multiply_base"
+    }
+  ]
+}

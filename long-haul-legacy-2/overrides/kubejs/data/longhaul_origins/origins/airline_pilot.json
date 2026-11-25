@@ -1,0 +1,13 @@
+{
+  "name": "Пилот самолёта",
+  "description": "Крылья вместо потолка: встроенное планирование, защита от падения и +30% на авиамаршрутах OpenTTD.",
+  "powers": [
+    "longhaul_origins:pilot_wings",
+    "longhaul_origins:pilot_fragile"
+  ],
+  "icon": {
+    "item": "minecraft:elytra"
+  },
+  "order": 4,
+  "impact": 3
+}

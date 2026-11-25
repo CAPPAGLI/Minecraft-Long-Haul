@@ -1,0 +1,19 @@
+{
+  "name": "Без крыши и брони",
+  "description": "-1.5 сердца максимального здоровья и -1 природной брони.",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "Vagabond HP",
+      "attribute": "minecraft:generic.max_health",
+      "value": -3.0,
+      "operation": "addition"
+    },
+    {
+      "name": "Vagabond Armor",
+      "attribute": "minecraft:generic.armor",
+      "value": -1.0,
+      "operation": "addition"
+    }
+  ]
+}

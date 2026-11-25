@@ -1,0 +1,22 @@
+{
+  "name": "Похмельный тремор",
+  "description": "Скорость атаки ниже на 12%, а расход голода выше на 20%.",
+  "type": "origins:multiple",
+  "atk": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Alcoholic AtkSpd",
+      "attribute": "minecraft:generic.attack_speed",
+      "value": -0.12,
+      "operation": "multiply_base"
+    }
+  },
+  "exh": {
+    "type": "origins:modify_exhaustion",
+    "modifier": {
+      "name": "Alcoholic Exhaustion",
+      "operation": "multiply_base",
+      "value": 0.2
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "Низкий и тяжёлый",
+  "description": "Рост 0.74x (Pehkui, KubeJS), -2 сердца здоровья, -15% скорости передвижения и +35% урона от утопления.",
+  "type": "origins:multiple",
+  "attr": {
+    "type": "origins:attribute",
+    "modifiers": [
+      {
+        "name": "Dwarf HP",
+        "attribute": "minecraft:generic.max_health",
+        "value": -4.0,
+        "operation": "addition"
+      },
+      {
+        "name": "Dwarf Speed",
+        "attribute": "minecraft:generic.movement_speed",
+        "value": -0.15,
+        "operation": "multiply_base"
+      }
+    ]
+  },
+  "drown": {
+    "type": "origins:modify_damage_taken",
+    "damage_condition": {
+      "type": "origins:in_tag",
+      "tag": "minecraft:is_drowning"
+    },
+    "modifier": {
+      "name": "Dwarf Drown",
+      "operation": "multiply_base",
+      "value": 0.35
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "Железное терпение",
+  "description": "+2.5 природной брони, +15% эффективности лечения и бонус поддержки при передаче ресурсов союзникам (KubeJS).",
+  "type": "origins:multiple",
+  "arm": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Henpecked Armor",
+      "attribute": "minecraft:generic.armor",
+      "value": 2.5,
+      "operation": "addition"
+    }
+  },
+  "heal": {
+    "type": "origins:modify_healing",
+    "modifier": {
+      "name": "Henpecked Heal",
+      "operation": "multiply_base",
+      "value": 0.15
+    }
+  }
+}

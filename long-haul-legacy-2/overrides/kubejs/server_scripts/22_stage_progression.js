@@ -70,21 +70,12 @@ function lhStageRecompute(server, player) {
 
   if (player && typeof lhUnlock === 'function') {
     lhUnlock(player, 'longhaul:story/01_left_for_bread');
-    var s2Done = hasBread || unlocked.indexOf('longhaul_stage_2') !== -1 || !!receipts.plates;
-    if (s2Done) lhUnlock(player, 'longhaul:story/02_bakery_burned');
     var s3Done = hasTerminal || commissioned >= 1;
     if (s3Done) lhUnlock(player, 'longhaul:story/03_dinner_telegram');
-    var s4Done = hasMilk || unlocked.indexOf('longhaul_stage_3') !== -1;
-    if (s4Done) lhUnlock(player, 'longhaul:story/04_snail_at_door');
-    var s5Done = !!receipts.plates || hasPress || unlocked.indexOf('longhaul_stage_4') !== -1;
-    if (s5Done) lhUnlock(player, 'longhaul:story/05_continental_bakery');
-    if ((hasCompass || unlocked.indexOf('longhaul_finale') !== -1) &&
-        typeof player.isAdvancementDone === 'function' &&
-        player.isAdvancementDone('longhaul:story/02_bakery_burned') &&
-        player.isAdvancementDone('longhaul:story/04_snail_at_door') &&
-        player.isAdvancementDone('longhaul:story/05_continental_bakery')) {
-      lhUnlock(player, 'longhaul:story/06_forgot_the_milk');
-    }
+    if (unlocked.indexOf('longhaul_stage_2') !== -1) lhUnlock(player, 'longhaul:story/02_bakery_burned');
+    if (unlocked.indexOf('longhaul_stage_3') !== -1) lhUnlock(player, 'longhaul:story/04_snail_at_door');
+    if (unlocked.indexOf('longhaul_stage_4') !== -1) lhUnlock(player, 'longhaul:story/05_continental_bakery');
+    if (unlocked.indexOf('longhaul_finale') !== -1) lhUnlock(player, 'longhaul:story/06_forgot_the_milk');
   }
 
   var prev = stDb.players[pid] || [];

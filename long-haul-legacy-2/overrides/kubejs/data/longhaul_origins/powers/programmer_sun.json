@@ -1,0 +1,35 @@
+{
+  "name": "Аллергия на солнце",
+  "description": "-1.5 сердца максимального здоровья; под открытым солнцем скорость атаки падает на 15%.",
+  "type": "origins:multiple",
+  "hp": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Dev HP",
+      "attribute": "minecraft:generic.max_health",
+      "value": -3.0,
+      "operation": "addition"
+    }
+  },
+  "sun_atk": {
+    "type": "origins:conditioned_attribute",
+    "tick_rate": 20,
+    "modifier": {
+      "name": "Dev Sun Atk",
+      "attribute": "minecraft:generic.attack_speed",
+      "value": -0.15,
+      "operation": "multiply_base"
+    },
+    "condition": {
+      "type": "origins:and",
+      "conditions": [
+        {
+          "type": "origins:exposed_to_sky"
+        },
+        {
+          "type": "origins:daytime"
+        }
+      ]
+    }
+  }
+}

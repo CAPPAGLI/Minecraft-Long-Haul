@@ -1,0 +1,22 @@
+{
+  "name": "Живая мелодия",
+  "description": "+15% опыта, +1.0 удачи; удержание инструментов MIMI или нотных блоков даёт союзникам рядом Регенерацию и Скорость (KubeJS).",
+  "type": "origins:multiple",
+  "xp": {
+    "type": "origins:modify_xp_gain",
+    "modifier": {
+      "name": "Musician XP",
+      "operation": "multiply_base",
+      "value": 0.15
+    }
+  },
+  "luck": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Musician Luck",
+      "attribute": "minecraft:generic.luck",
+      "value": 1.0,
+      "operation": "addition"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "Усталые ноги",
+  "description": "-8% скорости передвижения и -1.0 единицы удачи.",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "Worker Speed",
+      "attribute": "minecraft:generic.movement_speed",
+      "value": -0.08,
+      "operation": "multiply_base"
+    },
+    {
+      "name": "Worker Luck",
+      "attribute": "minecraft:generic.luck",
+      "value": -1.0,
+      "operation": "addition"
+    }
+  ]
+}

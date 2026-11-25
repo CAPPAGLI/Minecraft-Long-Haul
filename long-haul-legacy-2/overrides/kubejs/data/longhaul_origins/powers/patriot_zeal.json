@@ -1,0 +1,44 @@
+{
+  "name": "Несгибаемый напор",
+  "description": "+25% сопротивления отбрасыванию; при здоровье ниже 50% получает +2.5 урона в ближнем бою и +3 брони.",
+  "type": "origins:multiple",
+  "kb": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Patriot KB",
+      "attribute": "minecraft:generic.knockback_resistance",
+      "value": 0.25,
+      "operation": "addition"
+    }
+  },
+  "rage_dmg": {
+    "type": "origins:conditioned_attribute",
+    "tick_rate": 20,
+    "modifier": {
+      "name": "Patriot Rage Dmg",
+      "attribute": "minecraft:generic.attack_damage",
+      "value": 2.5,
+      "operation": "addition"
+    },
+    "condition": {
+      "type": "origins:relative_health",
+      "comparison": "<=",
+      "compare_to": 0.5
+    }
+  },
+  "rage_arm": {
+    "type": "origins:conditioned_attribute",
+    "tick_rate": 20,
+    "modifier": {
+      "name": "Patriot Rage Arm",
+      "attribute": "minecraft:generic.armor",
+      "value": 3.0,
+      "operation": "addition"
+    },
+    "condition": {
+      "type": "origins:relative_health",
+      "comparison": "<=",
+      "compare_to": 0.5
+    }
+  }
+}

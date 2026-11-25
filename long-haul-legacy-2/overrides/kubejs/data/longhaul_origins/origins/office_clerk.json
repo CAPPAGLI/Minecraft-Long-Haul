@@ -1,0 +1,13 @@
+{
+  "name": "Офисный клерк",
+  "description": "Сбежавший из душного опенспейса: +опыт, +удача и +15% к выплатам контрактов и OpenTTD, но хрупкое тело.",
+  "powers": [
+    "longhaul_origins:clerk_paperwork",
+    "longhaul_origins:clerk_sedentary"
+  ],
+  "icon": {
+    "item": "minecraft:writable_book"
+  },
+  "order": 1,
+  "impact": 1
+}

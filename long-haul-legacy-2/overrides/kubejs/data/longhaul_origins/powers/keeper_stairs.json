@@ -1,0 +1,19 @@
+{
+  "name": "Скрип винтовой лестницы",
+  "description": "-10% скорости передвижения и -1 сердце максимального здоровья.",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "Keeper Speed",
+      "attribute": "minecraft:generic.movement_speed",
+      "value": -0.1,
+      "operation": "multiply_base"
+    },
+    {
+      "name": "Keeper HP",
+      "attribute": "minecraft:generic.max_health",
+      "value": -2.0,
+      "operation": "addition"
+    }
+  ]
+}

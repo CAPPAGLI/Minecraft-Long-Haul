@@ -1,0 +1,22 @@
+{
+  "name": "Бумажная хватка",
+  "description": "+15% опыта, +1.0 удачи и +15% бонуса к выплатам контрактов консорциума и OpenTTD (KubeJS).",
+  "type": "origins:multiple",
+  "xp": {
+    "type": "origins:modify_xp_gain",
+    "modifier": {
+      "name": "Clerk XP",
+      "operation": "multiply_base",
+      "value": 0.15
+    }
+  },
+  "luck": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Clerk Luck",
+      "attribute": "minecraft:generic.luck",
+      "value": 1.0,
+      "operation": "addition"
+    }
+  }
+}

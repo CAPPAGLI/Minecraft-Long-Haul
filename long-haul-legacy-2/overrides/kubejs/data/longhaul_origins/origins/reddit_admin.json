@@ -1,0 +1,13 @@
+{
+  "name": "Админ реддита",
+  "description": "[Ослабленное] Неповоротливый диванный модератор (-3 сердца, -18% скорости, -20% скорости атаки, +35% голода), зато трудно отбросить.",
+  "powers": [
+    "longhaul_origins:reddit_sluggish",
+    "longhaul_origins:reddit_mass"
+  ],
+  "icon": {
+    "item": "minecraft:cake"
+  },
+  "order": 30,
+  "impact": 3
+}

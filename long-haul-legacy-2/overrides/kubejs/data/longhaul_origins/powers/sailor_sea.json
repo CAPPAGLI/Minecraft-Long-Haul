@@ -1,0 +1,13 @@
+{
+  "name": "Властелин волн",
+  "description": "+50% скорости плавания и +30% бонуса к водным маршрутам OpenTTD / навигации на судах (KubeJS).",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "Sailor Swim",
+      "attribute": "forge:swim_speed",
+      "value": 0.5,
+      "operation": "multiply_base"
+    }
+  ]
+}

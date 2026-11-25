@@ -1,0 +1,25 @@
+{
+  "name": "Массивная туша",
+  "description": "+4 сердца здоровья, +3 природной брони, +50% сопротивления отбрасыванию и увеличенная ширина тела 1.28x (Pehkui, KubeJS).",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "Heavy HP",
+      "attribute": "minecraft:generic.max_health",
+      "value": 8.0,
+      "operation": "addition"
+    },
+    {
+      "name": "Heavy Armor",
+      "attribute": "minecraft:generic.armor",
+      "value": 3.0,
+      "operation": "addition"
+    },
+    {
+      "name": "Heavy KB",
+      "attribute": "minecraft:generic.knockback_resistance",
+      "value": 0.5,
+      "operation": "addition"
+    }
+  ]
+}

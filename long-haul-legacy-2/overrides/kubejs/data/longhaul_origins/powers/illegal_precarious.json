@@ -1,0 +1,19 @@
+{
+  "name": "Без документов",
+  "description": "-2 сердца максимального здоровья и -1.0 удачи.",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "Illegal HP",
+      "attribute": "minecraft:generic.max_health",
+      "value": -4.0,
+      "operation": "addition"
+    },
+    {
+      "name": "Illegal Luck",
+      "attribute": "minecraft:generic.luck",
+      "value": -1.0,
+      "operation": "addition"
+    }
+  ]
+}

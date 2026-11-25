@@ -1,0 +1,26 @@
+{
+  "name": "Тонкая обшивка",
+  "description": "-2 сердца максимального здоровья и +20% урона от огня.",
+  "type": "origins:multiple",
+  "hp": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Pilot HP",
+      "attribute": "minecraft:generic.max_health",
+      "value": -4.0,
+      "operation": "addition"
+    }
+  },
+  "fire": {
+    "type": "origins:modify_damage_taken",
+    "damage_condition": {
+      "type": "origins:in_tag",
+      "tag": "minecraft:is_fire"
+    },
+    "modifier": {
+      "name": "Pilot Fire",
+      "operation": "multiply_base",
+      "value": 0.2
+    }
+  }
+}

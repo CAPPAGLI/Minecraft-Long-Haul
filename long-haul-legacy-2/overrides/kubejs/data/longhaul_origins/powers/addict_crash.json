@@ -1,0 +1,22 @@
+{
+  "name": "Износ организма",
+  "description": "-3 сердца максимального здоровья и +25% расхода голода.",
+  "type": "origins:multiple",
+  "hp": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Addict HP",
+      "attribute": "minecraft:generic.max_health",
+      "value": -6.0,
+      "operation": "addition"
+    }
+  },
+  "exh": {
+    "type": "origins:modify_exhaustion",
+    "modifier": {
+      "name": "Addict Exhaustion",
+      "operation": "multiply_base",
+      "value": 0.25
+    }
+  }
+}

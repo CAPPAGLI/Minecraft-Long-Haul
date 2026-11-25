@@ -1,0 +1,19 @@
+{
+  "name": "Офисная атрофия",
+  "description": "-1.5 сердца максимального здоровья и -1.0 урона в ближнем бою.",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "Clerk HP",
+      "attribute": "minecraft:generic.max_health",
+      "value": -3.0,
+      "operation": "addition"
+    },
+    {
+      "name": "Clerk Melee",
+      "attribute": "minecraft:generic.attack_damage",
+      "value": -1.0,
+      "operation": "addition"
+    }
+  ]
+}

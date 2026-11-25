@@ -1,0 +1,13 @@
+{
+  "name": "Музыкант",
+  "description": "Душа дороги: +15% опыта, +1.0 удачи и лечащая/ускоряющая аура для союзников при игре на инструментах MIMI.",
+  "powers": [
+    "longhaul_origins:musician_melody",
+    "longhaul_origins:musician_hands"
+  ],
+  "icon": {
+    "item": "minecraft:note_block"
+  },
+  "order": 25,
+  "impact": 2
+}

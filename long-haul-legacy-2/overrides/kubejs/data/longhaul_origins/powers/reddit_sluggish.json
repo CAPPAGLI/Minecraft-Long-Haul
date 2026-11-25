@@ -1,0 +1,36 @@
+{
+  "name": "Тяжесть кресла",
+  "description": "-3 сердца здоровья, -18% скорости передвижения, -20% скорости атаки и +35% расхода голода.",
+  "type": "origins:multiple",
+  "attr": {
+    "type": "origins:attribute",
+    "modifiers": [
+      {
+        "name": "Reddit HP",
+        "attribute": "minecraft:generic.max_health",
+        "value": -6.0,
+        "operation": "addition"
+      },
+      {
+        "name": "Reddit Speed",
+        "attribute": "minecraft:generic.movement_speed",
+        "value": -0.18,
+        "operation": "multiply_base"
+      },
+      {
+        "name": "Reddit AtkSpd",
+        "attribute": "minecraft:generic.attack_speed",
+        "value": -0.2,
+        "operation": "multiply_base"
+      }
+    ]
+  },
+  "exh": {
+    "type": "origins:modify_exhaustion",
+    "modifier": {
+      "name": "Reddit Exhaustion",
+      "operation": "multiply_base",
+      "value": 0.35
+    }
+  }
+}

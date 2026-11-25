@@ -1,0 +1,20 @@
+{
+  "name": "Стальная оболочка",
+  "description": "+2 природной брони и иммунитет к Яду.",
+  "type": "origins:multiple",
+  "arm": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Robo Armor",
+      "attribute": "minecraft:generic.armor",
+      "value": 2.0,
+      "operation": "addition"
+    }
+  },
+  "imm": {
+    "type": "origins:effect_immunity",
+    "effects": [
+      "minecraft:poison"
+    ]
+  }
+}

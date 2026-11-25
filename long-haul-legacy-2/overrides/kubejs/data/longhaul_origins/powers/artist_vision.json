@@ -1,0 +1,13 @@
+{
+  "name": "Широкий мазок",
+  "description": "+1.5 удачи, дальность установки блоков 1.25x (Pehkui) и ускоренный прогресс аспекта «Урбанист» при постройках (KubeJS).",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "Artist Luck",
+      "attribute": "minecraft:generic.luck",
+      "value": 1.5,
+      "operation": "addition"
+    }
+  ]
+}

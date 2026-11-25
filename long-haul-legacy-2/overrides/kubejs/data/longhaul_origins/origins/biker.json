@@ -1,0 +1,13 @@
+{
+  "name": "Байкер",
+  "description": "Свобода шоссе: выше скорость, стойкость к отбрасыванию и +25% дохода с дорожных маршрутов OpenTTD.",
+  "powers": [
+    "longhaul_origins:biker_highway",
+    "longhaul_origins:biker_reckless"
+  ],
+  "icon": {
+    "item": "minecraft:leather_helmet"
+  },
+  "order": 2,
+  "impact": 2
+}

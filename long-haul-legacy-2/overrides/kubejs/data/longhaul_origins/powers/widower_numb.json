@@ -1,0 +1,22 @@
+{
+  "name": "Холодная тишина",
+  "description": "Ночное зрение, иммунитет к Тьме и Иссушению, а также бесшумные шаги.",
+  "type": "origins:multiple",
+  "nv": {
+    "type": "origins:night_vision",
+    "strength": 0.8
+  },
+  "imm": {
+    "type": "origins:effect_immunity",
+    "effects": [
+      "minecraft:darkness",
+      "minecraft:wither"
+    ]
+  },
+  "step": {
+    "type": "origins:prevent_game_event",
+    "events": [
+      "minecraft:step"
+    ]
+  }
+}

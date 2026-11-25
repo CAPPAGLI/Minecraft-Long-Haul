@@ -1,0 +1,19 @@
+{
+  "name": "Подавленная воля",
+  "description": "-1.5 урона в ближнем бою и -10% скорости передвижения.",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "Henpecked Dmg",
+      "attribute": "minecraft:generic.attack_damage",
+      "value": -1.5,
+      "operation": "addition"
+    },
+    {
+      "name": "Henpecked Spd",
+      "attribute": "minecraft:generic.movement_speed",
+      "value": -0.1,
+      "operation": "multiply_base"
+    }
+  ]
+}

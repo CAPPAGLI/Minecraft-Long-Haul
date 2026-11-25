@@ -1,0 +1,22 @@
+{
+  "name": "Не привык к шахтам",
+  "description": "-1 сердце здоровья и скорость копания ниже на 15%.",
+  "type": "origins:multiple",
+  "hp": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Gamekeeper HP",
+      "attribute": "minecraft:generic.max_health",
+      "value": -2.0,
+      "operation": "addition"
+    }
+  },
+  "mine": {
+    "type": "origins:modify_break_speed",
+    "modifier": {
+      "name": "Gamekeeper Mine",
+      "operation": "multiply_base",
+      "value": -0.15
+    }
+  }
+}

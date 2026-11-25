@@ -1,0 +1,19 @@
+{
+  "name": "Мирный нрав",
+  "description": "-1.0 урона в ближнем бою и -10% скорости атаки.",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "Cook Dmg",
+      "attribute": "minecraft:generic.attack_damage",
+      "value": -1.0,
+      "operation": "addition"
+    },
+    {
+      "name": "Cook AtkSpd",
+      "attribute": "minecraft:generic.attack_speed",
+      "value": -0.1,
+      "operation": "multiply_base"
+    }
+  ]
+}

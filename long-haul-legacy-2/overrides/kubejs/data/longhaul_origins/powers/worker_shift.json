@@ -1,0 +1,23 @@
+{
+  "name": "Цеховая закалка",
+  "description": "+25% скорости копания киркой, иммунитет к Усталости; потеря от «Рудного голода» ниже на 35% + Спешка у блоков Create (KubeJS).",
+  "type": "origins:multiple",
+  "mine": {
+    "type": "origins:modify_break_speed",
+    "block_condition": {
+      "type": "origins:in_tag",
+      "tag": "minecraft:mineable/pickaxe"
+    },
+    "modifier": {
+      "name": "Worker Pickaxe",
+      "operation": "multiply_base",
+      "value": 0.25
+    }
+  },
+  "imm": {
+    "type": "origins:effect_immunity",
+    "effects": [
+      "minecraft:mining_fatigue"
+    ]
+  }
+}

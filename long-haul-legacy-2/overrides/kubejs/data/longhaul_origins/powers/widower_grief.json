@@ -1,0 +1,22 @@
+{
+  "name": "Надлом",
+  "description": "-2 сердца максимального здоровья и -15% эффективности лечения.",
+  "type": "origins:multiple",
+  "hp": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Widower HP",
+      "attribute": "minecraft:generic.max_health",
+      "value": -4.0,
+      "operation": "addition"
+    }
+  },
+  "heal": {
+    "type": "origins:modify_healing",
+    "modifier": {
+      "name": "Widower Heal",
+      "operation": "multiply_base",
+      "value": -0.15
+    }
+  }
+}

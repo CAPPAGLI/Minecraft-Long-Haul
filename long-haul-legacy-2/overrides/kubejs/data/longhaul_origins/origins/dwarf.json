@@ -1,0 +1,13 @@
+{
+  "name": "Дворф",
+  "description": "[Ослабленное] Низкий рост (0.74x через Pehkui), -2 сердца, -15% скорости и быстро тонет, зато быстрее копает киркой.",
+  "powers": [
+    "longhaul_origins:dwarf_stout",
+    "longhaul_origins:dwarf_pick"
+  ],
+  "icon": {
+    "item": "minecraft:iron_pickaxe"
+  },
+  "order": 32,
+  "impact": 3
+}

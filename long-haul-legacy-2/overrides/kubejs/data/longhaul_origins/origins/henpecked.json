@@ -1,0 +1,13 @@
+{
+  "name": "Каблук",
+  "description": "Привык терпеть всё молча: крепкая броня и быстрое лечение, но мягкий удар и нерешительность.",
+  "powers": [
+    "longhaul_origins:henpecked_patience",
+    "longhaul_origins:henpecked_timid"
+  ],
+  "icon": {
+    "item": "minecraft:lead"
+  },
+  "order": 12,
+  "impact": 2
+}

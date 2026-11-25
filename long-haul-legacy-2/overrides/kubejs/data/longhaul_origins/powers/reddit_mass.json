@@ -1,0 +1,13 @@
+{
+  "name": "Весовая категория",
+  "description": "+25% устойчивости к отбрасыванию.",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "Reddit KB",
+      "attribute": "minecraft:generic.knockback_resistance",
+      "value": 0.25,
+      "operation": "addition"
+    }
+  ]
+}

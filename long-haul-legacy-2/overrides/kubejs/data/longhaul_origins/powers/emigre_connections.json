@@ -1,0 +1,22 @@
+{
+  "name": "Диссидентские связи",
+  "description": "+25% опыта, +1.5 удачи и +15% к денежным наградам контрактов/грантов OpenTTD (KubeJS).",
+  "type": "origins:multiple",
+  "xp": {
+    "type": "origins:modify_xp_gain",
+    "modifier": {
+      "name": "Emigre XP",
+      "operation": "multiply_base",
+      "value": 0.25
+    }
+  },
+  "luck": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Emigre Luck",
+      "attribute": "minecraft:generic.luck",
+      "value": 1.5,
+      "operation": "addition"
+    }
+  }
+}

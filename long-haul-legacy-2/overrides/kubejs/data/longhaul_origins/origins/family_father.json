@@ -1,0 +1,13 @@
+{
+  "name": "Отец многодетной семьи",
+  "description": "Умеет тащить всё на себе: больше здоровья, брони и +6 слотов порога перегруза ценой аппетита.",
+  "powers": [
+    "longhaul_origins:father_backbone",
+    "longhaul_origins:father_exhaust"
+  ],
+  "icon": {
+    "item": "minecraft:chest"
+  },
+  "order": 5,
+  "impact": 2
+}

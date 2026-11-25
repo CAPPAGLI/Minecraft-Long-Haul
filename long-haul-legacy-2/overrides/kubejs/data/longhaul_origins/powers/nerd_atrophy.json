@@ -1,0 +1,49 @@
+{
+  "name": "Ослабленное тело",
+  "description": "-3 сердца здоровья, -1.5 урона в ближнем бою, -20% скорости атаки; под дневным солнцем получает Слабость и Медлительность (KubeJS).",
+  "type": "origins:multiple",
+  "attr": {
+    "type": "origins:attribute",
+    "modifiers": [
+      {
+        "name": "Nerd HP",
+        "attribute": "minecraft:generic.max_health",
+        "value": -6.0,
+        "operation": "addition"
+      },
+      {
+        "name": "Nerd Dmg",
+        "attribute": "minecraft:generic.attack_damage",
+        "value": -1.5,
+        "operation": "addition"
+      },
+      {
+        "name": "Nerd AtkSpd",
+        "attribute": "minecraft:generic.attack_speed",
+        "value": -0.2,
+        "operation": "multiply_base"
+      }
+    ]
+  },
+  "sun_spd": {
+    "type": "origins:conditioned_attribute",
+    "tick_rate": 20,
+    "modifier": {
+      "name": "Nerd Sun Slow",
+      "attribute": "minecraft:generic.movement_speed",
+      "value": -0.15,
+      "operation": "multiply_base"
+    },
+    "condition": {
+      "type": "origins:and",
+      "conditions": [
+        {
+          "type": "origins:exposed_to_sky"
+        },
+        {
+          "type": "origins:daytime"
+        }
+      ]
+    }
+  }
+}

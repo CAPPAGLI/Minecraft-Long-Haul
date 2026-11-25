@@ -1,0 +1,13 @@
+{
+  "name": "Политический эмигрант",
+  "description": "Уехал с головой, но без тыла: +25% опыта, +1.5 удачи и +15% к наградам контрактов, но слаб в ближнем бою.",
+  "powers": [
+    "longhaul_origins:emigre_connections",
+    "longhaul_origins:emigre_vulnerable"
+  ],
+  "icon": {
+    "item": "minecraft:compass"
+  },
+  "order": 14,
+  "impact": 2
+}

@@ -1,0 +1,38 @@
+{
+  "name": "Хрупкий баланс",
+  "description": "-2.5 сердца здоровья, -1.5 урона в ближнем бою, -15% эффективности лечения и +25% расхода голода.",
+  "type": "origins:multiple",
+  "attr": {
+    "type": "origins:attribute",
+    "modifiers": [
+      {
+        "name": "NB HP",
+        "attribute": "minecraft:generic.max_health",
+        "value": -5.0,
+        "operation": "addition"
+      },
+      {
+        "name": "NB Dmg",
+        "attribute": "minecraft:generic.attack_damage",
+        "value": -1.5,
+        "operation": "addition"
+      }
+    ]
+  },
+  "heal": {
+    "type": "origins:modify_healing",
+    "modifier": {
+      "name": "NB Heal",
+      "operation": "multiply_base",
+      "value": -0.15
+    }
+  },
+  "exh": {
+    "type": "origins:modify_exhaustion",
+    "modifier": {
+      "name": "NB Exhaustion",
+      "operation": "multiply_base",
+      "value": 0.25
+    }
+  }
+}

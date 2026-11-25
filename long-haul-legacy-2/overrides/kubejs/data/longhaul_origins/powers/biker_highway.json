@@ -1,0 +1,19 @@
+{
+  "name": "Король шоссе",
+  "description": "+12% скорости передвижения, +25% сопротивления отбрасыванию и +25% к выплатам дорожных маршрутов OpenTTD (KubeJS).",
+  "type": "origins:attribute",
+  "modifiers": [
+    {
+      "name": "Biker Speed",
+      "attribute": "minecraft:generic.movement_speed",
+      "value": 0.12,
+      "operation": "multiply_base"
+    },
+    {
+      "name": "Biker Knockback",
+      "attribute": "minecraft:generic.knockback_resistance",
+      "value": 0.25,
+      "operation": "addition"
+    }
+  ]
+}

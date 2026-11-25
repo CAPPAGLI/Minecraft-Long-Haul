@@ -1,0 +1,22 @@
+{
+  "name": "Вечная нехватка сил",
+  "description": "Расход сытости выше на 25%, а скорость атаки ниже на 8%.",
+  "type": "origins:multiple",
+  "exh": {
+    "type": "origins:modify_exhaustion",
+    "modifier": {
+      "name": "Father Exhaustion",
+      "operation": "multiply_base",
+      "value": 0.25
+    }
+  },
+  "atk": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Father AtkSpd",
+      "attribute": "minecraft:generic.attack_speed",
+      "value": -0.08,
+      "operation": "multiply_base"
+    }
+  }
+}

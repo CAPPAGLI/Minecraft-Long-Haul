@@ -1,0 +1,13 @@
+{
+  "name": "Скинхед",
+  "description": "Агрессивный уличный боец: тяжёлый кулак и стойкость в драке, но плохая удача и дорогие сделки.",
+  "powers": [
+    "longhaul_origins:skinhead_brawl",
+    "longhaul_origins:skinhead_trouble"
+  ],
+  "icon": {
+    "item": "minecraft:iron_boots"
+  },
+  "order": 9,
+  "impact": 2
+}

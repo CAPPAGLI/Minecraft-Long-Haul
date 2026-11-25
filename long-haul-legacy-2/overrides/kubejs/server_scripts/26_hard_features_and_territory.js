@@ -453,6 +453,10 @@ function lhFirstJoinRandomSpawn(server, player) {
     wx = Math.max(-safeHalf, Math.min(safeHalf, wx));
     wz = Math.max(-safeHalf, Math.min(safeHalf, wz));
     var cSc = global.LHOpenTTD ? global.LHOpenTTD.sectorCoords(wx, wz) : { sx: Math.floor(wx / 256), sz: Math.floor(wz / 256) };
+    if (safeHalf >= 560 && global.LHOpenTTD && global.LHOpenTTD.isSpawnProtectedSector &&
+        global.LHOpenTTD.isSpawnProtectedSector(cSc.sx, cSc.sz)) {
+      continue;
+    }
     if (ottdSt && global.LHOpenTTD) {
       var ownerInfo = global.LHOpenTTD.resolveSectorOwner(ottdSt, cSc.sx, cSc.sz);
       if (ownerInfo.kind === 'claimed') continue;
@@ -1054,17 +1058,20 @@ function lhProgressionRecompute(server, player, dryRun) {
     return !!(cDb.players[pid] && cDb.players[pid].terminal);
   });
 
-  // ch00: Chapter 00 (Story prologue; 03_dinner_telegram moved to Chapter 01)
+  // ch00: Chapter 00 (12-act Fight-Club prologue; completes via Heracles final quest or /lh prologue complete)
+  var ch00Done = false;
   if (player && typeof player.isAdvancementDone === 'function') {
-    var storyOk = [
-      'longhaul:story/01_left_for_bread',
-      'longhaul:story/02_bakery_burned',
-      'longhaul:story/04_snail_at_door',
-      'longhaul:story/05_continental_bakery',
-      'longhaul:story/06_forgot_the_milk'
-    ].every(function (a) { return player.isAdvancementDone(a); });
-    if (storyOk) lhUnlockChapter(server, 'ch00', true, dryRun, player);
+    ch00Done = player.isAdvancementDone('longhaul:story/06_forgot_the_milk');
   }
+  if (!ch00Done && LHHeraclesProgressHandler && player && player.uuid) {
+    try {
+      var qProg0 = LHHeraclesProgressHandler.getProgress(server, player.uuid);
+      if (qProg0 && typeof qProg0.isComplete === 'function' && qProg0.isComplete('story_06_forgot_the_milk')) {
+        ch00Done = true;
+      }
+    } catch (eHeraclesCh00) {}
+  }
+  if (ch00Done) lhUnlockChapter(server, 'ch00', true, dryRun, player);
 
   // ch01: Rules & Start (auto-completes once rules confirmed OR ch00 done + terminal placed)
   if (db.rulesConfirmed || (db.chapters.ch00 && hasTerminal)) {
@@ -1194,6 +1201,9 @@ BlockEvents.broken(function (event) {
       }
     } catch (eSilk) {}
     var oreChance = 0.50 * (typeof lhCompanyScarcityFactor === 'function' ? lhCompanyScarcityFactor(server, player, 'mining') : 1.0);
+    if (typeof lhPlayerHasOrigin === 'function' && lhPlayerHasOrigin(player, 'factory_worker')) {
+      oreChance *= 0.65;
+    }
     if (!hasSilk && Math.random() < oreChance) {
       block.popItem('minecraft:cobblestone');
       block.set('minecraft:air');
@@ -1330,6 +1340,7 @@ EntityEvents.hurt(function (event) {
   if (!ent || typeof ent.isPlayer !== 'function' || !ent.isPlayer()) return;
   var server = ent.server;
   if (!server || !lhHardIsActive(server, 'spore_spoilage')) return;
+  if (typeof lhPlayerHasOrigin === 'function' && lhPlayerHasOrigin(ent, 'cook')) return;
   var compHurt = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, ent) : null;
   if (compHurt && compHurt.resourceSpec === 'agro') return;
   if (Number(ent.y) >= 68 || Math.random() >= 0.25) return;
@@ -1476,8 +1487,9 @@ ServerEvents.tick(function (event) {
     if (LHProgTick % 160 === 0 && lhHardIsActive(server, 'overload_encumbrance')) {
       var compRoad = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, p) : null;
       var roadBonus = (compRoad && compRoad.transportSpec === 'road') ? 8 : 0;
+      var fatherBonus = (typeof lhPlayerHasOrigin === 'function' && lhPlayerHasOrigin(p, 'family_father')) ? 6 : 0;
       var usedSlots = lhCountOccupiedSlots(p);
-      var limit = Math.max(16, 25 - Math.floor(k / 20)) + roadBonus;
+      var limit = Math.max(16, 25 - Math.floor(k / 20)) + roadBonus + fatherBonus;
       if (usedSlots > limit) {
         var amp = k >= 50 ? 1 : 0;
         server.runCommandSilent('effect give ' + uname + ' minecraft:slowness 5 ' + amp + ' true');
@@ -1486,7 +1498,8 @@ ServerEvents.tick(function (event) {
     }
     if (LHProgTick % 240 === 0 && lhHardIsActive(server, 'cold_altitude_frost') && py >= 120) {
       var compAir = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, p) : null;
-      var fullArmor = (compAir && compAir.transportSpec === 'air') ||
+      var originColdImm = (typeof lhPlayerHasOrigin === 'function' && (lhPlayerHasOrigin(p, 'vagabond') || lhPlayerHasOrigin(p, 'hermit')));
+      var fullArmor = originColdImm || (compAir && compAir.transportSpec === 'air') ||
         (p.headArmorItem && !p.headArmorItem.empty &&
         p.chestArmorItem && !p.chestArmorItem.empty &&
         p.legsArmorItem && !p.legsArmorItem.empty &&
@@ -1505,7 +1518,8 @@ ServerEvents.tick(function (event) {
     if (LHProgTick % 320 === 0 && lhHardIsActive(server, 'toxic_rain_corrosion')) {
       var isRaining = false;
       try { isRaining = !!p.level.isRaining(); } catch (eRain) {}
-      if (isRaining && seeSky) {
+      var keeperRainImm = (typeof lhPlayerHasOrigin === 'function' && lhPlayerHasOrigin(p, 'lighthouse_keeper'));
+      if (isRaining && seeSky && !keeperRainImm) {
         server.runCommandSilent('effect give ' + uname + ' minecraft:wither 3 0 true');
         var armorSlots = [p.headArmorItem, p.chestArmorItem, p.legsArmorItem, p.feetArmorItem];
         for (var ai = 0; ai < armorSlots.length; ai++) {
@@ -1519,7 +1533,8 @@ ServerEvents.tick(function (event) {
     if (LHProgTick % 480 === 0 && lhHardIsActive(server, 'machine_sabotage_lightning')) {
       var storm = false;
       try { storm = !!p.level.isThundering() || (k >= 35 && !!p.level.isRaining()); } catch (eSt) {}
-      if (storm && seeSky && Math.random() < 0.25) {
+      var keeperStormImm = (typeof lhPlayerHasOrigin === 'function' && lhPlayerHasOrigin(p, 'lighthouse_keeper'));
+      if (storm && seeSky && !keeperStormImm && Math.random() < 0.25) {
         var angL = Math.random() * 6.2831853;
         var radL = 5.0 + Math.random() * 4.0;
         var lx = Math.round(px + Math.cos(angL) * radL);
@@ -1777,10 +1792,42 @@ ServerEvents.commandRegistry(function (event) {
   }));
   root.then(rules);
 
+  var prologue = C.literal('prologue');
+  prologue.then(C.literal('smoke').executes(function (ctx) {
+    var p = ctx.source.playerOrException;
+    var hasDoomed = (typeof Item !== 'undefined' && Item.exists && Item.exists('doomedmatu:cigarette_pack'));
+    if (hasDoomed) {
+      p.give('doomedmatu:cigarette_pack');
+      p.give(Item.of('doomedmatu:cigarette', 3));
+      if (Item.exists('doomedmatu:lighter')) p.give('doomedmatu:lighter');
+      lhMsg(p, '§7[Пролог] Выданы сигареты и зажигалка из мода DOOMED.');
+    } else {
+      lhMsg(p, '§7[Пролог] Опциональный мод DOOMED не установлен — использована ванильная зажигалка (см. optional-mods/README.md).');
+    }
+    return 1;
+  }));
+  prologue.then(C.literal('complete').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException;
+    if (typeof lhUnlock === 'function') {
+      lhUnlock(p, 'longhaul:story/01_left_for_bread');
+      lhUnlock(p, 'longhaul:story/02_bakery_burned');
+      lhUnlock(p, 'longhaul:story/04_snail_at_door');
+      lhUnlock(p, 'longhaul:story/05_continental_bakery');
+      lhUnlock(p, 'longhaul:story/06_forgot_the_milk');
+    }
+    var unlockedNow = lhUnlockChapter(server, 'ch00', true, false, p);
+    var infoP = lhApplyTerritoryBorder(server, false);
+    lhMsg(p, unlockedNow
+      ? ('§aПролог завершён! Граница мира расширена до ' + infoP.size + '×' + infoP.size + ' — впереди свобода и новая жизнь.')
+      : ('§aПролог завершён. Текущая граница мира: ' + infoP.size + '×' + infoP.size + '.'));
+    return 1;
+  }));
+  root.then(prologue);
+
   var doomed = C.literal('doomed');
   doomed.then(C.literal('status').executes(function (ctx) {
     var p = ctx.source.playerOrException;
-    var loaded = typeof Platform !== 'undefined' && Platform.isLoaded && Platform.isLoaded('doomed');
+    var loaded = typeof Platform !== 'undefined' && Platform.isLoaded && (Platform.isLoaded('doomedmatu') || Platform.isLoaded('doomed'));
     lhMsg(p, loaded
       ? 'Опциональный мод DOOMED установлен! Включение: /doom, отключение: /doom off. Проверка: /lh doomed verify.'
       : 'Опциональный мод DOOMED не установлен (см. DOOMED.md и optional-mods/README.md). Базовая игра работает без него.');
@@ -1792,7 +1839,7 @@ ServerEvents.commandRegistry(function (event) {
     db.doomedVerified = true;
     lhProgSave(server);
     lhUnlock(p, 'longhaul:doomed/checked');
-    var loaded = typeof Platform !== 'undefined' && Platform.isLoaded && Platform.isLoaded('doomed');
+    var loaded = typeof Platform !== 'undefined' && Platform.isLoaded && (Platform.isLoaded('doomedmatu') || Platform.isLoaded('doomed'));
     lhMsg(p, loaded
       ? 'DOOMED проверен на сервере: отметка для главы 14 выдана.'
       : 'Протокол полевого выживания (Глава 14 · DOOMED) подтверждён сервером.');

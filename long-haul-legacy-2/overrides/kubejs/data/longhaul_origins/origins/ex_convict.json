@@ -1,0 +1,13 @@
+{
+  "name": "Бывший зэк",
+  "description": "Вышел по УДО в большой мир: крепкое здоровье, броня, иммунитет к яду и тяжёлый удар, но дорогие компании.",
+  "powers": [
+    "longhaul_origins:convict_grit",
+    "longhaul_origins:convict_record"
+  ],
+  "icon": {
+    "item": "minecraft:iron_bars"
+  },
+  "order": 15,
+  "impact": 2
+}

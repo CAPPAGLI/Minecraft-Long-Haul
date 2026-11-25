@@ -1,0 +1,21 @@
+{
+  "name": "Полёт без границ",
+  "description": "Встроенное планирование без элитр, -35% урона от падения и +30% к авиамаршрутам OpenTTD / полётам Immersive Aircraft (KubeJS).",
+  "type": "origins:multiple",
+  "glide": {
+    "type": "origins:elytra_flight",
+    "render_elytra": false
+  },
+  "fall": {
+    "type": "origins:modify_damage_taken",
+    "damage_condition": {
+      "type": "origins:in_tag",
+      "tag": "minecraft:is_fall"
+    },
+    "modifier": {
+      "name": "Pilot Fall",
+      "operation": "multiply_base",
+      "value": -0.35
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "Прыткие лапки",
+  "description": "+10% скорости передвижения и +15% высоты прыжка.",
+  "type": "origins:multiple",
+  "spd": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Furry Speed",
+      "attribute": "minecraft:generic.movement_speed",
+      "value": 0.1,
+      "operation": "multiply_base"
+    }
+  },
+  "jmp": {
+    "type": "origins:modify_jump",
+    "modifier": {
+      "name": "Furry Jump",
+      "operation": "multiply_base",
+      "value": 0.15
+    }
+  }
+}

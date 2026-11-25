@@ -1,0 +1,13 @@
+{
+  "name": "Бродяга",
+  "description": "Вечный странник с рюкзаком: быстрый шаг, минимум голода и быстрая разведка новых секторов.",
+  "powers": [
+    "longhaul_origins:vagabond_road",
+    "longhaul_origins:vagabond_unarmored"
+  ],
+  "icon": {
+    "item": "minecraft:campfire"
+  },
+  "order": 11,
+  "impact": 1
+}

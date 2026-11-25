@@ -1,0 +1,20 @@
+{
+  "name": "Лужёная глотка",
+  "description": "Полный иммунитет к Тошноте, +20% сопротивления отбрасыванию; напитки Vinery/Brewin' дают Силу и Сопротивление (KubeJS).",
+  "type": "origins:multiple",
+  "imm": {
+    "type": "origins:effect_immunity",
+    "effects": [
+      "minecraft:nausea"
+    ]
+  },
+  "kb": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Alcoholic KB",
+      "attribute": "minecraft:generic.knockback_resistance",
+      "value": 0.2,
+      "operation": "addition"
+    }
+  }
+}

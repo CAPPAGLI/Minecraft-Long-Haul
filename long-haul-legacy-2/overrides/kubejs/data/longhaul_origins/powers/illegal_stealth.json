@@ -1,0 +1,28 @@
+{
+  "name": "Вне радаров",
+  "description": "Бесшумные шаги, +15% скорости передвижения, +20% скорости копания и сниженная дистанция обнаружения мобами (Pehkui, KubeJS).",
+  "type": "origins:multiple",
+  "step": {
+    "type": "origins:prevent_game_event",
+    "events": [
+      "minecraft:step"
+    ]
+  },
+  "spd": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Illegal Speed",
+      "attribute": "minecraft:generic.movement_speed",
+      "value": 0.15,
+      "operation": "multiply_base"
+    }
+  },
+  "mine": {
+    "type": "origins:modify_break_speed",
+    "modifier": {
+      "name": "Illegal Mine",
+      "operation": "multiply_base",
+      "value": 0.2
+    }
+  }
+}

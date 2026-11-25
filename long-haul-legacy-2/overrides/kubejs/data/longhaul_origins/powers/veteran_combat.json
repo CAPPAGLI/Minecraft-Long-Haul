@@ -1,0 +1,49 @@
+{
+  "name": "Фронтовая броня",
+  "description": "+3 сердца здоровья, +2 брони, +1.5 урона в ближнем бою и -25% урона от взрывов и снарядов.",
+  "type": "origins:multiple",
+  "attr": {
+    "type": "origins:attribute",
+    "modifiers": [
+      {
+        "name": "Veteran HP",
+        "attribute": "minecraft:generic.max_health",
+        "value": 6.0,
+        "operation": "addition"
+      },
+      {
+        "name": "Veteran Armor",
+        "attribute": "minecraft:generic.armor",
+        "value": 2.0,
+        "operation": "addition"
+      },
+      {
+        "name": "Veteran Dmg",
+        "attribute": "minecraft:generic.attack_damage",
+        "value": 1.5,
+        "operation": "addition"
+      }
+    ]
+  },
+  "res": {
+    "type": "origins:modify_damage_taken",
+    "damage_condition": {
+      "type": "origins:or",
+      "conditions": [
+        {
+          "type": "origins:in_tag",
+          "tag": "minecraft:is_explosion"
+        },
+        {
+          "type": "origins:in_tag",
+          "tag": "minecraft:is_projectile"
+        }
+      ]
+    },
+    "modifier": {
+      "name": "Veteran Res",
+      "operation": "multiply_base",
+      "value": -0.25
+    }
+  }
+}

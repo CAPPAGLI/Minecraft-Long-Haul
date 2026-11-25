@@ -1,0 +1,14 @@
+{
+  "name": "Старая кирка",
+  "description": "+25% скорости копания киркой.",
+  "type": "origins:modify_break_speed",
+  "block_condition": {
+    "type": "origins:in_tag",
+    "tag": "minecraft:mineable/pickaxe"
+  },
+  "modifier": {
+    "name": "Dwarf Mine",
+    "operation": "multiply_base",
+    "value": 0.25
+  }
+}

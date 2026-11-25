@@ -1,0 +1,13 @@
+{
+  "name": "Егерь",
+  "description": "Лесной охотник: +20% урона снарядами, быстрее движется в лесу/тайге и не боится лесных чащ.",
+  "powers": [
+    "longhaul_origins:gamekeeper_hunt",
+    "longhaul_origins:gamekeeper_woods"
+  ],
+  "icon": {
+    "item": "minecraft:bow"
+  },
+  "order": 20,
+  "impact": 2
+}

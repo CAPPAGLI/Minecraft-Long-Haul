@@ -1,0 +1,35 @@
+{
+  "name": "Вне закона",
+  "description": "-1.5 сердца здоровья и +20% урона от падения и огня.",
+  "type": "origins:multiple",
+  "hp": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Bandit HP",
+      "attribute": "minecraft:generic.max_health",
+      "value": -3.0,
+      "operation": "addition"
+    }
+  },
+  "vuln": {
+    "type": "origins:modify_damage_taken",
+    "damage_condition": {
+      "type": "origins:or",
+      "conditions": [
+        {
+          "type": "origins:in_tag",
+          "tag": "minecraft:is_fall"
+        },
+        {
+          "type": "origins:in_tag",
+          "tag": "minecraft:is_fire"
+        }
+      ]
+    },
+    "modifier": {
+      "name": "Bandit Vuln",
+      "operation": "multiply_base",
+      "value": 0.2
+    }
+  }
+}

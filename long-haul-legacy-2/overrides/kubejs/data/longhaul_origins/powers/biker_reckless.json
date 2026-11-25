@@ -1,0 +1,25 @@
+{
+  "name": "Безбашенная езда",
+  "description": "Расход голода выше на 15%, а входящий урон от снарядов выше на 15%.",
+  "type": "origins:multiple",
+  "exh": {
+    "type": "origins:modify_exhaustion",
+    "modifier": {
+      "name": "Biker Exhaustion",
+      "operation": "multiply_base",
+      "value": 0.15
+    }
+  },
+  "proj": {
+    "type": "origins:modify_damage_taken",
+    "damage_condition": {
+      "type": "origins:in_tag",
+      "tag": "minecraft:is_projectile"
+    },
+    "modifier": {
+      "name": "Biker Proj",
+      "operation": "multiply_base",
+      "value": 0.15
+    }
+  }
+}

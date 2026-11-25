@@ -1,0 +1,13 @@
+{
+  "name": "Нелегальный иммигрант",
+  "description": "Работает быстро и незаметно: тихие шаги, проворство, низкая заметность (Pehkui), но мало здоровья и удачи.",
+  "powers": [
+    "longhaul_origins:illegal_stealth",
+    "longhaul_origins:illegal_precarious"
+  ],
+  "icon": {
+    "item": "minecraft:leather_boots"
+  },
+  "order": 13,
+  "impact": 2
+}

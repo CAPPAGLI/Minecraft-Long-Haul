@@ -1,0 +1,13 @@
+{
+  "name": "Художник",
+  "description": "Видит форму на расстоянии: +1.5 удачи, дальность строительства 1.25x (Pehkui) и двойной прогресс урбаниста.",
+  "powers": [
+    "longhaul_origins:artist_vision",
+    "longhaul_origins:artist_fragile"
+  ],
+  "icon": {
+    "item": "minecraft:painting"
+  },
+  "order": 27,
+  "impact": 1
+}

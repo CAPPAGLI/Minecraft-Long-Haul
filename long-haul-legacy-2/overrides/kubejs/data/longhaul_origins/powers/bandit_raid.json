@@ -1,0 +1,22 @@
+{
+  "name": "Вооружённый налёт",
+  "description": "+10% скорости передвижения, +15% урона из луков/арбалетов/TaCZ и +25% добычи при рейдах OpenTTD (KubeJS).",
+  "type": "origins:multiple",
+  "spd": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Bandit Speed",
+      "attribute": "minecraft:generic.movement_speed",
+      "value": 0.1,
+      "operation": "multiply_base"
+    }
+  },
+  "proj": {
+    "type": "origins:modify_projectile_damage",
+    "modifier": {
+      "name": "Bandit Ranged",
+      "operation": "multiply_base",
+      "value": 0.15
+    }
+  }
+}

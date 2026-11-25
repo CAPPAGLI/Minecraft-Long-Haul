@@ -1,0 +1,13 @@
+{
+  "name": "Флешбэки и шрамы",
+  "description": "Эффективность лечения ниже на 25%; во время грозы возможны короткие приступы Тьмы (KubeJS).",
+  "type": "origins:multiple",
+  "heal": {
+    "type": "origins:modify_healing",
+    "modifier": {
+      "name": "Veteran Heal",
+      "operation": "multiply_base",
+      "value": -0.25
+    }
+  }
+}

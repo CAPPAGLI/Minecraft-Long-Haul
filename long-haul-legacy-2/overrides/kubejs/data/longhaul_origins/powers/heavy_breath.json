@@ -1,0 +1,22 @@
+{
+  "name": "Тяжёлая одышка",
+  "description": "-16% скорости передвижения и +30% расхода голода.",
+  "type": "origins:multiple",
+  "spd": {
+    "type": "origins:attribute",
+    "modifier": {
+      "name": "Heavy Speed",
+      "attribute": "minecraft:generic.movement_speed",
+      "value": -0.16,
+      "operation": "multiply_base"
+    }
+  },
+  "exh": {
+    "type": "origins:modify_exhaustion",
+    "modifier": {
+      "name": "Heavy Exhaustion",
+      "operation": "multiply_base",
+      "value": 0.3
+    }
+  }
+}

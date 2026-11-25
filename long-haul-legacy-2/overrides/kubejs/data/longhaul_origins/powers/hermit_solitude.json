@@ -1,0 +1,17 @@
+{
+  "name": "Сила уединения",
+  "description": "Ночное зрение, -20% расхода голода; вдали от других игроков (>48 м) получает регенерацию и защиту от холода (KubeJS).",
+  "type": "origins:multiple",
+  "nv": {
+    "type": "origins:night_vision",
+    "strength": 0.85
+  },
+  "exh": {
+    "type": "origins:modify_exhaustion",
+    "modifier": {
+      "name": "Hermit Exhaustion",
+      "operation": "multiply_base",
+      "value": -0.2
+    }
+  }
+}
