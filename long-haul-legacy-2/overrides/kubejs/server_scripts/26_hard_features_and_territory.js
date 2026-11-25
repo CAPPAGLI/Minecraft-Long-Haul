@@ -651,11 +651,12 @@ function lhApplyTerritoryBorder(server, announce, forceApply) {
   var info = lhTerritoryCounts(server);
   var db = lhProgRead(server);
   var prev = Number(db.lastBorderSize || 0);
-  if (!forceApply && prev === info.size && prev > 0) {
+  var ow = server.overworld();
+  var actualSize = (ow && ow.worldBorder) ? Math.round(Number(ow.worldBorder.size)) : 0;
+  if (!forceApply && prev === info.size && prev > 0 && actualSize === info.size) {
     return info;
   }
-  var ow = server.overworld();
-  if (ow && ow.worldBorder) {
+  if (ow && ow.worldBorder && (forceApply || actualSize !== info.size)) {
     ow.worldBorder.setCenter(0, 0);
     ow.worldBorder.setSize(info.size);
   }
