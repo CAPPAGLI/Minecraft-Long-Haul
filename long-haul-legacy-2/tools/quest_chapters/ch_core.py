@@ -102,7 +102,7 @@ def build_core_chapters():
          ], ['story_05b_no_looking_back'], {
              'xp': r_xp(80, 'POINTS'),
              'item': r_item('minecraft:emerald', 2),
-             'permit': r_item('longhaul:transport_permit', 1),
+             'manifest': r_item('longhaul:cargo_manifest', 1),
          }),
         ('story_05d_point_of_no_return', 'Акт XI · Точка невозврата', 'minecraft:oak_door', [-260, 60],
          t_check('Перешагнуть старую черту'), [
@@ -121,7 +121,7 @@ def build_core_chapters():
          ], ['story_05d_point_of_no_return'], {
              'xp': r_xp(2, 'LEVEL'),
              'item': r_item('longhaul:field_rations', 4),
-             'voucher': r_item('longhaul:route_voucher', 1),
+             'tablet': r_item('longhaul:control_tablet', 1),
              'prologue_done': r_command('lh prologue complete', 'Расширить границу мира и начать новую жизнь', 'minecraft:compass'),
          }),
     ]

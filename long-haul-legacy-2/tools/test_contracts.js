@@ -666,6 +666,16 @@ test('Spawn/border safety guards and native Xaero territory integration are wire
     });
   });
 
+  // Ensure every longhaul:* item referenced in any Heracles quest is registered in 01_longhaul_items.js
+  const lhItemsJs = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/startup_scripts/01_longhaul_items.js'), 'utf8');
+  const regLh = new Set([...lhItemsJs.matchAll(/\['([a-z0-9_]+)',/g)].map(m => 'longhaul:' + m[1]));
+  fs.readdirSync(qDir).filter(f => f.endsWith('.json')).forEach(f => {
+    const raw = fs.readFileSync(path.join(qDir, f), 'utf8');
+    for (const m of raw.matchAll(/"(longhaul:[a-z0-9_]+)"/g)) {
+      assert(regLh.has(m[1]), 'Quest ' + f + ' references unregistered item ' + m[1]);
+    }
+  });
+
   // Verify 34 custom longhaul_origins + Pehkui/mod integration script
   const layerJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'overrides/kubejs/data/origins/origin_layers/origin.json'), 'utf8'));
   assert.equal(layerJson.replace, true);
