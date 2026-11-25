@@ -32,7 +32,8 @@ public final class WorldMapSectorHighlighter extends ChunkHighlighter {
 
     @Override
     protected int[] getColors(ResourceKey<Level> dim, int cx, int cz) {
-        return LongHaulXaeroData.fillColors(this.resultStore, dim, cx, cz) ? this.resultStore : null;
+        int[] store = LongHaulXaeroData.threadColorStore();
+        return LongHaulXaeroData.fillColors(store, dim, cx, cz) ? store : null;
     }
 
     @Override

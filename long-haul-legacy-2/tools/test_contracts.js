@@ -425,9 +425,9 @@ test('OpenTTD buildings (2-way fork), territory violations, diplomacy, and suppl
   const path = require('path');
   const O = sandbox.global.LHOpenTTD;
   assert(O && O.BUILDING_CATALOG, 'BUILDING_CATALOG present');
-  assert.equal(Object.keys(O.BUILDING_CATALOG).length, 6, '6 building types across 3 categories');
+  assert.equal(Object.keys(O.BUILDING_CATALOG).length, 7, '7 building types across 4 categories');
   const cats = new Set(Object.values(O.BUILDING_CATALOG).map(b => b.category));
-  assert(cats.has('extraction') && cats.has('logistics') && cats.has('production'), 'all 3 building categories present');
+  assert(cats.has('extraction') && cats.has('logistics') && cats.has('production') && cats.has('security'), 'all 4 building categories present');
 
   const st = O.createInitialState();
   O.ensureBots(st);
@@ -694,6 +694,58 @@ test('Spawn/border safety guards and native Xaero territory integration are wire
     'runtime-mod/src/main/java/longhaul/runtime/xaero/MinimapSectorHighlighter.java',
     'runtime-mod/src/main/java/longhaul/runtime/xaero/XaeroRefreshBridge.java'
   ].forEach(rel => assert(fs.existsSync(path.join(ROOT, rel)), 'Xaero runtime file exists: ' + rel));
+
+  const xaeroJava = fs.readFileSync(path.join(ROOT, 'runtime-mod/src/main/java/longhaul/runtime/xaero/LongHaulXaeroData.java'), 'utf8');
+  assert(xaeroJava.includes('Math.floorDiv(c + 8, 16)'), 'LongHaulXaeroData chunkToSector aligns chunk [-8..7] with sector (0,0)');
+  assert(xaeroJava.includes('ThreadLocal'), 'LongHaulXaeroData uses ThreadLocal color buffer');
+  assert(s27.includes('LHOTTDTrespassWarn') && s27.includes('LHOTTDMiningWarn'), '27_openttd_companies implements warning-first grace period before reputation loss');
+  assert(s27.includes('lhHandlePatrolEvent') && s27.includes('lhSpawnPatrolGuards') && s27.includes('EntityEvents.death'), '27_openttd_companies wires Patrol Post alerts & L3 guard mob spawns');
+});
+
+test('Reputation-linked pricing, solo reputation sync, and upgradeable Patrol Post building', () => {
+  const O = sandbox.global.LHOpenTTD;
+  const E = sandbox.global.LHEconomyEngine;
+  const st = O.createInitialState();
+  O.ensureBots(st);
+  const econ = E.createInitialEconomyState();
+
+  // Solo player gets personal reputation penalty when violating bot territory, then syncs on company creation
+  const pViol = O.recordTerritoryViolation(st, null, 'bot_ironrail', 'trespass', 2, 0, 'solo_u1', 1.0);
+  assert(pViol.violated && pViol.newScore < 0, 'solo player reputation drops on violation');
+  const cSolo = O.companyCreate(st, 'solo_u1', 'solo_co', 'Соло', 1024, 0).company;
+  assert(O.getRelation(st, cSolo.id, 'bot_ironrail').score < 0, 'company inherits solo founder reputation');
+
+  // High reputation lowers buy prices & raises sell payouts; negative reputation does the reverse
+  const goodMods = O.getReputationPriceModifiers(80);
+  const badMods = O.getReputationPriceModifiers(-80);
+  assert(goodMods.buyMult < 1.0 && goodMods.sellMult > 1.0, 'positive rep lowers buy and boosts sell');
+  assert(badMods.buyMult > 1.0 && badMods.sellMult < 1.0, 'negative rep raises buy and lowers sell');
+
+  const sellerCo = O.companyCreate(st, 's_u', 'seller_rep', 'Торговец', 1536, 0).company;
+  const scS = O.sectorCoords(1536, 0);
+  const wh = O.buildCompanyBuilding(st, sellerCo.id, scS.sx, scS.sz, 'warehouse', 1536, 70, 0).building;
+  const lst = E.createFacilityListing(econ, sellerCo.id, wh, 'minecraft:iron_ingot', 20, 100).listing;
+  O.adjustRelation(st, cSolo.id, sellerCo.id, -80, 'тест наценки');
+  const badBuy = E.buyFacilityListing(st, econ, cSolo.id, lst.id, 1);
+  assert(badBuy.ok && badBuy.totalPrice > 100, 'negative reputation increases listing purchase price: ' + badBuy.totalPrice);
+  O.adjustRelation(st, cSolo.id, sellerCo.id, 160, 'тест скидки');
+  const goodBuy = E.buyFacilityListing(st, econ, cSolo.id, lst.id, 1);
+  assert(goodBuy.ok && goodBuy.totalPrice < 100, 'positive reputation lowers listing purchase price: ' + goodBuy.totalPrice);
+
+  // Patrol Post building: Lv1 -> Lv2 (radar_watchtower 420m) -> Lv3 (warden_bunker spawns guards)
+  cSolo.cash = 5000;
+  const pBuild = O.buildCompanyBuilding(st, cSolo.id, O.sectorCoords(1024, 0).sx, O.sectorCoords(1024, 0).sz, 'patrol_post', 1024, 70, 0);
+  assert(pBuild.ok && pBuild.building.type === 'patrol_post', 'patrol_post built cleanly');
+  let cov = O.findPatrolPostsCovering(st, cSolo.id, 1200, 0);
+  assert(cov.length === 1 && cov[0].radius === 256 && !cov[0].spawnGuards, 'Lv1 patrol covers 256m without guard spawns');
+  const up1 = O.upgradeCompanyBuilding(st, cSolo.id, O.sectorCoords(1024, 0).sx, O.sectorCoords(1024, 0).sz, 'radar_watchtower');
+  assert(up1.ok && up1.building.level === 2);
+  cov = O.findPatrolPostsCovering(st, cSolo.id, 1400, 0);
+  assert(cov.length === 1 && cov[0].radius === 420 && cov[0].markIntruders === true, 'Lv2 radar_watchtower extends radius to 420m');
+  const up2 = O.upgradeCompanyBuilding(st, cSolo.id, O.sectorCoords(1024, 0).sx, O.sectorCoords(1024, 0).sz, 'warden_bunker');
+  assert(up2.ok && up2.building.level === 3);
+  cov = O.findPatrolPostsCovering(st, cSolo.id, 1450, 0);
+  assert(cov.length === 1 && cov[0].spawnGuards === true && cov[0].guardCount === 3, 'Lv3 warden_bunker enables hostile guard spawns');
 });
 
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');

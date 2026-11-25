@@ -946,14 +946,17 @@ function lhGuiRenderBuildings(gui, server, player) {
     warehouse: 'minecraft:chest',
     airport: 'minecraft:elytra',
     factory: 'minecraft:blast_furnace',
-    refinery: 'minecraft:brewing_stand'
+    refinery: 'minecraft:brewing_stand',
+    patrol_post: 'minecraft:iron_sword'
   };
   bKeys.forEach(function (bt, idx) {
     var spec = global.LHOpenTTD.BUILDING_CATALOG[bt];
     var lore = [
       '§7Категория: §e' + spec.categoryName,
       '§fСтоимость: §6' + spec.cost + ' Cr',
-      '§fДоход за цикл: §a' + spec.baseIncome + ' Cr §7+ ' + (spec.baseQty || 0) + '× ' + (spec.baseProduct || ''),
+      spec.baseRadius
+        ? ('§fРадиус охраны: §b' + spec.baseRadius + ' м §7(на 3 ур. спавнит стражу)')
+        : ('§fДоход за цикл: §a' + spec.baseIncome + ' Cr §7+ ' + (spec.baseQty || 0) + '× ' + (spec.baseProduct || '')),
       '§e▶ ЛКМ: построить в секторе (' + sc.sx + ', ' + sc.sz + ')'
     ];
     lhGuiSlot(gui, idx, 0, bIcons[bt] || 'minecraft:anvil', spec.icon + ' §6' + spec.name, lore, function (pl) {
@@ -1059,12 +1062,16 @@ function lhGuiRenderDiplomacy(gui, server, player) {
   others.slice(0, 9).forEach(function (otherId, idx) {
     var c = st.companies[otherId];
     var rel = global.LHOpenTTD.getRelation(st, myComp.id, otherId);
+    var pm = global.LHOpenTTD.getReputationPriceModifiers
+      ? global.LHOpenTTD.getReputationPriceModifiers(rel.score)
+      : { buyMult: 1.0, sellMult: 1.0, standing: '' };
     var tLic = global.LHOpenTTD.canTransit(st, myComp.id, otherId);
     var mLic = global.LHOpenTTD.canMine(st, myComp.id, otherId);
     lhGuiSlot(gui, idx, 1, LH_COMP_WOOL[lhCompanyMcColor(c)] || 'minecraft:white_wool',
       c.colorCode + c.name + (rel.alliance ? ' §a[АЛЬЯНС]' : ''),
       [
         '§fОтношение: §e' + rel.score + ' §7(' + global.LHOpenTTD.getStandingLabel(rel.score) + ')',
+        '§fЦены: покупка §e×' + pm.buyMult + ' §7| сбыт §a×' + pm.sellMult,
         '§fПроход: ' + (tLic ? '§aЕсть' : '§cНет') + ' §7| Добыча: ' + (mLic ? '§aЕсть' : '§cНет'),
         '§aЛКМ: Альянс / Расторгнуть',
         '§bПКМ: Подарок (+15 отношений за 100 Cr)'

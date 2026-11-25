@@ -6,6 +6,11 @@ var LHOTTDTick = 0;
 var LHOTTDLastSectorByPlayer = {};
 var LHOTTDLastViolationByPlayer = {};
 var LHOTTDLastBreakWarnByPlayer = {};
+var LHOTTDTrespassWarn = {};
+var LHOTTDMiningWarn = {};
+var LHOTTDPatrolNotifyCooldown = {};
+var LHOTTDPatrolGuardCooldown = {};
+var LHOTTDLastGatherAlertByPlayer = {};
 
 var LH_HEX_BY_COLOR = {
   gold: '#FFAA00',
@@ -909,7 +914,9 @@ function lhMarketSell(server, player, orderId, dryRun) {
     ? global.LHEconomyEngine.recordTradePressure(econ, order.item, 'sell', order.qty)
     : null;
   var marketMult = marketInfo && marketInfo.quote ? Math.max(0.18, Math.min(2.40, marketInfo.quote.multiplier)) : 1.0;
-  var payout = Math.max(1, Math.round(order.price * bonusMult * marketMult));
+  var repScore = global.LHOpenTTD.getEffectiveRelationScore(st, myComp.id, lhId(player), order.companyId);
+  var repPricing = global.LHOpenTTD.getReputationPriceModifiers(repScore);
+  var payout = Math.max(1, Math.round(order.price * bonusMult * marketMult * repPricing.sellMult));
   if (typeof lhOriginFeeMult === 'function') {
     var feeMult = lhOriginFeeMult(player);
     if (feeMult > 1.0) payout = Math.max(1, Math.round(payout / feeMult));
@@ -923,8 +930,9 @@ function lhMarketSell(server, player, orderId, dryRun) {
   lhEconSave(server);
   if (!dryRun) {
     lhUnlock(player, 'longhaul:openttd/trade');
+    var repTag = repPricing.sellMult !== 1.0 ? (' §7[реп. ' + repScore + ': ×' + repPricing.sellMult + ']') : '';
     lhMsg(player, '§a[Рынок] Продано ' + order.qty + '× ' + order.item + ' компании ' + buyer.name +
-      ' за §f' + payout + ' Cr' + (isSubsidy ? ' §e(СУБСИДИЯ ×1.75!)' : ' §7(+20% бонус, рынок ×' + marketMult + ')') + '. Баланс: ' + myComp.cash + ' Cr.');
+      ' за §f' + payout + ' Cr' + (isSubsidy ? ' §e(СУБСИДИЯ ×1.75!)' : ' §7(+20% бонус, рынок ×' + marketMult + ')') + repTag + '. Баланс: ' + myComp.cash + ' Cr.');
     if (marketInfo && marketInfo.crashedJustNow) {
       var crashMsg = '§c§l[ОБВАЛ РЫНКА] §fПерепроизводство ' + order.item + ' обрушило цену до ×' + marketInfo.quote.multiplier + '!';
       if (server.players) {
@@ -958,10 +966,12 @@ function lhMarketBuy(server, player, orderId, dryRun) {
     : null;
   var marketMult = marketInfo && marketInfo.quote ? Math.max(0.24, Math.min(2.40, marketInfo.quote.multiplier)) : 1.0;
   var taxFree = global.LHOpenTTD.hasPact(st, myComp.id, order.companyId);
-  var baseBuy = Math.max(1, Math.round(order.price * marketMult));
+  var repScore = global.LHOpenTTD.getEffectiveRelationScore(st, myComp.id, lhId(player), order.companyId);
+  var repPricing = global.LHOpenTTD.getReputationPriceModifiers(repScore);
+  var baseBuy = Math.max(1, Math.round(order.price * marketMult * repPricing.buyMult));
   var totalCost = taxFree ? baseBuy : Math.round(baseBuy * 1.10);
   if (myComp.cash < totalCost) {
-    if (!dryRun) lhMsg(player, 'Недостаточно средств: нужно ' + totalCost + ' Cr, у вас ' + myComp.cash + ' Cr.');
+    if (!dryRun) lhMsg(player, 'Недостаточно средств: нужно ' + totalCost + ' Cr, у вас ' + myComp.cash + ' Cr (цена с учётом реп. ×' + repPricing.buyMult + ').');
     return 0;
   }
   myComp.cash -= totalCost;
@@ -978,8 +988,9 @@ function lhMarketBuy(server, player, orderId, dryRun) {
   lhEconSave(server);
   if (!dryRun) {
     lhUnlock(player, 'longhaul:openttd/trade');
+    var repTagB = repPricing.buyMult !== 1.0 ? (' §7[реп. ' + repScore + ': ×' + repPricing.buyMult + ']') : '';
     lhMsg(player, '§a[Рынок] Куплено ' + order.qty + '× ' + order.item + ' у ' + (seller ? seller.name : order.companyId) +
-      ' за ' + totalCost + ' Cr' + (taxFree ? ' §a(по торговому пакту без пошлины)' : ' §7(вкл. 10% пошлины)') + '.');
+      ' за ' + totalCost + ' Cr' + (taxFree ? ' §a(по торговому пакту без пошлины)' : ' §7(вкл. 10% пошлины)') + repTagB + '.');
   }
   return totalCost;
 }
@@ -1032,17 +1043,20 @@ function lhAcceptTradeOffer(server, player, offerId, dryRun) {
     if (!dryRun) lhMsg(player, 'Эта сделка адресована компании ' + offer.targetCompany + '.');
     return 0;
   }
-  if (myComp.cash < offer.price) {
-    if (!dryRun) lhMsg(player, 'Не хватает средств: нужно ' + offer.price + ' Cr.');
+  var repScoreT = global.LHOpenTTD.getEffectiveRelationScore(st, myComp.id, lhId(player), offer.sellerCompany);
+  var repPricingT = global.LHOpenTTD.getReputationPriceModifiers(repScoreT);
+  var finalOfferPrice = Math.max(1, Math.round(offer.price * repPricingT.buyMult));
+  if (myComp.cash < finalOfferPrice) {
+    if (!dryRun) lhMsg(player, 'Не хватает средств: нужно ' + finalOfferPrice + ' Cr (реп. ×' + repPricingT.buyMult + ').');
     return 0;
   }
   var seller = st.companies[offer.sellerCompany];
-  myComp.cash -= offer.price;
+  myComp.cash -= finalOfferPrice;
   if (seller) {
-    seller.cash += offer.price;
-    seller.stats.tradeVolume = (seller.stats.tradeVolume || 0) + offer.price;
+    seller.cash += finalOfferPrice;
+    seller.stats.tradeVolume = (seller.stats.tradeVolume || 0) + finalOfferPrice;
   }
-  myComp.stats.tradeVolume = (myComp.stats.tradeVolume || 0) + offer.price;
+  myComp.stats.tradeVolume = (myComp.stats.tradeVolume || 0) + finalOfferPrice;
   offer.status = 'completed';
   if (!dryRun && typeof Item !== 'undefined' && typeof player.give === 'function') {
     player.give(Item.of(offer.item, offer.qty));
@@ -1050,7 +1064,7 @@ function lhAcceptTradeOffer(server, player, offerId, dryRun) {
   lhOttdSave(server);
   if (!dryRun) {
     lhUnlock(player, 'longhaul:openttd/trade');
-    lhMsg(player, '§a[Сделка ' + offer.id + '] Получено ' + offer.qty + '× ' + offer.item + ' за ' + offer.price + ' Cr!');
+    lhMsg(player, '§a[Сделка ' + offer.id + '] Получено ' + offer.qty + '× ' + offer.item + ' за ' + finalOfferPrice + ' Cr (реп. ×' + repPricingT.buyMult + ')!');
   }
   return 1;
 }
@@ -1119,11 +1133,11 @@ function lhSyncXaeroTerritories(server, targetPlayer) {
   var borderHalf = 362;
   try {
     if (typeof lhTerritoryCounts === 'function') {
-      borderHalf = Math.max(32, Math.round(Number(lhTerritoryCounts(server).size || 724) / 2));
+      borderHalf = Math.max(32, Math.floor(Number(lhTerritoryCounts(server).size || 724) / 2));
     } else {
       var ow = server.getLevel('minecraft:overworld');
       if (ow && ow.worldBorder && Number(ow.worldBorder.size) > 0) {
-        borderHalf = Math.max(32, Math.round(Number(ow.worldBorder.size) / 2));
+        borderHalf = Math.max(32, Math.floor(Number(ow.worldBorder.size) / 2));
       }
     }
   } catch (eB) {}
@@ -1322,6 +1336,138 @@ function lhIsLootContainerBlock(bid) {
     bid.indexOf('furnace') !== -1 || bid.indexOf('cabinet') !== -1;
 }
 
+function lhNotifyPatrolOwner(server, st, ownerCid, intruderId, eventKey, msg) {
+  if (!server || !ownerCid || !st || !st.companies) return;
+  var cdKey = ownerCid + '|' + intruderId + '|' + eventKey;
+  var cdTicks = eventKey === 'trespass' ? 200 : 100;
+  if (LHOTTDPatrolNotifyCooldown[cdKey] && (LHOTTDTick - LHOTTDPatrolNotifyCooldown[cdKey]) < cdTicks) {
+    return;
+  }
+  LHOTTDPatrolNotifyCooldown[cdKey] = LHOTTDTick;
+  var plist = server.players || [];
+  for (var i = 0; i < plist.length; i++) {
+    var op = plist[i];
+    var oComp = lhGetPlayerCompany(server, op);
+    if (oComp && oComp.id === ownerCid) {
+      lhMsg(op, msg);
+    }
+  }
+  if (typeof lhLogEvent === 'function') {
+    lhLogEvent(server, 'patrol', msg.replace(/§[0-9a-fk-or]/gi, ''), { chatMode: 'never' });
+  }
+}
+
+function lhSpawnPatrolGuards(server, st, patrolProf, ownerComp, intruder) {
+  if (!server || !patrolProf || !patrolProf.spawnGuards || !intruder) return 0;
+  var pid = lhId(intruder);
+  var ownerCid = patrolProf.owner;
+  var gKey = ownerCid + '|' + pid;
+  if (LHOTTDPatrolGuardCooldown[gKey] && (LHOTTDTick - LHOTTDPatrolGuardCooldown[gKey]) < 400) {
+    return 0;
+  }
+  var ow = server.getLevel('minecraft:overworld');
+  if (!ow) return 0;
+  var uname = intruder.username || (typeof intruder.getName === 'function' ? intruder.getName().getString() : '');
+  if (!uname) return 0;
+
+  // Limit active nearby guards to prevent mob spam
+  var nearbyGuards = 0;
+  try {
+    var ents = ow.getEntities();
+    for (var ei = 0; ei < ents.length; ei++) {
+      var e = ents[ei];
+      if (!e || !e.tags || !e.tags.contains('lh_patrol_guard')) continue;
+      var dxE = Number(e.x) - Number(intruder.x);
+      var dzE = Number(e.z) - Number(intruder.z);
+      if ((dxE * dxE + dzE * dzE) <= 32 * 32) nearbyGuards++;
+    }
+  } catch (eCnt) {}
+  if (nearbyGuards >= 4) return 0;
+
+  LHOTTDPatrolGuardCooldown[gKey] = LHOTTDTick;
+  var count = Math.max(1, Math.min(3, Number(patrolProf.guardCount || 2)));
+  var mobType = String(patrolProf.guardMob || 'minecraft:pillager');
+  var tagLabel = ownerComp ? ownerComp.name : ownerCid;
+  var spawned = 0;
+
+  for (var gi = 0; gi < count; gi++) {
+    var angle = (Math.PI * 2 * gi) / count + Math.random() * 0.6;
+    var dist = 6 + Math.random() * 4;
+    var sx = Math.round(Number(intruder.x) + Math.cos(angle) * dist);
+    var sz = Math.round(Number(intruder.z) + Math.sin(angle) * dist);
+    var sy = Math.round(Number(intruder.y));
+    for (var dy = 4; dy >= -4; dy--) {
+      try {
+        var bBelow = ow.getBlock(sx, sy + dy - 1, sz);
+        var bAt = ow.getBlock(sx, sy + dy, sz);
+        var bAbove = ow.getBlock(sx, sy + dy + 1, sz);
+        if (bBelow && String(bBelow.id) !== 'minecraft:air' &&
+            bAt && String(bAt.id) === 'minecraft:air' &&
+            bAbove && String(bAbove.id) === 'minecraft:air') {
+          sy = sy + dy;
+          break;
+        }
+      } catch (eScan) {}
+    }
+    try {
+      var nbtStr = JSON.stringify({
+        Tags: ['lh_patrol_guard'],
+        PersistenceRequired: 0,
+        CustomName: JSON.stringify({ text: 'Охрана «' + tagLabel + '»', color: 'red' }),
+        CustomNameVisible: 1
+      });
+      server.runCommandSilent('execute in minecraft:overworld run summon ' + mobType + ' ' + sx + ' ' + sy + ' ' + sz + ' ' + nbtStr);
+      spawned++;
+    } catch (eSum) {}
+  }
+
+  if (spawned > 0) {
+    lhMsg(intruder, '§c§l[Пост патруля · Тревога 3 ур.] §fОхрана компании «' + tagLabel + '» (' + spawned + '×) перехватывает вас!');
+    lhNotifyPatrolOwner(server, st, ownerCid, pid, 'guards_spawned',
+      '§6§l[Патруль Ур.3] §fПост в (' + patrolProf.sx + ', ' + patrolProf.sz + ') выслал ' + spawned +
+      ' охранников против нарушителя §c' + uname + ' §fв (' + Math.round(intruder.x) + ', ' + Math.round(intruder.z) + ')!');
+  }
+  return spawned;
+}
+
+function lhHandlePatrolEvent(server, st, ownerCid, intruder, eventType, detailText, wx, wy, wz, allowGuardSpawn) {
+  if (!server || !st || !ownerCid || !intruder || !global.LHOpenTTD || !global.LHOpenTTD.findPatrolPostsCovering) {
+    return null;
+  }
+  var intrComp = lhGetPlayerCompany(server, intruder);
+  if (intrComp && (intrComp.id === ownerCid || global.LHOpenTTD.isAllied(st, intrComp.id, ownerCid))) {
+    return null;
+  }
+  var posts = global.LHOpenTTD.findPatrolPostsCovering(st, ownerCid, wx, wz);
+  if (!posts || !posts.length) return null;
+  var top = posts[0];
+  var ownerComp = st.companies ? st.companies[ownerCid] : null;
+  var uname = intruder.username || (typeof intruder.getName === 'function' ? intruder.getName().getString() : 'Игрок');
+  var pid = lhId(intruder);
+
+  var labels = {
+    trespass: 'Пересечение границы',
+    break_block: 'Добыча/ломка блока',
+    break_ore: 'Добыча руды',
+    break_log: 'Рубка леса',
+    mob_kill: 'Убийство моба',
+    resource_gather: 'Сбор ресурсов',
+    container_loot: 'Открытие контейнера'
+  };
+  var evTitle = labels[eventType] || eventType;
+  lhNotifyPatrolOwner(server, st, ownerCid, pid, eventType,
+    '§6§l[Патруль · Ур.' + top.level + '] §e' + evTitle + ': §c' + uname +
+    (detailText ? (' §7(' + detailText + ')') : '') + ' §fна (' + Math.round(wx) + ', ' + Math.round(wy) + ', ' + Math.round(wz) + ')!');
+
+  if (top.markIntruders && uname) {
+    server.runCommandSilent('effect give ' + uname + ' minecraft:glowing 6 0 true');
+  }
+  if (allowGuardSpawn && top.spawnGuards) {
+    lhSpawnPatrolGuards(server, st, top, ownerComp, intruder);
+  }
+  return top;
+}
+
 BlockEvents.broken(function (event) {
   var server = event.server, player = event.player, block = event.block;
   if (!server || !player || !block) return;
@@ -1374,25 +1520,38 @@ BlockEvents.broken(function (event) {
     }
   }
 
-  // Strict Territory Control: breaking ANY block or harvesting resources in rival claimed sector without mining rights triggers company anger!
+  // Strict Territory Control with Warning-First Grace Strike:
+  // First broken block issues a stern warning from bots/owner; continuing within 20s drops reputation & escalates prices!
   if (sec.kind === 'claimed' && sec.owner && (!comp || sec.owner !== comp.id)) {
     var canMineHere = comp ? global.LHOpenTTD.canMine(st, comp.id, sec.owner) : false;
+    var pidWarn = lhId(player);
+    var kind = isOre ? 'break_ore' : (isLog ? 'break_log' : 'break_block');
+    var patrolHit = lhHandlePatrolEvent(server, st, sec.owner, player, kind, bidStr, block.x, block.y, block.z, !canMineHere);
     if (!canMineHere) {
-      var kind = isOre ? 'break_ore' : (isLog ? 'break_log' : 'break_block');
-      var viol = global.LHOpenTTD.recordTerritoryViolation(st, comp ? comp.id : null, sec.owner, kind, sc.sx, sc.sz);
-      lhOttdSave(server);
-      var pidWarn = lhId(player);
+      var ownerObj = st.companies[sec.owner];
+      var mKey = pidWarn + '|' + sec.owner;
+      var mWarn = LHOTTDMiningWarn[mKey];
       var nowTick = LHOTTDTick;
-      if (!LHOTTDLastBreakWarnByPlayer[pidWarn] || (nowTick - LHOTTDLastBreakWarnByPlayer[pidWarn]) >= 80) {
-        LHOTTDLastBreakWarnByPlayer[pidWarn] = nowTick;
-        var ownerObj = st.companies[sec.owner];
-        lhMsg(player, '§c§l[Нарушение территории] §f' + (ownerObj ? ownerObj.name : sec.owner) +
-          ' недовольна добычей на её земле! Отношения ' + (viol.delta || -5) + ' (теперь ' + viol.newScore + '), штраф ' + viol.fine +
-          ' Cr. Купите право добычи (/lh diplomacy license ' + sec.owner + ' mining)!');
-      }
-      if (viol.hostile || !comp) {
-        var unameWarn = player.username || (typeof player.getName === 'function' ? player.getName().getString() : '');
-        if (unameWarn) server.runCommandSilent('effect give ' + unameWarn + ' minecraft:mining_fatigue 4 1 true');
+      if (!mWarn || (nowTick - mWarn.tick) > 400) {
+        LHOTTDMiningWarn[mKey] = { tick: nowTick, count: 1 };
+        lhMsg(player, '§e§l[Предупреждение · ' + (ownerObj && ownerObj.isBot ? 'Бот-компания' : 'Территория') + '] §fВы сломали блок (' + bidStr +
+          ') на земле «' + (ownerObj ? ownerObj.name : sec.owner) + '»! Прекратите добычу, иначе потеряете репутацию и цены вырастут! (/lh diplomacy license ' + sec.owner + ' mining)');
+      } else {
+        mWarn.tick = nowTick;
+        mWarn.count++;
+        var pMult = patrolHit ? patrolHit.penaltyMult : 1.0;
+        var viol = global.LHOpenTTD.recordTerritoryViolation(st, comp ? comp.id : null, sec.owner, kind, sc.sx, sc.sz, pidWarn, pMult);
+        lhOttdSave(server);
+        if (!LHOTTDLastBreakWarnByPlayer[pidWarn] || (nowTick - LHOTTDLastBreakWarnByPlayer[pidWarn]) >= 60) {
+          LHOTTDLastBreakWarnByPlayer[pidWarn] = nowTick;
+          lhMsg(player, '§c§l[Репутация снижена] §f' + (ownerObj ? ownerObj.name : sec.owner) +
+            ': репутация ' + (viol.delta || -6) + ' (итого ' + viol.newScore + ', ' + viol.standing + '), штраф ' + viol.fine +
+            ' Cr. §7Цены: покупка ×' + viol.pricing.buyMult + ', сбыт ×' + viol.pricing.sellMult + '!');
+        }
+        if (viol.hostile || !comp) {
+          var unameWarn = player.username || (typeof player.getName === 'function' ? player.getName().getString() : '');
+          if (unameWarn) server.runCommandSilent('effect give ' + unameWarn + ' minecraft:mining_fatigue 4 1 true');
+        }
       }
     }
   }
@@ -1431,8 +1590,66 @@ BlockEvents.rightClicked(function (event) {
   if (!isSpawnZone && sec.kind !== 'claimed') {
     lhMsg(player, '§c[Незаприваченный сектор (' + sc.sx + ',' + sc.sz + ')] §fЛутинг контейнеров запрещён на незаприваченной территории! Заприватьте сектор (/lh territory claim).');
     event.cancel();
+    return;
+  }
+  if (sec.kind === 'claimed' && sec.owner) {
+    var compRc = lhGetPlayerCompany(server, player);
+    if (!compRc || compRc.id !== sec.owner) {
+      var canMineRc = compRc ? global.LHOpenTTD.canMine(st, compRc.id, sec.owner) : false;
+      lhHandlePatrolEvent(server, st, sec.owner, player, 'container_loot', bidStr, block.x, block.y, block.z, !canMineRc);
+    }
   }
 });
+
+EntityEvents.death(function (event) {
+  var ent = event.entity;
+  var src = event.source;
+  if (!ent || !src) return;
+  var killer = src.player || src.actual || src.entity;
+  if (!killer || typeof killer.isPlayer !== 'function' || !killer.isPlayer()) return;
+  var creative = (typeof killer.isCreative === 'function' && killer.isCreative()) ||
+    (typeof killer.isSpectator === 'function' && killer.isSpectator());
+  if (creative) return;
+  if (String(ent.level.dimension) !== 'minecraft:overworld') return;
+  if (typeof ent.isPlayer === 'function' && ent.isPlayer()) return;
+  var server = ent.server || killer.server;
+  if (!server) return;
+  var st = lhOttdRead(server);
+  var sc = global.LHOpenTTD.sectorCoords(ent.x, ent.z);
+  var sec = global.LHOpenTTD.resolveSectorOwner(st, sc.sx, sc.sz);
+  var kComp = lhGetPlayerCompany(server, killer);
+  if (sec.kind === 'claimed' && sec.owner && (!kComp || kComp.id !== sec.owner)) {
+    var canMineK = kComp ? global.LHOpenTTD.canMine(st, kComp.id, sec.owner) : false;
+    var mobName = String(ent.type || 'mob');
+    lhHandlePatrolEvent(server, st, sec.owner, killer, 'mob_kill', mobName, ent.x, ent.y, ent.z, !canMineK);
+  }
+});
+
+if (typeof ItemEvents !== 'undefined' && ItemEvents.pickedUp) {
+  ItemEvents.pickedUp(function (event) {
+    var player = event.player;
+    var item = event.item;
+    if (!player || !item) return;
+    var server = player.server;
+    if (!server) return;
+    var creative = (typeof player.isCreative === 'function' && player.isCreative()) ||
+      (typeof player.isSpectator === 'function' && player.isSpectator());
+    if (creative) return;
+    if (String(player.level.dimension) !== 'minecraft:overworld') return;
+    var pid = lhId(player);
+    if (LHOTTDLastGatherAlertByPlayer[pid] && (LHOTTDTick - LHOTTDLastGatherAlertByPlayer[pid]) < 80) return;
+    var st = lhOttdRead(server);
+    var sc = global.LHOpenTTD.sectorCoords(player.x, player.z);
+    var sec = global.LHOpenTTD.resolveSectorOwner(st, sc.sx, sc.sz);
+    var comp = lhGetPlayerCompany(server, player);
+    if (sec.kind === 'claimed' && sec.owner && (!comp || comp.id !== sec.owner)) {
+      LHOTTDLastGatherAlertByPlayer[pid] = LHOTTDTick;
+      var canMineG = comp ? global.LHOpenTTD.canMine(st, comp.id, sec.owner) : false;
+      var itemStr = item.id ? String(item.id) : (item.item && item.item.id ? String(item.item.id) : 'ресурс');
+      lhHandlePatrolEvent(server, st, sec.owner, player, 'resource_gather', itemStr, player.x, player.y, player.z, !canMineG);
+    }
+  });
+}
 
 EntityEvents.spawned(function (event) {
   var ent = event.entity;
@@ -1442,7 +1659,32 @@ EntityEvents.spawned(function (event) {
   if (!global.LHEconomyEngine) return;
   try {
     var econ = lhEconRead(level.server);
-    var gen = global.LHEconomyEngine.generateWanderingTraderOffers(econ);
+    var stWt = lhOttdRead(level.server);
+    var repBuyMult = 1.0;
+    var repSellMult = 1.0;
+    var repLabel = '';
+    try {
+      var nearP = null;
+      var bestD2 = 1e12;
+      var pls = level.server.players || [];
+      for (var pi = 0; pi < pls.length; pi++) {
+        var pl = pls[pi];
+        if (!pl || String(pl.level.dimension) !== String(level.dimension)) continue;
+        var dx = Number(pl.x) - Number(ent.x);
+        var dz = Number(pl.z) - Number(ent.z);
+        var d2 = dx * dx + dz * dz;
+        if (d2 < bestD2) { bestD2 = d2; nearP = pl; }
+      }
+      if (nearP && global.LHOpenTTD && global.LHOpenTTD.getAverageBotReputationScore) {
+        var nearComp = lhGetPlayerCompany(level.server, nearP);
+        var avgScore = global.LHOpenTTD.getAverageBotReputationScore(stWt, nearComp ? nearComp.id : null, lhId(nearP));
+        var rMods = global.LHOpenTTD.getReputationPriceModifiers(avgScore);
+        repBuyMult = rMods.buyMult;
+        repSellMult = rMods.sellMult;
+        if (avgScore !== 0) repLabel = ' [реп. ' + avgScore + ']';
+      }
+    } catch (eRepWt) {}
+    var gen = global.LHEconomyEngine.generateWanderingTraderOffers(econ, null, repBuyMult, repSellMult);
     var MerchantOffersCls = Java.loadClass('net.minecraft.world.item.trading.MerchantOffers');
     var MerchantOfferCls = Java.loadClass('net.minecraft.world.item.trading.MerchantOffer');
     var mOffers = new MerchantOffersCls();
@@ -1465,7 +1707,7 @@ EntityEvents.spawned(function (event) {
       ent.offers.clear();
       ent.offers.addAll(mOffers);
     }
-    ent.setCustomName(Text.of('§6Бродячий Биржевик §7(-60%..+200%)'));
+    ent.setCustomName(Text.of('§6Бродячий Биржевик §7(-60%..+200%)' + repLabel));
   } catch (eWt) {}
 });
 
@@ -1561,28 +1803,69 @@ ServerEvents.tick(function (event) {
     var comp = lhGetPlayerCompany(server, p);
     var prevKey = LHOTTDLastSectorByPlayer[pid];
     var nowTag = (sec.owner || 'none') + ':' + sec.kind;
-    if (prevKey && prevKey !== nowTag) {
-      var oComp = sec.owner ? st.companies[sec.owner] : null;
-      var uname = p.username || (typeof p.getName === 'function' ? p.getName().getString() : '');
-      if (oComp && uname) {
-        var unauthorized = sec.kind === 'claimed' && (!comp || (comp.id !== sec.owner && !global.LHOpenTTD.canTransit(st, comp.id, sec.owner)));
-        var msgJson = JSON.stringify({
-          text: (unauthorized ? '⚠ ЧУЖАЯ ГРАНИЦА: ' : '🏴 Территория: ') + oComp.name +
-            (sec.kind === 'claimed' ? (unauthorized ? ' [НЕТ ПРОПУСКА]' : ' [Захвачен]') : ' [Влияние]'),
-          color: unauthorized ? 'red' : (oComp.color || 'yellow')
-        });
-        server.runCommandSilent('title ' + uname + ' actionbar ' + msgJson);
-        if (unauthorized && (!LHOTTDLastViolationByPlayer[pid] || (LHOTTDTick - LHOTTDLastViolationByPlayer[pid]) >= 300)) {
-          LHOTTDLastViolationByPlayer[pid] = LHOTTDTick;
-          var tViol = global.LHOpenTTD.recordTerritoryViolation(st, comp ? comp.id : null, sec.owner, 'trespass', sc.sx, sc.sz);
-          lhOttdSave(server);
-          lhMsg(p, '§c[Граница] Вы вошли в сектор (' + sc.sx + ', ' + sc.sz + ') компании «' + oComp.name +
-            '» без права прохода! Отношения ' + tViol.delta + ' (' + tViol.newScore + '), пошлина ' + tViol.fine +
-            ' Cr. Купить проход: /lh diplomacy license ' + sec.owner + ' transit');
-          if (tViol.hostile) {
-            server.runCommandSilent('effect give ' + uname + ' minecraft:glowing 8 0 true');
-            server.runCommandSilent('effect give ' + uname + ' minecraft:slowness 4 0 true');
-          }
+    var unauthorized = sec.kind === 'claimed' && sec.owner && (!comp || (comp.id !== sec.owner && !global.LHOpenTTD.canTransit(st, comp.id, sec.owner)));
+    var uname = p.username || (typeof p.getName === 'function' ? p.getName().getString() : '');
+    var oComp = sec.owner ? st.companies[sec.owner] : null;
+    var activeWarn = LHOTTDTrespassWarn[pid];
+
+    // If player left the warned company's unauthorized territory in time, clear warning safely
+    if (activeWarn && (!unauthorized || sec.owner !== activeWarn.ownerId)) {
+      if (activeWarn.strikes === 0) {
+        lhMsg(p, '§a[Граница] Вы покинули территорию «' + activeWarn.ownerName + '» вовремя — репутация не снижена.');
+      }
+      delete LHOTTDTrespassWarn[pid];
+      activeWarn = null;
+    }
+
+    if (prevKey && prevKey !== nowTag && oComp && uname) {
+      var msgJson = JSON.stringify({
+        text: (unauthorized ? '⚠ ЧУЖАЯ ГРАНИЦА: ' : '🏴 Территория: ') + oComp.name +
+          (sec.kind === 'claimed' ? (unauthorized ? ' [НЕТ ПРОПУСКА]' : ' [Захвачен]') : ' [Влияние]'),
+        color: unauthorized ? 'red' : (oComp.color || 'yellow')
+      });
+      server.runCommandSilent('title ' + uname + ' actionbar ' + msgJson);
+      if (sec.kind === 'claimed' && sec.owner && (!comp || comp.id !== sec.owner)) {
+        lhHandlePatrolEvent(server, st, sec.owner, p, 'trespass', 'сектор (' + sc.sx + ',' + sc.sz + ')', p.x, p.y, p.z, false);
+      }
+      if (unauthorized && !activeWarn) {
+        LHOTTDTrespassWarn[pid] = {
+          ownerId: oComp.id,
+          ownerName: oComp.name,
+          sx: sc.sx,
+          sz: sc.sz,
+          warnedTick: LHOTTDTick,
+          nextPenaltyTick: LHOTTDTick + 200,
+          strikes: 0
+        };
+        activeWarn = LHOTTDTrespassWarn[pid];
+        lhMsg(p, '§e§l[Предупреждение · ' + (oComp.isBot ? 'Бот-компания' : 'Граница') + '] §fВы пересекли границу «' +
+          oComp.name + '» в секторе (' + sc.sx + ', ' + sc.sz + ')! Покиньте территорию в течение §c10 сек§f, иначе потеряете репутацию и цены вырастут! (/lh diplomacy license ' + sec.owner + ' transit)');
+      }
+    }
+
+    // Enforce grace period -> reputation loss + patrol guards if player stays on unauthorized territory
+    if (unauthorized && oComp && activeWarn && activeWarn.ownerId === sec.owner) {
+      var ticksRem = activeWarn.nextPenaltyTick - LHOTTDTick;
+      if (ticksRem > 0 && activeWarn.strikes === 0 && uname) {
+        var secsLeft = Math.max(1, Math.ceil(ticksRem / 20));
+        server.runCommandSilent('title ' + uname + ' actionbar ' + JSON.stringify({
+          text: '⚠ ПОКИНЬТЕ ТЕРРИТОРИЮ «' + oComp.name + '»: ' + secsLeft + 'с до штрафа репутации!',
+          color: 'gold'
+        }));
+      } else if (ticksRem <= 0) {
+        activeWarn.strikes += 1;
+        activeWarn.nextPenaltyTick = LHOTTDTick + 300;
+        LHOTTDLastViolationByPlayer[pid] = LHOTTDTick;
+        var patrolBorder = lhHandlePatrolEvent(server, st, sec.owner, p, 'trespass', 'вторжение в (' + sc.sx + ',' + sc.sz + ')', p.x, p.y, p.z, true);
+        var pMultT = patrolBorder ? patrolBorder.penaltyMult : 1.0;
+        var tViol = global.LHOpenTTD.recordTerritoryViolation(st, comp ? comp.id : null, sec.owner, 'trespass', sc.sx, sc.sz, pid, pMultT);
+        lhOttdSave(server);
+        lhMsg(p, '§c§l[Репутация снижена] §fВы не покинули территорию «' + oComp.name +
+          '»! Отношения ' + tViol.delta + ' (итого ' + tViol.newScore + ', ' + tViol.standing + '), пошлина ' + tViol.fine +
+          ' Cr. §7Цены: покупка ×' + tViol.pricing.buyMult + ', сбыт ×' + tViol.pricing.sellMult + ' (/lh diplomacy license ' + sec.owner + ' transit)');
+        if (tViol.hostile && uname) {
+          server.runCommandSilent('effect give ' + uname + ' minecraft:glowing 8 0 true');
+          server.runCommandSilent('effect give ' + uname + ' minecraft:slowness 4 0 true');
         }
       }
     }
@@ -1875,15 +2158,18 @@ ServerEvents.commandRegistry(function (event) {
   dipCmd.then(C.literal('status').executes(function (ctx) {
     var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
     var c = lhGetPlayerCompany(server, p);
-    if (!c) { lhMsg(p, 'Сначала создайте компанию.'); return 0; }
-    lhMsg(p, '=== Дипломатия ' + c.name + ' ===');
+    var pid = lhId(p);
+    lhMsg(p, '=== Дипломатия и цены по репутации (' + (c ? c.name : 'Личная репутация') + ') ===');
     Object.keys(st.companies).forEach(function (otherId) {
-      if (otherId === c.id) return;
-      var rel = global.LHOpenTTD.getRelation(st, c.id, otherId);
-      var licT = global.LHOpenTTD.canTransit(st, c.id, otherId);
-      var licM = global.LHOpenTTD.canMine(st, c.id, otherId);
-      lhMsg(p, '• ' + st.companies[otherId].name + ' [' + otherId + ']: §e' + rel.score + ' (' + global.LHOpenTTD.getStandingLabel(rel.score) + ')' +
-        (rel.alliance ? ' §a[АЛЬЯНС]' : '') + (licT ? ' §b[Проход]' : '') + (licM ? ' §6[Добыча]' : ''));
+      if (c && otherId === c.id) return;
+      var scNow = global.LHOpenTTD.getEffectiveRelationScore(st, c ? c.id : null, pid, otherId);
+      var pm = global.LHOpenTTD.getReputationPriceModifiers(scNow);
+      var rel = c ? global.LHOpenTTD.getRelation(st, c.id, otherId) : null;
+      var licT = c ? global.LHOpenTTD.canTransit(st, c.id, otherId) : false;
+      var licM = c ? global.LHOpenTTD.canMine(st, c.id, otherId) : false;
+      lhMsg(p, '• ' + st.companies[otherId].name + ' [' + otherId + ']: §e' + scNow + ' (' + pm.standing + ') §7| покупка ×' +
+        pm.buyMult + ', сбыт ×' + pm.sellMult +
+        (rel && rel.alliance ? ' §a[АЛЬЯНС]' : '') + (licT ? ' §b[Проход]' : '') + (licM ? ' §6[Добыча]' : ''));
     });
     return 1;
   }));

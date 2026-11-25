@@ -53,6 +53,7 @@ public final class LongHaulXaeroData {
 
     private static volatile long seq = 1L;
     private static volatile Snapshot current = new Snapshot(1L, true, 362, "", new HashMap<>());
+    private static final ThreadLocal<int[]> THREAD_COLORS = ThreadLocal.withInitial(() -> new int[5]);
 
     private LongHaulXaeroData() {}
 
@@ -60,12 +61,17 @@ public final class LongHaulXaeroData {
         return current;
     }
 
+    public static int[] threadColorStore() {
+        return THREAD_COLORS.get();
+    }
+
     public static long packSectorKey(int sx, int sz) {
         return (((long) sx) << 32) ^ (sz & 0xFFFFFFFFL);
     }
 
     public static int chunkToSector(int c) {
-        return Math.floorDiv(c, 16);
+        // Matches LHOpenTTD.sectorCoords(x, z): sector (0, 0) spans blocks [-128, 127], i.e. chunks [-8, 7].
+        return Math.floorDiv(c + 8, 16);
     }
 
     public static boolean isOverworld(ResourceKey<Level> dim) {

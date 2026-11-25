@@ -27,7 +27,8 @@ public final class MinimapSectorHighlighter extends ChunkHighlighter {
 
     @Override
     protected int[] getColors(ResourceKey<Level> dim, int cx, int cz) {
-        return LongHaulXaeroData.fillColors(this.resultStore, dim, cx, cz) ? this.resultStore : null;
+        int[] store = LongHaulXaeroData.threadColorStore();
+        return LongHaulXaeroData.fillColors(store, dim, cx, cz) ? store : null;
     }
 
     public void addBlockHighlightTooltips(InfoDisplayCompiler compiler, ResourceKey<Level> dim, int x, int z, int width) {

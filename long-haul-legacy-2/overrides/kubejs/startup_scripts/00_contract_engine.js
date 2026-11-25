@@ -1166,12 +1166,81 @@ global.LHOpenTTD = (function () {
           summary: '+90% выхода химикатов и концентратов. Блокирует Каталитическую колонну.'
         }
       ]
+    },
+    patrol_post: {
+      id: 'patrol_post',
+      category: 'security',
+      categoryName: 'Охрана',
+      name: 'Пост патруля',
+      icon: 'minecraft:iron_sword',
+      mapSym: 'P',
+      cost: 380,
+      baseIncome: 12,
+      baseProduct: 'minecraft:arrow',
+      baseQty: 4,
+      baseRadius: 256,
+      summary: 'Охраняет границы в радиусе 256 м: шлёт тревоги о вторжении, добыче, убийстве мобов и сборе ресурсов; на 3-м ур. спавнит охранников.',
+      tier1Fork: [
+        {
+          id: 'radar_watchtower',
+          name: 'Радарная вышка',
+          icon: 'minecraft:spyglass',
+          cost: 460,
+          incomeMult: 1.20,
+          yieldMult: 1.35,
+          patrolRadius: 420,
+          markIntruders: true,
+          summary: 'Радиус охраны 420 м и подсветка нарушителей. Блокирует Гарнизон перехвата.'
+        },
+        {
+          id: 'interceptor_garrison',
+          name: 'Гарнизон перехвата',
+          icon: 'minecraft:crossbow',
+          cost: 480,
+          incomeMult: 1.35,
+          yieldMult: 1.60,
+          patrolRadius: 340,
+          penaltyMult: 1.45,
+          bonusProduct: 'minecraft:spectral_arrow',
+          bonusQty: 2,
+          summary: 'Радиус 340 м, ×1.45 штрафы нарушителям и +2 спектр. стрелы/цикл. Блокирует Радарную вышку.'
+        }
+      ],
+      tier2Fork: [
+        {
+          id: 'autonomous_sentinel',
+          name: 'Автономный гарнизон',
+          icon: 'minecraft:iron_chestplate',
+          cost: 820,
+          incomeMult: 1.40,
+          yieldMult: 1.60,
+          patrolRadius: 560,
+          spawnGuards: true,
+          guardCount: 2,
+          guardMob: 'minecraft:pillager',
+          summary: 'Радиус до 560 м и спавн 2 враждебных охранников-патрульных рядом с нарушителем. Блокирует Цитадель стражи.'
+        },
+        {
+          id: 'warden_bunker',
+          name: 'Цитадель стражи',
+          icon: 'minecraft:netherite_sword',
+          cost: 860,
+          incomeMult: 1.50,
+          yieldMult: 1.50,
+          patrolRadius: 480,
+          spawnGuards: true,
+          guardCount: 3,
+          guardMob: 'minecraft:vindicator',
+          summary: 'Радиус 480 м и спавн 3 элитных поборников-охранников рядом с нарушителем. Блокирует Автономный гарнизон.'
+        }
+      ]
     }
   };
 
   function ensureDiplomacyState(state) {
     if (!state.buildings) state.buildings = {};
     if (!state.relations) state.relations = {};
+    if (!state.playerRelations) state.playerRelations = {};
     if (!state.supplyContracts) state.supplyContracts = [];
     if (!state.sectorOffers) state.sectorOffers = [];
     if (!(state.nextBuildingSeq > 0)) state.nextBuildingSeq = 1;
@@ -1181,6 +1250,95 @@ global.LHOpenTTD = (function () {
 
   function relationKey(a, b) {
     return a < b ? (a + '|' + b) : (b + '|' + a);
+  }
+
+  function getPlayerRelation(state, playerId, companyId) {
+    ensureDiplomacyState(state);
+    if (!playerId || !companyId) {
+      return { score: 0, trespassCount: 0, griefCount: 0, lastIncident: '' };
+    }
+    var k = String(playerId) + '|' + String(companyId);
+    if (!state.playerRelations[k]) {
+      state.playerRelations[k] = {
+        score: 0,
+        trespassCount: 0,
+        griefCount: 0,
+        lastIncident: ''
+      };
+    }
+    return state.playerRelations[k];
+  }
+
+  function adjustPlayerRelation(state, playerId, companyId, delta, reason) {
+    if (!playerId || !companyId) return 0;
+    var r = getPlayerRelation(state, playerId, companyId);
+    r.score = Math.max(-100, Math.min(100, Math.round(Number(r.score || 0) + Number(delta || 0))));
+    if (reason) r.lastIncident = String(reason).slice(0, 120);
+    return r.score;
+  }
+
+  function getEffectiveRelationScore(state, companyIdOrNull, playerIdOrNull, targetCompanyId) {
+    ensureDiplomacyState(state);
+    if (!targetCompanyId) return 0;
+    if (companyIdOrNull && companyIdOrNull === targetCompanyId) return 100;
+    if (companyIdOrNull && state.companies && state.companies[companyIdOrNull]) {
+      return Number(getRelation(state, companyIdOrNull, targetCompanyId).score || 0);
+    }
+    if (playerIdOrNull) {
+      return Number(getPlayerRelation(state, playerIdOrNull, targetCompanyId).score || 0);
+    }
+    return 0;
+  }
+
+  function getReputationPriceModifiers(score) {
+    var s = Math.max(-100, Math.min(100, Number(score || 0)));
+    var buyMult = s >= 0
+      ? Math.max(0.70, 1.0 - (s / 100.0) * 0.30)
+      : Math.min(1.75, 1.0 + (Math.abs(s) / 100.0) * 0.75);
+    var sellMult = s >= 0
+      ? Math.min(1.35, 1.0 + (s / 100.0) * 0.35)
+      : Math.max(0.55, 1.0 - (Math.abs(s) / 100.0) * 0.45);
+    return {
+      score: Math.round(s),
+      buyMult: Number(buyMult.toFixed(2)),
+      sellMult: Number(sellMult.toFixed(2)),
+      standing: getStandingLabel(s)
+    };
+  }
+
+  function getAverageBotReputationScore(state, companyIdOrNull, playerIdOrNull) {
+    ensureDiplomacyState(state);
+    if (!state || !state.companies) return 0;
+    var sum = 0;
+    var cnt = 0;
+    var ids = Object.keys(state.companies);
+    for (var i = 0; i < ids.length; i++) {
+      var c = state.companies[ids[i]];
+      if (!c || !c.isBot) continue;
+      sum += getEffectiveRelationScore(state, companyIdOrNull, playerIdOrNull, c.id);
+      cnt++;
+    }
+    return cnt > 0 ? Math.round(sum / cnt) : 0;
+  }
+
+  function syncPlayerReputationToCompany(state, playerId, companyId) {
+    ensureDiplomacyState(state);
+    if (!playerId || !companyId || !state.companies || !state.companies[companyId]) return 0;
+    var synced = 0;
+    var prefix = String(playerId) + '|';
+    var keys = Object.keys(state.playerRelations || {});
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      if (k.indexOf(prefix) !== 0) continue;
+      var targetCid = k.slice(prefix.length);
+      if (!targetCid || targetCid === companyId || !state.companies[targetCid]) continue;
+      var pr = state.playerRelations[k];
+      if (pr && Number(pr.score || 0) !== 0) {
+        adjustRelation(state, companyId, targetCid, Math.round(Number(pr.score) * 0.75), pr.lastIncident || 'Личная репутация основателя');
+        synced++;
+      }
+    }
+    return synced;
   }
 
   function getRelation(state, a, b) {
@@ -1311,24 +1469,29 @@ global.LHOpenTTD = (function () {
     return { ok: true, allied: true, cost: fee, score: rel.score };
   }
 
-  function recordTerritoryViolation(state, intruderCid, ownerCid, kind, sx, sz) {
+  function recordTerritoryViolation(state, intruderCid, ownerCid, kind, sx, sz, playerId, penaltyMult) {
     ensureDiplomacyState(state);
     if (!ownerCid || intruderCid === ownerCid) return { violated: false };
     var owner = state.companies && state.companies[ownerCid];
     if (!owner) return { violated: false };
-    var isMine = kind === 'break_block' || kind === 'break_ore';
+    var isMine = kind === 'break_block' || kind === 'break_ore' || kind === 'break_log';
     if (isMine && intruderCid && canMine(state, intruderCid, ownerCid)) return { violated: false };
     if (!isMine && intruderCid && canTransit(state, intruderCid, ownerCid)) return { violated: false };
 
-    var delta = kind === 'break_ore' ? -12 : (kind === 'break_block' ? -5 : -4);
-    var fine = kind === 'break_ore' ? 20 : (kind === 'break_block' ? 10 : 8);
+    var mult = Math.max(1.0, Number(penaltyMult || 1.0));
+    var baseDelta = kind === 'break_ore' ? -12 : (kind === 'break_block' || kind === 'break_log' ? -6 : (kind === 'mob_kill' ? -7 : -5));
+    var baseFine = kind === 'break_ore' ? 20 : (kind === 'break_block' || kind === 'break_log' ? 10 : (kind === 'mob_kill' ? 12 : 8));
+    var delta = Math.round(baseDelta * mult);
+    var fine = Math.round(baseFine * mult);
     var paid = 0;
     var rel = null;
+    var pRel = null;
+    var reasonStr = (isMine ? 'Добыча в (' : (kind === 'mob_kill' ? 'Охота в (' : 'Нарушение границ (')) + sx + ',' + sz + ')';
     if (intruderCid && state.companies[intruderCid]) {
       rel = getRelation(state, intruderCid, ownerCid);
       if (isMine) rel.griefCount = (rel.griefCount || 0) + 1;
       else rel.trespassCount = (rel.trespassCount || 0) + 1;
-      adjustRelation(state, intruderCid, ownerCid, delta, (isMine ? 'Добыча в (' : 'Нарушение границ (') + sx + ',' + sz + ')');
+      adjustRelation(state, intruderCid, ownerCid, delta, reasonStr);
       var intr = state.companies[intruderCid];
       if (intr.cash >= fine) {
         intr.cash -= fine;
@@ -1336,7 +1499,13 @@ global.LHOpenTTD = (function () {
         paid = fine;
       }
     }
-    var scNow = rel ? rel.score : -10;
+    if (playerId) {
+      pRel = getPlayerRelation(state, playerId, ownerCid);
+      if (isMine) pRel.griefCount = (pRel.griefCount || 0) + 1;
+      else pRel.trespassCount = (pRel.trespassCount || 0) + 1;
+      adjustPlayerRelation(state, playerId, ownerCid, delta, reasonStr);
+    }
+    var scNow = rel ? rel.score : (pRel ? pRel.score : delta);
     return {
       violated: true,
       kind: kind,
@@ -1344,6 +1513,7 @@ global.LHOpenTTD = (function () {
       fine: paid,
       newScore: scNow,
       standing: getStandingLabel(scNow),
+      pricing: getReputationPriceModifiers(scNow),
       hostile: scNow <= -40
     };
   }
@@ -1592,6 +1762,82 @@ global.LHOpenTTD = (function () {
       items[f1.bonusProduct] = (items[f1.bonusProduct] || 0) + Math.max(1, Math.round((f1.bonusQty || 1) * (f2 ? f2.yieldMult : 1.0)));
     }
     return { income: income, items: items };
+  }
+
+  function getPatrolProfile(b) {
+    if (!b || b.type !== 'patrol_post' || b.operational === false) return null;
+    var spec = BUILDING_CATALOG.patrol_post;
+    if (!spec) return null;
+    var radius = Number(spec.baseRadius || 256);
+    var markIntruders = false;
+    var penaltyMult = 1.0;
+    var spawnGuards = false;
+    var guardCount = 0;
+    var guardMob = 'minecraft:pillager';
+
+    var f1 = null, f2 = null;
+    if (b.branch1 && spec.tier1Fork) {
+      for (var i = 0; i < spec.tier1Fork.length; i++) {
+        if (spec.tier1Fork[i].id === b.branch1) f1 = spec.tier1Fork[i];
+      }
+    }
+    if (b.branch2 && spec.tier2Fork) {
+      for (var j = 0; j < spec.tier2Fork.length; j++) {
+        if (spec.tier2Fork[j].id === b.branch2) f2 = spec.tier2Fork[j];
+      }
+    }
+    if (f1) {
+      if (f1.patrolRadius) radius = Math.max(radius, Number(f1.patrolRadius));
+      if (f1.markIntruders) markIntruders = true;
+      if (f1.penaltyMult) penaltyMult = Math.max(penaltyMult, Number(f1.penaltyMult));
+    }
+    if (f2 || Number(b.level || 1) >= 3) {
+      spawnGuards = true;
+      guardCount = (f2 && f2.guardCount) ? Number(f2.guardCount) : 2;
+      guardMob = (f2 && f2.guardMob) ? String(f2.guardMob) : 'minecraft:pillager';
+      if (f2 && f2.patrolRadius) radius = Math.max(radius, Number(f2.patrolRadius));
+    }
+    return {
+      buildingId: b.id,
+      owner: b.owner,
+      sx: b.sx,
+      sz: b.sz,
+      x: Number(b.x || b.sx * SECTOR_SIZE),
+      y: Number(b.y || 64),
+      z: Number(b.z || b.sz * SECTOR_SIZE),
+      level: Number(b.level || 1),
+      radius: radius,
+      markIntruders: markIntruders,
+      penaltyMult: penaltyMult,
+      spawnGuards: spawnGuards,
+      guardCount: guardCount,
+      guardMob: guardMob
+    };
+  }
+
+  function findPatrolPostsCovering(state, ownerCid, wx, wz) {
+    ensureDiplomacyState(state);
+    var out = [];
+    var keys = Object.keys(state.buildings || {});
+    for (var i = 0; i < keys.length; i++) {
+      var b = state.buildings[keys[i]];
+      if (!b || b.type !== 'patrol_post' || b.operational === false) continue;
+      if (ownerCid && b.owner !== ownerCid) continue;
+      var prof = getPatrolProfile(b);
+      if (!prof) continue;
+      var dx = Number(wx) - prof.x;
+      var dz = Number(wz) - prof.z;
+      var dist = Math.sqrt(dx * dx + dz * dz);
+      if (dist <= prof.radius) {
+        prof.distance = Math.round(dist);
+        out.push(prof);
+      }
+    }
+    out.sort(function (a, b) {
+      if (b.level !== a.level) return b.level - a.level;
+      return a.distance - b.distance;
+    });
+    return out;
   }
 
   function tickCompanyBuildings(state) {
@@ -2053,6 +2299,7 @@ global.LHOpenTTD = (function () {
       state.claims[sc.key] = { sx: sc.sx, sz: sc.sz, owner: cid, strength: 2, isHq: true };
       comp.stats.sectorsCaptured = 1;
     }
+    syncPlayerReputationToCompany(state, playerUuid, cid);
     return { ok: true, company: comp };
   }
 
@@ -2064,6 +2311,7 @@ global.LHOpenTTD = (function () {
     if (prev && prev !== cid) companyLeave(state, playerUuid);
     if (comp.members.indexOf(playerUuid) === -1) comp.members.push(playerUuid);
     state.playerCompany[playerUuid] = cid;
+    syncPlayerReputationToCompany(state, playerUuid, cid);
     return { ok: true, company: comp };
   }
 
@@ -2483,6 +2731,12 @@ global.LHOpenTTD = (function () {
     refreshBotOrders: refreshBotOrders,
     renderAsciiMap: renderAsciiMap,
     getRelation: getRelation,
+    getPlayerRelation: getPlayerRelation,
+    adjustPlayerRelation: adjustPlayerRelation,
+    getEffectiveRelationScore: getEffectiveRelationScore,
+    getReputationPriceModifiers: getReputationPriceModifiers,
+    getAverageBotReputationScore: getAverageBotReputationScore,
+    syncPlayerReputationToCompany: syncPlayerReputationToCompany,
     getStandingLabel: getStandingLabel,
     adjustRelation: adjustRelation,
     isAllied: isAllied,
@@ -2501,6 +2755,8 @@ global.LHOpenTTD = (function () {
     damageBuildingIntegrity: damageBuildingIntegrity,
     repairBuildingIntegrity: repairBuildingIntegrity,
     getBuildingYieldProfile: getBuildingYieldProfile,
+    getPatrolProfile: getPatrolProfile,
+    findPatrolPostsCovering: findPatrolPostsCovering,
     tickCompanyBuildings: tickCompanyBuildings,
     collectBuildingOutput: collectBuildingOutput,
     createSupplyContract: createSupplyContract,
@@ -3092,8 +3348,14 @@ global.LHEconomyEngine = (function () {
     var seller = ottdState.companies && ottdState.companies[listing.sellerCid];
     if (!seller) return { ok: false, reason: 'no_seller' };
     var q = Math.max(1, Math.min(listing.qtyAvailable, Math.round(Number(qty || 1))));
-    var totalPrice = q * listing.unitPrice;
-    if (buyer.cash < totalPrice) return { ok: false, reason: 'no_cash', cost: totalPrice, cash: buyer.cash };
+    var repScore = (global.LHOpenTTD && global.LHOpenTTD.getEffectiveRelationScore)
+      ? global.LHOpenTTD.getEffectiveRelationScore(ottdState, buyerCid, null, listing.sellerCid)
+      : 0;
+    var repPricing = (global.LHOpenTTD && global.LHOpenTTD.getReputationPriceModifiers)
+      ? global.LHOpenTTD.getReputationPriceModifiers(repScore)
+      : { score: 0, buyMult: 1.0, sellMult: 1.0 };
+    var totalPrice = Math.max(1, Math.round(q * listing.unitPrice * repPricing.buyMult));
+    if (buyer.cash < totalPrice) return { ok: false, reason: 'no_cash', cost: totalPrice, cash: buyer.cash, repMult: repPricing.buyMult };
 
     buyer.cash -= totalPrice;
     seller.cash += totalPrice;
@@ -3123,7 +3385,7 @@ global.LHEconomyEngine = (function () {
       status: 'ready'
     };
     econState.pickupOrders.push(order);
-    return { ok: true, order: order, totalPrice: totalPrice };
+    return { ok: true, order: order, totalPrice: totalPrice, repScore: repScore, repMult: repPricing.buyMult };
   }
 
   function pickupLogisticsOrder(econState, buyerCid, orderId, playerX, playerY, playerZ, maxDist) {
@@ -3162,9 +3424,11 @@ global.LHEconomyEngine = (function () {
 
   // Wandering Trader offers: offsets from -60% (0.40x) to +200% (3.00x),
   // balanced so total discounted value ~ total marked-up value.
-  function generateWanderingTraderOffers(st, rngFn) {
+  function generateWanderingTraderOffers(st, rngFn, repBuyMult, repSellMult) {
     ensureEconomyState(st);
     var rng = rngFn || Math.random;
+    var rBuy = Number(repBuyMult || 1.0);
+    var rSell = Number(repSellMult || 1.0);
     var pool = Object.keys(BASE_COMMODITY_CATALOG).filter(function (id) {
       return inferCommodityKind(id) === 'item';
     });
@@ -3202,8 +3466,8 @@ global.LHEconomyEngine = (function () {
       var mUnitDelta = Math.max(1, Math.round(mBase * (mMult - 1.0)));
       var mQty = Math.max(1, Math.min(32, Math.round(targetDelta / mUnitDelta)));
 
-      var dPrice = Math.max(1, Math.round(dBase * dMult));
-      var mPrice = Math.max(1, Math.round(mBase * mMult));
+      var dPrice = Math.max(1, Math.round(dBase * dMult * (idx % 2 === 0 ? rBuy : (1.0 / Math.max(0.55, rSell)))));
+      var mPrice = Math.max(1, Math.round(mBase * mMult * (idx % 2 === 0 ? (1.0 / Math.max(0.55, rSell)) : rBuy)));
       totalDiscountDelta += (dBase - dPrice) * dQty;
       totalMarkupDelta += (mPrice - mBase) * mQty;
 

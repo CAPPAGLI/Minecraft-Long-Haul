@@ -1018,7 +1018,24 @@ function lhStartIntegrationSetup(server) {
         ok(lhSyncXaeroTerritories(server, xaeroActor) && xaeroPackets.length === 1 && xaeroPackets[0].ch === 'lh:xaero_territories',
           'lhSyncXaeroTerritories sends lh:xaero_territories payload');
 
-        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic + openttd + eventlog + gui + economy + map_byte_fix + border_spawn_safety + xaero_sync + quest_items_' + auditList.length + ' + custom_origins_only');
+        // 29. Patrol Post building & reputation-linked pricing live sanity
+        var stPat = lhOttdRead(server);
+        var patSave = JSON.stringify(stPat);
+        var patCo = global.LHOpenTTD.companyCreate(stPat, '00000000-0000-4000-8000-000000000101', 'patrol_test', 'ПатрульТест', 1280, 0).company;
+        patCo.cash = 5000;
+        var patSc = global.LHOpenTTD.sectorCoords(1280, 0);
+        var patRes = global.LHOpenTTD.buildCompanyBuilding(stPat, patCo.id, patSc.sx, patSc.sz, 'patrol_post', 1280, 70, 0);
+        ok(patRes.ok && global.LHOpenTTD.findPatrolPostsCovering(stPat, patCo.id, 1400, 0).length === 1, 'live Patrol Post builds and covers sector radius');
+        global.LHOpenTTD.upgradeCompanyBuilding(stPat, patCo.id, patSc.sx, patSc.sz, 'radar_watchtower');
+        global.LHOpenTTD.upgradeCompanyBuilding(stPat, patCo.id, patSc.sx, patSc.sz, 'autonomous_sentinel');
+        var patL3 = global.LHOpenTTD.findPatrolPostsCovering(stPat, patCo.id, 1650, 0);
+        ok(patL3.length === 1 && patL3[0].spawnGuards === true && patL3[0].radius === 560, 'live Patrol Post upgrades to Lv3 guard-spawning radius 560m');
+        ok(global.LHOpenTTD.getReputationPriceModifiers(80).buyMult < 1.0 && global.LHOpenTTD.getReputationPriceModifiers(-80).buyMult > 1.0,
+          'live reputation price modifiers adjust buy/sell multipliers');
+        LHOTTDState = JSON.parse(patSave);
+        lhOttdSave(server);
+
+        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic + openttd + eventlog + gui + economy + map_byte_fix + border_spawn_safety + xaero_sync + patrol_rep_pricing + quest_items_' + auditList.length + ' + custom_origins_only');
       } catch (err2) {
         console.error('LH_INTEGRATION_FAIL: live adapter ' + err2);
       }
