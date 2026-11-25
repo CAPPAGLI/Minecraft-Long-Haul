@@ -42,7 +42,7 @@
       "side": "client_and_server",
       "requires_mod": "voicechat",
       "config_file": "config/walkietalkies-server.properties",
-      "notes": "Frequency-tuned (100.0-999.9 MHz) Simple Voice Chat radios with radio audio effects, squelch, and text channel support. Preconfigured in overrides/config/walkietalkies-server.properties; coexists with Flaton's Modrinth walkie-talkie in alpha20.json."
+      "notes": "Sole radio mod in Long Haul Legacy 2.0 (Flaton's walkie-talkie removed). Frequency-tuned (100.0-999.9 MHz) Simple Voice Chat radios with radio audio effects, squelch, /walkie, /radio, and text channel support. Preconfigured in overrides/config/walkietalkies-server.properties; early Chapter 01 quest + /lh radio kit grant starter radios dynamically when loaded."
     }
   ]
 }

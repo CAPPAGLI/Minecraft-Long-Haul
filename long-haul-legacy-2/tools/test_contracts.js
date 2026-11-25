@@ -269,15 +269,15 @@ test('all Heracles quests form an acyclic DAG with zero dangling dependencies an
 test('OpenTTD engine supports spawn sanctuary, companies, specializations, Voronoi+claim, remote exclave, raid/seize/transfer, pacts, and AI bots', () => {
   const ottd = sandbox.global.LHOpenTTD;
   const st = ottd.createInitialState();
-  assert(st.companies.bot_ironrail && st.companies.bot_greencart && st.companies.bot_skyport, '3 AI bots seeded');
+  assert(st.companies.bot_ironrail && st.companies.bot_greencart && st.companies.bot_skyport && st.companies.bot_seawolf, '4 AI bots seeded across all 4 environments');
   assert.equal(ottd.isSpawnProtectedSector(0, 0), true);
   assert.equal(ottd.isSpawnProtectedSector(1, 1), true);
   assert.equal(ottd.isSpawnProtectedSector(2, 0), false);
   assert.equal(ottd.resolveSectorOwner(st, 0, 0).kind, 'unclaimed');
   assert.equal(ottd.resolveSectorOwner(st, 0, 0).owner, null);
-  assert.equal(ottd.resolveSectorOwner(st, 2, 0).owner, 'bot_ironrail');
+  assert.equal(ottd.resolveSectorOwner(st, 7, 2).owner, 'bot_ironrail');
   // Voronoi partition assigns distant unclaimed sectors to nearest company HQ/outpost
-  const vor = ottd.resolveSectorOwner(st, 10, 0);
+  const vor = ottd.resolveSectorOwner(st, 14, 2);
   assert.equal(vor.kind, 'voronoi');
   assert.equal(vor.owner, 'bot_ironrail');
 
@@ -308,16 +308,19 @@ test('OpenTTD engine supports spawn sanctuary, companies, specializations, Voron
   assert.equal(ottd.fortifySector(st, 'transsib', adjFinalX, adjFinalZ).strength, 2);
 
   // Non-adjacent sector rejected remotely, allowed physically with exclave surcharge
-  assert.equal(ottd.claimOrCaptureSector(st, 'transsib', 5, 5, false, { remote: true }).ok, false);
-  const remCost = ottd.computeClaimCost(st, 'transsib', 5, 5);
+  const remSx = c1.company.hqSx - 2;
+  const remSz = c1.company.hqSz + 2;
+  assert.equal(ottd.claimOrCaptureSector(st, 'transsib', remSx, remSz, false, { remote: true }).ok, false);
+  const remCost = ottd.computeClaimCost(st, 'transsib', remSx, remSz);
   assert.equal(remCost.adjacent, false);
   assert(remCost.exclaveMult > 1.0);
-  st.companies.transsib.cash += 5000;
-  assert.equal(ottd.claimOrCaptureSector(st, 'transsib', 5, 5, false).ok, true);
+  st.companies.transsib.cash += remCost.cost + 500;
+  assert.equal(ottd.claimOrCaptureSector(st, 'transsib', remSx, remSz, false).ok, true);
 
   // Hostile capture fails without allowCapture, succeeds with allowCapture & compensates rival
   assert.equal(ottd.claimOrCaptureSector(st, 'pacific', adjFinalX, adjFinalZ, false).ok, false);
-  st.companies.pacific.cash += 5000;
+  const capCost = ottd.computeClaimCost(st, 'pacific', adjFinalX, adjFinalZ);
+  st.companies.pacific.cash += (capCost.cost || 5000) + 5000;
   const prevCash = st.companies.transsib.cash;
   const cap = ottd.claimOrCaptureSector(st, 'pacific', adjFinalX, adjFinalZ, true);
   assert.equal(cap.ok, true);
@@ -336,6 +339,7 @@ test('OpenTTD engine supports spawn sanctuary, companies, specializations, Voron
   assert.equal(ottd.resolveSectorOwner(st, adjFinalX, adjFinalZ).owner, 'transsib');
 
   // Position pacific adjacent to (adjFinalX, adjFinalZ) for antitrustSeize test
+  st.companies.pacific.cash += 50000;
   ottd.claimOrCaptureSector(st, 'pacific', adjFinalX + 1, adjFinalZ, false);
   const sz = ottd.antitrustSeize(st, 'pacific', adjFinalX, adjFinalZ);
   assert.equal(sz.ok, true);
@@ -352,8 +356,8 @@ test('OpenTTD engine supports spawn sanctuary, companies, specializations, Voron
 
   // Bot expansion & dynamic orders
   ottd.refreshBotOrders(st, () => 0.5);
-  assert(st.marketOrders.length >= 18, 'bot buy/sell market orders generated');
-  const botEv = ottd.botExpandStep(st, 3, () => 0);
+  assert(st.marketOrders.length >= 24, 'bot buy/sell market orders generated for 4 bots');
+  const botEv = ottd.botExpandStep(st, 10, () => 0);
   assert(botEv.length >= 1, 'bots expand into adjacent sectors within border');
   assert.equal(ottd.isSpawnProtectedSector(botEv[0].sx, botEv[0].sz), false);
   assert.equal(ottd.renderAsciiMap(st, 0, 0, 2).length, 5, 'ASCII territory map renders 5x5 grid');
@@ -433,8 +437,8 @@ test('OpenTTD buildings (2-way fork), territory violations, diplomacy, and suppl
   O.ensureBots(st);
   const cRes = O.companyCreate(st, 'p1', 'acme', 'Acme Corp');
   assert(cRes.ok);
-  st.companies.acme.cash = 5000;
-  st.companies.bot_ironrail.cash = 5000;
+  st.companies.acme.cash = 50000;
+  st.companies.bot_ironrail.cash = 50000;
 
   // Claim sector (0,3) adjacent to HQ (0,2) and build + upgrade with 2-way branching lockout
   const clm = O.claimOrCaptureSector(st, 'acme', 0, 3, false);
@@ -606,9 +610,9 @@ test('LHEconomyEngine covers items/fluids/gas/energy, recipe graph, market crash
 
   // 6. Bot claim cap tied to player claims + dynamic bot on border expansion + physical building destruction
   const stCap = O.createInitialState();
-  assert.equal(O.countBotClaimsTotal(stCap), 3, 'bots start with only 3 HQ claims');
-  assert.equal(O.maxBotClaimsAllowed(stCap), 3, 'with 0 player claims bots cannot claim extra sectors');
-  const botTry = O.botExpandStep(stCap, 6, () => 0.1);
+  assert.equal(O.countBotClaimsTotal(stCap), 4, 'bots start with only 4 HQ claims');
+  assert.equal(O.maxBotClaimsAllowed(stCap), 4, 'with 0 player claims bots cannot claim extra sectors');
+  const botTry = O.botExpandStep(stCap, 10, () => 0.1);
   assert.equal(botTry.length, 0, 'bots blocked from claiming extra sectors when players have 0 claims');
   O.companyCreate(stCap, 'pu1', 'alpha', 'Альфа', 512, 512);
   assert(O.maxBotClaimsAllowed(stCap) > 3, 'player HQ claim expands bot claim allowance');
@@ -758,6 +762,112 @@ test('Reputation-linked pricing, solo reputation sync, and upgradeable Patrol Po
   assert(up2.ok && up2.building.level === 3);
   cov = O.findPatrolPostsCovering(st, cSolo.id, 1450, 0);
   assert(cov.length === 1 && cov[0].spawnGuards === true && cov[0].guardCount === 3, 'Lv3 warden_bunker enables hostile guard spawns');
+});
+
+test('Alpha20 overhaul: zfastnoise, Realistic Walkie-Talkie addon, 5x stack reduction, ch00 pre-complete, and ChestGUI defer fix', () => {
+  const path = require('path');
+  const ROOT = path.resolve(__dirname, '..');
+  const prof = JSON.parse(fs.readFileSync(path.join(ROOT, 'profiles/alpha20.json'), 'utf8'));
+  const all = Object.values(prof.categories).flat();
+  assert(all.includes('zfastnoise') && !all.includes('noisium'), 'zfastnoise replaces noisium in alpha20');
+  assert(!all.includes('walkie-talkie'), 'walkie-talkie removed in favor of Realistic Walkie-Talkie optional addon');
+  const cfAddons = JSON.parse(fs.readFileSync(path.join(ROOT, 'optional-mods/curseforge-addons.json'), 'utf8'));
+  assert(cfAddons.addons.some(a => a.mod_id === 'walkietalkies' && a.curseforge_project_id === 1750447), 'Realistic Walkie-Talkie (1750447) documented in curseforge-addons.json');
+  assert(fs.existsSync(path.join(ROOT, 'overrides/config/walkietalkies-server.properties')), 'walkietalkies-server.properties exists');
+
+  const stackJs = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/startup_scripts/02_stack_sizes.js'), 'utf8');
+  assert(stackJs.includes('Math.ceil(cur / 5)'), '02_stack_sizes.js divides maxStackSize by 5');
+  const itemsJs = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/startup_scripts/01_longhaul_items.js'), 'utf8');
+  assert(itemsJs.includes('maxStackSize(13)') && itemsJs.includes('maxStackSize(4)'), 'custom item stacks reduced 5x (64 -> 13, 16 -> 4)');
+
+  const s26 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/26_hard_features_and_territory.js'), 'utf8');
+  assert(s26.includes('schemaVersion: 3') && s26.includes("chapters: { ch00: true }"), 'ch00 pre-completed in schemaVersion 3');
+  assert(s26.includes('Number(p.y) <= -59') && !s26.includes('Number(p.y) <= 0'), 'below-Y safeguard uses <= -59 so underground companies at Y=-44 are safe');
+  assert(s26.includes('lhCheckFilledBarrelCarry') && s26.includes('dist <= 5.0'), 'filled-barrel 5-block anti-carry rule wired in 26_hard_features_and_territory.js');
+  assert(s26.includes('lhGrantStarterRadio') && s26.includes("'radio'"), 'starter radio command and join grant wired');
+
+  const s27 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/27_openttd_companies.js'), 'utf8');
+  assert(s27.includes('lhIsHostileMob') && s27.includes('lhRelocateCompanyEnv') && s27.includes('lhRequestBorderTrade'), '27_openttd_companies wires hostile mob exclusion, 4-env relocation, and border trade passes');
+
+  const s30 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/30_lh_gui.js'), 'utf8');
+  assert(s30.includes('lhGuiDeferAction') && s30.includes('scheduleInTicks'), '30_lh_gui.js defers inventory mutations after ChestGUI closes to prevent item wipe');
+});
+
+test('4-env companies, >=4 sector HQ spacing, TradeLogistics (1.04..24 m/s), HaggleEngine, and P2PTradeEngine', () => {
+  const O = sandbox.global.LHOpenTTD;
+  const TL = sandbox.global.LHTradeLogistics;
+  const HE = sandbox.global.LHHaggleEngine;
+  const P2P = sandbox.global.LHP2PTradeEngine;
+  assert(O && TL && HE && P2P, 'all new pure-JS engines loaded');
+
+  const st = O.createInitialState();
+  // Verify 4 environments and >=4 sector separation among initial bots
+  const botIds = ['bot_ironrail', 'bot_greencart', 'bot_skyport', 'bot_seawolf'];
+  const envs = new Set(botIds.map(id => st.companies[id].envType));
+  assert.equal(envs.size, 4, '4 bots span all 4 environments (normal, air, sea, underground)');
+  for (let i = 0; i < botIds.length; i++) {
+    for (let j = i + 1; j < botIds.length; j++) {
+      const a = st.companies[botIds[i]], b = st.companies[botIds[j]];
+      const sDist = Math.max(Math.abs(a.hqSx - b.hqSx), Math.abs(a.hqSz - b.hqSz));
+      assert(sDist >= 4, `bots ${a.id} and ${b.id} must be >= 4 sectors apart (got ${sDist})`);
+    }
+  }
+
+  // Wide HQ spacing for player companies
+  const p1 = O.companyCreate(st, 'u1', 'sky_corp', 'SkyCorp', 0, 0, { envType: 'air' }).company;
+  const p2 = O.companyCreate(st, 'u2', 'deep_corp', 'DeepCorp', 0, 0, { envType: 'underground' }).company;
+  assert.equal(p1.envType, 'air');
+  assert.equal(p1.hqY, 286);
+  assert.equal(p2.envType, 'underground');
+  assert.equal(p2.hqY, -44);
+  assert(Math.max(Math.abs(p1.hqSx - p2.hqSx), Math.abs(p1.hqSz - p2.hqSz)) >= 4, 'player companies placed >= 4 sectors apart');
+
+  // Delivery speeds 1.04..24.0 m/s and timed arrival
+  const logSt = TL.createState();
+  assert.equal(TL.MIN_DELIVERY_SPEED_BPS, 1.04);
+  assert.equal(TL.MAX_DELIVERY_SPEED_BPS, 24.0);
+  p1.cash = 50000;
+  const delRes = TL.createBuyOrderDelivery(logSt, st, 'sky_corp', 'deep_corp', 'minecraft:iron_ingot', 10, 120, 24.0, 100);
+  assert(delRes.ok && delRes.delivery, 'createBuyOrderDelivery succeeded');
+  const del = delRes.delivery;
+  assert.equal(del.speedBps, 24.0);
+  assert.equal(TL.tickDeliveries(logSt, st, 150).arrivedBuy.length, 0);
+  const arrived = TL.tickDeliveries(logSt, st, del.etaTick).arrivedBuy;
+  assert.equal(arrived.length, 1);
+  assert.equal(del.status, 'arrived_at_terminal');
+
+  // Border pass lifecycle (must be near target company's border)
+  const passFar = TL.requestBorderTradePass(logSt, st, 'u1', 'sky_corp', 'bot_ironrail', 0, 0, { nowTick: 100 });
+  assert(!passFar.ok, 'border pass rejected far from target company border');
+  const passRes = TL.requestBorderTradePass(logSt, st, 'u1', 'sky_corp', 'bot_ironrail', 7 * 256, 2 * 256, { nowTick: 100 });
+  assert(passRes.ok, 'requestBorderTradePass succeeded at company border');
+  assert.equal(TL.hasActiveBorderPass(logSt, 'u1', 'bot_ironrail', 120), true);
+  const leaveRes = TL.completeBorderTradeOnLeave(logSt, st, 'u1', 'bot_ironrail');
+  assert(leaveRes.ok);
+  assert.equal(TL.hasActiveBorderPass(logSt, 'u1', 'bot_ironrail', 120), false);
+
+  // HaggleEngine: fair offer agrees; insulting offers drain patience -> walked_away
+  const hFair = HE.createSession('H1', 'vs_bot', 'sky_corp', 'bot_ironrail', 'minecraft:iron_ingot', 10, 100, { botSide: 'seller', repScore: 40 });
+  const r1 = HE.submitOffer(hFair, 'buyer', hFair.botReservation, {});
+  assert(r1.ok && r1.agreed === true && r1.price === hFair.botReservation, 'haggle accepts offer >= botReservation');
+
+  const hInsult = HE.createSession('H2', 'vs_bot', 'sky_corp', 'bot_greencart', 'minecraft:diamond', 1, 100, { botSide: 'seller', repScore: -40 });
+  let rBad = null;
+  for (let round = 0; round < 6 && (!rBad || !rBad.walkedAway); round++) {
+    rBad = HE.submitOffer(hInsult, 'buyer', 1, {});
+  }
+  assert(rBad && rBad.walkedAway === true && hInsult.status === 'walked_away', 'repeated insulting offers trigger walk-away');
+
+  // P2P proximity trading <= 10 blocks
+  const proxFar = P2P.validateProximity(0, 70, 0, 25, 70, 0, true);
+  assert(!proxFar.ok && proxFar.reason === 'too_far', 'P2P rejects > 10m distance');
+  const proxNear = P2P.validateProximity(0, 70, 0, 6, 70, 0, true);
+  assert(proxNear.ok, 'P2P accepts <= 10m distance');
+  const p2pSess = P2P.createSession('P1', 'u1', 'Alice', 'sky_corp', 'u2', 'Bob', 'deep_corp');
+  assert(P2P.addItemOffer(p2pSess, 'u1', 'minecraft:iron_ingot', 4).ok);
+  assert(P2P.setCurrencyOffer(p2pSess, 'u2', 50).ok);
+  assert.equal(P2P.setConfirmed(p2pSess, 'u1', true).bothConfirmed, false);
+  assert.equal(P2P.setConfirmed(p2pSess, 'u2', true).bothConfirmed, true);
 });
 
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');

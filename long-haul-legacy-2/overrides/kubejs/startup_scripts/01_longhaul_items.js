@@ -20,9 +20,9 @@ StartupEvents.registry('item', function (event) {
     if (id === 'control_tablet') {
       builder.maxStackSize(1);
     } else if (id === 'cargo_manifest' || id === 'continental_module') {
-      builder.maxStackSize(16);
+      builder.maxStackSize(4); // ceil(16 / 5)
     } else {
-      builder.maxStackSize(64);
+      builder.maxStackSize(13); // ceil(64 / 5)
     }
   });
 });

@@ -108,6 +108,33 @@ function lhGuiItem(iconId, title, loreLines, count) {
   return st;
 }
 
+function lhGuiClose(player) {
+  if (!player) return;
+  try {
+    if (typeof player.closeContainer === 'function') player.closeContainer();
+    else if (typeof player.closeMenu === 'function') player.closeMenu();
+  } catch (eClose) {}
+}
+
+function lhGuiDeferAction(server, player, fn, reopenTab, reopenArg) {
+  lhGuiClose(player);
+  if (server && typeof server.scheduleInTicks === 'function') {
+    server.scheduleInTicks(2, function () {
+      try {
+        if (typeof fn === 'function') fn(player);
+      } catch (eFn) {}
+      if (reopenTab) {
+        server.scheduleInTicks(2, function () {
+          try { lhOpenGui(server, player, reopenTab, reopenArg); } catch (eRe) {}
+        });
+      }
+    });
+  } else {
+    if (typeof fn === 'function') fn(player);
+    if (reopenTab) lhOpenGui(server, player, reopenTab, reopenArg);
+  }
+}
+
 function lhGuiSlot(gui, x, y, iconId, title, loreLines, onLeft, onRight, count) {
   var slot = gui.getSlot(x, y);
   slot.setItem(lhGuiItem(iconId, title, loreLines, count));
@@ -450,24 +477,25 @@ function lhGuiRenderSites(gui, server, player) {
     }
     lhGuiSlot(gui, x, y, icon, '§6' + spec.name + ' §7[' + spec.id + ']', lore, function (pl) {
       if (spec.id === 'continental_archive') {
-        lhSiteArchive(server, pl);
+        lhGuiDeferAction(server, pl, function (p2) { lhSiteArchive(server, p2); }, 'sites');
       } else if (!entry.commissioned) {
         lhSiteCommission(server, pl, spec.id);
+        lhOpenGui(server, pl, 'sites');
       } else if (spec.bootstrapInputs) {
-        lhSiteProduce(server, pl, spec.id, 'bootstrap');
+        lhGuiDeferAction(server, pl, function (p2) { lhSiteProduce(server, p2, spec.id, 'bootstrap'); }, 'sites');
       } else {
         lhMsg(pl, spec.name + ' в (' + entry.x + ', ' + entry.y + ', ' + entry.z + '), дист. ' + dist);
+        lhOpenGui(server, pl, 'sites');
       }
-      lhOpenGui(server, pl, 'sites');
     }, function (pl) {
       if (spec.id === 'continental_archive') {
-        lhSiteRepairArchive(server, pl);
+        lhGuiDeferAction(server, pl, function (p2) { lhSiteRepairArchive(server, p2); }, 'sites');
       } else if (entry.commissioned && spec.industrialInputs) {
-        lhSiteProduce(server, pl, spec.id, 'industrial');
+        lhGuiDeferAction(server, pl, function (p2) { lhSiteProduce(server, p2, spec.id, 'industrial'); }, 'sites');
       } else {
         lhMsg(pl, spec.name + ' в (' + entry.x + ', ' + entry.y + ', ' + entry.z + '), дист. ' + dist);
+        lhOpenGui(server, pl, 'sites');
       }
-      lhOpenGui(server, pl, 'sites');
     });
   });
 
@@ -481,8 +509,9 @@ function lhGuiRenderSites(gui, server, player) {
       var d = Math.hypot(s.x - pl.x, s.z - pl.z);
       if (d < bestD) { bestD = d; best = sid; }
     });
-    if (best && typeof lhPhotoReport === 'function') lhPhotoReport(server, pl, best);
-    lhOpenGui(server, pl, 'sites');
+    lhGuiDeferAction(server, pl, function (p2) {
+      if (best && typeof lhPhotoReport === 'function') lhPhotoReport(server, p2, best);
+    }, 'sites');
   });
 
   lhGuiSlot(gui, 3, 3, 'minecraft:redstone_torch', '§eЗапросить CC-челлендж (/lh cc challenge)', [
@@ -568,8 +597,7 @@ function lhGuiRenderLogistics(gui, server, player) {
   lhGuiSlot(gui, 8, 0, 'minecraft:paper', '§eСдать накладную (/lh cargo deliver)', [
     '§7Держите груз-накладную в руке на узле назначения.'
   ], function (pl) {
-    lhCargoDeliver(server, pl);
-    lhOpenGui(server, pl, 'logistics');
+    lhGuiDeferAction(server, pl, function (p2) { lhCargoDeliver(server, p2); }, 'logistics');
   });
 
   camps.slice(0, 8).forEach(function (c, i) {
@@ -606,8 +634,7 @@ function lhGuiRenderLogistics(gui, server, player) {
       '§7Оформить перевозку от ближайшего узла (' + nearest + ')',
       '§e▶ ЛКМ: выписать (/lh cargo issue ' + nearest + ' ' + dst + ')'
     ], function (pl) {
-      lhCargoIssue(server, pl, nearest, dst);
-      lhOpenGui(server, pl, 'logistics');
+      lhGuiDeferAction(server, pl, function (p2) { lhCargoIssue(server, p2, nearest, dst); }, 'logistics');
     });
   });
 }
@@ -628,8 +655,7 @@ function lhGuiRenderRecovery(gui, server, player) {
       lhRecSurvey(server, pl, spec.id);
       lhOpenGui(server, pl, 'recovery');
     }, function (pl) {
-      lhRecRestore(server, pl, spec.id);
-      lhOpenGui(server, pl, 'recovery');
+      lhGuiDeferAction(server, pl, function (p2) { lhRecRestore(server, p2, spec.id); }, 'recovery');
     });
   });
 
@@ -670,7 +696,7 @@ function lhGuiRenderOpenTTD(gui, server, player) {
       '§fНаличные: §e' + myComp.cash + ' Cr',
       '§fОценка: §a' + global.LHOpenTTD.computeValuation(st, myComp.id) + ' Cr',
       '§fСекторов: §b' + global.LHOpenTTD.countClaims(st, myComp.id),
-      '§fСпец.: §f' + (myComp.transportSpec || 'нет') + ' / ' + (myComp.resourceSpec || 'нет')
+      '§fСреда: §d' + (myComp.envType || 'normal') + ' §7| Спец.: §f' + (myComp.transportSpec || 'нет') + ' / ' + (myComp.resourceSpec || 'нет')
     ]);
     lhGuiSlot(gui, 3, 0, 'minecraft:oak_door', '§cПокинуть компанию', ['§7Выйти из текущей компании OpenTTD'], function (pl) {
       global.LHOpenTTD.companyLeave(st, lhId(pl));
@@ -704,6 +730,35 @@ function lhGuiRenderOpenTTD(gui, server, player) {
       server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh openttd verify');
     }
     lhOpenGui(server, pl, 'openttd');
+  });
+
+  // Row 1: Environment selection (/lh company env <normal|air|sea|underground>)
+  var envSpecs = (global.LHOpenTTD && global.LHOpenTTD.COMPANY_ENV_TYPES) || {
+    normal: { name: 'Наземная (Surface)', y: 70 },
+    air: { name: 'Небесная (Y=286)', y: 286 },
+    sea: { name: 'Морская (Y=64)', y: 64 },
+    underground: { name: 'Подземная (Y=-44)', y: -44 }
+  };
+  var envIcons = {
+    normal: 'minecraft:grass_block',
+    air: 'minecraft:feather',
+    sea: 'minecraft:oak_boat',
+    underground: 'minecraft:deepslate'
+  };
+  ['normal', 'air', 'sea', 'underground'].forEach(function (eid, eIdx) {
+    var esp = envSpecs[eid] || { name: eid, y: 70 };
+    var activeEnv = myComp && (myComp.envType || 'normal') === eid;
+    lhGuiSlot(gui, 2 + eIdx, 1, envIcons[eid] || 'minecraft:stone',
+      (activeEnv ? '§a✔ ' : '§d') + 'Среда: ' + esp.name,
+      [
+        '§7Высота терминала/штаба: Y=' + esp.y,
+        '§7Новые здания строятся в этой среде.',
+        activeEnv ? '§aТекущая среда компании' : '§e▶ ЛКМ: переключить среду (/lh company env ' + eid + ')'
+      ],
+      function (pl) {
+        if (typeof lhRelocateCompanyEnv === 'function') lhRelocateCompanyEnv(server, pl, eid, false);
+        lhOpenGui(server, pl, 'openttd');
+      });
   });
 
   var tKeys = Object.keys(global.LHOpenTTD.TRANSPORT_SPECS || {});
@@ -911,7 +966,9 @@ function lhGuiRenderTerritory(gui, server, player) {
     if (typeof lhSyncXaeroTerritories === 'function') lhSyncXaeroTerritories(server, pl);
     lhOpenGui(server, pl, 'territory');
   }, function (pl) {
-    lhGiveTerritoryMapItem(server, pl, false, false);
+    lhGuiDeferAction(server, pl, function (p2) {
+      lhGiveTerritoryMapItem(server, p2, false, false);
+    });
   });
 
   lhGuiSlot(gui, 7, 4, 'minecraft:iron_sword', '§cРейд / Антимонополия', [
@@ -1109,6 +1166,20 @@ function lhGuiRenderDiplomacy(gui, server, player) {
     lhOpenGui(server, pl, 'diplomacy');
   });
 
+  // Row 3: Border Trade Visit passes (/lh trade visit <cid>)
+  others.slice(0, 9).forEach(function (otherId, idx) {
+    var c = st.companies[otherId];
+    lhGuiSlot(gui, idx, 3, 'minecraft:ender_eye', '§bВизит к терминалу: ' + c.name, [
+      '§7Покупает временный пограничный пропуск',
+      '§7к торговому терминалу компании ' + c.id + '.',
+      '§7Без пропуска охрана штрафует за вторжение.',
+      '§e▶ ЛКМ: запросить визит (/lh trade visit ' + otherId + ')'
+    ], function (pl) {
+      if (typeof lhRequestBorderTrade === 'function') lhRequestBorderTrade(server, pl, otherId, false);
+      lhOpenGui(server, pl, 'diplomacy');
+    });
+  });
+
   // Row 4: Supply Contracts
   var openSupply = (st.supplyContracts || []).filter(function (s) { return s.status === 'open'; });
   openSupply.slice(0, 9).forEach(function (sup, si) {
@@ -1117,10 +1188,11 @@ function lhGuiRenderDiplomacy(gui, server, player) {
       '§fНаграда: §a' + sup.price + ' Cr (+8 отношений, ост. ' + sup.remainingBatches + ')',
       '§e▶ ЛКМ: выполнить контракт из инвентаря'
     ], function (pl) {
-      if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
-        server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh diplomacy supply fulfill ' + sup.id);
-      }
-      lhOpenGui(server, pl, 'diplomacy');
+      lhGuiDeferAction(server, pl, function (p2) {
+        if (server && server.commands && typeof p2.createCommandSourceStack === 'function') {
+          server.commands.performPrefixedCommand(p2.createCommandSourceStack(), 'lh diplomacy supply fulfill ' + sup.id);
+        }
+      }, 'diplomacy');
     });
   });
 }
@@ -1191,6 +1263,24 @@ function lhGuiRenderMarket(gui, server, player) {
         q.crashed ? ('§c⚠ Обвал ещё ' + q.crashTicks + ' цикл.') : '§7Команда: /lh price check <id>'
       ]);
     });
+    lhGuiSlot(gui, 7, 0, 'minecraft:minecart', '§aДоставки и Торг', [
+      '§7Заказы с биржи едут в ваш терминал',
+      '§7со скоростью транспорта (1.04–24 м/с).',
+      '§eЛКМ: забрать прибывшие доставки в терминале',
+      '§bПКМ: список доставок, торга и P2P в чат'
+    ], function (pl) {
+      lhGuiDeferAction(server, pl, function (p2) {
+        if (typeof lhClaimArrivedDeliveriesAtTerminal === 'function') {
+          lhClaimArrivedDeliveriesAtTerminal(server, p2, null);
+        }
+      }, 'market');
+    }, function (pl) {
+      if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
+        server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh delivery list');
+        server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh haggle status');
+        server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh p2p list');
+      }
+    });
     lhGuiSlot(gui, 8, 0, 'minecraft:chest_minecart', '§6Логистика самовывоза', [
       '§7Покупка с витрины компании требует',
       '§7физически забрать груз со склада!',
@@ -1214,11 +1304,12 @@ function lhGuiRenderMarket(gui, server, player) {
       '§7Контрагент: ' + (c ? c.name : o.companyId)
     ].filter(Boolean);
     if (sub) lore.push('§e★ ГОССУБСИДИЯ ×1.75!');
-    lore.push(o.side === 'buy' ? '§e▶ ЛКМ: продать партию из инвентаря' : '§e▶ ЛКМ: купить партию за Cr');
+    lore.push(o.side === 'buy' ? '§e▶ ЛКМ: продать партию из инвентаря' : '§e▶ ЛКМ: купить (доставка или визит к терминалу)');
     lhGuiSlot(gui, x, y, o.item, (o.side === 'buy' ? '§a[СКУПКА] ' : '§b[ПРОДАЖА] ') + o.id, lore, function (pl) {
-      if (o.side === 'buy') lhMarketSell(server, pl, o.id, false);
-      else lhMarketBuy(server, pl, o.id, false);
-      lhOpenGui(server, pl, 'market');
+      lhGuiDeferAction(server, pl, function (p2) {
+        if (o.side === 'buy') lhMarketSell(server, p2, o.id, false);
+        else lhMarketBuy(server, p2, o.id, false);
+      }, 'market');
     }, null, Math.min(64, o.qty));
   });
 
@@ -1259,19 +1350,20 @@ function lhGuiRenderMarket(gui, server, player) {
       '§fСклад: §b(' + po.x + ', ' + po.y + ', ' + po.z + ')',
       '§e▶ ЛКМ: забрать груз (нужно быть рядом ≤ 24 м)'
     ], function (pl) {
-      var res = global.LHEconomyEngine.pickupLogisticsOrder(econ, myComp.id, po.id, pl.x, pl.y, pl.z, 24);
-      if (!res.ok) {
-        lhMsg(pl, res.reason === 'too_far'
-          ? ('§cВы в ' + res.distance + ' м от склада (' + res.target.x + ',' + res.target.y + ',' + res.target.z + ')!')
-          : ('§cОшибка: ' + res.reason));
-      } else {
-        lhEconSave(server);
-        if (po.kind === 'item' && typeof Item !== 'undefined' && typeof pl.give === 'function') {
-          pl.give(Item.of(po.itemId, Math.min(256, po.qty)));
+      lhGuiDeferAction(server, pl, function (p2) {
+        var res = global.LHEconomyEngine.pickupLogisticsOrder(econ, myComp.id, po.id, p2.x, p2.y, p2.z, 24);
+        if (!res.ok) {
+          lhMsg(p2, res.reason === 'too_far'
+            ? ('§cВы в ' + res.distance + ' м от склада (' + res.target.x + ',' + res.target.y + ',' + res.target.z + ')!')
+            : ('§cОшибка: ' + res.reason));
+        } else {
+          lhEconSave(server);
+          if (po.kind === 'item' && typeof Item !== 'undefined' && typeof p2.give === 'function') {
+            p2.give(Item.of(po.itemId, Math.min(256, po.qty)));
+          }
+          lhMsg(p2, '§a[Самовывоз ' + po.id + '] Получено ' + po.qty + '× ' + po.itemId + '!');
         }
-        lhMsg(pl, '§a[Самовывоз ' + po.id + '] Получено ' + po.qty + '× ' + po.itemId + '!');
-      }
-      lhOpenGui(server, pl, 'market');
+      }, 'market');
     });
   });
 
@@ -1280,10 +1372,11 @@ function lhGuiRenderMarket(gui, server, player) {
     lhGuiSlot(gui, 4 + idx, 4, tr.item || 'minecraft:emerald', '§dСделка: ' + tr.id, [
       '§f' + tr.sellerCompany + ' → ' + tr.targetCompany,
       '§fЛот: §e' + tr.qty + '× ' + tr.item + ' за §6' + tr.price + ' Cr',
-      '§e▶ ЛКМ: принять сделку (/lh trade accept ' + tr.id + ')'
+      '§e▶ ЛКМ: принять с доставкой (/lh trade accept ' + tr.id + ')'
     ], function (pl) {
-      lhAcceptTradeOffer(server, pl, tr.id, false);
-      lhOpenGui(server, pl, 'market');
+      lhGuiDeferAction(server, pl, function (p2) {
+        lhAcceptTradeOffer(server, p2, tr.id, false);
+      }, 'market');
     });
   });
 }
@@ -1406,7 +1499,7 @@ function lhGuiRenderWorld(gui, server, player) {
 }
 
 function lhGuiRenderHelp(gui, server, player) {
-  lhGuiSlot(gui, 2, 1, 'minecraft:knowledge_book', '§6Вывести полную справку в чат', [
+  lhGuiSlot(gui, 1, 1, 'minecraft:knowledge_book', '§6Вывести полную справку в чат', [
     '§7Отправит все основные команды /lh в ваш чат.'
   ], function (pl) {
     if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
@@ -1414,26 +1507,45 @@ function lhGuiRenderHelp(gui, server, player) {
     }
   });
 
-  lhGuiSlot(gui, 4, 1, 'longhaul:control_tablet', '§eВыдать Планшет диспетчера', [
+  lhGuiSlot(gui, 3, 1, 'longhaul:control_tablet', '§eВыдать Планшет диспетчера', [
     '§7Открывает этот GUI по ПКМ в любое время.',
     '§7Команда: /lh или /lh gui'
   ], function (pl) {
-    pl.give('longhaul:control_tablet');
-    lhMsg(pl, 'Планшет диспетчера выдан в инвентарь.');
+    lhGuiDeferAction(server, pl, function (p2) {
+      p2.give('longhaul:control_tablet');
+      lhMsg(p2, 'Планшет диспетчера выдан в инвентарь.');
+    });
   });
 
-  lhGuiSlot(gui, 6, 1, 'heracles:quest_book', '§aВыдать Квестбук Heracles', [
+  lhGuiSlot(gui, 5, 1, 'heracles:quest_book', '§aВыдать Квестбук Heracles', [
     '§7Основные главы, заказы каталога и туториалы.'
   ], function (pl) {
-    pl.give('heracles:quest_book');
-    lhMsg(pl, 'Квестбук Heracles выдан в инвентарь.');
+    lhGuiDeferAction(server, pl, function (p2) {
+      p2.give('heracles:quest_book');
+      lhMsg(p2, 'Квестбук Heracles выдан в инвентарь.');
+    });
   });
 
-  lhGuiSlot(gui, 4, 3, 'minecraft:paper', '§fБыстрые псевдонимы команд', [
-    '§e/lh §7или §e/lh gui §7— главное меню',
-    '§e/lh gui territory §7— сразу карта секторов 5×5',
-    '§e/lh gui market §7— сразу биржа консорциума',
-    '§e/lh gui events §7— сразу журнал событий'
+  lhGuiSlot(gui, 7, 1, 'minecraft:lightning_rod', '§bСтартовая радиостанция (/lh radio kit)', [
+    '§7Выдаёт рацию Realistic Walkie-Talkie (100–999 МГц)',
+    '§7при установленном опциональном моде.'
+  ], function (pl) {
+    lhGuiDeferAction(server, pl, function (p2) {
+      if (typeof lhGrantStarterRadio === 'function') {
+        lhGrantStarterRadio(server, p2, true);
+      } else if (server && server.commands && typeof p2.createCommandSourceStack === 'function') {
+        server.commands.performPrefixedCommand(p2.createCommandSourceStack(), 'lh radio kit');
+      }
+    });
+  });
+
+  lhGuiSlot(gui, 4, 3, 'minecraft:paper', '§fНовые команды логистики и среды', [
+    '§e/lh company env <normal|air|sea|underground> §7— среда штаба',
+    '§e/lh trade visit <id> §7— пограничный пропуск к терминалу',
+    '§e/lh delivery list|claim §7— доставки (1.04–24 м/с)',
+    '§e/lh haggle start <comp> <buy|sell> <item> <qty> §7— торг',
+    '§e/lh p2p propose <игрок> ... §7— P2P обмен рядом (<= 10м)',
+    '§e/lh radio kit §7— получить рацию'
   ]);
 }
 

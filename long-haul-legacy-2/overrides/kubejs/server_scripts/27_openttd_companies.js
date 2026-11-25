@@ -247,41 +247,221 @@ function lhBuildingContainsBlock(bldg, bx, by, bz) {
   return Math.abs(bx - x0) <= span && Math.abs(bz - z0) <= span && by >= (y0 - 1) && by <= (y0 + 5);
 }
 
-function lhPlacePhysicalBuildingBlocks(server, bldg) {
-  if (!server || !bldg) return false;
-  try {
-    var ow = server.getLevel('minecraft:overworld');
-    if (!ow) return false;
-    var bx = Math.round(Number(bldg.x)), by = Math.round(Number(bldg.y)), bz = Math.round(Number(bldg.z));
-    var wallMat = bldg.category === 'extraction' ? 'minecraft:stone_bricks'
-      : (bldg.category === 'logistics' ? 'minecraft:bricks' : 'minecraft:deepslate_bricks');
-    var trimMat = bldg.category === 'production' ? 'minecraft:iron_block' : 'minecraft:oak_planks';
+var LHLogiState = null;
 
-    // Build a customizable 5x4 physical company pavilion with a central terminal barrel
-    for (var dx = -2; dx <= 2; dx++) {
-      for (var dz = -2; dz <= 2; dz++) {
-        ow.getBlock(bx + dx, by - 1, bz + dz).set(wallMat);
-        for (var dy = 0; dy <= 3; dy++) {
-          var isCorner = Math.abs(dx) === 2 && Math.abs(dz) === 2;
-          var isEdge = Math.abs(dx) === 2 || Math.abs(dz) === 2;
-          if (dy === 3) {
-            ow.getBlock(bx + dx, by + dy, bz + dz).set(isEdge ? trimMat : 'minecraft:glass');
-          } else if (isCorner) {
-            ow.getBlock(bx + dx, by + dy, bz + dz).set(wallMat);
-          } else if (isEdge && dy === 0 && !(dx === 0 && Math.abs(dz) === 2)) {
-            ow.getBlock(bx + dx, by + dy, bz + dz).set(wallMat);
+function lhLogisticsRead(server) {
+  if (LHLogiState !== null) {
+    if (global.LHTradeLogistics) global.LHTradeLogistics.ensureState(LHLogiState);
+    return LHLogiState;
+  }
+  var raw = server.persistentData.getString('longhaul_logistics_v1');
+  LHLogiState = raw
+    ? JSON.parse(String(raw))
+    : (global.LHTradeLogistics ? global.LHTradeLogistics.createState() : { passes: {}, deliveries: [], haggles: {}, p2pSessions: {} });
+  if (global.LHTradeLogistics) global.LHTradeLogistics.ensureState(LHLogiState);
+  return LHLogiState;
+}
+
+function lhLogisticsSave(server) {
+  if (LHLogiState !== null) {
+    server.persistentData.putString('longhaul_logistics_v1', JSON.stringify(LHLogiState));
+  }
+}
+
+function lhGetCompanyTerminalBlockPos(server, st, cid) {
+  if (!st || !st.companies || !st.companies[cid]) return null;
+  var comp = st.companies[cid];
+  if (comp.terminalPos && typeof comp.terminalPos.x === 'number') {
+    return { x: Math.round(comp.terminalPos.x), y: Math.round(comp.terminalPos.y), z: Math.round(comp.terminalPos.z) };
+  }
+  return global.LHOpenTTD.getCompanyTerminalCoords(st, cid);
+}
+
+function lhPlaceSpecializedStructure(ow, bx, by, bz, envType, category) {
+  if (!ow) return false;
+  var wallMat = category === 'extraction' ? 'minecraft:stone_bricks'
+    : (category === 'logistics' ? 'minecraft:bricks' : 'minecraft:deepslate_bricks');
+  var trimMat = category === 'production' ? 'minecraft:iron_block' : 'minecraft:oak_planks';
+
+  if (envType === 'air') {
+    // Floating sky platform near world ceiling (Y ~ 286)
+    for (var ax = -3; ax <= 3; ax++) {
+      for (var az = -3; az <= 3; az++) {
+        var aEdge = Math.abs(ax) === 3 || Math.abs(az) === 3;
+        ow.getBlock(bx + ax, by - 1, bz + az).set(aEdge ? 'minecraft:iron_block' : 'minecraft:stone_bricks');
+        for (var ay = 0; ay <= 3; ay++) {
+          if (ay === 3 && Math.abs(ax) <= 2 && Math.abs(az) <= 2) {
+            ow.getBlock(bx + ax, by + ay, bz + az).set((Math.abs(ax) === 2 || Math.abs(az) === 2) ? 'minecraft:iron_block' : 'minecraft:glass');
+          } else if (aEdge && ay === 0 && !(ax === 0 || az === 0)) {
+            ow.getBlock(bx + ax, by + ay, bz + az).set('minecraft:iron_bars');
           } else {
-            ow.getBlock(bx + dx, by + dy, bz + dz).set('minecraft:air');
+            ow.getBlock(bx + ax, by + ay, bz + az).set('minecraft:air');
           }
         }
       }
     }
     ow.getBlock(bx, by, bz).set('minecraft:barrel');
-    ow.getBlock(bx, by + 2, bz + 2).set('minecraft:lantern');
+    ow.getBlock(bx + 2, by + 1, bz + 2).set('minecraft:lantern');
+    ow.getBlock(bx - 2, by + 1, bz - 2).set('minecraft:lantern');
     return true;
+  }
+
+  if (envType === 'sea') {
+    // Offshore oil-rig / floating naval pontoon over water (Y ~ 64)
+    for (var sx = -3; sx <= 3; sx++) {
+      for (var sz = -3; sz <= 3; sz++) {
+        var isCorner = Math.abs(sx) === 3 && Math.abs(sz) === 3;
+        if (isCorner) {
+          for (var py = by - 14; py < by - 1; py++) {
+            ow.getBlock(bx + sx, py, bz + sz).set('minecraft:deepslate_bricks');
+          }
+        }
+        var sEdge = Math.abs(sx) === 3 || Math.abs(sz) === 3;
+        ow.getBlock(bx + sx, by - 1, bz + sz).set(sEdge ? 'minecraft:iron_block' : 'minecraft:oak_planks');
+        for (var sy = 0; sy <= 3; sy++) {
+          ow.getBlock(bx + sx, by + sy, bz + sz).set('minecraft:air');
+        }
+      }
+    }
+    // Oil-rig derrick tower on corner
+    for (var ty = 0; ty <= 4; ty++) {
+      ow.getBlock(bx + 3, by + ty, bz + 3).set('minecraft:scaffolding');
+    }
+    ow.getBlock(bx, by, bz).set('minecraft:barrel');
+    ow.getBlock(bx - 2, by + 1, bz - 2).set('minecraft:lantern');
+    return true;
+  }
+
+  if (envType === 'underground') {
+    // Carved subterranean bunker near world bottom (Y = -44)
+    for (var ux = -3; ux <= 3; ux++) {
+      for (var uz = -3; uz <= 3; uz++) {
+        var uEdge = Math.abs(ux) === 3 || Math.abs(uz) === 3;
+        ow.getBlock(bx + ux, by - 1, bz + uz).set('minecraft:deepslate_bricks');
+        ow.getBlock(bx + ux, by + 4, bz + uz).set('minecraft:deepslate_bricks');
+        for (var uy = 0; uy <= 3; uy++) {
+          if (uEdge && !(ux === 0 && Math.abs(uz) === 3 && uy <= 1)) {
+            ow.getBlock(bx + ux, by + uy, bz + uz).set((Math.abs(ux) === 3 && Math.abs(uz) === 3) ? 'minecraft:chiseled_deepslate' : 'minecraft:deepslate_bricks');
+          } else {
+            ow.getBlock(bx + ux, by + uy, bz + uz).set('minecraft:air');
+          }
+        }
+      }
+    }
+    ow.getBlock(bx, by, bz).set('minecraft:barrel');
+    ow.getBlock(bx + 2, by + 2, bz + 2).set('minecraft:lantern');
+    ow.getBlock(bx - 2, by + 2, bz - 2).set('minecraft:lantern');
+    return true;
+  }
+
+  // Standard surface pavilion (normal)
+  for (var dx = -2; dx <= 2; dx++) {
+    for (var dz = -2; dz <= 2; dz++) {
+      ow.getBlock(bx + dx, by - 1, bz + dz).set(wallMat);
+      for (var dy = 0; dy <= 3; dy++) {
+        var isCornerN = Math.abs(dx) === 2 && Math.abs(dz) === 2;
+        var isEdgeN = Math.abs(dx) === 2 || Math.abs(dz) === 2;
+        if (dy === 3) {
+          ow.getBlock(bx + dx, by + dy, bz + dz).set(isEdgeN ? trimMat : 'minecraft:glass');
+        } else if (isCornerN) {
+          ow.getBlock(bx + dx, by + dy, bz + dz).set(wallMat);
+        } else if (isEdgeN && dy === 0 && !(dx === 0 && Math.abs(dz) === 2)) {
+          ow.getBlock(bx + dx, by + dy, bz + dz).set(wallMat);
+        } else {
+          ow.getBlock(bx + dx, by + dy, bz + dz).set('minecraft:air');
+        }
+      }
+    }
+  }
+  ow.getBlock(bx, by, bz).set('minecraft:barrel');
+  ow.getBlock(bx, by + 2, bz + 2).set('minecraft:lantern');
+  return true;
+}
+
+function lhPlacePhysicalBuildingBlocks(server, bldg) {
+  if (!server || !bldg) return false;
+  try {
+    var ow = server.getLevel('minecraft:overworld');
+    if (!ow) return false;
+    var st = lhOttdRead(server);
+    var comp = (bldg.owner && st && st.companies) ? st.companies[bldg.owner] : null;
+    var envType = bldg.envType || (comp ? global.LHOpenTTD.getCompanyEnvType(comp) : 'normal');
+    var bx = Math.round(Number(bldg.x));
+    var by = Math.round(Number(bldg.y));
+    var bz = Math.round(Number(bldg.z));
+    if (envType === 'air') by = Math.max(278, Math.min(300, by));
+    else if (envType === 'sea') by = 64;
+    else if (envType === 'underground') by = -44;
+    return lhPlaceSpecializedStructure(ow, bx, by, bz, envType, bldg.category || 'logistics');
   } catch (eBuild) {
     return false;
   }
+}
+
+function lhEnsureCompanyTerminalBuilt(server, st, cid) {
+  if (!server || !st || !st.companies || !st.companies[cid]) return null;
+  var comp = st.companies[cid];
+  var term = lhGetCompanyTerminalBlockPos(server, st, cid);
+  if (!term) return null;
+  try {
+    var ow = server.getLevel('minecraft:overworld');
+    if (!ow) return term;
+    var envType = global.LHOpenTTD.getCompanyEnvType(comp);
+    if (envType === 'normal' && typeof lhFindSafeRespawnY === 'function' && !comp.terminalPos) {
+      var surfY = lhFindSafeRespawnY(ow, term.x, term.z, true);
+      if (surfY > 0) term.y = surfY;
+    }
+    var pos = new LHPos(term.x, term.y, term.z);
+    if (ow.hasChunkAt(pos)) {
+      var blk = ow.getBlock(term.x, term.y, term.z);
+      if (!blk || (String(blk.id) !== 'minecraft:barrel' && String(blk.id) !== 'minecraft:chest')) {
+        lhPlaceSpecializedStructure(ow, term.x, term.y, term.z, envType, 'logistics');
+      }
+      comp.terminalPos = { x: term.x, y: term.y, z: term.z };
+      comp.hqX = term.x;
+      comp.hqY = term.y;
+      comp.hqZ = term.z;
+    }
+  } catch (eTerm) {}
+  return term;
+}
+
+function lhRelocateCompanyEnv(server, player, envType) {
+  var st = lhOttdRead(server);
+  var comp = lhGetPlayerCompany(server, player);
+  if (!comp) { lhMsg(player, 'Сначала создайте компанию.'); return { ok: false, reason: 'no_company' }; }
+  var res = global.LHOpenTTD.setCompanyEnvType(st, comp.id, envType);
+  if (!res.ok) { lhMsg(player, 'Неизвестный тип среды: ' + envType + ' (доступны: normal, air, sea, underground).'); return res; }
+
+  var ow = server.getLevel('minecraft:overworld');
+  var hx = Math.round(Number(comp.hqX || comp.hqSx * 256));
+  var hz = Math.round(Number(comp.hqZ || comp.hqSz * 256));
+  var hy = res.hqY;
+  if (ow) {
+    if (envType === 'normal' && typeof lhFindSafeRespawnY === 'function') {
+      hy = lhFindSafeRespawnY(ow, hx, hz, true);
+    } else if (envType === 'sea' && typeof lhFindWaterColumnForSeaSpawn === 'function') {
+      var wy = lhFindWaterColumnForSeaSpawn(ow, hx, hz);
+      hy = wy > 0 ? wy : 64;
+    }
+    lhPlaceSpecializedStructure(ow, hx, hy, hz, envType, 'logistics');
+  }
+  comp.hqX = hx;
+  comp.hqY = hy;
+  comp.hqZ = hz;
+  comp.terminalPos = { x: hx, y: hy, z: hz };
+  lhOttdSave(server);
+
+  if (typeof lhProfile === 'function' && typeof lhSave === 'function') {
+    var prof = lhProfile(server, player);
+    if (prof) {
+      prof.terminal = { dim: 'minecraft:overworld', x: hx, y: hy, z: hz };
+      lhSave(server);
+    }
+  }
+  lhMsg(player, '§a[Среда компании] §fШтаб и новые здания настроены на: ' + res.info.icon + ' §e' + res.info.name +
+    ' §7(терминал на ' + hx + ', ' + hy + ', ' + hz + ').');
+  return { ok: true, envType: envType, x: hx, y: hy, z: hz };
 }
 
 function lhGetPlayerCompany(server, player) {
@@ -881,6 +1061,174 @@ function lhConsumeInvItem(inv, itemId, qty) {
   return { ok: true };
 }
 
+function lhInsertIntoTerminalContainer(server, termPos, itemId, qty) {
+  if (!server || !termPos || !(qty > 0)) return 0;
+  try {
+    var ow = server.getLevel('minecraft:overworld');
+    if (!ow) return 0;
+    var bp = new LHPos(Math.round(termPos.x), Math.round(termPos.y), Math.round(termPos.z));
+    if (!ow.hasChunkAt(bp)) return 0;
+    var blk = ow.getBlock(bp.x, bp.y, bp.z);
+    if (!blk || !blk.inventory) return 0;
+    var inv = blk.inventory;
+    var stSample = Item.of(itemId, 1);
+    var maxStack = Math.max(1, Number(stSample.maxStackSize || 13));
+    var rem = Math.round(qty);
+    var inserted = 0;
+    // Top off existing matching stacks first, then empty slots
+    for (var pass = 0; pass < 2 && rem > 0; pass++) {
+      for (var s = 0; s < inv.slots && rem > 0; s++) {
+        var cur = inv.getStackInSlot(s);
+        if (pass === 0 && cur && !cur.empty && String(cur.id) === itemId && Number(cur.count) < maxStack) {
+          var add0 = Math.min(rem, maxStack - Number(cur.count));
+          inv.setStackInSlot(s, Item.of(itemId, Number(cur.count) + add0));
+          rem -= add0;
+          inserted += add0;
+        } else if (pass === 1 && (!cur || cur.empty)) {
+          var add1 = Math.min(rem, maxStack);
+          inv.setStackInSlot(s, Item.of(itemId, add1));
+          rem -= add1;
+          inserted += add1;
+        }
+      }
+    }
+    return inserted;
+  } catch (eIns) {
+    return 0;
+  }
+}
+
+function lhCountAndExtractFromTerminal(server, termPos, itemId, maxQty, extractNow) {
+  if (!server || !termPos) return { loaded: false, count: 0, extracted: 0 };
+  try {
+    var ow = server.getLevel('minecraft:overworld');
+    if (!ow) return { loaded: false, count: 0, extracted: 0 };
+    var bp = new LHPos(Math.round(termPos.x), Math.round(termPos.y), Math.round(termPos.z));
+    if (!ow.hasChunkAt(bp)) return { loaded: false, count: 0, extracted: 0 };
+    var blk = ow.getBlock(bp.x, bp.y, bp.z);
+    if (!blk || !blk.inventory) return { loaded: true, count: 0, extracted: 0 };
+    var inv = blk.inventory;
+    var have = 0;
+    for (var s = 0; s < inv.slots; s++) {
+      var st = inv.getStackInSlot(s);
+      if (st && !st.empty && String(st.id) === itemId) have += Number(st.count);
+    }
+    if (!extractNow) return { loaded: true, count: have, extracted: 0 };
+    var rem = Math.min(have, Math.max(0, Math.round(maxQty || have)));
+    var takenTotal = 0;
+    for (var s2 = 0; s2 < inv.slots && rem > 0; s2++) {
+      var st2 = inv.getStackInSlot(s2);
+      if (st2 && !st2.empty && String(st2.id) === itemId) {
+        var tk = inv.extractItem(s2, Math.min(rem, Number(st2.count)), false);
+        var c = Number(tk.count || 0);
+        rem -= c;
+        takenTotal += c;
+      }
+    }
+    return { loaded: true, count: have, extracted: takenTotal };
+  } catch (eExt) {
+    return { loaded: false, count: 0, extracted: 0 };
+  }
+}
+
+function lhRequestBorderTrade(server, player, opts, dryRun) {
+  var st = lhOttdRead(server);
+  var lState = lhLogisticsRead(server);
+  var myComp = lhGetPlayerCompany(server, player);
+  if (!myComp) { if (!dryRun) lhMsg(player, 'Сначала создайте или вступите в компанию.'); return { ok: false, reason: 'no_company' }; }
+  var targetCid = opts && opts.targetCid;
+  var itemId = opts && opts.itemId;
+  var qty = Math.max(1, Math.round(Number((opts && opts.qty) || 1)));
+  var side = (opts && opts.side) || 'buy';
+  var totalPrice = Math.max(0, Math.round(Number((opts && opts.totalPrice) || 0)));
+  var deliveryBonus = Math.max(0, Math.round(Number((opts && opts.deliveryBonus) || 0)));
+
+  if (!targetCid || !st.companies[targetCid]) return { ok: false, reason: 'bad_target' };
+  if (side === 'buy' && totalPrice > 0 && myComp.cash < totalPrice) {
+    if (!dryRun) lhMsg(player, '§cНедостаточно средств: нужно ' + totalPrice + ' Cr, у компании ' + myComp.cash + ' Cr.');
+    return { ok: false, reason: 'no_cash', cost: totalPrice };
+  }
+  var res = global.LHTradeLogistics.requestBorderTradePass(lState, st, lhId(player), myComp.id, targetCid, player.x, player.z, {
+    side: side,
+    orderId: opts.orderId || null,
+    deliveryId: opts.deliveryId || null,
+    itemId: itemId,
+    qty: qty,
+    totalPrice: totalPrice,
+    deliveryBonus: deliveryBonus
+  }, LHOTTDTick);
+  if (!res.ok) {
+    if (!dryRun && res.reason === 'not_at_border') {
+      var tTerm = lhGetCompanyTerminalBlockPos(server, st, targetCid);
+      var tComp = st.companies[targetCid];
+      lhMsg(player, '§c[Нужна граница] §fЧтобы запросить пропуск к «' + (tComp ? tComp.name : targetCid) +
+        '», подойдите к границе их территории (сектор рядом с ' + (tComp ? (tComp.hqSx + ',' + tComp.hqSz) : '?') +
+        ', терминал на ' + (tTerm ? (tTerm.x + ', ' + tTerm.y + ', ' + tTerm.z) : '?') + ').');
+    }
+    return res;
+  }
+  if (side === 'buy' && totalPrice > 0 && !opts.alreadyPaid) {
+    myComp.cash -= totalPrice;
+    st.companies[targetCid].cash += totalPrice;
+    myComp.stats.tradeVolume = (myComp.stats.tradeVolume || 0) + totalPrice;
+    st.companies[targetCid].stats.tradeVolume = (st.companies[targetCid].stats.tradeVolume || 0) + totalPrice;
+    if (opts.orderObj && opts.orderObj.remainingBatches > 0) opts.orderObj.remainingBatches -= 1;
+  }
+  lhEnsureCompanyTerminalBuilt(server, st, targetCid);
+  lhOttdSave(server);
+  lhLogisticsSave(server);
+  if (!dryRun) {
+    var tp = res.pass;
+    var tgtName = st.companies[targetCid].name;
+    lhMsg(player, '§a[Торговый пропуск ' + tp.id + '] §fВыдан временный пропуск на 10 мин по территории «' + tgtName +
+      '»! Дойдите до терминала §e(' + tp.terminal.x + ', ' + tp.terminal.y + ', ' + tp.terminal.z + ')§f, ' +
+      (side === 'buy' ? ('заберите ' + qty + '× ' + itemId) : ('положите ' + qty + '× ' + itemId)) +
+      ' в бочку-терминал и покиньте территорию! §c(Добыча/сбор/убийство мирных мобов всё ещё штрафуются!)');
+  }
+  return res;
+}
+
+function lhFinalizeTradePassOnLeave(server, player, targetCid) {
+  var st = lhOttdRead(server);
+  var lState = lhLogisticsRead(server);
+  var pid = lhId(player);
+  var active = global.LHTradeLogistics.getActiveBorderPass(lState, pid, targetCid, LHOTTDTick);
+  if (!active) return null;
+
+  if (active.side === 'sell') {
+    // Check live container if loaded right now and drain sold goods
+    var ext = lhCountAndExtractFromTerminal(server, active.terminal, active.itemId, active.qty, true);
+    if (ext.loaded && ext.extracted > 0) {
+      active.depositedQty = ext.extracted;
+    } else if (!ext.loaded && active.depositedQty > 0) {
+      // Queue deferred drain if container chunk unloaded while walking away
+      if (!lState.pendingTerminalDrains) lState.pendingTerminalDrains = [];
+      lState.pendingTerminalDrains.push({
+        terminal: active.terminal,
+        itemId: active.itemId,
+        qty: active.depositedQty
+      });
+    }
+  }
+  var compRes = global.LHTradeLogistics.completeBorderTradeOnLeave(lState, st, pid, targetCid);
+  lhOttdSave(server);
+  lhLogisticsSave(server);
+  if (compRes && compRes.ok && compRes.finalized) {
+    if (compRes.side === 'sell') {
+      lhUnlock(player, 'longhaul:openttd/trade');
+      lhMsg(player, '§a§l[Сделка завершена] §fВы покинули территорию «' + st.companies[targetCid].name +
+        '»: ' + compRes.qty + '× ' + active.itemId + ' изъяты из терминала, на баланс зачислено §e+' + compRes.payout + ' Cr' +
+        (compRes.bonusCredit > 0 ? (' §7(в т.ч. +' + compRes.bonusCredit + ' Cr за самодоставку)') : '') + '!');
+    } else {
+      lhUnlock(player, 'longhaul:openttd/trade');
+      lhMsg(player, '§a§l[Покупка завершена] §fВы благополучно покинули территорию «' + st.companies[targetCid].name + '» с грузом.');
+    }
+  } else if (compRes && compRes.ok) {
+    lhMsg(player, '§e[Пропуск закрыт] §fВы покинули территорию «' + st.companies[targetCid].name + '» без завершения загрузки.');
+  }
+  return compRes;
+}
+
 function lhMarketSell(server, player, orderId, dryRun) {
   var st = lhOttdRead(server);
   var myComp = lhGetPlayerCompany(server, player);
@@ -902,18 +1250,13 @@ function lhMarketSell(server, player, orderId, dryRun) {
     if (!dryRun) lhMsg(player, 'У компании-покупателя недостаточно средств.');
     return 0;
   }
-  var cons = lhConsumeInvItem(player.inventory, order.item, order.qty);
-  if (!cons.ok) {
-    if (!dryRun) lhMsg(player, 'Недостаточно ' + order.item + ': нужно ' + order.qty + ', у вас ' + cons.have + '.');
-    return 0;
-  }
   var isSubsidy = st.subsidy && st.subsidy.item === order.item && st.subsidy.companyId === order.companyId;
   var bonusMult = isSubsidy ? 1.75 : 1.20;
   var econ = lhEconRead(server);
   var marketInfo = global.LHEconomyEngine
-    ? global.LHEconomyEngine.recordTradePressure(econ, order.item, 'sell', order.qty)
+    ? global.LHEconomyEngine.getMarketQuote(econ, order.item)
     : null;
-  var marketMult = marketInfo && marketInfo.quote ? Math.max(0.18, Math.min(2.40, marketInfo.quote.multiplier)) : 1.0;
+  var marketMult = marketInfo ? Math.max(0.18, Math.min(2.40, marketInfo.multiplier)) : 1.0;
   var repScore = global.LHOpenTTD.getEffectiveRelationScore(st, myComp.id, lhId(player), order.companyId);
   var repPricing = global.LHOpenTTD.getReputationPriceModifiers(repScore);
   var payout = Math.max(1, Math.round(order.price * bonusMult * marketMult * repPricing.sellMult));
@@ -921,6 +1264,35 @@ function lhMarketSell(server, player, orderId, dryRun) {
     var feeMult = lhOriginFeeMult(player);
     if (feeMult > 1.0) payout = Math.max(1, Math.round(payout / feeMult));
   }
+
+  if (!dryRun) {
+    // Live mode: no instant remote item teleport! Require border visit pass OR Delivery Desk at own terminal
+    var sTerm = lhGetCompanyTerminalBlockPos(server, st, myComp.id);
+    var bTerm = lhGetCompanyTerminalBlockPos(server, st, order.companyId);
+    var dist = global.LHTradeLogistics.computeDistance(sTerm.x, sTerm.z, bTerm.x, bTerm.z);
+    var vol = global.LHTradeLogistics.computeCargoVolume(order.qty, 13);
+    var delivBonus = global.LHTradeLogistics.computeSelfDeliveryReward(dist, vol);
+    var passRes = lhRequestBorderTrade(server, player, {
+      targetCid: order.companyId,
+      side: 'sell',
+      orderId: order.id,
+      itemId: order.item,
+      qty: order.qty,
+      totalPrice: payout,
+      deliveryBonus: delivBonus
+    }, false);
+    if (passRes.ok) {
+      order.remainingBatches -= 1;
+      lhOttdSave(server);
+      return payout;
+    }
+    lhMsg(player, '§e[Доставка / Граница] §fПодойдите к границе «' + buyer.name + '» для прохода к их терминалу, либо выберите «Поручить доставку покупателю» во вкладке §6Доставка§f своего терминала!');
+    return 0;
+  }
+
+  var cons = lhConsumeInvItem(player.inventory, order.item, order.qty);
+  if (!cons.ok) return 0;
+  if (global.LHEconomyEngine) global.LHEconomyEngine.recordTradePressure(econ, order.item, 'sell', order.qty);
   buyer.cash -= order.price;
   myComp.cash += payout;
   myComp.stats.tradeVolume = (myComp.stats.tradeVolume || 0) + payout;
@@ -928,18 +1300,6 @@ function lhMarketSell(server, player, orderId, dryRun) {
   order.remainingBatches -= 1;
   lhOttdSave(server);
   lhEconSave(server);
-  if (!dryRun) {
-    lhUnlock(player, 'longhaul:openttd/trade');
-    var repTag = repPricing.sellMult !== 1.0 ? (' §7[реп. ' + repScore + ': ×' + repPricing.sellMult + ']') : '';
-    lhMsg(player, '§a[Рынок] Продано ' + order.qty + '× ' + order.item + ' компании ' + buyer.name +
-      ' за §f' + payout + ' Cr' + (isSubsidy ? ' §e(СУБСИДИЯ ×1.75!)' : ' §7(+20% бонус, рынок ×' + marketMult + ')') + repTag + '. Баланс: ' + myComp.cash + ' Cr.');
-    if (marketInfo && marketInfo.crashedJustNow) {
-      var crashMsg = '§c§l[ОБВАЛ РЫНКА] §fПерепроизводство ' + order.item + ' обрушило цену до ×' + marketInfo.quote.multiplier + '!';
-      if (server.players) {
-        for (var mp = 0; mp < server.players.length; mp++) server.players[mp].tell(crashMsg);
-      }
-    }
-  }
   return payout;
 }
 
@@ -962,9 +1322,9 @@ function lhMarketBuy(server, player, orderId, dryRun) {
   var seller = st.companies[order.companyId];
   var econ = lhEconRead(server);
   var marketInfo = global.LHEconomyEngine
-    ? global.LHEconomyEngine.recordTradePressure(econ, order.item, 'buy', order.qty)
+    ? global.LHEconomyEngine.getMarketQuote(econ, order.item)
     : null;
-  var marketMult = marketInfo && marketInfo.quote ? Math.max(0.24, Math.min(2.40, marketInfo.quote.multiplier)) : 1.0;
+  var marketMult = marketInfo ? Math.max(0.24, Math.min(2.40, marketInfo.multiplier)) : 1.0;
   var taxFree = global.LHOpenTTD.hasPact(st, myComp.id, order.companyId);
   var repScore = global.LHOpenTTD.getEffectiveRelationScore(st, myComp.id, lhId(player), order.companyId);
   var repPricing = global.LHOpenTTD.getReputationPriceModifiers(repScore);
@@ -974,6 +1334,29 @@ function lhMarketBuy(server, player, orderId, dryRun) {
     if (!dryRun) lhMsg(player, 'Недостаточно средств: нужно ' + totalCost + ' Cr, у вас ' + myComp.cash + ' Cr (цена с учётом реп. ×' + repPricing.buyMult + ').');
     return 0;
   }
+
+  if (!dryRun) {
+    // Live mode: NEVER teleport items directly into inventory! Require border pass to seller's terminal OR Delivery Desk at own terminal
+    var passRes = lhRequestBorderTrade(server, player, {
+      targetCid: order.companyId,
+      side: 'buy',
+      orderId: order.id,
+      orderObj: order,
+      itemId: order.item,
+      qty: order.qty,
+      totalPrice: totalCost
+    }, false);
+    if (passRes.ok) {
+      if (global.LHEconomyEngine) global.LHEconomyEngine.recordTradePressure(econ, order.item, 'buy', order.qty);
+      lhEconSave(server);
+      return totalCost;
+    }
+    lhMsg(player, '§e[Способ покупки] §fПодойдите к границе «' + (seller ? seller.name : order.companyId) +
+      '» и подайте запрос через Планшет, ИЛИ закажите доставку / удержание через вкладку §6Доставка §fу своего терминала!');
+    return 0;
+  }
+
+  if (global.LHEconomyEngine) global.LHEconomyEngine.recordTradePressure(econ, order.item, 'buy', order.qty);
   myComp.cash -= totalCost;
   if (seller) {
     seller.cash += baseBuy;
@@ -981,17 +1364,8 @@ function lhMarketBuy(server, player, orderId, dryRun) {
   }
   myComp.stats.tradeVolume = (myComp.stats.tradeVolume || 0) + totalCost;
   order.remainingBatches -= 1;
-  if (!dryRun && typeof Item !== 'undefined' && typeof player.give === 'function') {
-    player.give(Item.of(order.item, order.qty));
-  }
   lhOttdSave(server);
   lhEconSave(server);
-  if (!dryRun) {
-    lhUnlock(player, 'longhaul:openttd/trade');
-    var repTagB = repPricing.buyMult !== 1.0 ? (' §7[реп. ' + repScore + ': ×' + repPricing.buyMult + ']') : '';
-    lhMsg(player, '§a[Рынок] Куплено ' + order.qty + '× ' + order.item + ' у ' + (seller ? seller.name : order.companyId) +
-      ' за ' + totalCost + ' Cr' + (taxFree ? ' §a(по торговому пакту без пошлины)' : ' §7(вкл. 10% пошлины)') + repTagB + '.');
-  }
   return totalCost;
 }
 
@@ -1029,6 +1403,15 @@ function lhCreateTradeOffer(server, player, targetCid, qty, priceCr, dryRun) {
   return offer;
 }
 
+function lhCompanySpeedBps(comp) {
+  var sp = comp && comp.transportSpec ? String(comp.transportSpec) : 'road';
+  if (sp === 'air') return 24.0;
+  if (sp === 'rail') return 12.0;
+  if (sp === 'underground') return 8.0;
+  if (sp === 'sea') return 5.5;
+  return 1.04;
+}
+
 function lhAcceptTradeOffer(server, player, offerId, dryRun) {
   var st = lhOttdRead(server);
   var myComp = lhGetPlayerCompany(server, player);
@@ -1046,26 +1429,38 @@ function lhAcceptTradeOffer(server, player, offerId, dryRun) {
   var repScoreT = global.LHOpenTTD.getEffectiveRelationScore(st, myComp.id, lhId(player), offer.sellerCompany);
   var repPricingT = global.LHOpenTTD.getReputationPriceModifiers(repScoreT);
   var finalOfferPrice = Math.max(1, Math.round(offer.price * repPricingT.buyMult));
-  if (myComp.cash < finalOfferPrice) {
-    if (!dryRun) lhMsg(player, 'Не хватает средств: нужно ' + finalOfferPrice + ' Cr (реп. ×' + repPricingT.buyMult + ').');
+  var seller = st.companies[offer.sellerCompany];
+  if (dryRun) {
+    if (myComp.cash < finalOfferPrice) return 0;
+    myComp.cash -= finalOfferPrice;
+    if (seller) {
+      seller.cash += finalOfferPrice;
+      seller.stats.tradeVolume = (seller.stats.tradeVolume || 0) + finalOfferPrice;
+    }
+    myComp.stats.tradeVolume = (myComp.stats.tradeVolume || 0) + finalOfferPrice;
+    offer.status = 'completed';
+    lhOttdSave(server);
+    return 1;
+  }
+  var logSt = lhLogisticsRead(server);
+  var buyerTerm = lhEnsureCompanyTerminalBuilt(server, st, myComp);
+  if (seller) lhEnsureCompanyTerminalBuilt(server, st, seller);
+  var delivRes = global.LHTradeLogistics
+    ? global.LHTradeLogistics.createBuyOrderDelivery(logSt, st, myComp.id, offer.sellerCompany, offer.item, offer.qty, finalOfferPrice, lhCompanySpeedBps(seller || myComp), LHOTTDTick)
+    : { ok: false, reason: 'no_logistics' };
+  if (!delivRes.ok) {
+    lhMsg(player, '§cНе хватает средств для сделки с доставкой: нужно ' + (delivRes.cost || finalOfferPrice) + ' Cr (вкл. доставку ' + (delivRes.fee || 0) + ' Cr).');
     return 0;
   }
-  var seller = st.companies[offer.sellerCompany];
-  myComp.cash -= finalOfferPrice;
-  if (seller) {
-    seller.cash += finalOfferPrice;
-    seller.stats.tradeVolume = (seller.stats.tradeVolume || 0) + finalOfferPrice;
-  }
-  myComp.stats.tradeVolume = (myComp.stats.tradeVolume || 0) + finalOfferPrice;
   offer.status = 'completed';
-  if (!dryRun && typeof Item !== 'undefined' && typeof player.give === 'function') {
-    player.give(Item.of(offer.item, offer.qty));
-  }
+  lhLogisticsSave(server);
   lhOttdSave(server);
-  if (!dryRun) {
-    lhUnlock(player, 'longhaul:openttd/trade');
-    lhMsg(player, '§a[Сделка ' + offer.id + '] Получено ' + offer.qty + '× ' + offer.item + ' за ' + finalOfferPrice + ' Cr (реп. ×' + repPricingT.buyMult + ')!');
-  }
+  lhUnlock(player, 'longhaul:openttd/trade');
+  var del = delivRes.delivery;
+  var etaSec = Math.max(1, Math.round((delivRes.durationTicks || 200) / 20));
+  lhMsg(player, '§a[Сделка ' + offer.id + '] Куплено ' + offer.qty + '× ' + offer.item + ' за ' + finalOfferPrice +
+    ' Cr + доставка ' + delivRes.deliveryFee + ' Cr. §eДоставка ' + del.id + ' (' + etaSec + 'с @ ' + del.speedBps +
+    ' м/с) в терминал (' + Math.round(buyerTerm.x) + ',' + Math.round(buyerTerm.y) + ',' + Math.round(buyerTerm.z) + ')!');
   return 1;
 }
 
@@ -1573,6 +1968,340 @@ BlockEvents.broken(function (event) {
   }
 });
 
+function lhIsHostileMob(ent) {
+  if (!ent) return false;
+  try {
+    if (typeof ent.isMonster === 'function' && ent.isMonster()) return true;
+  } catch (e1) {}
+  try {
+    if (typeof ent.getType === 'function') {
+      var tp = ent.getType();
+      if (tp && typeof tp.getCategory === 'function') {
+        var cat = tp.getCategory();
+        if (cat && String(cat.getName ? cat.getName() : cat).toLowerCase() === 'monster') return true;
+      }
+    }
+  } catch (e2) {}
+  var s = String(ent.type || '').toLowerCase();
+  return s === 'minecraft:zombie' || s === 'minecraft:skeleton' || s === 'minecraft:creeper' ||
+    s === 'minecraft:spider' || s === 'minecraft:cave_spider' || s === 'minecraft:enderman' ||
+    s === 'minecraft:witch' || s === 'minecraft:pillager' || s === 'minecraft:vindicator' ||
+    s === 'minecraft:drowned' || s === 'minecraft:husk' || s === 'minecraft:stray' ||
+    s === 'minecraft:phantom' || s === 'minecraft:slime' || s === 'minecraft:warden';
+}
+
+function lhFindTerminalAtBlock(server, bx, by, bz) {
+  var logSt = lhLogisticsRead(server);
+  var terms = logSt.terminals || {};
+  var keys = Object.keys(terms);
+  for (var i = 0; i < keys.length; i++) {
+    var cid = keys[i];
+    var t = terms[cid];
+    if (!t) continue;
+    if (Math.round(t.x) === Math.round(bx) && Math.round(t.y) === Math.round(by) && Math.round(t.z) === Math.round(bz)) {
+      return { companyId: cid, terminal: t };
+    }
+  }
+  return null;
+}
+
+function lhClaimArrivedDeliveriesAtTerminal(server, player, deliveryIdOpt) {
+  var st = lhOttdRead(server);
+  var comp = lhGetPlayerCompany(server, player);
+  if (!comp) { lhMsg(player, 'Сначала создайте или вступите в компанию.'); return 0; }
+  var logSt = lhLogisticsRead(server);
+  var term = lhEnsureCompanyTerminalBuilt(server, st, comp);
+  var dist = Math.sqrt(
+    Math.pow(Number(player.x) - Number(term.x), 2) +
+    Math.pow(Number(player.y) - Number(term.y), 2) +
+    Math.pow(Number(player.z) - Number(term.z), 2)
+  );
+  if (dist > 14.0) {
+    lhMsg(player, '§cПодойдите к терминалу вашей компании (' + Math.round(term.x) + ',' + Math.round(term.y) + ',' + Math.round(term.z) + ', сейчас ' + Math.round(dist) + ' м).');
+    return 0;
+  }
+  var claimed = 0;
+  var dels = logSt.deliveries || [];
+  for (var i = 0; i < dels.length; i++) {
+    var d = dels[i];
+    if (d.buyerCid !== comp.id || (d.status !== 'arrived_at_terminal' && d.status !== 'arrived')) continue;
+    if (deliveryIdOpt && d.id !== deliveryIdOpt) continue;
+    var rem = Number(d.unclaimedQty != null ? d.unclaimedQty : d.qty);
+    if (rem <= 0) { d.status = 'completed'; continue; }
+    var ins = lhInsertIntoTerminalContainer(server, term, d.itemId, rem);
+    var left = rem - ins;
+    if (left > 0 && typeof Item !== 'undefined' && typeof player.give === 'function') {
+      player.give(Item.of(d.itemId, left));
+      left = 0;
+    }
+    d.unclaimedQty = left;
+    if (left <= 0) d.status = 'completed';
+    claimed++;
+    lhMsg(player, '§a[Доставка ' + d.id + '] Получено ' + rem + '× ' + d.itemId + (ins > 0 ? (' (в бочку терминала: ' + ins + ')') : '') + '!');
+  }
+  lhLogisticsSave(server);
+  if (!claimed) lhMsg(player, 'Нет ожидающих прибывших доставок для вашей компании.');
+  return claimed ? 1 : 0;
+}
+
+function lhHaggleStart(server, player, targetCid, side, itemId, qty, dryRun) {
+  if (!global.LHHaggleEngine || !global.LHEconomyEngine) return null;
+  var st = lhOttdRead(server);
+  var econ = lhEconRead(server);
+  var myComp = lhGetPlayerCompany(server, player);
+  if (!myComp) { if (!dryRun) lhMsg(player, 'Сначала создайте или вступите в компанию.'); return null; }
+  var cleanTarget = global.LHOpenTTD.sanitizeId(targetCid);
+  var targetComp = st.companies[cleanTarget];
+  if (!targetComp) { if (!dryRun) lhMsg(player, 'Компания "' + targetCid + '" не найдена.'); return null; }
+  var q = global.LHEconomyEngine.getMarketQuote(econ, itemId);
+  var unitPrice = Math.max(1, Number(q.price || 10));
+  var repScore = global.LHOpenTTD.getEffectiveRelationScore(st, myComp.id, lhId(player), cleanTarget);
+  var logSt = lhLogisticsRead(server);
+  logSt.haggles = logSt.haggles || {};
+  logSt.nextHaggleSeq = (logSt.nextHaggleSeq || 0) + 1;
+  var hid = 'H' + logSt.nextHaggleSeq;
+  var cleanQty = Math.max(1, Math.round(qty || 1));
+  var isSell = (side === 'sell');
+  var sess = global.LHHaggleEngine.createSession(
+    hid, 'vs_bot',
+    isSell ? cleanTarget : myComp.id,
+    isSell ? myComp.id : cleanTarget,
+    q.itemId, cleanQty, unitPrice * cleanQty,
+    { botSide: isSell ? 'buyer' : 'seller', repScore: repScore }
+  );
+  sess.playerId = lhId(player);
+  sess.playerCid = myComp.id;
+  sess.targetCid = cleanTarget;
+  logSt.haggles[hid] = sess;
+  lhLogisticsSave(server);
+  if (!dryRun) {
+    var curAsk = sess.botSide === 'seller' ? sess.sellerAsk : sess.buyerBid;
+    lhMsg(player, '§e[Торг ' + sess.id + '] §f' + targetComp.name + ' (' + (isSell ? 'продажа им' : 'покупка у них') +
+      ' ' + sess.qty + '× ' + sess.itemId + '): стартовая цена §e' + curAsk + ' Cr §7(мин ' + sess.minPrice + ' / макс ' + sess.maxPrice + ', реп. ' + repScore + '). ' +
+      'Команды: /lh haggle offer ' + sess.id + ' <цена> | /lh haggle accept ' + sess.id);
+  }
+  return sess;
+}
+
+function lhHaggleOffer(server, player, sessionId, offeredPrice, dryRun) {
+  if (!global.LHHaggleEngine) return null;
+  var logSt = lhLogisticsRead(server);
+  var sess = (logSt.haggles || {})[sessionId];
+  if (!sess || sess.playerId !== lhId(player)) {
+    if (!dryRun) lhMsg(player, '§cСессия торга ' + sessionId + ' не найдена.');
+    return { ok: false, reason: 'not_found' };
+  }
+  var role = sess.botSide === 'seller' ? 'buyer' : 'seller';
+  var res = global.LHHaggleEngine.submitOffer(sess, role, offeredPrice, {});
+  lhLogisticsSave(server);
+  if (!dryRun) {
+    if (!res.ok) {
+      lhMsg(player, '§c[Торг] Ошибка: ' + res.reason);
+    } else if (res.walkedAway) {
+      lhMsg(player, '§c[Торг ' + sessionId + '] ' + sess.lastMsg);
+    } else if (res.agreed) {
+      lhMsg(player, '§a[Торг ' + sessionId + '] ' + sess.lastMsg + ' Завершите: /lh haggle accept ' + sessionId);
+    } else {
+      lhMsg(player, '§e[Торг ' + sessionId + '] ' + sess.lastMsg + ' §7(раунд ' + sess.round + '/' + sess.maxRounds + ').');
+    }
+  }
+  return res;
+}
+
+function lhHaggleAccept(server, player, sessionId, dryRun) {
+  if (!global.LHHaggleEngine) return 0;
+  var st = lhOttdRead(server);
+  var logSt = lhLogisticsRead(server);
+  var sess = (logSt.haggles || {})[sessionId];
+  if (!sess || sess.playerId !== lhId(player)) {
+    if (!dryRun) lhMsg(player, '§cСессия торга ' + sessionId + ' не найдена.');
+    return 0;
+  }
+  if (sess.status === 'active') {
+    var role = sess.botSide === 'seller' ? 'buyer' : 'seller';
+    var acc = global.LHHaggleEngine.acceptCurrentOffer(sess, role);
+    if (!acc.ok) {
+      if (!dryRun) lhMsg(player, '§cНе удалось принять торг: ' + acc.reason);
+      return 0;
+    }
+  }
+  if (sess.status !== 'agreed') {
+    if (!dryRun) lhMsg(player, '§cСессия торга уже закрыта (' + sess.status + ').');
+    return 0;
+  }
+  var myComp = st.companies[sess.playerCid];
+  var targetComp = st.companies[sess.targetCid];
+  if (!myComp || !targetComp) return 0;
+  var finalPrice = Math.max(1, Math.round(sess.agreedPrice || sess.marketTotal));
+  if (sess.botSide === 'seller') {
+    if (dryRun) {
+      if (myComp.cash < finalPrice) return 0;
+      myComp.cash -= finalPrice;
+      targetComp.cash += finalPrice;
+      sess.status = 'completed';
+      lhOttdSave(server);
+      lhLogisticsSave(server);
+      return 1;
+    }
+    var bTerm = lhEnsureCompanyTerminalBuilt(server, st, myComp);
+    lhEnsureCompanyTerminalBuilt(server, st, targetComp);
+    var dRes = global.LHTradeLogistics
+      ? global.LHTradeLogistics.createBuyOrderDelivery(logSt, st, myComp.id, targetComp.id, sess.itemId, sess.qty, finalPrice, lhCompanySpeedBps(targetComp), LHOTTDTick)
+      : { ok: false, reason: 'no_logistics' };
+    if (!dRes.ok) {
+      lhMsg(player, '§cНе хватает средств: нужно ' + (dRes.cost || finalPrice) + ' Cr.');
+      return 0;
+    }
+    sess.status = 'completed';
+    var etaSec = Math.max(1, Math.round((dRes.durationTicks || 200) / 20));
+    lhMsg(player, '§a[Торг завершён] Куплено ' + sess.qty + '× ' + sess.itemId + ' за ' + finalPrice +
+      ' Cr + доставка ' + dRes.deliveryFee + ' Cr! Доставка ' + dRes.delivery.id + ' (' + etaSec + 'с @ ' + dRes.delivery.speedBps +
+      ' м/с) в терминал (' + Math.round(bTerm.x) + ',' + Math.round(bTerm.y) + ',' + Math.round(bTerm.z) + ').');
+  } else {
+    if (!dryRun) {
+      var cons = lhConsumeInvItem(player.inventory, sess.itemId, sess.qty);
+      if (!cons.ok) {
+        lhMsg(player, '§cНедостаточно ' + sess.itemId + ' (есть ' + cons.have + '/' + sess.qty + ').');
+        return 0;
+      }
+    }
+    if (targetComp.cash < finalPrice) targetComp.cash += finalPrice;
+    targetComp.cash -= finalPrice;
+    myComp.cash += finalPrice;
+    myComp.stats.tradeVolume = (myComp.stats.tradeVolume || 0) + finalPrice;
+    targetComp.stats.tradeVolume = (targetComp.stats.tradeVolume || 0) + finalPrice;
+    sess.status = 'completed';
+    if (!dryRun) lhMsg(player, '§a[Торг завершён] Продано ' + sess.qty + '× ' + sess.itemId + ' за ' + finalPrice + ' Cr!');
+  }
+  lhOttdSave(server);
+  lhLogisticsSave(server);
+  lhUnlock(player, 'longhaul:openttd/trade');
+  return 1;
+}
+
+function lhP2PPropose(server, sellerPlayer, targetName, offerItem, offerQty, reqItem, reqQty, cashDelta, dryRun) {
+  if (!global.LHP2PTradeEngine) return null;
+  var plist = server.players || [];
+  var buyerPlayer = null;
+  var tLow = String(targetName || '').toLowerCase();
+  for (var i = 0; i < plist.length; i++) {
+    var pl = plist[i];
+    var un = String(pl.username || (typeof pl.getName === 'function' ? pl.getName().getString() : '')).toLowerCase();
+    if (un === tLow || lhId(pl).toLowerCase() === tLow) { buyerPlayer = pl; break; }
+  }
+  if (!buyerPlayer) { if (!dryRun) lhMsg(sellerPlayer, '§cИгрок "' + targetName + '" не в сети.'); return null; }
+  var sameDim = (!sellerPlayer.level || !buyerPlayer.level) ? true : (String(sellerPlayer.level.dimension) === String(buyerPlayer.level.dimension));
+  var prox = global.LHP2PTradeEngine.validateProximity(sellerPlayer.x, sellerPlayer.y, sellerPlayer.z, buyerPlayer.x, buyerPlayer.y, buyerPlayer.z, sameDim);
+  if (!prox.ok) {
+    if (!dryRun) lhMsg(sellerPlayer, '§c[P2P] Игрок слишком далеко (' + prox.dist + ' м > ' + prox.maxDist + ' м)! Подойдите ближе.');
+    return prox;
+  }
+  var st = lhOttdRead(server);
+  var sComp = lhGetPlayerCompany(server, sellerPlayer);
+  var bComp = lhGetPlayerCompany(server, buyerPlayer);
+  var logSt = lhLogisticsRead(server);
+  logSt.p2pSessions = logSt.p2pSessions || {};
+  logSt.nextP2pSeq = (logSt.nextP2pSeq || 0) + 1;
+  var tid = 'P2P' + logSt.nextP2pSeq;
+  var sess = global.LHP2PTradeEngine.createSession(
+    tid,
+    lhId(sellerPlayer), sellerPlayer.username || lhId(sellerPlayer), sComp ? sComp.id : null,
+    lhId(buyerPlayer), buyerPlayer.username || lhId(buyerPlayer), bComp ? bComp.id : null
+  );
+  if (offerQty > 0 && offerItem && offerItem !== 'none' && offerItem !== 'minecraft:air') {
+    global.LHP2PTradeEngine.addItemOffer(sess, lhId(sellerPlayer), offerItem, offerQty);
+  }
+  if (reqQty > 0 && reqItem && reqItem !== 'none' && reqItem !== 'minecraft:air') {
+    global.LHP2PTradeEngine.addItemOffer(sess, lhId(buyerPlayer), reqItem, reqQty);
+  }
+  if (cashDelta > 0) global.LHP2PTradeEngine.setCurrencyOffer(sess, lhId(buyerPlayer), cashDelta);
+  else if (cashDelta < 0) global.LHP2PTradeEngine.setCurrencyOffer(sess, lhId(sellerPlayer), Math.abs(cashDelta));
+  global.LHP2PTradeEngine.setConfirmed(sess, lhId(sellerPlayer), true);
+  logSt.p2pSessions[tid] = sess;
+  lhLogisticsSave(server);
+  if (!dryRun) {
+    lhMsg(sellerPlayer, '§a[P2P ' + tid + '] Предложение отправлено игроку ' + sess.sideB.name + '.');
+    lhMsg(buyerPlayer, '§e[P2P ' + tid + '] ' + sess.sideA.name + ' предлагает: ' +
+      (offerQty > 0 ? (offerQty + '× ' + offerItem) : 'без предметов') + ' в обмен на ' +
+      (reqQty > 0 ? (reqQty + '× ' + reqItem) : 'без предметов') +
+      (cashDelta ? (' + ' + cashDelta + ' Cr') : '') + '. Принять (рядом <= 10м): /lh p2p accept ' + tid);
+  }
+  return { ok: true, trade: sess };
+}
+
+function lhP2PAccept(server, buyerPlayer, tradeId, dryRun) {
+  if (!global.LHP2PTradeEngine) return 0;
+  var logSt = lhLogisticsRead(server);
+  var sess = (logSt.p2pSessions || {})[tradeId];
+  if (!sess || sess.status !== 'open') { if (!dryRun) lhMsg(buyerPlayer, '§cP2P-сделка ' + tradeId + ' не найдена.'); return 0; }
+  if (sess.sideB.uuid !== lhId(buyerPlayer)) { if (!dryRun) lhMsg(buyerPlayer, '§cЭта сделка адресована другому игроку.'); return 0; }
+  var plist = server.players || [];
+  var sellerPlayer = null;
+  for (var i = 0; i < plist.length; i++) {
+    if (lhId(plist[i]) === sess.sideA.uuid) { sellerPlayer = plist[i]; break; }
+  }
+  if (!sellerPlayer) { if (!dryRun) lhMsg(buyerPlayer, '§cИгрок-инициатор не в сети.'); return 0; }
+  var sameDim = (!sellerPlayer.level || !buyerPlayer.level) ? true : (String(sellerPlayer.level.dimension) === String(buyerPlayer.level.dimension));
+  var check = global.LHP2PTradeEngine.validateProximity(sellerPlayer.x, sellerPlayer.y, sellerPlayer.z, buyerPlayer.x, buyerPlayer.y, buyerPlayer.z, sameDim);
+  if (!check.ok) {
+    if (!dryRun) lhMsg(buyerPlayer, '§c[P2P] Подойдите ближе (' + check.dist + ' м > ' + check.maxDist + ' м)!');
+    return 0;
+  }
+  var st = lhOttdRead(server);
+  var sComp = lhGetPlayerCompany(server, sellerPlayer);
+  var bComp = lhGetPlayerCompany(server, buyerPlayer);
+  var payBtoA = Number(sess.sideB.currency || 0);
+  var payAtoB = Number(sess.sideA.currency || 0);
+  if (payBtoA > 0 && (!bComp || bComp.cash < payBtoA)) {
+    if (!dryRun) lhMsg(buyerPlayer, '§cУ вашей компании недостаточно средств (' + payBtoA + ' Cr).');
+    return 0;
+  }
+  if (payAtoB > 0 && (!sComp || sComp.cash < payAtoB)) {
+    if (!dryRun) lhMsg(buyerPlayer, '§cУ компании отправителя недостаточно средств (' + payAtoB + ' Cr).');
+    return 0;
+  }
+  if (!dryRun) {
+    var takenA = [];
+    for (var ia = 0; ia < sess.sideA.items.length; ia++) {
+      var itA = sess.sideA.items[ia];
+      var c1 = lhConsumeInvItem(sellerPlayer.inventory, itA.itemId, itA.count);
+      if (!c1.ok) {
+        takenA.forEach(function (t) { sellerPlayer.give(Item.of(t.itemId, t.count)); });
+        lhMsg(buyerPlayer, '§cУ отправителя больше нет ' + itA.count + '× ' + itA.itemId + '.');
+        return 0;
+      }
+      takenA.push(itA);
+    }
+    var takenB = [];
+    for (var ib = 0; ib < sess.sideB.items.length; ib++) {
+      var itB = sess.sideB.items[ib];
+      var c2 = lhConsumeInvItem(buyerPlayer.inventory, itB.itemId, itB.count);
+      if (!c2.ok) {
+        takenA.forEach(function (t) { sellerPlayer.give(Item.of(t.itemId, t.count)); });
+        takenB.forEach(function (t) { buyerPlayer.give(Item.of(t.itemId, t.count)); });
+        lhMsg(buyerPlayer, '§cУ вас недостаточно ' + itB.count + '× ' + itB.itemId + '.');
+        return 0;
+      }
+      takenB.push(itB);
+    }
+    if (typeof Item !== 'undefined') {
+      takenA.forEach(function (t) { buyerPlayer.give(Item.of(t.itemId, t.count)); });
+      takenB.forEach(function (t) { sellerPlayer.give(Item.of(t.itemId, t.count)); });
+    }
+  }
+  if (payBtoA > 0 && bComp && sComp) { bComp.cash -= payBtoA; sComp.cash += payBtoA; }
+  if (payAtoB > 0 && sComp && bComp) { sComp.cash -= payAtoB; bComp.cash += payAtoB; }
+  global.LHP2PTradeEngine.setConfirmed(sess, lhId(buyerPlayer), true);
+  sess.status = 'completed';
+  lhOttdSave(server);
+  lhLogisticsSave(server);
+  if (!dryRun) {
+    lhMsg(buyerPlayer, '§a[P2P ' + sess.id + '] Обмен из рук в руки завершён!');
+    lhMsg(sellerPlayer, '§a[P2P ' + sess.id + '] Обмен с ' + sess.sideB.name + ' завершён!');
+  }
+  return 1;
+}
+
 BlockEvents.rightClicked(function (event) {
   var server = event.server, player = event.player, block = event.block;
   if (!server || !player || !block) return;
@@ -1586,6 +2315,16 @@ BlockEvents.rightClicked(function (event) {
   var st = lhOttdRead(server);
   var sc = global.LHOpenTTD.sectorCoords(block.x, block.z);
   var sec = global.LHOpenTTD.resolveSectorOwner(st, sc.sx, sc.sz);
+  var compRc = lhGetPlayerCompany(server, player);
+  var termHit = lhFindTerminalAtBlock(server, block.x, block.y, block.z);
+  if (termHit) {
+    if (compRc && termHit.companyId === compRc.id) {
+      return; // Own company terminal barrel is always usable
+    }
+    if (global.LHTradeLogistics && global.LHTradeLogistics.hasActiveBorderPass(lhLogisticsRead(server), lhId(player), termHit.companyId)) {
+      return; // Allowed during active border trade pass
+    }
+  }
   var isSpawnZone = !!(global.LHOpenTTD.isSpawnProtectedSector && global.LHOpenTTD.isSpawnProtectedSector(sc.sx, sc.sz));
   if (!isSpawnZone && sec.kind !== 'claimed') {
     lhMsg(player, '§c[Незаприваченный сектор (' + sc.sx + ',' + sc.sz + ')] §fЛутинг контейнеров запрещён на незаприваченной территории! Заприватьте сектор (/lh territory claim).');
@@ -1593,7 +2332,6 @@ BlockEvents.rightClicked(function (event) {
     return;
   }
   if (sec.kind === 'claimed' && sec.owner) {
-    var compRc = lhGetPlayerCompany(server, player);
     if (!compRc || compRc.id !== sec.owner) {
       var canMineRc = compRc ? global.LHOpenTTD.canMine(st, compRc.id, sec.owner) : false;
       lhHandlePatrolEvent(server, st, sec.owner, player, 'container_loot', bidStr, block.x, block.y, block.z, !canMineRc);
@@ -1612,6 +2350,8 @@ EntityEvents.death(function (event) {
   if (creative) return;
   if (String(ent.level.dimension) !== 'minecraft:overworld') return;
   if (typeof ent.isPlayer === 'function' && ent.isPlayer()) return;
+  // Killing hostile monsters (zombies, skeletons, creepers, etc.) never penalizes territory reputation
+  if (lhIsHostileMob(ent)) return;
   var server = ent.server || killer.server;
   if (!server) return;
   var st = lhOttdRead(server);
@@ -1733,6 +2473,37 @@ ServerEvents.tick(function (event) {
   if (LHOTTDTick % 20 !== 0) return;
 
   var st = lhOttdRead(server);
+  var logSt = lhLogisticsRead(server);
+  if (global.LHTradeLogistics) {
+    var tickRes = global.LHTradeLogistics.tickDeliveries(logSt, st, LHOTTDTick);
+    var arrivedList = (tickRes && tickRes.arrivedBuy) ? tickRes.arrivedBuy : [];
+    var changedLog = arrivedList.length > 0 || (tickRes && ((tickRes.dueDelegatedSell && tickRes.dueDelegatedSell.length > 0) || (tickRes.holdEvents && tickRes.holdEvents.length > 0)));
+    if (arrivedList.length > 0) {
+      for (var ai = 0; ai < arrivedList.length; ai++) {
+        var del = arrivedList[ai];
+        var bCompDel = st.companies[del.buyerCid];
+        var bTerm = bCompDel ? lhEnsureCompanyTerminalBuilt(server, st, bCompDel) : null;
+        var insCnt = bTerm ? lhInsertIntoTerminalContainer(server, bTerm, del.itemId, del.qty) : 0;
+        var leftCnt = Math.max(0, Number(del.qty) - insCnt);
+        del.unclaimedQty = leftCnt;
+        if (leftCnt === 0) del.status = 'completed';
+        if (bCompDel && bCompDel.members) {
+          var plsDel = server.players || [];
+          for (var pdi = 0; pdi < plsDel.length; pdi++) {
+            var pd = plsDel[pdi];
+            if (bCompDel.members.indexOf(lhId(pd)) !== -1) {
+              lhMsg(pd, '§a[Доставка ' + del.id + ' прибыла] §f' + del.qty + '× ' + del.itemId +
+                (leftCnt === 0 ? ' загружено в бочку терминала!' : (' — заберите в терминале: /lh delivery claim ' + del.id)));
+            }
+          }
+        }
+      }
+    }
+    if (changedLog) {
+      lhLogisticsSave(server);
+      lhOttdSave(server);
+    }
+  }
   var plist = server.players || [];
 
   // Progress active physical sector raids (60s hold inside target sector)
@@ -1802,8 +2573,16 @@ ServerEvents.tick(function (event) {
     var sec = global.LHOpenTTD.resolveSectorOwner(st, sc.sx, sc.sz);
     var comp = lhGetPlayerCompany(server, p);
     var prevKey = LHOTTDLastSectorByPlayer[pid];
+    var prevOwner = prevKey ? String(prevKey).split(':')[0] : null;
+    if (prevOwner && prevOwner !== 'none' && prevOwner !== sec.owner && global.LHTradeLogistics) {
+      if (global.LHTradeLogistics.hasActiveBorderPass(logSt, pid, prevOwner)) {
+        lhFinalizeTradePassOnLeave(server, p, prevOwner);
+      }
+    }
     var nowTag = (sec.owner || 'none') + ':' + sec.kind;
-    var unauthorized = sec.kind === 'claimed' && sec.owner && (!comp || (comp.id !== sec.owner && !global.LHOpenTTD.canTransit(st, comp.id, sec.owner)));
+    var hasBorderPass = !!(sec.owner && global.LHTradeLogistics && global.LHTradeLogistics.hasActiveBorderPass(logSt, pid, sec.owner));
+    var unauthorized = sec.kind === 'claimed' && sec.owner && !hasBorderPass &&
+      (!comp || (comp.id !== sec.owner && !global.LHOpenTTD.canTransit(st, comp.id, sec.owner)));
     var uname = p.username || (typeof p.getName === 'function' ? p.getName().getString() : '');
     var oComp = sec.owner ? st.companies[sec.owner] : null;
     var activeWarn = LHOTTDTrespassWarn[pid];
@@ -2035,6 +2814,13 @@ ServerEvents.commandRegistry(function (event) {
       : ('Торговый пакт с ' + st.companies[otherId].name + ' расторгнут.'));
     return 1;
   })));
+  var envNode = C.literal('env');
+  ['normal', 'air', 'sea', 'underground'].forEach(function (ek) {
+    envNode.then(C.literal(ek).executes(function (ctx) {
+      return lhRelocateCompanyEnv(ctx.source.server, ctx.source.playerOrException, ek, false);
+    }));
+  });
+  compCmd.then(envNode);
   root.then(compCmd);
 
   var mkt = C.literal('market');
@@ -2077,6 +2863,9 @@ ServerEvents.commandRegistry(function (event) {
         })))));
   trade.then(C.literal('accept').then(C.argument('id', LHOTTDStringArg.word()).executes(function (ctx) {
     return lhAcceptTradeOffer(ctx.source.server, ctx.source.playerOrException, LHOTTDStringArg.getString(ctx, 'id'), false);
+  })));
+  trade.then(C.literal('visit').then(C.argument('company', LHOTTDStringArg.word()).executes(function (ctx) {
+    return lhRequestBorderTrade(ctx.source.server, ctx.source.playerOrException, LHOTTDStringArg.getString(ctx, 'company'), false);
   })));
   root.then(trade);
 
@@ -2425,6 +3214,109 @@ ServerEvents.commandRegistry(function (event) {
       return 1;
     })));
   root.then(shopCmd);
+
+  var delivCmd = C.literal('delivery');
+  delivCmd.then(C.literal('list').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException;
+    var comp = lhGetPlayerCompany(server, p);
+    var logSt = lhLogisticsRead(server);
+    var dels = (logSt.deliveries || []).filter(function (d) {
+      return d.status !== 'completed' && (!comp || d.buyerCid === comp.id || d.sellerCid === comp.id);
+    });
+    lhMsg(p, '=== Активные доставки (' + dels.length + ') ===');
+    dels.slice(0, 14).forEach(function (d) {
+      var remSec = Math.max(0, Math.round(((d.etaTick || LHOTTDTick) - LHOTTDTick) / 20));
+      var spdLbl = d.speedBps || d.speedMps || 1.04;
+      var arrivedFlag = (d.status === 'arrived_at_terminal' || d.status === 'arrived');
+      lhMsg(p, d.id + ' | ' + d.sellerCid + ' -> ' + d.buyerCid + ': §f' + d.qty + '× ' + d.itemId +
+        ' §7[' + (d.mode || 'delivery') + ' @ ' + spdLbl + ' м/с | ' +
+        (arrivedFlag ? '§aПРИБЫЛ' : ('§e' + (d.status === 'in_transit' ? ('в пути: ' + remSec + 'с') : d.status))) + '§7]');
+    });
+    return 1;
+  }));
+  delivCmd.then(C.literal('claim')
+    .executes(function (ctx) {
+      return lhClaimArrivedDeliveriesAtTerminal(ctx.source.server, ctx.source.playerOrException, null);
+    })
+    .then(C.argument('id', LHOTTDStringArg.word()).executes(function (ctx) {
+      return lhClaimArrivedDeliveriesAtTerminal(ctx.source.server, ctx.source.playerOrException, LHOTTDStringArg.getString(ctx, 'id'));
+    })));
+  root.then(delivCmd);
+
+  var hagCmd = C.literal('haggle');
+  hagCmd.then(C.literal('status').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException;
+    var pid = lhId(p);
+    var logSt = lhLogisticsRead(server);
+    var list = Object.keys(logSt.haggles || {}).map(function (k) { return logSt.haggles[k]; })
+      .filter(function (s) { return s.playerId === pid && (s.status === 'active' || s.status === 'agreed'); });
+    lhMsg(p, 'Активные сессии торга (' + list.length + '):');
+    list.forEach(function (s) {
+      var curP = s.agreedPrice || (s.botSide === 'seller' ? s.sellerAsk : s.buyerBid);
+      lhMsg(p, s.id + ': ' + s.targetCid + ' (' + s.qty + '× ' + s.itemId + ') — текущ: ' + curP + ' Cr [' + s.status + ']');
+    });
+    return 1;
+  }));
+  hagCmd.then(C.literal('start')
+    .then(C.argument('company', LHOTTDStringArg.word())
+      .then(C.argument('side', LHOTTDStringArg.word())
+        .then(C.argument('item', Args.RESOURCE_LOCATION.create(event))
+          .then(C.argument('qty', LHOTTDStringArg.word()).executes(function (ctx) {
+            var p = ctx.source.playerOrException;
+            var qty = parseInt(LHOTTDStringArg.getString(ctx, 'qty'), 10);
+            var s = lhHaggleStart(ctx.source.server, p, LHOTTDStringArg.getString(ctx, 'company'),
+              LHOTTDStringArg.getString(ctx, 'side'), lhCmdItemArg(ctx, p), isNaN(qty) ? 1 : qty, false);
+            return s ? 1 : 0;
+          }))))));
+  hagCmd.then(C.literal('offer')
+    .then(C.argument('id', LHOTTDStringArg.word())
+      .then(C.argument('price', LHOTTDStringArg.word()).executes(function (ctx) {
+        var price = parseInt(LHOTTDStringArg.getString(ctx, 'price'), 10);
+        var res = lhHaggleOffer(ctx.source.server, ctx.source.playerOrException, LHOTTDStringArg.getString(ctx, 'id'), price, false);
+        return res && res.ok ? 1 : 0;
+      }))));
+  hagCmd.then(C.literal('accept').then(C.argument('id', LHOTTDStringArg.word()).executes(function (ctx) {
+    return lhHaggleAccept(ctx.source.server, ctx.source.playerOrException, LHOTTDStringArg.getString(ctx, 'id'), false);
+  })));
+  root.then(hagCmd);
+
+  var p2pCmd = C.literal('p2p');
+  p2pCmd.then(C.literal('list').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException;
+    var pid = lhId(p);
+    var logSt = lhLogisticsRead(server);
+    var open = Object.keys(logSt.p2pSessions || {}).map(function (k) { return logSt.p2pSessions[k]; })
+      .filter(function (t) { return t.status === 'open' && (t.sideB.uuid === pid || t.sideA.uuid === pid); });
+    lhMsg(p, 'Активные P2P-сделки рядом (' + open.length + '):');
+    open.forEach(function (t) {
+      var aItems = (t.sideA.items || []).map(function (it) { return it.count + '×' + it.itemId; }).join(', ') || 'нет';
+      var bItems = (t.sideB.items || []).map(function (it) { return it.count + '×' + it.itemId; }).join(', ') || 'нет';
+      lhMsg(p, t.id + ': ' + t.sideA.name + ' -> ' + t.sideB.name + ' | [' + aItems + '] за [' + bItems + '] + ' + (t.sideB.currency || 0) + ' Cr');
+    });
+    return 1;
+  }));
+  p2pCmd.then(C.literal('propose')
+    .then(C.argument('player', LHOTTDStringArg.word())
+      .then(C.argument('offerItem', Args.RESOURCE_LOCATION.create(event))
+        .then(C.argument('offerQty', LHOTTDStringArg.word())
+          .then(C.argument('reqItem', Args.RESOURCE_LOCATION.create(event))
+            .then(C.argument('reqQty', LHOTTDStringArg.word())
+              .then(C.argument('cashDelta', LHOTTDStringArg.word()).executes(function (ctx) {
+                var p = ctx.source.playerOrException;
+                var oq = parseInt(LHOTTDStringArg.getString(ctx, 'offerQty'), 10);
+                var rq = parseInt(LHOTTDStringArg.getString(ctx, 'reqQty'), 10);
+                var cd = parseInt(LHOTTDStringArg.getString(ctx, 'cashDelta'), 10);
+                var res = lhP2PPropose(ctx.source.server, p,
+                  LHOTTDStringArg.getString(ctx, 'player'),
+                  String(Args.RESOURCE_LOCATION.getResult(ctx, 'offerItem')), isNaN(oq) ? 0 : oq,
+                  String(Args.RESOURCE_LOCATION.getResult(ctx, 'reqItem')), isNaN(rq) ? 0 : rq,
+                  isNaN(cd) ? 0 : cd, false);
+                return res && res.ok ? 1 : 0;
+              }))))))));
+  p2pCmd.then(C.literal('accept').then(C.argument('id', LHOTTDStringArg.word()).executes(function (ctx) {
+    return lhP2PAccept(ctx.source.server, ctx.source.playerOrException, LHOTTDStringArg.getString(ctx, 'id'), false);
+  })));
+  root.then(p2pCmd);
 
   event.register(root);
 });

@@ -232,11 +232,16 @@ def build_core_chapters():
          t_check('Механика Carry On проверена'), [
              'Carry On позволяет поднимать сундуки, бочки, станки и небольших животных вручную (Shift + ПКМ пустыми руками) для перегрузки на повозки, баржи и поезда.',
          ], ['alpha_storage_basics'], {'xp': r_xp(70, 'POINTS'), 'item': r_item('minecraft:barrel', 2)}),
+        ('alpha_radio_comms', 'Полевая радиосвязь (Realistic Walkie-Talkie)', 'minecraft:bell', [-200, -210],
+         t_check('Рация Realistic Walkie-Talkie получена'), [
+             'Для связи между игроками и компаниями на больших расстояниях используется мод Realistic Walkie-Talkie (CF #1750447, частоты 100.0–999.9 МГц, /walkie, /radio).',
+             'Нажмите на награду или выполните /lh radio kit, чтобы получить стартовую рацию сразу в начале игры.',
+         ], ['alpha_welcome'], {'xp': r_xp(50, 'POINTS'), 'cmd': r_command('lh radio kit', 'Получить стартовую рацию', 'minecraft:bell')}),
         ('alpha_chapter_fork_radio', 'Вилка глав (3 случайные) и Радиосвязь', 'minecraft:compass', [400, 110],
          t_check('Система вилки глав и рации изучена'), [
              'После обязательных глав 00–02 дальнейшие главы открываются через вилку из 3 случайных глав по тирам: Ранние (5) → Средние (6) → Поздние (/lh chapters или вкладка «Вилка глав» в Планшете).',
-             'Игроки расходятся по разным модам — обменивайтесь товарами через компании/дипломатию и держите связь по Simple Voice Chat + рациям (Walkie-Talkie и опциональный Realistic Walkie-Talkie CF #1750447).',
-         ], ['alpha_first_camp_prep'], {'xp': r_xp(75, 'POINTS'), 'item': r_item('minecraft:paper', 4)}),
+             'Игроки расходятся по разным модам — обменивайтесь товарами через компании/дипломатию и держите связь по Simple Voice Chat + Realistic Walkie-Talkie (/lh radio kit).',
+         ], ['alpha_first_camp_prep'], {'xp': r_xp(75, 'POINTS'), 'cmd': r_command('lh radio kit', 'Выдать рацию Realistic Walkie-Talkie', 'minecraft:compass')}),
     ]
     for qid, title, icon, pos, tasks, desc, deps, rew in ch01_nodes:
         quest(qid, title, '01 · Начало и правила', pos, icon, tasks, desc, deps=deps, rewards=rew)

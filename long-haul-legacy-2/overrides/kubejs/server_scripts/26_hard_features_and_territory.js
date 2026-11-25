@@ -135,8 +135,9 @@ function lhProgRead(server) {
   }
   var raw = server.persistentData.getString('longhaul_progression_v1');
   LHProgState = raw ? JSON.parse(String(raw)) : {
-    schemaVersion: 2,
-    chapters: {},
+    schemaVersion: 3,
+    chapters: { ch00: true },
+    adminChapters: { ch00: true },
     hardFeatures: {},
     featureOrder: [],
     workshopItems: {},
@@ -145,6 +146,7 @@ function lhProgRead(server) {
     chaptersByPlayer: {},
     playerHomeSpawns: {},
     firstJoinDone: {},
+    radioKitsGranted: {},
     targetAvgDeaths: 275.15,
     rulesConfirmed: false,
     nuclearVerified: false,
@@ -152,6 +154,7 @@ function lhProgRead(server) {
     lastBorderSize: 0
   };
   if (!LHProgState.chapters) LHProgState.chapters = {};
+  if (!LHProgState.adminChapters) LHProgState.adminChapters = {};
   if (!LHProgState.hardFeatures) LHProgState.hardFeatures = {};
   if (!LHProgState.featureOrder) LHProgState.featureOrder = [];
   if (!LHProgState.workshopItems) LHProgState.workshopItems = {};
@@ -160,11 +163,17 @@ function lhProgRead(server) {
   if (!LHProgState.chaptersByPlayer) LHProgState.chaptersByPlayer = {};
   if (!LHProgState.playerHomeSpawns) LHProgState.playerHomeSpawns = {};
   if (!LHProgState.firstJoinDone) LHProgState.firstJoinDone = {};
+  if (!LHProgState.radioKitsGranted) LHProgState.radioKitsGranted = {};
   if ((LHProgState.schemaVersion || 1) < 2) {
     if (!(LHProgState.targetAvgDeaths > 0) || Math.abs(LHProgState.targetAvgDeaths - 63.15) < 0.01) {
       LHProgState.targetAvgDeaths = 275.15;
     }
     LHProgState.schemaVersion = 2;
+  }
+  if ((LHProgState.schemaVersion || 2) < 3) {
+    LHProgState.chapters.ch00 = true;
+    LHProgState.adminChapters.ch00 = true;
+    LHProgState.schemaVersion = 3;
   }
   if (!(LHProgState.targetAvgDeaths > 0)) LHProgState.targetAvgDeaths = 275.15;
   lhEnsureBaseHardFeatures(LHProgState);
@@ -416,6 +425,129 @@ function lhEnsureSafeSpawn(server, player, fixWorldSpawn) {
   return true;
 }
 
+function lhFindRealisticRadioItems() {
+  var out = [];
+  try {
+    if (typeof Item !== 'undefined' && typeof Item.getList === 'function') {
+      var list = Item.getList();
+      for (var i = 0; i < list.length; i++) {
+        var it = list[i];
+        var sid = it && it.id ? String(it.id) : '';
+        if (sid.indexOf('walkietalkies:') === 0) out.push(sid);
+      }
+    }
+  } catch (eR) {}
+  return out;
+}
+
+function lhGrantStarterRadio(server, player, forceGive) {
+  if (!server || !player) return { ok: false, reason: 'no_player' };
+  var db = lhProgRead(server);
+  var pid = lhId(player);
+  if (!forceGive && db.radioKitsGranted && db.radioKitsGranted[pid]) {
+    return { ok: false, reason: 'already_granted' };
+  }
+  var loaded = typeof Platform !== 'undefined' && Platform.isLoaded && Platform.isLoaded('walkietalkies');
+  var radios = lhFindRealisticRadioItems();
+  if (!loaded && radios.length === 0) {
+    return { ok: false, reason: 'mod_not_installed' };
+  }
+  // Prefer basic/wooden/stone/iron handheld walkie-talkie item
+  var picked = radios[0];
+  for (var i = 0; i < radios.length; i++) {
+    var rid = radios[i];
+    if (rid.indexOf('walkie') !== -1 || rid.indexOf('radio') !== -1 || rid.indexOf('handheld') !== -1) {
+      picked = rid;
+      if (rid.indexOf('wood') !== -1 || rid.indexOf('basic') !== -1 || rid.indexOf('stone') !== -1) break;
+    }
+  }
+  if (!picked) return { ok: false, reason: 'no_radio_item' };
+  if (typeof player.give === 'function' && typeof Item !== 'undefined') {
+    player.give(Item.of(picked, 1));
+  }
+  if (!db.radioKitsGranted) db.radioKitsGranted = {};
+  db.radioKitsGranted[pid] = true;
+  lhProgSave(server);
+  return { ok: true, itemId: picked };
+}
+
+function lhBuildSpecializedHqPlatform(ow, x, y, z, envType) {
+  if (!ow) return false;
+  var bx = Math.round(x), by = Math.round(y), bz = Math.round(z);
+  try {
+    if (envType === 'air') {
+      for (var dx = -3; dx <= 3; dx++) {
+        for (var dz = -3; dz <= 3; dz++) {
+          var isEdge = Math.abs(dx) === 3 || Math.abs(dz) === 3;
+          ow.getBlock(bx + dx, by - 1, bz + dz).set(isEdge ? 'minecraft:iron_block' : 'minecraft:stone_bricks');
+          ow.getBlock(bx + dx, by, bz + dz).set(isEdge && (Math.abs(dx) !== 0 && Math.abs(dz) !== 0) ? 'minecraft:iron_bars' : 'minecraft:air');
+          ow.getBlock(bx + dx, by + 1, bz + dz).set('minecraft:air');
+          ow.getBlock(bx + dx, by + 2, bz + dz).set('minecraft:air');
+        }
+      }
+      ow.getBlock(bx + 3, by + 1, bz + 3).set('minecraft:lantern');
+      ow.getBlock(bx - 3, by + 1, bz - 3).set('minecraft:lantern');
+      ow.getBlock(bx, by - 1, bz).set('minecraft:barrel');
+      return true;
+    }
+    if (envType === 'sea') {
+      for (var sx = -3; sx <= 3; sx++) {
+        for (var sz = -3; sz <= 3; sz++) {
+          var isCorner = Math.abs(sx) === 3 && Math.abs(sz) === 3;
+          if (isCorner) {
+            for (var py = by - 14; py < by - 1; py++) {
+              ow.getBlock(bx + sx, py, bz + sz).set('minecraft:deepslate_bricks');
+            }
+          }
+          var sEdge = Math.abs(sx) === 3 || Math.abs(sz) === 3;
+          ow.getBlock(bx + sx, by - 1, bz + sz).set(sEdge ? 'minecraft:iron_block' : 'minecraft:oak_planks');
+          ow.getBlock(bx + sx, by, bz + sz).set('minecraft:air');
+          ow.getBlock(bx + sx, by + 1, bz + sz).set('minecraft:air');
+        }
+      }
+      for (var ty = 0; ty <= 4; ty++) {
+        ow.getBlock(bx + 3, by + ty, bz + 3).set('minecraft:scaffolding');
+      }
+      ow.getBlock(bx - 3, by, bz - 3).set('minecraft:lantern');
+      ow.getBlock(bx, by - 1, bz).set('minecraft:barrel');
+      return true;
+    }
+    if (envType === 'underground') {
+      for (var ux = -3; ux <= 3; ux++) {
+        for (var uz = -3; uz <= 3; uz++) {
+          var uEdge = Math.abs(ux) === 3 || Math.abs(uz) === 3;
+          ow.getBlock(bx + ux, by - 1, bz + uz).set('minecraft:deepslate_bricks');
+          ow.getBlock(bx + ux, by + 3, bz + uz).set('minecraft:deepslate_bricks');
+          for (var uy = 0; uy <= 2; uy++) {
+            ow.getBlock(bx + ux, by + uy, bz + uz).set(uEdge && Math.abs(ux) === 3 && Math.abs(uz) === 3 ? 'minecraft:chiseled_deepslate' : (uEdge ? 'minecraft:deepslate_bricks' : 'minecraft:air'));
+          }
+        }
+      }
+      ow.getBlock(bx + 2, by + 1, bz + 2).set('minecraft:lantern');
+      ow.getBlock(bx - 2, by + 1, bz - 2).set('minecraft:lantern');
+      ow.getBlock(bx, by - 1, bz).set('minecraft:barrel');
+      return true;
+    }
+    // Normal surface: place barrel directly under landing tile
+    ow.getBlock(bx, by - 1, bz).set('minecraft:barrel');
+    ow.getBlock(bx, by, bz).set('minecraft:air');
+    ow.getBlock(bx, by + 1, bz).set('minecraft:air');
+    return true;
+  } catch (ePlat) {
+    return false;
+  }
+}
+
+function lhFindWaterColumnForSeaSpawn(ow, cx, cz) {
+  for (var dy = 66; dy >= 58; dy--) {
+    try {
+      var blk = String(ow.getBlock(cx, dy, cz).id);
+      if (blk === 'minecraft:water') return dy + 2;
+    } catch (eW) {}
+  }
+  return -1;
+}
+
 function lhFirstJoinRandomSpawn(server, player) {
   if (!server || !player) return false;
   var db = lhProgRead(server);
@@ -429,16 +561,18 @@ function lhFirstJoinRandomSpawn(server, player) {
 
   var borderInfo = lhTerritoryCounts(server);
   var halfBorder = Math.max(48, Math.floor(borderInfo.size / 2));
-  var safeHalf = Math.max(32, halfBorder - Math.min(36, Math.floor(halfBorder / 6)));
+  var safeHalf = Math.max(32, halfBorder - Math.min(256, Math.floor(halfBorder / 10)));
   var ottdSt = typeof lhOttdRead === 'function' ? lhOttdRead(server) : null;
+  var envType = 'normal';
+  if (ottdSt && ottdSt.playerCompany && ottdSt.playerCompany[pid] && ottdSt.companies[ottdSt.playerCompany[pid]]) {
+    envType = global.LHOpenTTD.getCompanyEnvType(ottdSt.companies[ottdSt.playerCompany[pid]]);
+  }
 
   var chosen = null;
-  var maxAttempts = safeHalf < 560 ? 2 : 3;
+  var maxAttempts = safeHalf < 560 ? 3 : 16;
   for (var attempt = 0; attempt < maxAttempts; attempt++) {
     var wx = 0, wz = 0;
     if (safeHalf < 560) {
-      // Initial 724x724 border (±362): pick near the closest claimable L-strip outside
-      // the 3x3 spawn sanctuary (-256..511) to avoid generating far-away chunk rings on first join.
       if (attempt % 2 === 0) {
         wx = -270 - Math.floor(Math.random() * Math.min(24, Math.max(8, safeHalf - 270)));
         wz = Math.floor((Math.random() * 2 - 1) * Math.min(48, safeHalf - 16));
@@ -447,8 +581,13 @@ function lhFirstJoinRandomSpawn(server, player) {
         wx = Math.floor((Math.random() * 2 - 1) * Math.min(48, safeHalf - 16));
       }
     } else {
-      wx = Math.floor((Math.random() * 2 - 1) * safeHalf);
-      wz = Math.floor((Math.random() * 2 - 1) * safeHalf);
+      // Spread new companies widely across the expanded starting territory (min 1500m from origin, max 75% of safeHalf)
+      var minSpan = Math.min(safeHalf - 128, 1280);
+      var maxSpan = Math.min(safeHalf, Math.max(minSpan + 512, Math.floor(safeHalf * 0.70)));
+      var ang = Math.random() * 6.2831853;
+      var rad = minSpan + Math.random() * (maxSpan - minSpan);
+      wx = Math.round(Math.cos(ang) * rad);
+      wz = Math.round(Math.sin(ang) * rad);
     }
     wx = Math.max(-safeHalf, Math.min(safeHalf, wx));
     wz = Math.max(-safeHalf, Math.min(safeHalf, wz));
@@ -460,19 +599,36 @@ function lhFirstJoinRandomSpawn(server, player) {
     if (ottdSt && global.LHOpenTTD) {
       var ownerInfo = global.LHOpenTTD.resolveSectorOwner(ottdSt, cSc.sx, cSc.sz);
       if (ownerInfo.kind === 'claimed') continue;
+      if (safeHalf >= 1200 && global.LHOpenTTD.minCompanyHqDistance &&
+          global.LHOpenTTD.minCompanyHqDistance(ottdSt, cSc.sx, cSc.sz) < 4) {
+        continue;
+      }
     }
-    var sy = lhFindSafeRespawnY(ow, wx, wz, attempt === maxAttempts - 1);
-    if (sy > 52) {
-      chosen = { x: wx, y: sy, z: wz, sx: cSc.sx, sz: cSc.sz };
+    if (envType === 'air') {
+      chosen = { x: wx, y: 286, z: wz, sx: cSc.sx, sz: cSc.sz };
       break;
+    } else if (envType === 'underground') {
+      chosen = { x: wx, y: -44, z: wz, sx: cSc.sx, sz: cSc.sz };
+      break;
+    } else if (envType === 'sea') {
+      var waterY = lhFindWaterColumnForSeaSpawn(ow, wx, wz);
+      if (waterY > 0 || attempt >= maxAttempts - 2) {
+        chosen = { x: wx, y: waterY > 0 ? waterY : 64, z: wz, sx: cSc.sx, sz: cSc.sz };
+        break;
+      }
+    } else {
+      var sy = lhFindSafeRespawnY(ow, wx, wz, attempt === maxAttempts - 1);
+      if (sy > 52) {
+        chosen = { x: wx, y: sy, z: wz, sx: cSc.sx, sz: cSc.sz };
+        break;
+      }
     }
   }
   if (!chosen) {
-    // Guaranteed inside-border fallback inside sector (-2, 0) -> x=-272, z=0
-    var fWx = Math.max(-safeHalf, Math.min(safeHalf, -272));
-    var fWz = 0;
-    var fY = lhFindSafeRespawnY(ow, fWx, fWz, true);
-    var fSc = global.LHOpenTTD ? global.LHOpenTTD.sectorCoords(fWx, fWz) : { sx: -2, sz: 0 };
+    var fWx = Math.max(-safeHalf, Math.min(safeHalf, safeHalf >= 1200 ? -1536 : -272));
+    var fWz = safeHalf >= 1200 ? 1024 : 0;
+    var fY = envType === 'air' ? 286 : (envType === 'underground' ? -44 : (envType === 'sea' ? 64 : lhFindSafeRespawnY(ow, fWx, fWz, true)));
+    var fSc = global.LHOpenTTD ? global.LHOpenTTD.sectorCoords(fWx, fWz) : { sx: -6, sz: 4 };
     chosen = { x: fWx, y: fY, z: fWz, sx: fSc.sx, sz: fSc.sz };
   }
   chosen.x = Math.max(-safeHalf, Math.min(safeHalf, chosen.x));
@@ -483,14 +639,7 @@ function lhFirstJoinRandomSpawn(server, player) {
   lhProgSave(server);
 
   if (!creative) {
-    // Place company terminal barrel directly beneath player's landing tile
-    try {
-      var termY = chosen.y - 1;
-      var termBlock = ow.getBlock(chosen.x, termY, chosen.z);
-      termBlock.set('minecraft:barrel');
-      ow.getBlock(chosen.x, termY + 1, chosen.z).set('minecraft:air');
-      ow.getBlock(chosen.x, termY + 2, chosen.z).set('minecraft:air');
-    } catch (eBar) {}
+    lhBuildSpecializedHqPlatform(ow, chosen.x, chosen.y, chosen.z, envType);
 
     if (typeof lhRegisterTerminalForPlayer === 'function') {
       lhRegisterTerminalForPlayer(server, player, chosen.x, chosen.y - 1, chosen.z, 'minecraft:overworld');
@@ -503,7 +652,15 @@ function lhFirstJoinRandomSpawn(server, player) {
       }
     }
     if (typeof lhAutoCreateCompanyAtSpawn === 'function') {
-      lhAutoCreateCompanyAtSpawn(server, player, chosen.x, chosen.z);
+      var createdComp = lhAutoCreateCompanyAtSpawn(server, player, chosen.x, chosen.z);
+      if (createdComp) {
+        createdComp.envType = envType;
+        createdComp.hqX = chosen.x;
+        createdComp.hqY = chosen.y - 1;
+        createdComp.hqZ = chosen.z;
+        createdComp.terminalPos = { x: chosen.x, y: chosen.y - 1, z: chosen.z };
+        if (typeof lhOttdSave === 'function') lhOttdSave(server);
+      }
     }
 
     try {
@@ -517,6 +674,7 @@ function lhFirstJoinRandomSpawn(server, player) {
       server.runCommandSilent('spawnpoint ' + uname + ' ' + chosen.x + ' ' + chosen.y + ' ' + chosen.z);
       server.runCommandSilent('effect give ' + uname + ' minecraft:resistance 8 4 true');
     }
+    lhGrantStarterRadio(server, player, false);
     lhMsg(player, '§a§l[Высадка компании] §fВы высажены на свободный участок §b(' + chosen.x + ', ' + chosen.y + ', ' + chosen.z +
       ') §7в секторе (' + chosen.sx + ',' + chosen.sz + '). Прямо под вами установлен §eТерминал компании§7, а сектор закреплён как ваша штаб-квартира!');
   }
@@ -1415,12 +1573,121 @@ function lhProcessFirstJoinQueue(server) {
   }
 }
 
+var LHFilledBarrelCarryState = {};
+
+function lhIsFilledBarrelStack(stack) {
+  if (!stack || stack.empty) return false;
+  var sid = String(stack.id || '');
+  if (sid !== 'minecraft:barrel' && sid.indexOf('barrel') === -1) return false;
+  if (sid.indexOf('fluid') !== -1 || sid.indexOf('gun') !== -1) return false;
+  var nbt = stack.nbt;
+  if (!nbt) return false;
+  try {
+    var bet = nbt.BlockEntityTag || nbt;
+    if (bet && bet.Items) {
+      var sz = typeof bet.Items.size === 'function' ? Number(bet.Items.size()) : Number(bet.Items.length || 0);
+      if (sz > 0) return true;
+    }
+    if (nbt.Items) {
+      var sz2 = typeof nbt.Items.size === 'function' ? Number(nbt.Items.size()) : Number(nbt.Items.length || 0);
+      if (sz2 > 0) return true;
+    }
+    if (bet && bet.Inventory && bet.Inventory.Items) {
+      var sz3 = typeof bet.Inventory.Items.size === 'function' ? Number(bet.Inventory.Items.size()) : Number(bet.Inventory.Items.length || 0);
+      if (sz3 > 0) return true;
+    }
+  } catch (eNbt) {
+    try {
+      var s = String(nbt);
+      if (s.indexOf('Items:[') !== -1 && s.indexOf('Items:[]') === -1) return true;
+    } catch (eStr) {}
+  }
+  return false;
+}
+
+function lhCheckFilledBarrelCarry(server, player, dryRun) {
+  if (!server || !player || !player.inventory) return { carrying: false, dropped: 0 };
+  var inv = player.inventory;
+  var filledSlots = [];
+  for (var s = 0; s < inv.slots; s++) {
+    var st = inv.getStackInSlot(s);
+    if (lhIsFilledBarrelStack(st)) {
+      filledSlots.push(s);
+    }
+  }
+  var pid = lhId(player);
+  if (!filledSlots.length) {
+    delete LHFilledBarrelCarryState[pid];
+    return { carrying: false, dropped: 0 };
+  }
+  var dim = player.level ? String(player.level.dimension) : 'minecraft:overworld';
+  var px = Number(player.x || 0), py = Number(player.y || 64), pz = Number(player.z || 0);
+  var anchor = LHFilledBarrelCarryState[pid];
+  if (!anchor || anchor.dim !== dim) {
+    LHFilledBarrelCarryState[pid] = { dim: dim, x: px, y: py, z: pz, warned: true };
+    if (!dryRun && typeof player.tell === 'function') {
+      player.tell('§e[Тяжёлый груз] §fВы несёте бочку с вещами! Если отойдёте дальше §c5 блоков§f, заполненные бочки выпадут из инвентаря.');
+    }
+    return { carrying: true, dropped: 0, dist: 0 };
+  }
+  var dx = px - anchor.x, dy = py - anchor.y, dz = pz - anchor.z;
+  var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+  if (dist <= 5.0) {
+    return { carrying: true, dropped: 0, dist: dist };
+  }
+  var droppedCount = 0;
+  for (var fi = 0; fi < filledSlots.length; fi++) {
+    var slotIdx = filledSlots[fi];
+    var bStack = inv.getStackInSlot(slotIdx);
+    if (!bStack || bStack.empty) continue;
+    droppedCount += Number(bStack.count || 1);
+    if (!dryRun) {
+      var copy = typeof bStack.copy === 'function' ? bStack.copy() : bStack;
+      if (typeof inv.setStackInSlot === 'function' && typeof Item !== 'undefined') {
+        inv.setStackInSlot(slotIdx, Item.empty);
+      }
+      var droppedViaMethod = false;
+      try {
+        if (typeof player.drop === 'function') {
+          player.drop(copy, true, false);
+          droppedViaMethod = true;
+        }
+      } catch (eDrop) {}
+      if (!droppedViaMethod && player.level && typeof player.level.createEntity === 'function') {
+        try {
+          var ie = player.level.createEntity('minecraft:item');
+          ie.item = copy;
+          ie.setPosition(px, py + 0.35, pz);
+          if (typeof ie.setPickUpDelay === 'function') ie.setPickUpDelay(40);
+          ie.spawn();
+        } catch (eEnt) {}
+      }
+    } else if (typeof inv.setStackInSlot === 'function' && typeof Item !== 'undefined') {
+      inv.setStackInSlot(slotIdx, Item.empty);
+    }
+  }
+  delete LHFilledBarrelCarryState[pid];
+  if (!dryRun && droppedCount > 0 && typeof player.tell === 'function') {
+    player.tell('§c[Перегруз бочек] §fВы отошли на ' + Math.round(dist * 10) / 10 + ' м (> 5 м) — из инвентаря выпали заполненные бочки (' + droppedCount + ' шт.)!');
+  }
+  return { carrying: false, dropped: droppedCount, dist: dist };
+}
+
 ServerEvents.tick(function (event) {
   LHProgTick++;
   var server = event.server;
   lhProcessFirstJoinQueue(server);
   lhCasinoStep(server, false);
   lhProcessRespawnScatter(server, false);
+
+  if (LHProgTick % 10 === 0 && server && server.players) {
+    for (var fbIdx = 0; fbIdx < server.players.length; fbIdx++) {
+      var fbp = server.players[fbIdx];
+      var fbCreative = (typeof fbp.isCreative === 'function' && fbp.isCreative()) ||
+        (typeof fbp.isSpectator === 'function' && fbp.isSpectator());
+      if (!fbCreative) lhCheckFilledBarrelCarry(server, fbp, false);
+    }
+  }
 
   if (LHLightningWarnings.length > 0) {
     var nextWarn = [];
@@ -1463,9 +1730,9 @@ ServerEvents.tick(function (event) {
       (typeof p.isSpectator === 'function' && p.isSpectator());
     if (creative) continue;
 
-    // Continuous safeguard for players below Y=0, trapped inside bedrock, or outside the world border
+    // Continuous safeguard for players below bedrock (Y<=-59), trapped inside bedrock, or outside the world border
     var halfB = lhActiveBorderHalf(server);
-    if (Number(p.y) <= 0 || Math.abs(Number(p.x)) >= halfB - 1 || Math.abs(Number(p.z)) >= halfB - 1) {
+    if (Number(p.y) <= -59 || Math.abs(Number(p.x)) >= halfB - 1 || Math.abs(Number(p.z)) >= halfB - 1) {
       lhEnsureSafeSpawn(server, p, true);
     }
 
@@ -1580,6 +1847,22 @@ ServerEvents.tick(function (event) {
 
 PlayerEvents.loggedIn(function (event) {
   var server = event.server, player = event.player;
+  var dbBoot = lhProgRead(server);
+  var pidBoot = lhId(player);
+  if (!dbBoot.chaptersByPlayer) dbBoot.chaptersByPlayer = {};
+  if (!dbBoot.chaptersByPlayer[pidBoot]) dbBoot.chaptersByPlayer[pidBoot] = {};
+  if (!dbBoot.chaptersByPlayer[pidBoot].ch00) {
+    dbBoot.chaptersByPlayer[pidBoot].ch00 = true;
+    dbBoot.chapters.ch00 = true;
+    lhProgSave(server);
+  }
+  if (typeof lhUnlock === 'function') {
+    lhUnlock(player, 'longhaul:story/01_left_for_bread');
+    lhUnlock(player, 'longhaul:story/02_bakery_burned');
+    lhUnlock(player, 'longhaul:story/04_snail_at_door');
+    lhUnlock(player, 'longhaul:story/05_continental_bakery');
+    lhUnlock(player, 'longhaul:story/06_forgot_the_milk');
+  }
   lhProgressionRecompute(server, player, false);
   var info = lhApplyTerritoryBorder(server, false);
   var db = lhProgRead(server);
@@ -1876,6 +2159,32 @@ ServerEvents.commandRegistry(function (event) {
     return 1;
   }));
   root.then(nuclear);
+
+  var radio = C.literal('radio');
+  radio.then(C.literal('kit').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException;
+    var res = lhGrantStarterRadio(server, p, false);
+    if (res.ok) {
+      lhMsg(p, '§a[Рация] Выдана стартовая рация Realistic Walkie-Talkie (' + res.itemId + '). Настройка: /walkie tune <100.0..999.9>');
+      return 1;
+    }
+    if (res.reason === 'already_granted') {
+      lhMsg(p, '§e[Рация] Стартовая рация уже выдавалась вам ранее. Крафтите дополнительные рации в верстаке!');
+      return 1;
+    }
+    lhMsg(p, '§e[Рация] Опциональный CurseForge-аддон Realistic Walkie-Talkie (CF #1750447) сейчас не установлен в папке mods/ (см. optional-mods/README.md).');
+    return 1;
+  }));
+  radio.then(C.literal('status').executes(function (ctx) {
+    var p = ctx.source.playerOrException;
+    var loaded = typeof Platform !== 'undefined' && Platform.isLoaded && Platform.isLoaded('walkietalkies');
+    var items = lhFindRealisticRadioItems();
+    lhMsg(p, loaded
+      ? ('§aRealistic Walkie-Talkie активен! Найдено предметов раций: ' + items.length + ' (' + items.slice(0, 4).join(', ') + ').')
+      : '§eRealistic Walkie-Talkie (CF #1750447) не установлен локально (опциональный CurseForge-мод).');
+    return 1;
+  }));
+  root.then(radio);
 
   event.register(root);
 });

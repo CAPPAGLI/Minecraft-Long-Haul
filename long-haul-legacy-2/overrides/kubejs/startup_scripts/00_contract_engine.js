@@ -670,12 +670,20 @@ global.LHOpenTTD = (function () {
   var SPEC_SWITCH_COST = 500;
   var STARTING_CASH = 1000;
 
+  var COMPANY_ENV_TYPES = {
+    normal: { id: 'normal', name: 'Обычная (поверхность)', icon: '🏔', defaultY: 70 },
+    air: { id: 'air', name: 'Воздушная (у потолка мира)', icon: '☁', defaultY: 286 },
+    sea: { id: 'sea', name: 'Морская (на воде / нефтевышке)', icon: '🌊', defaultY: 64 },
+    underground: { id: 'underground', name: 'Подземная (у дна мира)', icon: '🕳', defaultY: -44 }
+  };
+
   var TRANSPORT_SPECS = {
     rail: {
       id: 'rail',
       name: 'Железнодорожная корпорация',
       icon: '🚆',
       telemetryFamily: 'rail',
+      envType: 'normal',
       payoutBonus: 0.45,
       claimDiscount: 0.35,
       summary: '+45% выручки с ж/д маршрутов и контрактов, -35% цена захвата секторов, ускорение на поездах/вагонетках.'
@@ -685,6 +693,7 @@ global.LHOpenTTD = (function () {
       name: 'Автотранспортный конвой',
       icon: '🚚',
       telemetryFamily: 'road_vehicle',
+      envType: 'normal',
       payoutBonus: 0.45,
       claimDiscount: 0.20,
       summary: '+45% выручки с авто/повозок, +8 слотов к лимиту перегруза, скидка 20% на захват секторов.'
@@ -694,18 +703,30 @@ global.LHOpenTTD = (function () {
       name: 'Морское пароходство',
       icon: '🚢',
       telemetryFamily: 'watercraft',
+      envType: 'sea',
       payoutBonus: 0.50,
       claimDiscount: 0.25,
-      summary: '+50% выручки на воде и в портовых узлах, водное дыхание и скорость на воде, скидка 25% на захват.'
+      summary: '+50% выручки на воде и в портовых узлах, спаун на нефтяных платформах и плавучих базах, водное дыхание.'
     },
     air: {
       id: 'air',
       name: 'Воздушный флот',
       icon: '✈',
       telemetryFamily: 'aircraft_vs',
+      envType: 'air',
       payoutBonus: 0.50,
       claimDiscount: 0.25,
-      summary: '+50% выручки на авиа/VS-судах, иммунитет к высотному морозу, страховка от падений, скидка 25% на захват.'
+      summary: '+50% выручки на авиа/VS-судах, штаб и здания в воздухе у потолка мира, страховка от падений.'
+    },
+    underground: {
+      id: 'underground',
+      name: 'Подземная корпорация',
+      icon: '🚇',
+      telemetryFamily: 'rail',
+      envType: 'underground',
+      payoutBonus: 0.45,
+      claimDiscount: 0.25,
+      summary: '+45% выручки на подземных/ж/д трассах, штаб и все здания в глубине у дна мира (Y=-44), скидка 25%.'
     }
   };
 
@@ -747,14 +768,16 @@ global.LHOpenTTD = (function () {
   var DEFAULT_BOT_COMPANIES = [
     {
       id: 'bot_ironrail',
-      name: 'Стальная Магистраль',
+      name: 'Подземный Синдикат',
       color: 'gold',
       colorCode: '§6',
-      tag: 'IRON',
-      transportSpec: 'rail',
+      tag: 'DEEP',
+      transportSpec: 'underground',
       resourceSpec: 'mining',
-      hqSx: 2,
-      hqSz: 0,
+      envType: 'underground',
+      hqSx: 7,
+      hqSz: 2,
+      hqY: -44,
       cash: 1500
     },
     {
@@ -765,8 +788,10 @@ global.LHOpenTTD = (function () {
       tag: 'AGRO',
       transportSpec: 'road',
       resourceSpec: 'agro',
-      hqSx: -2,
-      hqSz: 0,
+      envType: 'normal',
+      hqSx: -7,
+      hqSz: -2,
+      hqY: 70,
       cash: 1500
     },
     {
@@ -777,8 +802,24 @@ global.LHOpenTTD = (function () {
       tag: 'AERO',
       transportSpec: 'air',
       resourceSpec: 'energy',
-      hqSx: 0,
-      hqSz: -2,
+      envType: 'air',
+      hqSx: 2,
+      hqSz: -8,
+      hqY: 286,
+      cash: 1500
+    },
+    {
+      id: 'bot_seawolf',
+      name: 'Морской Конвой',
+      color: 'blue',
+      colorCode: '§9',
+      tag: 'SEA',
+      transportSpec: 'sea',
+      resourceSpec: 'forestry',
+      envType: 'sea',
+      hqSx: -3,
+      hqSz: 8,
+      hqY: 64,
       cash: 1500
     }
   ];
@@ -818,6 +859,18 @@ global.LHOpenTTD = (function () {
         { item: 'longhaul:technical_glass', qty: 4, price: 210 },
         { item: 'longhaul:refractory_mix', qty: 4, price: 205 },
         { item: 'create:precision_mechanism', qty: 2, price: 260 }
+      ]
+    },
+    bot_seawolf: {
+      buy: [
+        { item: 'longhaul:treated_timber', qty: 4, price: 185 },
+        { item: 'minecraft:iron_ingot', qty: 16, price: 115 },
+        { item: 'minecraft:coal', qty: 24, price: 70 }
+      ],
+      sell: [
+        { item: 'longhaul:marine_reagent', qty: 4, price: 195 },
+        { item: 'minecraft:oak_log', qty: 24, price: 72 },
+        { item: 'longhaul:technical_oil', qty: 4, price: 225 }
       ]
     }
   };
@@ -1610,6 +1663,54 @@ global.LHOpenTTD = (function () {
     return out;
   }
 
+  function getCompanyEnvType(comp) {
+    if (!comp) return 'normal';
+    if (comp.envType && COMPANY_ENV_TYPES[comp.envType]) return comp.envType;
+    if (comp.transportSpec && TRANSPORT_SPECS[comp.transportSpec] && TRANSPORT_SPECS[comp.transportSpec].envType) {
+      return TRANSPORT_SPECS[comp.transportSpec].envType;
+    }
+    return 'normal';
+  }
+
+  function preferredBuildingY(envType, fallbackY) {
+    if (envType === 'air') {
+      var ay = Number(fallbackY);
+      return (ay >= 278 && ay <= 300) ? Math.round(ay) : 286;
+    }
+    if (envType === 'sea') return 64;
+    if (envType === 'underground') return -44;
+    return Math.max(63, Math.round(Number(fallbackY || 70)));
+  }
+
+  function setCompanyEnvType(state, cid, envType) {
+    var comp = state.companies && state.companies[cid];
+    if (!comp) return { ok: false, reason: 'no_company' };
+    if (!COMPANY_ENV_TYPES[envType]) return { ok: false, reason: 'bad_env' };
+    comp.envType = envType;
+    comp.hqY = preferredBuildingY(envType, comp.hqY);
+    return { ok: true, envType: envType, info: COMPANY_ENV_TYPES[envType], hqY: comp.hqY };
+  }
+
+  function getCompanyTerminalCoords(state, cid) {
+    var comp = state.companies && state.companies[cid];
+    if (!comp) return null;
+    if (comp.terminalPos && typeof comp.terminalPos.x === 'number') {
+      return {
+        x: Math.round(comp.terminalPos.x),
+        y: Math.round(comp.terminalPos.y),
+        z: Math.round(comp.terminalPos.z),
+        sx: Number(comp.hqSx || 0),
+        sz: Number(comp.hqSz || 0),
+        envType: getCompanyEnvType(comp)
+      };
+    }
+    var env = getCompanyEnvType(comp);
+    var hx = (typeof comp.hqX === 'number') ? Math.round(comp.hqX) : (Number(comp.hqSx || 0) * SECTOR_SIZE);
+    var hz = (typeof comp.hqZ === 'number') ? Math.round(comp.hqZ) : (Number(comp.hqSz || 0) * SECTOR_SIZE);
+    var hy = (typeof comp.hqY === 'number') ? Math.round(comp.hqY) : preferredBuildingY(env, 70);
+    return { x: hx, y: hy, z: hz, sx: Number(comp.hqSx || 0), sz: Number(comp.hqSz || 0), envType: env };
+  }
+
   function buildCompanyBuilding(state, cid, sx, sz, bType, wx, wy, wz) {
     ensureDiplomacyState(state);
     var comp = state.companies && state.companies[cid];
@@ -1622,16 +1723,21 @@ global.LHOpenTTD = (function () {
     if (state.buildings[k]) return { ok: false, reason: 'already_built', existing: state.buildings[k] };
     if (comp.cash < spec.cost) return { ok: false, reason: 'no_cash', cost: spec.cost, cash: comp.cash };
     comp.cash -= spec.cost;
+    var env = getCompanyEnvType(comp);
+    var resolvedY = env === 'normal'
+      ? Math.max(63, Math.round(Number(wy || 70)))
+      : preferredBuildingY(env, wy);
     var bldg = {
       id: 'b' + (state.nextBuildingSeq++),
       type: bType,
       category: spec.category,
+      envType: env,
       owner: cid,
       sx: sx,
       sz: sz,
       key: k,
       x: Math.round(Number(wx || sx * SECTOR_SIZE)),
-      y: Math.round(Number(wy || 64)),
+      y: resolvedY,
       z: Math.round(Number(wz || sz * SECTOR_SIZE)),
       halfSpan: 3,
       maxBlocks: 20,
@@ -2039,13 +2145,19 @@ global.LHOpenTTD = (function () {
           cash: b.cash,
           transportSpec: b.transportSpec,
           resourceSpec: b.resourceSpec,
+          envType: b.envType || 'normal',
           hqSx: b.hqSx,
           hqSz: b.hqSz,
+          hqX: b.hqSx * SECTOR_SIZE,
+          hqY: typeof b.hqY === 'number' ? b.hqY : preferredBuildingY(b.envType || 'normal', 70),
+          hqZ: b.hqSz * SECTOR_SIZE,
           stats: { deliveries: 0, tradeVolume: 0, blocksMined: 0, sectorsCaptured: 1, contractsDone: 0, routesDone: 0 }
         };
       } else {
         state.companies[b.id].hqSx = b.hqSx;
         state.companies[b.id].hqSz = b.hqSz;
+        if (!state.companies[b.id].envType) state.companies[b.id].envType = b.envType || 'normal';
+        if (typeof state.companies[b.id].hqY !== 'number') state.companies[b.id].hqY = typeof b.hqY === 'number' ? b.hqY : preferredBuildingY(state.companies[b.id].envType, 70);
       }
       var k = sectorKey(b.hqSx, b.hqSz);
       if (!state.claims[k]) {
@@ -2244,7 +2356,19 @@ global.LHOpenTTD = (function () {
     };
   }
 
-  function companyCreate(state, playerUuid, rawId, displayName, hqX, hqZ) {
+  function minCompanyHqDistance(state, sx, sz) {
+    var best = 999999;
+    var cids = Object.keys(state.companies || {});
+    for (var i = 0; i < cids.length; i++) {
+      var c = state.companies[cids[i]];
+      if (!c) continue;
+      var d = Math.max(Math.abs(Number(c.hqSx || 0) - sx), Math.abs(Number(c.hqSz || 0) - sz));
+      if (d < best) best = d;
+    }
+    return best;
+  }
+
+  function companyCreate(state, playerUuid, rawId, displayName, hqX, hqZ, opts) {
     var cid = sanitizeId(rawId);
     if (!cid || cid.indexOf('bot_') === 0) return { ok: false, reason: 'invalid_id' };
     if (state.companies[cid]) return { ok: false, reason: 'exists' };
@@ -2260,20 +2384,30 @@ global.LHOpenTTD = (function () {
     });
     var colorCode = PLAYER_COLORS[playerCount % PLAYER_COLORS.length];
     var sc = sectorCoords(hqX || 0, hqZ || 0);
-    if (isSpawnProtectedSector(sc.sx, sc.sz)) {
+    if (isSpawnProtectedSector(sc.sx, sc.sz) || state.claims[sc.key]) {
       var ringCandidates = [
-        [0, 2], [2, 2], [-2, 2], [2, -2], [-2, -2],
-        [1, 2], [-1, 2], [2, 1], [-2, 1], [2, -1], [-2, -1], [1, -2], [-1, -2],
-        [0, 3], [3, 0], [-3, 0], [0, -3]
+        [0, 5], [5, 0], [-5, 0], [0, -5],
+        [4, 4], [-4, 4], [4, -4], [-4, -4],
+        [0, 3], [3, 0], [-3, 0], [0, -3],
+        [0, 2], [2, 2], [-2, 2], [2, -2], [-2, -2]
       ];
+      var bestCand = null;
       for (var ri = 0; ri < ringCandidates.length; ri++) {
         var rKey = sectorKey(ringCandidates[ri][0], ringCandidates[ri][1]);
         if (!state.claims[rKey]) {
-          sc = { sx: ringCandidates[ri][0], sz: ringCandidates[ri][1], key: rKey };
-          break;
+          if (!bestCand) bestCand = { sx: ringCandidates[ri][0], sz: ringCandidates[ri][1], key: rKey };
+          if (minCompanyHqDistance(state, ringCandidates[ri][0], ringCandidates[ri][1]) >= 4) {
+            sc = { sx: ringCandidates[ri][0], sz: ringCandidates[ri][1], key: rKey };
+            bestCand = sc;
+            break;
+          }
         }
       }
+      if (bestCand) sc = bestCand;
     }
+    var reqEnv = (opts && (opts.envType || opts.environment)) ? (opts.envType || opts.environment) : 'normal';
+    var envType = COMPANY_ENV_TYPES[reqEnv] ? reqEnv : 'normal';
+    var hqY = (opts && typeof opts.hqY === 'number') ? Math.round(opts.hqY) : preferredBuildingY(envType, 70);
     var comp = {
       id: cid,
       name: String(displayName || cid).slice(0, 32),
@@ -2286,8 +2420,12 @@ global.LHOpenTTD = (function () {
       cash: STARTING_CASH,
       transportSpec: null,
       resourceSpec: null,
+      envType: envType,
       hqSx: sc.sx,
       hqSz: sc.sz,
+      hqX: Math.round(Number(hqX || sc.sx * SECTOR_SIZE)),
+      hqY: hqY,
+      hqZ: Math.round(Number(hqZ || sc.sz * SECTOR_SIZE)),
       stats: { deliveries: 0, tradeVolume: 0, blocksMined: 0, sectorsCaptured: 0, contractsDone: 0, routesDone: 0 }
     };
     state.companies[cid] = comp;
@@ -2333,7 +2471,11 @@ global.LHOpenTTD = (function () {
       if (switching && comp.cash < SPEC_SWITCH_COST) return { ok: false, reason: 'no_cash', cost: SPEC_SWITCH_COST };
       if (switching) comp.cash -= SPEC_SWITCH_COST;
       comp.transportSpec = specId;
-      return { ok: true, switched: switching, cost: switching ? SPEC_SWITCH_COST : 0, spec: TRANSPORT_SPECS[specId] };
+      if (TRANSPORT_SPECS[specId].envType) {
+        comp.envType = TRANSPORT_SPECS[specId].envType;
+        comp.hqY = preferredBuildingY(comp.envType, comp.hqY);
+      }
+      return { ok: true, switched: switching, cost: switching ? SPEC_SWITCH_COST : 0, spec: TRANSPORT_SPECS[specId], envType: comp.envType };
     }
     if (kind === 'resource') {
       if (!RESOURCE_SPECS[specId]) return { ok: false, reason: 'bad_spec' };
@@ -2508,18 +2650,18 @@ global.LHOpenTTD = (function () {
       bid = 'bot_dyn_' + seq;
     }
 
-    // Pick an unclaimed sector in the outer half of the unlocked territory
-    var minRing = Math.max(2, Math.floor(limit * 0.45));
+    // Pick an unclaimed sector well-spaced from existing HQs
+    var minRing = Math.max(4, Math.floor(limit * 0.40));
     var hqSx = null;
     var hqSz = null;
-    for (var attempt = 0; attempt < 48; attempt++) {
+    for (var attempt = 0; attempt < 64; attempt++) {
       var angle = rng() * 6.283185307179586;
       var rad = minRing + rng() * Math.max(1, limit - minRing);
       var csx = Math.round(Math.cos(angle) * rad);
       var csz = Math.round(Math.sin(angle) * rad);
       if (isSpawnProtectedSector(csx, csz)) continue;
       if (Math.abs(csx) > limit || Math.abs(csz) > limit) continue;
-      if (!state.claims[sectorKey(csx, csz)]) {
+      if (!state.claims[sectorKey(csx, csz)] && minCompanyHqDistance(state, csx, csz) >= 4) {
         hqSx = csx;
         hqSz = csz;
         break;
@@ -2542,6 +2684,8 @@ global.LHOpenTTD = (function () {
 
     var tKeys = Object.keys(TRANSPORT_SPECS);
     var rKeys = Object.keys(RESOURCE_SPECS);
+    var chosenTSpec = tKeys[seq % tKeys.length];
+    var chosenEnv = TRANSPORT_SPECS[chosenTSpec].envType || 'normal';
     var nameBase = DYNAMIC_BOT_NAMES[(seq - 1) % DYNAMIC_BOT_NAMES.length];
     var displayName = seq > DYNAMIC_BOT_NAMES.length ? (nameBase + ' #' + seq) : nameBase;
     var colorCode = PLAYER_COLORS[(seq + 2) % PLAYER_COLORS.length];
@@ -2555,10 +2699,14 @@ global.LHOpenTTD = (function () {
       owner: 'AI',
       members: [],
       cash: 1100 + Math.min(2000, seq * 120),
-      transportSpec: tKeys[seq % tKeys.length],
+      transportSpec: chosenTSpec,
       resourceSpec: rKeys[seq % rKeys.length],
+      envType: chosenEnv,
       hqSx: hqSx,
       hqSz: hqSz,
+      hqX: hqSx * SECTOR_SIZE,
+      hqY: preferredBuildingY(chosenEnv, 70),
+      hqZ: hqSz * SECTOR_SIZE,
       stats: { deliveries: 0, tradeVolume: 0, blocksMined: 0, sectorsCaptured: 1, contractsDone: 0, routesDone: 0 }
     };
     state.companies[bid] = bot;
@@ -2694,11 +2842,17 @@ global.LHOpenTTD = (function () {
     BASE_CLAIM_COST: BASE_CLAIM_COST,
     SPEC_SWITCH_COST: SPEC_SWITCH_COST,
     STARTING_CASH: STARTING_CASH,
+    COMPANY_ENV_TYPES: COMPANY_ENV_TYPES,
     TRANSPORT_SPECS: TRANSPORT_SPECS,
     RESOURCE_SPECS: RESOURCE_SPECS,
     DEFAULT_BOT_COMPANIES: DEFAULT_BOT_COMPANIES,
     BOT_ORDER_TEMPLATES: BOT_ORDER_TEMPLATES,
     BUILDING_CATALOG: BUILDING_CATALOG,
+    getCompanyEnvType: getCompanyEnvType,
+    setCompanyEnvType: setCompanyEnvType,
+    preferredBuildingY: preferredBuildingY,
+    getCompanyTerminalCoords: getCompanyTerminalCoords,
+    minCompanyHqDistance: minCompanyHqDistance,
     sectorCoords: sectorCoords,
     sectorKey: sectorKey,
     sanitizeId: sanitizeId,
@@ -3528,6 +3682,692 @@ global.LHEconomyEngine = (function () {
     pickupLogisticsOrder: pickupLogisticsOrder,
     listReadyPickups: listReadyPickups,
     generateWanderingTraderOffers: generateWanderingTraderOffers
+  };
+})();
+
+global.LHTradeLogistics = (function () {
+  var MIN_DELIVERY_SPEED_BPS = 1.04; // vanilla crouch ~1.30 m/s - 20%
+  var MAX_DELIVERY_SPEED_BPS = 24.0; // modpack top speed ~30.0 m/s - 20%
+  var TICKS_PER_GAME_DAY = 24000;
+  var SPEED_PRESETS = [
+    { id: 'slow', bps: 1.04, label: 'Обоз (присед −20%)' },
+    { id: 'walk', bps: 4.30, label: 'Пеший курьер' },
+    { id: 'road', bps: 9.00, label: 'Автоконвой' },
+    { id: 'rail', bps: 15.00, label: 'Скоростной поезд' },
+    { id: 'air', bps: 24.00, label: 'Авиа-экспресс (макс. −20%)' }
+  ];
+
+  function createState() {
+    return {
+      passes: {},
+      deliveries: [],
+      haggles: {},
+      p2pSessions: {},
+      nextPassSeq: 1,
+      nextDeliverySeq: 1,
+      nextHaggleSeq: 1,
+      nextP2pSeq: 1
+    };
+  }
+
+  function ensureState(st) {
+    if (!st || typeof st !== 'object') st = createState();
+    if (!st.passes) st.passes = {};
+    if (!Array.isArray(st.deliveries)) st.deliveries = [];
+    if (!st.haggles) st.haggles = {};
+    if (!st.p2pSessions) st.p2pSessions = {};
+    if (!st.nextPassSeq) st.nextPassSeq = 1;
+    if (!st.nextDeliverySeq) st.nextDeliverySeq = 1;
+    if (!st.nextHaggleSeq) st.nextHaggleSeq = 1;
+    if (!st.nextP2pSeq) st.nextP2pSeq = 1;
+    return st;
+  }
+
+  function clampSpeed(bps) {
+    var v = Number(bps || MIN_DELIVERY_SPEED_BPS);
+    if (isNaN(v)) v = MIN_DELIVERY_SPEED_BPS;
+    return Math.max(MIN_DELIVERY_SPEED_BPS, Math.min(MAX_DELIVERY_SPEED_BPS, Math.round(v * 100) / 100));
+  }
+
+  function computeCargoVolume(qty, stackSize) {
+    var q = Math.max(1, Math.round(Number(qty || 1)));
+    var stSz = Math.max(1, Math.round(Number(stackSize || 13))); // 5x reduced stacks (64 -> 13)
+    return Math.max(0.25, Math.round((q / stSz) * 100) / 100);
+  }
+
+  function computeDistance(ax, az, bx, bz) {
+    var dx = Number(ax || 0) - Number(bx || 0);
+    var dz = Number(az || 0) - Number(bz || 0);
+    return Math.max(32, Math.round(Math.sqrt(dx * dx + dz * dz)));
+  }
+
+  function computeDeliveryFee(distanceBlocks, volumeStacks, speedBps) {
+    var dist = Math.max(32, Number(distanceBlocks || 256));
+    var vol = Math.max(0.25, Number(volumeStacks || 1));
+    var spd = clampSpeed(speedBps);
+    var ratio = (spd - MIN_DELIVERY_SPEED_BPS) / (MAX_DELIVERY_SPEED_BPS - MIN_DELIVERY_SPEED_BPS);
+    var speedMult = 0.75 + 2.25 * Math.pow(Math.max(0, Math.min(1, ratio)), 1.15);
+    var distComponent = 14 + dist * 0.045;
+    var volFactor = 0.55 + 0.45 * vol;
+    return Math.max(8, Math.round(distComponent * volFactor * speedMult));
+  }
+
+  function computeSelfDeliveryReward(distanceBlocks, volumeStacks) {
+    // Self-delivery always pays generously so doing it yourself beats hiring/delegating
+    return Math.max(10, Math.round(computeDeliveryFee(distanceBlocks, volumeStacks, 9.0) * 0.90));
+  }
+
+  function computeHoldDailyFee(volumeStacks) {
+    var vol = Math.max(0.25, Number(volumeStacks || 1));
+    return Math.max(2, Math.round(4 * vol));
+  }
+
+  function isNearCompanyBorder(ottdState, targetCid, wx, wz) {
+    if (!ottdState || !targetCid || !global.LHOpenTTD) return false;
+    var sc = global.LHOpenTTD.sectorCoords(wx, wz);
+    var claims = ottdState.claims || {};
+    var cur = claims[global.LHOpenTTD.sectorKey(sc.sx, sc.sz)];
+    // Check if player stands adjacent to a claimed sector of targetCid OR on an outer-edge sector of targetCid
+    var hasOutsideNeighbor = false;
+    var touchesTarget = false;
+    for (var dx = -1; dx <= 1; dx++) {
+      for (var dz = -1; dz <= 1; dz++) {
+        var nCl = claims[global.LHOpenTTD.sectorKey(sc.sx + dx, sc.sz + dz)];
+        if (nCl && nCl.owner === targetCid) touchesTarget = true;
+        if (!nCl || nCl.owner !== targetCid) hasOutsideNeighbor = true;
+      }
+    }
+    if (cur && cur.owner === targetCid) {
+      return hasOutsideNeighbor;
+    }
+    return touchesTarget;
+  }
+
+  function requestBorderTradePass(lState, ottdState, playerUuid, myCid, targetCid, wx, wz, spec, nowTick) {
+    ensureState(lState);
+    if (!ottdState || !ottdState.companies || !ottdState.companies[targetCid]) {
+      return { ok: false, reason: 'bad_target' };
+    }
+    if (myCid && myCid === targetCid) return { ok: false, reason: 'own_company' };
+    if (!isNearCompanyBorder(ottdState, targetCid, wx, wz)) {
+      return { ok: false, reason: 'not_at_border', targetCid: targetCid };
+    }
+    var term = global.LHOpenTTD.getCompanyTerminalCoords(ottdState, targetCid);
+    if (!term) return { ok: false, reason: 'no_terminal' };
+    var tick = Number(nowTick || 0);
+    if (!lState.passes[playerUuid]) lState.passes[playerUuid] = {};
+    var pass = {
+      id: 'BP' + (lState.nextPassSeq++),
+      playerUuid: playerUuid,
+      myCid: myCid || null,
+      targetCid: targetCid,
+      side: (spec && spec.side) || 'buy', // 'buy' (take from target terminal) or 'sell' (deposit into target terminal)
+      orderId: (spec && spec.orderId) || null,
+      deliveryId: (spec && spec.deliveryId) || null,
+      itemId: String((spec && spec.itemId) || 'minecraft:iron_ingot'),
+      qty: Math.max(1, Math.round(Number((spec && spec.qty) || 1))),
+      totalPrice: Math.max(0, Math.round(Number((spec && spec.totalPrice) || 0))),
+      deliveryBonus: Math.max(0, Math.round(Number((spec && spec.deliveryBonus) || 0))),
+      terminal: term,
+      grantedTick: tick,
+      expiresTick: tick + 12000, // 10 real minutes
+      loadedInContainer: false,
+      pickedUpQty: 0,
+      depositedQty: 0,
+      status: 'active'
+    };
+    lState.passes[playerUuid][targetCid] = pass;
+    return { ok: true, pass: pass };
+  }
+
+  function getActiveBorderPass(lState, playerUuid, targetCid, nowTick) {
+    ensureState(lState);
+    var map = lState.passes[playerUuid];
+    if (!map || !map[targetCid]) return null;
+    var p = map[targetCid];
+    if (p.status !== 'active' && p.status !== 'loaded') return null;
+    if (typeof nowTick === 'number' && p.expiresTick < nowTick) {
+      p.status = 'expired';
+      return null;
+    }
+    return p;
+  }
+
+  function hasActiveBorderPass(lState, playerUuid, targetCid, nowTick) {
+    return !!getActiveBorderPass(lState, playerUuid, targetCid, nowTick);
+  }
+
+  function completeBorderTradeOnLeave(lState, ottdState, playerUuid, targetCid) {
+    ensureState(lState);
+    var map = lState.passes[playerUuid];
+    if (!map || !map[targetCid]) return { ok: false, reason: 'no_pass' };
+    var p = map[targetCid];
+    if (p.status === 'completed' || p.status === 'expired') return { ok: false, reason: 'already_closed' };
+    var buyerComp = p.side === 'buy'
+      ? (p.myCid ? ottdState.companies[p.myCid] : null)
+      : ottdState.companies[targetCid];
+    var sellerComp = p.side === 'buy'
+      ? ottdState.companies[targetCid]
+      : (p.myCid ? ottdState.companies[p.myCid] : null);
+
+    if (p.side === 'sell') {
+      if (p.depositedQty <= 0) {
+        p.status = 'cancelled_empty';
+        delete map[targetCid];
+        return { ok: true, finalized: false, side: 'sell', reason: 'nothing_deposited', pass: p };
+      }
+      var ratio = Math.min(1, p.depositedQty / Math.max(1, p.qty));
+      var saleCredit = Math.max(1, Math.round(p.totalPrice * ratio));
+      var bonusCredit = Math.round(p.deliveryBonus * ratio);
+      var totalPayout = saleCredit + bonusCredit;
+      if (buyerComp && buyerComp.cash >= saleCredit) buyerComp.cash -= saleCredit;
+      if (sellerComp) {
+        sellerComp.cash += totalPayout;
+        sellerComp.stats.tradeVolume = (sellerComp.stats.tradeVolume || 0) + totalPayout;
+        sellerComp.stats.deliveries = (sellerComp.stats.deliveries || 0) + 1;
+      }
+      if (p.deliveryId) {
+        for (var di = 0; di < lState.deliveries.length; di++) {
+          if (lState.deliveries[di].id === p.deliveryId) lState.deliveries[di].status = 'completed';
+        }
+      }
+      p.status = 'completed';
+      delete map[targetCid];
+      return { ok: true, finalized: true, side: 'sell', payout: totalPayout, saleCredit: saleCredit, bonusCredit: bonusCredit, qty: p.depositedQty, pass: p };
+    }
+
+    // Buy side: pass closes cleanly upon leaving territory after picking up goods
+    if (p.pickedUpQty > 0 || p.loadedInContainer) {
+      if (p.deliveryId) {
+        for (var dj = 0; dj < lState.deliveries.length; dj++) {
+          if (lState.deliveries[dj].id === p.deliveryId) lState.deliveries[dj].status = 'completed';
+        }
+      }
+      p.status = 'completed';
+      delete map[targetCid];
+      return { ok: true, finalized: true, side: 'buy', qty: p.pickedUpQty, pass: p };
+    }
+    p.status = 'left_without_pickup';
+    delete map[targetCid];
+    return { ok: true, finalized: false, side: 'buy', pass: p };
+  }
+
+  function createBuyOrderDelivery(lState, ottdState, buyerCid, sellerCid, itemId, qty, itemCost, speedBps, nowTick, stackSize) {
+    ensureState(lState);
+    var buyer = ottdState.companies[buyerCid];
+    var seller = ottdState.companies[sellerCid];
+    if (!buyer || !seller || buyerCid === sellerCid) return { ok: false, reason: 'bad_company' };
+    var bTerm = global.LHOpenTTD.getCompanyTerminalCoords(ottdState, buyerCid);
+    var sTerm = global.LHOpenTTD.getCompanyTerminalCoords(ottdState, sellerCid);
+    var dist = computeDistance(bTerm.x, bTerm.z, sTerm.x, sTerm.z);
+    var vol = computeCargoVolume(qty, stackSize);
+    var spd = clampSpeed(speedBps);
+    var fee = computeDeliveryFee(dist, vol, spd);
+    var total = Math.max(1, Math.round(Number(itemCost || 0))) + fee;
+    if (buyer.cash < total) return { ok: false, reason: 'no_cash', cost: total, fee: fee, cash: buyer.cash };
+
+    buyer.cash -= total;
+    seller.cash += Math.round(Number(itemCost || 0));
+    buyer.stats.tradeVolume = (buyer.stats.tradeVolume || 0) + total;
+    seller.stats.tradeVolume = (seller.stats.tradeVolume || 0) + Math.round(Number(itemCost || 0));
+    var durationTicks = Math.max(200, Math.round((dist / spd) * 20));
+    var rec = {
+      id: 'D' + (lState.nextDeliverySeq++),
+      mode: 'hired_delivery',
+      side: 'buy',
+      buyerCid: buyerCid,
+      sellerCid: sellerCid,
+      itemId: String(itemId),
+      qty: Math.max(1, Math.round(Number(qty || 1))),
+      volume: vol,
+      distance: dist,
+      speedBps: spd,
+      deliveryFee: fee,
+      itemCost: Math.round(Number(itemCost || 0)),
+      startTick: Number(nowTick || 0),
+      etaTick: Number(nowTick || 0) + durationTicks,
+      destTerminal: bTerm,
+      status: 'in_transit'
+    };
+    lState.deliveries.push(rec);
+    return { ok: true, delivery: rec, totalCost: total, deliveryFee: fee, durationTicks: durationTicks };
+  }
+
+  function createBuyOrderOnHold(lState, ottdState, buyerCid, sellerCid, itemId, qty, itemCost, nowTick, stackSize) {
+    ensureState(lState);
+    var buyer = ottdState.companies[buyerCid];
+    var seller = ottdState.companies[sellerCid];
+    if (!buyer || !seller || buyerCid === sellerCid) return { ok: false, reason: 'bad_company' };
+    var cost = Math.max(1, Math.round(Number(itemCost || 0)));
+    if (buyer.cash < cost) return { ok: false, reason: 'no_cash', cost: cost, cash: buyer.cash };
+    var bTerm = global.LHOpenTTD.getCompanyTerminalCoords(ottdState, buyerCid);
+    var sTerm = global.LHOpenTTD.getCompanyTerminalCoords(ottdState, sellerCid);
+    var dist = computeDistance(bTerm.x, bTerm.z, sTerm.x, sTerm.z);
+    var vol = computeCargoVolume(qty, stackSize);
+    var dailyFee = computeHoldDailyFee(vol);
+
+    buyer.cash -= cost;
+    seller.cash += cost;
+    buyer.stats.tradeVolume = (buyer.stats.tradeVolume || 0) + cost;
+    seller.stats.tradeVolume = (seller.stats.tradeVolume || 0) + cost;
+
+    var rec = {
+      id: 'D' + (lState.nextDeliverySeq++),
+      mode: 'self_hold',
+      side: 'buy',
+      buyerCid: buyerCid,
+      sellerCid: sellerCid,
+      itemId: String(itemId),
+      qty: Math.max(1, Math.round(Number(qty || 1))),
+      volume: vol,
+      distance: dist,
+      itemCost: cost,
+      holdDailyFee: dailyFee,
+      lastHoldChargeTick: Number(nowTick || 0),
+      holdDaysCharged: 0,
+      holdFeesPaid: 0,
+      sourceTerminal: sTerm,
+      status: 'on_hold'
+    };
+    lState.deliveries.push(rec);
+    return { ok: true, delivery: rec, holdDailyFee: dailyFee };
+  }
+
+  function chargeHoldDailyFees(lState, ottdState, nowTick) {
+    ensureState(lState);
+    var tick = Number(nowTick || 0);
+    var events = [];
+    for (var i = 0; i < lState.deliveries.length; i++) {
+      var d = lState.deliveries[i];
+      if (!d || d.status !== 'on_hold') continue;
+      var elapsed = tick - Number(d.lastHoldChargeTick || 0);
+      if (elapsed >= TICKS_PER_GAME_DAY) {
+        var days = Math.floor(elapsed / TICKS_PER_GAME_DAY);
+        d.lastHoldChargeTick += days * TICKS_PER_GAME_DAY;
+        var buyer = ottdState.companies[d.buyerCid];
+        var feeTotal = d.holdDailyFee * days;
+        var paid = 0;
+        if (buyer && buyer.cash > 0) {
+          paid = Math.min(buyer.cash, feeTotal);
+          buyer.cash -= paid;
+        }
+        d.holdDaysCharged = (d.holdDaysCharged || 0) + days;
+        d.holdFeesPaid = (d.holdFeesPaid || 0) + paid;
+        events.push({ deliveryId: d.id, buyerCid: d.buyerCid, days: days, fee: paid });
+      }
+    }
+    return events;
+  }
+
+  function createSellOrderSelfDelivery(lState, ottdState, sellerCid, buyerCid, itemId, qty, saleRevenue, stackSize) {
+    ensureState(lState);
+    var seller = ottdState.companies[sellerCid];
+    var buyer = ottdState.companies[buyerCid];
+    if (!seller || !buyer || sellerCid === buyerCid) return { ok: false, reason: 'bad_company' };
+    var sTerm = global.LHOpenTTD.getCompanyTerminalCoords(ottdState, sellerCid);
+    var bTerm = global.LHOpenTTD.getCompanyTerminalCoords(ottdState, buyerCid);
+    var dist = computeDistance(sTerm.x, sTerm.z, bTerm.x, bTerm.z);
+    var vol = computeCargoVolume(qty, stackSize);
+    var bonus = computeSelfDeliveryReward(dist, vol);
+    var rec = {
+      id: 'D' + (lState.nextDeliverySeq++),
+      mode: 'self_delivery',
+      side: 'sell',
+      sellerCid: sellerCid,
+      buyerCid: buyerCid,
+      itemId: String(itemId),
+      qty: Math.max(1, Math.round(Number(qty || 1))),
+      volume: vol,
+      distance: dist,
+      saleRevenue: Math.max(1, Math.round(Number(saleRevenue || 1))),
+      deliveryBonus: bonus,
+      destTerminal: bTerm,
+      status: 'awaiting_border_delivery'
+    };
+    lState.deliveries.push(rec);
+    return { ok: true, delivery: rec, deliveryBonus: bonus };
+  }
+
+  function createSellOrderDelegated(lState, ottdState, sellerCid, buyerCid, itemId, qty, saleRevenue, buyerSpeedBps, nowTick, stackSize) {
+    ensureState(lState);
+    var seller = ottdState.companies[sellerCid];
+    var buyer = ottdState.companies[buyerCid];
+    if (!seller || !buyer || sellerCid === buyerCid) return { ok: false, reason: 'bad_company' };
+    var sTerm = global.LHOpenTTD.getCompanyTerminalCoords(ottdState, sellerCid);
+    var bTerm = global.LHOpenTTD.getCompanyTerminalCoords(ottdState, buyerCid);
+    var dist = computeDistance(sTerm.x, sTerm.z, bTerm.x, bTerm.z);
+    var vol = computeCargoVolume(qty, stackSize);
+    var spd = clampSpeed(buyerSpeedBps || 12.0);
+    var durationTicks = Math.max(200, Math.round((dist / spd) * 20));
+    var rec = {
+      id: 'D' + (lState.nextDeliverySeq++),
+      mode: 'buyer_delegated',
+      side: 'sell',
+      sellerCid: sellerCid,
+      buyerCid: buyerCid,
+      itemId: String(itemId),
+      qty: Math.max(1, Math.round(Number(qty || 1))),
+      volume: vol,
+      distance: dist,
+      speedBps: spd,
+      deliveryFee: 0,
+      saleRevenue: Math.max(1, Math.round(Number(saleRevenue || 1))),
+      startTick: Number(nowTick || 0),
+      etaTick: Number(nowTick || 0) + durationTicks,
+      sourceTerminal: sTerm,
+      occupyingTerminal: true,
+      status: 'waiting_pickup'
+    };
+    lState.deliveries.push(rec);
+    return { ok: true, delivery: rec, durationTicks: durationTicks };
+  }
+
+  function tickDeliveries(lState, ottdState, nowTick) {
+    ensureState(lState);
+    var tick = Number(nowTick || 0);
+    var arrivedBuy = [];
+    var dueDelegatedSell = [];
+    for (var i = 0; i < lState.deliveries.length; i++) {
+      var d = lState.deliveries[i];
+      if (!d) continue;
+      if (d.status === 'in_transit' && tick >= Number(d.etaTick || 0)) {
+        d.status = 'arrived_at_terminal';
+        arrivedBuy.push(d);
+      } else if (d.status === 'waiting_pickup' && tick >= Number(d.etaTick || 0)) {
+        d.status = 'ready_for_pickup_drain';
+        dueDelegatedSell.push(d);
+      }
+    }
+    var holdEvents = chargeHoldDailyFees(lState, ottdState, tick);
+    return { arrivedBuy: arrivedBuy, dueDelegatedSell: dueDelegatedSell, holdEvents: holdEvents };
+  }
+
+  return {
+    MIN_DELIVERY_SPEED_BPS: MIN_DELIVERY_SPEED_BPS,
+    MAX_DELIVERY_SPEED_BPS: MAX_DELIVERY_SPEED_BPS,
+    TICKS_PER_GAME_DAY: TICKS_PER_GAME_DAY,
+    SPEED_PRESETS: SPEED_PRESETS,
+    createState: createState,
+    ensureState: ensureState,
+    clampSpeed: clampSpeed,
+    computeCargoVolume: computeCargoVolume,
+    computeDistance: computeDistance,
+    computeDeliveryFee: computeDeliveryFee,
+    computeSelfDeliveryReward: computeSelfDeliveryReward,
+    computeHoldDailyFee: computeHoldDailyFee,
+    isNearCompanyBorder: isNearCompanyBorder,
+    requestBorderTradePass: requestBorderTradePass,
+    getActiveBorderPass: getActiveBorderPass,
+    hasActiveBorderPass: hasActiveBorderPass,
+    completeBorderTradeOnLeave: completeBorderTradeOnLeave,
+    createBuyOrderDelivery: createBuyOrderDelivery,
+    createBuyOrderOnHold: createBuyOrderOnHold,
+    chargeHoldDailyFees: chargeHoldDailyFees,
+    createSellOrderSelfDelivery: createSellOrderSelfDelivery,
+    createSellOrderDelegated: createSellOrderDelegated,
+    tickDeliveries: tickDeliveries
+  };
+})();
+
+global.LHHaggleEngine = (function () {
+  var SCALE_PCTS = [-35, -20, -10, 0, 10, 20, 35];
+
+  function createSession(id, mode, buyerCid, sellerCid, itemId, qty, marketTotal, opts) {
+    var mTotal = Math.max(10, Math.round(Number(marketTotal || 100)));
+    var minPrice = Math.max(5, Math.round(mTotal * 0.65));
+    var maxPrice = Math.max(minPrice + 10, Math.round(mTotal * 1.35));
+    var repScore = Number((opts && opts.repScore) || 0);
+    // Bot reservation price depends on reputation
+    var repShift = Math.max(-0.12, Math.min(0.12, -repScore / 800));
+    var botReservation = (mode === 'vs_bot')
+      ? (opts && opts.botSide === 'seller'
+          ? Math.round(mTotal * (0.92 + repShift))
+          : Math.round(mTotal * (1.08 - repShift)))
+      : null;
+
+    var buyerBid = Math.round(mTotal * 0.80);
+    var sellerAsk = Math.round(mTotal * 1.25);
+    if (opts && opts.initialBuyerBid > 0) buyerBid = Math.round(opts.initialBuyerBid);
+    if (opts && opts.initialSellerAsk > 0) sellerAsk = Math.round(opts.initialSellerAsk);
+
+    var scalePrices = SCALE_PCTS.map(function (pct) {
+      return Math.max(1, Math.round(mTotal * (1 + pct / 100)));
+    });
+
+    return {
+      id: id || 'H1',
+      mode: mode || 'vs_bot', // 'vs_bot' | 'vs_player'
+      botSide: (opts && opts.botSide) || 'seller', // 'seller' | 'buyer'
+      buyerCid: buyerCid,
+      sellerCid: sellerCid,
+      itemId: String(itemId || 'minecraft:iron_ingot'),
+      qty: Math.max(1, Math.round(Number(qty || 1))),
+      marketTotal: mTotal,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+      scalePrices: scalePrices,
+      scalePcts: SCALE_PCTS.slice(),
+      buyerBid: buyerBid,
+      sellerAsk: sellerAsk,
+      botReservation: botReservation,
+      repScore: repScore,
+      patience: 100,
+      round: 0,
+      maxRounds: 6,
+      persuadeUsed: false,
+      agreedPrice: null,
+      status: 'active',
+      lastMsg: 'Торг начат! Предложите цену по шкале или согласуйте компромисс.'
+    };
+  }
+
+  function submitOffer(s, role, proposedPrice, opts) {
+    if (!s || s.status !== 'active') return { ok: false, reason: 'not_active' };
+    var p = Math.max(1, Math.round(Number(proposedPrice || s.marketTotal)));
+    if (opts && opts.compromise) {
+      p = Math.round((s.buyerBid + s.sellerAsk) / 2);
+    }
+    s.round += 1;
+
+    if (role === 'buyer') s.buyerBid = p;
+    else s.sellerAsk = p;
+
+    if (s.mode === 'vs_player') {
+      if (s.buyerBid >= s.sellerAsk) {
+        s.agreedPrice = Math.round((s.buyerBid + s.sellerAsk) / 2);
+        s.status = 'agreed';
+        s.lastMsg = 'Обе стороны сошлись на цене ' + s.agreedPrice + ' Cr!';
+        return { ok: true, agreed: true, price: s.agreedPrice, session: s };
+      }
+      if (s.round >= s.maxRounds * 2) {
+        s.status = 'walked_away';
+        s.lastMsg = 'Лимит раундов исчерпан без соглашения.';
+        return { ok: true, agreed: false, walkedAway: true, session: s };
+      }
+      s.lastMsg = (role === 'buyer' ? 'Покупатель предложил ' : 'Продавец запросил ') + p + ' Cr.';
+      return { ok: true, agreed: false, session: s };
+    }
+
+    // vs_bot evaluation
+    var botIsSeller = s.botSide === 'seller';
+    var playerOffer = p;
+    var acceptable = botIsSeller ? (playerOffer >= s.botReservation) : (playerOffer <= s.botReservation);
+
+    if (opts && opts.persuade && !s.persuadeUsed) {
+      s.persuadeUsed = true;
+      var bonusShift = Math.max(2, Math.round(s.marketTotal * 0.06));
+      if (botIsSeller) s.botReservation = Math.max(s.minPrice, s.botReservation - bonusShift);
+      else s.botReservation = Math.min(s.maxPrice, s.botReservation + bonusShift);
+      acceptable = botIsSeller ? (playerOffer >= s.botReservation) : (playerOffer <= s.botReservation);
+    }
+
+    if (acceptable) {
+      s.agreedPrice = playerOffer;
+      s.status = 'agreed';
+      s.lastMsg = 'Партнёр согласился на вашу цену: ' + s.agreedPrice + ' Cr!';
+      return { ok: true, agreed: true, price: s.agreedPrice, session: s };
+    }
+
+    var gap = botIsSeller ? (s.botReservation - playerOffer) : (playerOffer - s.botReservation);
+    var gapPct = gap / Math.max(1, s.marketTotal);
+    var patienceDrop = Math.max(14, Math.round(16 + gapPct * 55 - Math.max(-10, Math.min(10, s.repScore / 8))));
+    s.patience = Math.max(0, s.patience - patienceDrop);
+
+    if (s.patience <= 0 || s.round >= s.maxRounds) {
+      s.status = 'walked_away';
+      s.lastMsg = 'Партнёр потерял терпение и прекратил торг.';
+      return { ok: true, agreed: false, walkedAway: true, session: s };
+    }
+
+    // Bot concedes partway toward player's offer without crossing reservation
+    if (botIsSeller) {
+      var stepS = Math.max(2, Math.round((s.sellerAsk - s.botReservation) * 0.42));
+      s.sellerAsk = Math.max(s.botReservation, s.sellerAsk - stepS);
+      s.lastMsg = 'Бот снизил цену до ' + s.sellerAsk + ' Cr (терпение: ' + s.patience + '%).';
+    } else {
+      var stepB = Math.max(2, Math.round((s.botReservation - s.buyerBid) * 0.42));
+      s.buyerBid = Math.min(s.botReservation, s.buyerBid + stepB);
+      s.lastMsg = 'Бот поднял предложение до ' + s.buyerBid + ' Cr (терпение: ' + s.patience + '%).';
+    }
+    return { ok: true, agreed: false, session: s };
+  }
+
+  function acceptCurrentOffer(s, role) {
+    if (!s || s.status !== 'active') return { ok: false, reason: 'not_active' };
+    var accepted = (role === 'buyer') ? s.sellerAsk : s.buyerBid;
+    s.agreedPrice = Math.max(1, Math.round(accepted));
+    s.status = 'agreed';
+    s.lastMsg = 'Предложение принято! Итоговая цена: ' + s.agreedPrice + ' Cr.';
+    return { ok: true, agreed: true, price: s.agreedPrice, session: s };
+  }
+
+  return {
+    SCALE_PCTS: SCALE_PCTS,
+    createSession: createSession,
+    submitOffer: submitOffer,
+    acceptCurrentOffer: acceptCurrentOffer
+  };
+})();
+
+global.LHP2PTradeEngine = (function () {
+  var PROXIMITY_MAX_BLOCKS = 10;
+
+  function createSession(id, uuidA, nameA, cidA, uuidB, nameB, cidB) {
+    return {
+      id: id || 'P2P1',
+      sideA: {
+        uuid: uuidA,
+        name: nameA || 'Игрок A',
+        cid: cidA || null,
+        items: [], // [{ itemId, count }]
+        currency: 0,
+        confirmed: false
+      },
+      sideB: {
+        uuid: uuidB,
+        name: nameB || 'Игрок B',
+        cid: cidB || null,
+        items: [],
+        currency: 0,
+        confirmed: false
+      },
+      status: 'open',
+      revision: 1
+    };
+  }
+
+  function getSideKey(session, uuid) {
+    if (!session) return null;
+    if (session.sideA.uuid === uuid) return 'sideA';
+    if (session.sideB.uuid === uuid) return 'sideB';
+    return null;
+  }
+
+  function resetConfirmations(session) {
+    session.sideA.confirmed = false;
+    session.sideB.confirmed = false;
+    session.revision = (session.revision || 1) + 1;
+  }
+
+  function addItemOffer(session, uuid, itemId, count) {
+    if (!session || session.status !== 'open') return { ok: false, reason: 'closed' };
+    var sk = getSideKey(session, uuid);
+    if (!sk) return { ok: false, reason: 'not_participant' };
+    var side = session[sk];
+    var cnt = Math.max(1, Math.round(Number(count || 1)));
+    var id = String(itemId);
+    var merged = false;
+    for (var i = 0; i < side.items.length; i++) {
+      if (side.items[i].itemId === id) {
+        side.items[i].count += cnt;
+        merged = true;
+        break;
+      }
+    }
+    if (!merged) {
+      if (side.items.length >= 12) return { ok: false, reason: 'grid_full' };
+      side.items.push({ itemId: id, count: cnt });
+    }
+    resetConfirmations(session);
+    return { ok: true, session: session };
+  }
+
+  function removeItemOffer(session, uuid, idx) {
+    if (!session || session.status !== 'open') return { ok: false, reason: 'closed' };
+    var sk = getSideKey(session, uuid);
+    if (!sk) return { ok: false, reason: 'not_participant' };
+    var side = session[sk];
+    if (idx < 0 || idx >= side.items.length) return { ok: false, reason: 'bad_slot' };
+    side.items.splice(idx, 1);
+    resetConfirmations(session);
+    return { ok: true, session: session };
+  }
+
+  function setCurrencyOffer(session, uuid, amount) {
+    if (!session || session.status !== 'open') return { ok: false, reason: 'closed' };
+    var sk = getSideKey(session, uuid);
+    if (!sk) return { ok: false, reason: 'not_participant' };
+    session[sk].currency = Math.max(0, Math.round(Number(amount || 0)));
+    resetConfirmations(session);
+    return { ok: true, currency: session[sk].currency, session: session };
+  }
+
+  function setConfirmed(session, uuid, flag) {
+    if (!session || session.status !== 'open') return { ok: false, reason: 'closed' };
+    var sk = getSideKey(session, uuid);
+    if (!sk) return { ok: false, reason: 'not_participant' };
+    session[sk].confirmed = !!flag;
+    session.revision = (session.revision || 1) + 1;
+    return {
+      ok: true,
+      bothConfirmed: !!(session.sideA.confirmed && session.sideB.confirmed),
+      session: session
+    };
+  }
+
+  function validateProximity(ax, ay, az, bx, by, bz, sameDim) {
+    if (sameDim === false) return { ok: false, reason: 'wrong_dimension', dist: 999999 };
+    var dx = Number(ax) - Number(bx);
+    var dy = Number(ay) - Number(by);
+    var dz = Number(az) - Number(bz);
+    var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    return {
+      ok: dist <= PROXIMITY_MAX_BLOCKS,
+      reason: dist <= PROXIMITY_MAX_BLOCKS ? null : 'too_far',
+      dist: Math.round(dist * 10) / 10,
+      maxDist: PROXIMITY_MAX_BLOCKS
+    };
+  }
+
+  return {
+    PROXIMITY_MAX_BLOCKS: PROXIMITY_MAX_BLOCKS,
+    createSession: createSession,
+    getSideKey: getSideKey,
+    addItemOffer: addItemOffer,
+    removeItemOffer: removeItemOffer,
+    setCurrencyOffer: setCurrencyOffer,
+    setConfirmed: setConfirmed,
+    validateProximity: validateProximity
   };
 })();
 

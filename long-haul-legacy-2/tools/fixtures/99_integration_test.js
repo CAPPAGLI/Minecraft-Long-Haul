@@ -576,8 +576,8 @@ function lhStartIntegrationSetup(server) {
         // 19. Eccentric Tome item registered for unified mod guidebooks
         ok(!Item.of('eccentrictome:tome').isEmpty(), 'eccentrictome:tome registered');
 
-        // 20. Chapter-based territory border scaling (61-stage diminishing concave area curve 724 -> 175000) + always-active ore_scarcity + 100 Casino Wheel complications + worldgen verification
-        ok(Math.round(Number(overworld.worldBorder.size)) === 724, 'initial world border starts at 724 blocks when 61 chapters locked');
+        // 20. Chapter-based territory border scaling (61-stage diminishing concave area curve; ch00 pre-completed -> 31825 -> 175000) + always-active ore_scarcity + 100 Casino Wheel complications + worldgen verification
+        ok(Math.round(Number(overworld.worldBorder.size)) === 31825, 'initial world border starts at 31825 blocks with ch00 pre-completed (got ' + overworld.worldBorder.size + ')');
         ok(lhHardIsActive(server, 'ore_scarcity') === true, 'base complication ore_scarcity is ALWAYS active from world start');
         ok((global.LHHardFeatureCatalog || []).length === 100, '100 complications registered in LHHardFeatureCatalog');
         ok(LHHeraclesProgressHandler !== null, 'Heracles QuestProgressHandler loaded for live ch15..ch61 completion sync');
@@ -595,8 +595,7 @@ function lhStartIntegrationSetup(server) {
 
         var pDb = lhProgRead(server);
         var savedProg = JSON.stringify(pDb);
-        ok(lhUnlockChapter(server, 'ch00', true, true) === true, 'Chapter 00 unlocks and queues Casino Wheel spin');
-        ok(lhTerritoryCounts(server).size === 31825, '1 unlocked chapter expands border to 31825 blocks');
+        ok(lhTerritoryCounts(server).size === 31825, 'ch00 pre-completed keeps 1 unlocked chapter -> 31825 blocks');
         lhUnlockChapter(server, 'ch01', true, true);
         lhUnlockChapter(server, 'ch02', true, true);
         lhUnlockChapter(server, 'ch03', true, true);
@@ -610,7 +609,7 @@ function lhStartIntegrationSetup(server) {
         lhUnlockChapter(server, 'ch61', true, true);
         ok(lhTerritoryCounts(server).size === 175000 && Math.round(Number(overworld.worldBorder.size)) === 175000, '60 unlocked chapters (locked=1 ch04) expands border to 175000 blocks');
         var spun = lhCasinoResolveImmediate(server, true);
-        ok(spun.length === 60 && Object.keys(pDb.hardFeatures).length === 61, 'Casino Wheel resolved 60 chapter complications + 1 base ore_scarcity = 61 active complications');
+        ok(spun.length === 59 && Object.keys(pDb.hardFeatures).length === 60, 'Casino Wheel resolved 59 unlocked chapter complications + 1 base ore_scarcity = 60 active complications');
         ok(server.getAdvancement('longhaul:story/01_left_for_bread') !== null && server.getAdvancement('longhaul:story/06_forgot_the_milk') !== null, 'Chapter 00 story advancements exist');
         ok(server.getAdvancement('longhaul:story/03_dinner_telegram') !== null, 'Chapter 01 story/03_dinner_telegram advancement exists');
         ok(server.getAdvancement('longhaul:nuclear/verified') !== null && server.getAdvancement('longhaul:doomed/checked') !== null, 'Nuclear & DOOMED advancements exist');
@@ -629,7 +628,7 @@ function lhStartIntegrationSetup(server) {
         ok(dOne.coeff > 95.0 && dOne.coeff < 97.0, 'difficulty coeff near 96 at 275 deaths solo (' + dOne.coeff + ')');
         ok(dTwo.coeff < dOne.coeff, 'difficulty coeff inversely depends on online players (' + dTwo.coeff + ' < ' + dOne.coeff + ')');
         var rEnd = lhComputeRandomRespawnTarget(server, 0, 0, 96.0, 0.25, 1.0);
-        ok(rEnd.radius === 20203 && Math.abs(rEnd.x) <= 362 && Math.abs(rEnd.z) <= 362, 'random respawn radius hits 20203 at k=96 and clamps cleanly within current worldborder');
+        ok(rEnd.radius === 20203 && Math.abs(rEnd.x) <= 15900 && Math.abs(rEnd.z) <= 15900, 'random respawn radius hits 20203 at k=96 and clamps cleanly within current worldborder');
         var mockInv = {
           slots: 5,
           items: [
@@ -700,8 +699,8 @@ function lhStartIntegrationSetup(server) {
         oP1.x = 0.5; oP1.z = 0.5;
         ok(lhCompanyClaimHere(server, oP1, false) === 0, 'spawn sanctuary sector (0,0) protected from claim');
         oP1.x = 512.5; oP1.z = 512.5;
-        ottdSt.companies.sibir.cash += 2000;
-        ottdSt.companies.volga.cash += 5000;
+        ottdSt.companies.sibir.cash += 50000;
+        ottdSt.companies.volga.cash += 50000;
         ok(lhCompanyClaimHere(server, oP1, false) === 1, 'sibir claimed sector (2,2)');
         ok(lhCompanyFortifyHere(server, oP1) === 1, 'sibir fortified sector (2,2)');
         oP2.x = 512.5; oP2.z = 512.5;
@@ -742,7 +741,7 @@ function lhStartIntegrationSetup(server) {
         ok(!Item.of('longhaul:control_tablet', 1).empty, 'longhaul:control_tablet registered');
         ok(!lhGuiItem('minecraft:barrel', 'Тест', ['Строка 1', 'Строка 2'], 1).empty, 'lhGuiItem creates ItemStack with name and lore');
         var guiSnap = lhGuiSnapshot(server, fp, 'hub');
-        ok(guiSnap.borderSize === 724 && guiSnap.totalChapters === 61 && guiSnap.hazardsTotal === 100, 'lhGuiSnapshot reports live territory (61 chapters) & 100 complications');
+        ok(guiSnap.borderSize === 31825 && guiSnap.totalChapters === 61 && guiSnap.hazardsTotal === 100, 'lhGuiSnapshot reports live territory (61 chapters, ch00 pre-completed -> 31825) & 100 complications');
         ok(disp.performPrefixedCommand(src, 'lh tablet') === 1, 'brigadier /lh tablet');
         var mockGuiSlots = {};
         var mockGui = {
@@ -807,14 +806,14 @@ function lhStartIntegrationSetup(server) {
         var ottdForkSaved = JSON.stringify(lhOttdRead(server));
         var stTest = lhOttdRead(server);
         global.LHOpenTTD.companyCreate(stTest, lhId(fp), 'testco', 'TestCo');
-        stTest.companies.testco.cash = 5000;
+        stTest.companies.testco.cash = 50000;
         global.LHOpenTTD.claimOrCaptureSector(stTest, 'testco', 0, 3, false);
         var bRes = lhBuildFacilityCmd(server, fp, 'factory', 0, 3, false);
         ok(bRes && bRes.ok, 'built company factory in owned sector (0,3)');
         var t1a = lhUpgradeFacilityCmd(server, fp, 0, 3, global.LHOpenTTD.BUILDING_CATALOG.factory.tier1Fork[0].id, false);
         var t1b = lhUpgradeFacilityCmd(server, fp, 0, 3, global.LHOpenTTD.BUILDING_CATALOG.factory.tier1Fork[1].id, false);
         ok(t1a.ok && !t1b.ok, 'building Tier 1 2-way upgrade fork locks out alternate branch');
-        var vRes = global.LHOpenTTD.recordTerritoryViolation(stTest, 'testco', 'bot_ironrail', 'break_block', 2, 0);
+        var vRes = global.LHOpenTTD.recordTerritoryViolation(stTest, 'testco', 'bot_ironrail', 'break_block', 7, 2);
         ok(vRes.delta < 0 && vRes.newScore < 0, 'territory violation reduces diplomatic relation score');
         var dRes = lhDiplomacyAction(server, fp, 'transit', 'bot_ironrail', null, false);
         ok(dRes && dRes.ok && global.LHOpenTTD.canTransit(stTest, 'testco', 'bot_ironrail'), 'diplomacy transit license purchased cleanly');
@@ -1035,7 +1034,36 @@ function lhStartIntegrationSetup(server) {
         LHOTTDState = JSON.parse(patSave);
         lhOttdSave(server);
 
-        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic + openttd + eventlog + gui + economy + map_byte_fix + border_spawn_safety + xaero_sync + patrol_rep_pricing + quest_items_' + auditList.length + ' + custom_origins_only');
+        // 30. 5x stack-size reduction, filled-barrel 5-block drop, 4-env relocation, radio/delivery/haggle/p2p commands
+        ok(Item.of('minecraft:iron_ingot', 1).maxStackSize === 13, 'iron_ingot maxStackSize reduced 5x (64 -> 13)');
+        ok(Item.of('minecraft:ender_pearl', 1).maxStackSize === 4, 'ender_pearl maxStackSize reduced 5x (16 -> 4)');
+        ok(Item.of('longhaul:ore_concentrate', 1).maxStackSize === 13, 'custom ore_concentrate maxStackSize is 13');
+        var filledBarrelItem = Item.of('minecraft:barrel', { BlockEntityTag: { Items: [{ id: 'minecraft:iron_ingot', Count: 4 }] } });
+        ok(lhIsFilledBarrelStack(filledBarrelItem) === true, 'lhIsFilledBarrelStack detects non-empty barrel NBT');
+        var fbActor = {
+          uuid: '00000000-0000-4000-8000-000000000109',
+          level: overworld,
+          x: 0.5, y: 80, z: 0.5,
+          inventory: {
+            slots: 1,
+            items: [filledBarrelItem],
+            getStackInSlot: function (idx) { return this.items[idx]; }
+          },
+          tell: function () {}
+        };
+        var fb1 = lhCheckFilledBarrelCarry(server, fbActor, true);
+        ok(fb1.carrying && fb1.dropped === 0, 'filled barrel allowed within 5 blocks of pickup anchor');
+        fbActor.x = 7.5;
+        var fb2 = lhCheckFilledBarrelCarry(server, fbActor, true);
+        ok(fb2.carrying && fb2.dropped === 1, 'filled barrel dropped when carried > 5 blocks');
+        delete LHFilledBarrelCarryState[fbActor.uuid];
+
+        ok(disp.performPrefixedCommand(src, 'lh radio status') === 1, 'brigadier /lh radio status');
+        ok(disp.performPrefixedCommand(src, 'lh delivery list') === 1, 'brigadier /lh delivery list');
+        ok(disp.performPrefixedCommand(src, 'lh haggle status') === 1, 'brigadier /lh haggle status');
+        ok(disp.performPrefixedCommand(src, 'lh p2p list') === 1, 'brigadier /lh p2p list');
+
+        console.info('LH_INTEGRATION_PASS: items + contracts + shift + brigadier + sites + nbt_structures + archive_repair + production + recovery + photo + cc + camp + cargo + territory + casino + voidout_k + random_respawn + death_item_loss + nuclear + draconic + openttd + eventlog + gui + economy + map_byte_fix + border_spawn_safety + xaero_sync + patrol_rep_pricing + stack5x_barrel_logistics + quest_items_' + auditList.length + ' + custom_origins_only');
       } catch (err2) {
         console.error('LH_INTEGRATION_FAIL: live adapter ' + err2);
       }
