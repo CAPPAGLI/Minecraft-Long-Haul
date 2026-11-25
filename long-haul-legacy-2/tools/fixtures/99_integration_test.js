@@ -628,7 +628,7 @@ function lhStartIntegrationSetup(server) {
         ok(dOne.coeff > 95.0 && dOne.coeff < 97.0, 'difficulty coeff near 96 at 275 deaths solo (' + dOne.coeff + ')');
         ok(dTwo.coeff < dOne.coeff, 'difficulty coeff inversely depends on online players (' + dTwo.coeff + ' < ' + dOne.coeff + ')');
         var rEnd = lhComputeRandomRespawnTarget(server, 0, 0, 96.0, 0.25, 1.0);
-        ok(rEnd.radius === 20203 && Math.abs(rEnd.x) <= 15900 && Math.abs(rEnd.z) <= 15900, 'random respawn radius hits 20203 at k=96 and clamps cleanly within current worldborder');
+        ok(rEnd.radius === 20203 && rEnd.halfBorder === 15904 && Math.abs(rEnd.x) <= rEnd.halfBorder && Math.abs(rEnd.z) <= rEnd.halfBorder, 'random respawn radius hits 20203 at k=96 and clamps cleanly within current worldborder (' + rEnd.halfBorder + ')');
         var mockInv = {
           slots: 5,
           items: [
@@ -981,6 +981,7 @@ function lhStartIntegrationSetup(server) {
         // 28. First-join spawn & out-of-border rescue stay strictly inside active world border + Xaero sync works
         var halfBorderNow = lhActiveBorderHalf(server);
         var progSaved28 = JSON.stringify(lhProgRead(server));
+        var ottdSaved28 = JSON.stringify(lhOttdRead(server));
         var newJoiner = {
           uuid: '00000000-0000-4000-8000-000000000099',
           username: 'TestNewJoiner',
@@ -1008,6 +1009,8 @@ function lhStartIntegrationSetup(server) {
           'out-of-border player rescued strictly inside world border: (' + newJoiner.x + ', ' + newJoiner.z + ')');
         LHProgState = JSON.parse(progSaved28);
         lhProgSave(server);
+        LHOTTDState = JSON.parse(ottdSaved28);
+        lhOttdSave(server);
 
         var xaeroPackets = [];
         var xaeroActor = {
