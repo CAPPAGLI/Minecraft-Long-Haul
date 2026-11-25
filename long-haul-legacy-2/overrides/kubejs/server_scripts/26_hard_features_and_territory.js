@@ -1657,13 +1657,8 @@ function lhCheckFilledBarrelCarry(server, player, dryRun) {
         try {
           var ie = player.level.createEntity('minecraft:item');
           ie.item = copy;
-          ie.setPosition(px, py + 0.35, pz);
-          if (typeof ie.setPickUpDelay === 'function') ie.setPickUpDelay(40);
-          ie.spawn();
         } catch (eEnt) {}
       }
-    } else if (typeof inv.setStackInSlot === 'function' && typeof Item !== 'undefined') {
-      inv.setStackInSlot(slotIdx, Item.empty);
     }
   }
   delete LHFilledBarrelCarryState[pid];

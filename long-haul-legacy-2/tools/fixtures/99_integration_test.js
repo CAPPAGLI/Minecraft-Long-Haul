@@ -1058,7 +1058,7 @@ function lhStartIntegrationSetup(server) {
         ok(fb1.carrying && fb1.dropped === 0, 'filled barrel allowed within 5 blocks of pickup anchor');
         fbActor.x = 7.5;
         var fb2 = lhCheckFilledBarrelCarry(server, fbActor, true);
-        ok(fb2.carrying && fb2.dropped === 1, 'filled barrel dropped when carried > 5 blocks');
+        ok(!fb2.carrying && fb2.dropped === 1 && fb2.dist > 5.0, 'filled barrel dropped when carried > 5 blocks');
         delete LHFilledBarrelCarryState[fbActor.uuid];
 
         ok(disp.performPrefixedCommand(src, 'lh radio status') === 1, 'brigadier /lh radio status');
