@@ -1,5 +1,5 @@
 # Pre-tuned Distant Horizons 3.3.x defaults for Long Haul Legacy 2.0
-# Prevents 1-2s G1GC / CPU stutters caused by background chunk worldgen and 256-chunk LOD mesh churn.
+# Prevents 10s GC / 500 MB/s allocation sawtooths caused by background chunk import and 96-chunk LOD mesh churn.
 # Players can raise LOD radius or enable distant generation in the DH menu if using Shenandoah/ZGC.
 _version = 4
 
@@ -11,7 +11,7 @@ enableSsao = false
 overrideVanillaGraphicsSettings = true
 
 [client.advanced.graphics.quality]
-lodChunkRenderDistanceRadius = 96
+lodChunkRenderDistanceRadius = 64
 horizontalQuality = "MEDIUM"
 maxHorizontalResolution = "TWO_BLOCKS"
 verticalQuality = "MEDIUM"
@@ -25,8 +25,14 @@ vanillaFadeMode = "SINGLE_PASS"
 dhFadeFarClipPlane = true
 lodBiomeBlending = 0
 
+[client.advanced.graphics.genericRendering]
+enableCloudRendering = false
+
+[client.advanced.graphics.noiseTexture]
+enableNoiseTexture = false
+
 [common.worldGenerator]
-enableDistantGeneration = true
+enableDistantGeneration = false
 distantGeneratorMode = "PRE_EXISTING_ONLY"
 showGenerationProgress = "DISABLED"
 
@@ -34,8 +40,8 @@ showGenerationProgress = "DISABLED"
 worldCompression = "VISUALLY_EQUAL"
 
 [common.multiThreading]
-numberOfThreads = 2
-threadRunTimeRatio = "0.5"
+numberOfThreads = 1
+threadRunTimeRatio = "0.25"
 
 [common.logging.warning]
 showLowMemoryWarningOnStart = false
@@ -44,3 +50,4 @@ showModCompatibilityWarningsOnStartup = false
 showHighVanillaRenderDistanceWarning = false
 showSlowWorldGenSettingWarnings = false
 showUpdateQueueOverloadedChatWarning = false
+showPoolInsufficientMemoryWarning = false

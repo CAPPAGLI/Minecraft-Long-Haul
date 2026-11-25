@@ -1,6 +1,6 @@
 {
   "name": "Старая кирка",
-  "description": "+25% скорости копания киркой.",
+  "description": "+25% скорости копания киркой и дальность блока 1.15x.",
   "type": "origins:modify_break_speed",
   "block_condition": {
     "type": "origins:in_tag",

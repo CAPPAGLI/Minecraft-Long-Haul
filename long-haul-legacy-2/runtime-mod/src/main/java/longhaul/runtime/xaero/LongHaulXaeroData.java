@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
 /**
@@ -74,8 +75,17 @@ public final class LongHaulXaeroData {
         return Math.floorDiv(c + 8, 16);
     }
 
+    private static final ResourceLocation OVERWORLD_RL = new ResourceLocation("minecraft", "overworld");
+    private static volatile ResourceKey<Level> cachedOverworldKey = null;
+
     public static boolean isOverworld(ResourceKey<Level> dim) {
-        return dim != null && dim.toString().contains("minecraft:overworld");
+        if (dim == null) return false;
+        if (dim == cachedOverworldKey) return true;
+        if (OVERWORLD_RL.equals(dim.m_135782_())) {
+            cachedOverworldKey = dim;
+            return true;
+        }
+        return false;
     }
 
     public static boolean isSpawnSanctuarySector(int sx, int sz) {
@@ -157,13 +167,14 @@ public final class LongHaulXaeroData {
         return isSpawnSanctuarySector(sx, sz) || snap.claims.containsKey(packSectorKey(sx, sz));
     }
 
-    private static String cellOwnerId(Snapshot snap, int cx, int cz) {
+    private static boolean sameCellOwner(Snapshot snap, String ownerOrNull, boolean isSpawn, int cx, int cz) {
         int sx = chunkToSector(cx);
         int sz = chunkToSector(cz);
         SectorClaim cl = snap.claims.get(packSectorKey(sx, sz));
-        if (cl != null) return "C:" + cl.owner;
-        if (isSpawnSanctuarySector(sx, sz)) return "SPAWN";
-        return null;
+        if (ownerOrNull != null) {
+            return cl != null && ownerOrNull.equals(cl.owner);
+        }
+        return isSpawn && cl == null && isSpawnSanctuarySector(sx, sz);
     }
 
     public static boolean fillColors(int[] resultStore, ResourceKey<Level> dim, int cx, int cz) {
@@ -180,13 +191,12 @@ public final class LongHaulXaeroData {
 
         int fill = 0;
         int borderCol = 0;
-        String me = null;
+        String meOwner = null;
         if (cl != null) {
-            me = "C:" + cl.owner;
+            meOwner = cl.owner;
             fill = packColor(cl.colorRgb, 24);
             borderCol = packColor(cl.colorRgb, 88);
         } else if (spawn) {
-            me = "SPAWN";
             fill = packColor(0x60A5FA, 11);
             borderCol = packColor(0x93C5FD, 72);
         } else {
@@ -204,10 +214,10 @@ public final class LongHaulXaeroData {
         }
 
         resultStore[0] = fill;
-        resultStore[1] = me.equals(cellOwnerId(snap, cx, cz - 1)) ? fill : borderCol;
-        resultStore[2] = me.equals(cellOwnerId(snap, cx + 1, cz)) ? fill : borderCol;
-        resultStore[3] = me.equals(cellOwnerId(snap, cx, cz + 1)) ? fill : borderCol;
-        resultStore[4] = me.equals(cellOwnerId(snap, cx - 1, cz)) ? fill : borderCol;
+        resultStore[1] = sameCellOwner(snap, meOwner, spawn, cx, cz - 1) ? fill : borderCol;
+        resultStore[2] = sameCellOwner(snap, meOwner, spawn, cx + 1, cz) ? fill : borderCol;
+        resultStore[3] = sameCellOwner(snap, meOwner, spawn, cx, cz + 1) ? fill : borderCol;
+        resultStore[4] = sameCellOwner(snap, meOwner, spawn, cx - 1, cz) ? fill : borderCol;
 
         if (border) {
             int redEdge = packColor(0xEF4444, 92);

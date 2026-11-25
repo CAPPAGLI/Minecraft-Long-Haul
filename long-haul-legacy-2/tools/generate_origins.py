@@ -34,9 +34,9 @@ ORIGINS_SPEC = [
      'Burned-out office escapee: +XP, +luck, and +15% contract/OpenTTD payouts, at the cost of fragile health.',
      'minecraft:writable_book', 1, [
          ('clerk_paperwork', 'Бумажная хватка', 'Paperwork Mastery',
-          '+15% опыта, +1.0 удачи и +15% бонуса к выплатам контрактов консорциума и OpenTTD (KubeJS).',
-          '+15% XP gain, +1.0 luck, and +15% contract/OpenTTD payout bonus (KubeJS).',
-          p_mult('Бумажная хватка', '+15% опыта, +1.0 удачи и +15% бонуса к выплатам контрактов консорциума и OpenTTD (KubeJS).', {
+          '+15% опыта, +1.0 удачи и +15% бонуса к выплатам контрактов консорциума и OpenTTD.',
+          '+15% XP gain, +1.0 luck, and +15% contract/OpenTTD payout bonus.',
+          p_mult('Бумажная хватка', '+15% опыта, +1.0 удачи и +15% бонуса к выплатам контрактов консорциума и OpenTTD.', {
               'xp': {'type': 'origins:modify_xp_gain', 'modifier': {'name': 'Clerk XP', 'operation': 'multiply_base', 'value': 0.15}},
               'luck': {'type': 'origins:attribute', 'modifier': attr_mod('Clerk Luck', 'minecraft:generic.luck', 1.0)},
           })),
@@ -54,9 +54,9 @@ ORIGINS_SPEC = [
      'Highway outlaw: faster stride, knockback resistance, and +25% road route payouts in OpenTTD.',
      'minecraft:leather_helmet', 2, [
          ('biker_highway', 'Король шоссе', 'Highway King',
-          '+12% скорости передвижения, +25% сопротивления отбрасыванию и +25% к выплатам дорожных маршрутов OpenTTD (KubeJS).',
-          '+12% movement speed, +25% knockback resistance, and +25% OpenTTD road route bonus (KubeJS).',
-          p_attr('Король шоссе', '+12% скорости передвижения, +25% сопротивления отбрасыванию и +25% к выплатам дорожных маршрутов OpenTTD (KubeJS).', [
+          '+12% скорости передвижения, +25% сопротивления отбрасыванию и +25% к выплатам дорожных маршрутов OpenTTD.',
+          '+12% movement speed, +25% knockback resistance, and +25% OpenTTD road route bonus.',
+          p_attr('Король шоссе', '+12% скорости передвижения, +25% сопротивления отбрасыванию и +25% к выплатам дорожных маршрутов OpenTTD.', [
               attr_mod('Biker Speed', 'minecraft:generic.movement_speed', 0.12, 'multiply_base'),
               attr_mod('Biker Knockback', 'minecraft:generic.knockback_resistance', 0.25),
           ])),
@@ -75,9 +75,9 @@ ORIGINS_SPEC = [
      'Veteran machinist: faster pickaxe mining, fatigue immunity, reduced ore scarcity loss, and Create haste aura.',
      'create:wrench', 2, [
          ('worker_shift', 'Цеховая закалка', 'Shop-Floor Grit',
-          '+25% скорости копания киркой, иммунитет к Усталости; потеря от «Рудного голода» ниже на 35% + Спешка у блоков Create (KubeJS).',
-          '+25% pickaxe speed, Mining Fatigue immunity, -35% ore scarcity loss, and Haste near Create blocks (KubeJS).',
-          p_mult('Цеховая закалка', '+25% скорости копания киркой, иммунитет к Усталости; потеря от «Рудного голода» ниже на 35% + Спешка у блоков Create (KubeJS).', {
+          '+25% скорости копания киркой, иммунитет к Усталости; потеря от «Рудного голода» ниже на 35% + Спешка у блоков Create.',
+          '+25% pickaxe speed, Mining Fatigue immunity, -35% ore scarcity loss, and Haste near Create blocks.',
+          p_mult('Цеховая закалка', '+25% скорости копания киркой, иммунитет к Усталости; потеря от «Рудного голода» ниже на 35% + Спешка у блоков Create.', {
               'mine': {'type': 'origins:modify_break_speed',
                        'block_condition': {'type': 'origins:in_tag', 'tag': 'minecraft:mineable/pickaxe'},
                        'modifier': {'name': 'Worker Pickaxe', 'operation': 'multiply_base', 'value': 0.25}},
@@ -97,9 +97,9 @@ ORIGINS_SPEC = [
      'Sky veteran: built-in gliding, reduced fall damage, and +30% OpenTTD air route payouts.',
      'minecraft:elytra', 3, [
          ('pilot_wings', 'Полёт без границ', 'Skybound Glide',
-          'Встроенное планирование без элитр, -35% урона от падения и +30% к авиамаршрутам OpenTTD / полётам Immersive Aircraft (KubeJS).',
-          'Built-in gliding without elytra, -35% fall damage, and +30% OpenTTD air route bonus (KubeJS).',
-          p_mult('Полёт без границ', 'Встроенное планирование без элитр, -35% урона от падения и +30% к авиамаршрутам OpenTTD / полётам Immersive Aircraft (KubeJS).', {
+          'Встроенное планирование без элитр, -35% урона от падения и +30% к авиамаршрутам OpenTTD / полётам Immersive Aircraft.',
+          'Built-in gliding without elytra, -35% fall damage, and +30% OpenTTD air route bonus.',
+          p_mult('Полёт без границ', 'Встроенное планирование без элитр, -35% урона от падения и +30% к авиамаршрутам OpenTTD / полётам Immersive Aircraft.', {
               'glide': {'type': 'origins:elytra_flight', 'render_elytra': False},
               'fall': {'type': 'origins:modify_damage_taken', 'damage_condition': {'type': 'origins:in_tag', 'tag': 'minecraft:is_fall'},
                        'modifier': {'name': 'Pilot Fall', 'operation': 'multiply_base', 'value': -0.35}},
@@ -119,9 +119,9 @@ ORIGINS_SPEC = [
      'Built to carry everyone: extra HP, armor, and +6 encumbrance capacity at the cost of higher hunger drain.',
      'minecraft:chest', 2, [
          ('father_backbone', 'Тягловая выносливость', 'Family Backbone',
-          '+1 сердце здоровья, +2 природной брони и +6 слотов к лимиту перегруза инвентаря (KubeJS).',
-          '+1 heart health, +2 armor, and +6 inventory encumbrance threshold slots (KubeJS).',
-          p_attr('Тягловая выносливость', '+1 сердце здоровья, +2 природной брони и +6 слотов к лимиту перегруза инвентаря (KubeJS).', [
+          '+1 сердце здоровья, +2 природной брони и +6 слотов к лимиту перегруза инвентаря.',
+          '+1 heart health, +2 armor, and +6 inventory encumbrance threshold slots.',
+          p_attr('Тягловая выносливость', '+1 сердце здоровья, +2 природной брони и +6 слотов к лимиту перегруза инвентаря.', [
               attr_mod('Father HP', 'minecraft:generic.max_health', 2.0),
               attr_mod('Father Armor', 'minecraft:generic.armor', 2.0),
           ])),
@@ -160,9 +160,9 @@ ORIGINS_SPEC = [
      'Immune to Nausea and empowered by Vinery/Brewin\' drinks, but shaky hands and higher hunger drain.',
      'minecraft:glass_bottle', 2, [
          ('alcoholic_tolerance', 'Лужёная глотка', 'Iron Liver',
-          'Полный иммунитет к Тошноте, +20% сопротивления отбрасыванию; напитки Vinery/Brewin\' дают Силу и Сопротивление (KubeJS).',
-          'Nausea immunity, +20% knockback resistance; Vinery/Brewin\' drinks grant Strength & Resistance (KubeJS).',
-          p_mult('Лужёная глотка', 'Полный иммунитет к Тошноте, +20% сопротивления отбрасыванию; напитки Vinery/Brewin\' дают Силу и Сопротивление (KubeJS).', {
+          'Полный иммунитет к Тошноте, +20% сопротивления отбрасыванию; напитки Vinery/Brewin\' дают Силу и Сопротивление.',
+          'Nausea immunity, +20% knockback resistance; Vinery/Brewin\' drinks grant Strength & Resistance.',
+          p_mult('Лужёная глотка', 'Полный иммунитет к Тошноте, +20% сопротивления отбрасыванию; напитки Vinery/Brewin\' дают Силу и Сопротивление.', {
               'imm': {'type': 'origins:effect_immunity', 'effects': ['minecraft:nausea']},
               'kb': {'type': 'origins:attribute', 'modifier': attr_mod('Alcoholic KB', 'minecraft:generic.knockback_resistance', 0.2)},
           })),
@@ -180,9 +180,9 @@ ORIGINS_SPEC = [
      'Explosive reflexes boosted by stimulants and DOOMED cigarettes, at the cost of fragile health and rapid exhaustion.',
      'minecraft:sugar', 3, [
          ('addict_rush', 'Адреналиновый всплеск', 'Adrenaline Rush',
-          '+15% скорости передвижения и +15% скорости атаки; сигареты DOOMED, сахар, кофе и зелья дают кратковременный рывок Speed II + Absorption (KubeJS).',
-          '+15% movement and attack speed; DOOMED cigarettes, sugar, coffee, and potions trigger Speed II + Absorption bursts (KubeJS).',
-          p_attr('Адреналиновый всплеск', '+15% скорости передвижения и +15% скорости атаки; сигареты DOOMED, сахар, кофе и зелья дают кратковременный рывок Speed II + Absorption (KubeJS).', [
+          '+15% скорости передвижения и +15% скорости атаки; сигареты DOOMED, сахар, кофе и зелья дают кратковременный рывок Speed II + Absorption.',
+          '+15% movement and attack speed; DOOMED cigarettes, sugar, coffee, and potions trigger Speed II + Absorption bursts.',
+          p_attr('Адреналиновый всплеск', '+15% скорости передвижения и +15% скорости атаки; сигареты DOOMED, сахар, кофе и зелья дают кратковременный рывок Speed II + Absorption.', [
               attr_mod('Addict Speed', 'minecraft:generic.movement_speed', 0.15, 'multiply_base'),
               attr_mod('Addict AtkSpd', 'minecraft:generic.attack_speed', 0.15, 'multiply_base'),
           ])),
@@ -208,9 +208,9 @@ ORIGINS_SPEC = [
               attr_mod('Skinhead KB', 'minecraft:generic.knockback_resistance', 0.25),
           ])),
          ('skinhead_trouble', 'Дурная слава', 'Bad Reputation',
-          '-1.5 удачи, +20% урона от снарядов и наценка +20% при торговле/регистрации OpenTTD (KubeJS).',
-          '-1.5 luck, +20% incoming projectile damage, and +20% OpenTTD/trader fee markup (KubeJS).',
-          p_mult('Дурная слава', '-1.5 удачи, +20% урона от снарядов и наценка +20% при торговле/регистрации OpenTTD (KubeJS).', {
+          '-1.5 удачи, +20% урона от снарядов и наценка +20% при торговле/регистрации OpenTTD.',
+          '-1.5 luck, +20% incoming projectile damage, and +20% OpenTTD/trader fee markup.',
+          p_mult('Дурная слава', '-1.5 удачи, +20% урона от снарядов и наценка +20% при торговле/регистрации OpenTTD.', {
               'luck': {'type': 'origins:attribute', 'modifier': attr_mod('Skinhead Luck', 'minecraft:generic.luck', -1.5)},
               'proj': {'type': 'origins:modify_damage_taken', 'damage_condition': {'type': 'origins:in_tag', 'tag': 'minecraft:is_projectile'},
                        'modifier': {'name': 'Skinhead Proj', 'operation': 'multiply_base', 'value': 0.2}},
@@ -222,16 +222,16 @@ ORIGINS_SPEC = [
      'Thrives far from civilization: night vision, reduced hunger, and solitude regeneration, weakened near crowds.',
      'minecraft:lantern', 2, [
          ('hermit_solitude', 'Сила уединения', 'Solitude Vigor',
-          'Ночное зрение, -20% расхода голода; вдали от других игроков (>48 м) получает регенерацию и защиту от холода (KubeJS).',
-          'Night vision, -20% hunger drain; regenerates and resists frost when >48m from other players (KubeJS).',
-          p_mult('Сила уединения', 'Ночное зрение, -20% расхода голода; вдали от других игроков (>48 м) получает регенерацию и защиту от холода (KubeJS).', {
+          'Ночное зрение, -20% расхода голода; вдали от других игроков (>48 м) получает регенерацию и защиту от холода.',
+          'Night vision, -20% hunger drain; regenerates and resists frost when >48m from other players.',
+          p_mult('Сила уединения', 'Ночное зрение, -20% расхода голода; вдали от других игроков (>48 м) получает регенерацию и защиту от холода.', {
               'nv': {'type': 'origins:night_vision', 'strength': 0.85},
               'exh': {'type': 'origins:modify_exhaustion', 'modifier': {'name': 'Hermit Exhaustion', 'operation': 'multiply_base', 'value': -0.2}},
           })),
          ('hermit_crowd', 'Боязнь толпы', 'Crowd Anxiety',
-          '-1 сердце максимального здоровья и Слабость при нахождении вплотную к другим игрокам (<16 м, KubeJS).',
-          '-1 heart max health and Weakness when crowded within 16m of other players (KubeJS).',
-          p_attr('Боязнь толпы', '-1 сердце максимального здоровья и Слабость при нахождении вплотную к другим игрокам (<16 м, KubeJS).', [
+          '-1 сердце максимального здоровья и Слабость при нахождении вплотную к другим игрокам (<16 м).',
+          '-1 heart max health and Weakness when crowded within 16m of other players.',
+          p_attr('Боязнь толпы', '-1 сердце максимального здоровья и Слабость при нахождении вплотную к другим игрокам (<16 м).', [
               attr_mod('Hermit HP', 'minecraft:generic.max_health', -2.0),
           ])),
      ]),
@@ -241,9 +241,9 @@ ORIGINS_SPEC = [
      'Perpetual drifter: faster travel, minimal hunger drain, and accelerated sector pathfinding.',
      'minecraft:campfire', 1, [
          ('vagabond_road', 'Дорожная закалка', 'Road Endurance',
-          '+12% скорости передвижения, -25% расхода голода, +25% к прогрессу аспекта «Первооткрыватель» и защита от холода у костра (KubeJS).',
-          '+12% speed, -25% hunger drain, +25% pathfinder aspect gain, and campfire frost immunity (KubeJS).',
-          p_mult('Дорожная закалка', '+12% скорости передвижения, -25% расхода голода, +25% к прогрессу аспекта «Первооткрыватель» и защита от холода у костра (KubeJS).', {
+          '+12% скорости передвижения, -25% расхода голода, +25% к прогрессу аспекта «Первооткрыватель» и защита от холода у костра.',
+          '+12% speed, -25% hunger drain, +25% pathfinder aspect gain, and campfire frost immunity.',
+          p_mult('Дорожная закалка', '+12% скорости передвижения, -25% расхода голода, +25% к прогрессу аспекта «Первооткрыватель» и защита от холода у костра.', {
               'spd': {'type': 'origins:attribute', 'modifier': attr_mod('Vagabond Speed', 'minecraft:generic.movement_speed', 0.12, 'multiply_base')},
               'exh': {'type': 'origins:modify_exhaustion', 'modifier': {'name': 'Vagabond Exhaustion', 'operation': 'multiply_base', 'value': -0.25}},
           })),
@@ -261,9 +261,9 @@ ORIGINS_SPEC = [
      'Built to endure nagging: extra armor and boosted healing, at the expense of melee damage and speed.',
      'minecraft:lead', 2, [
          ('henpecked_patience', 'Железное терпение', 'Stoic Endurance',
-          '+2.5 природной брони, +15% эффективности лечения и бонус поддержки при передаче ресурсов союзникам (KubeJS).',
-          '+2.5 natural armor, +15% healing received, and support buffs when assisting nearby allies (KubeJS).',
-          p_mult('Железное терпение', '+2.5 природной брони, +15% эффективности лечения и бонус поддержки при передаче ресурсов союзникам (KubeJS).', {
+          '+2.5 природной брони, +15% эффективности лечения и бонус поддержки при передаче ресурсов союзникам.',
+          '+2.5 natural armor, +15% healing received, and support buffs when assisting nearby allies.',
+          p_mult('Железное терпение', '+2.5 природной брони, +15% эффективности лечения и бонус поддержки при передаче ресурсов союзникам.', {
               'arm': {'type': 'origins:attribute', 'modifier': attr_mod('Henpecked Armor', 'minecraft:generic.armor', 2.5)},
               'heal': {'type': 'origins:modify_healing', 'modifier': {'name': 'Henpecked Heal', 'operation': 'multiply_base', 'value': 0.15}},
           })),
@@ -277,13 +277,13 @@ ORIGINS_SPEC = [
      ]),
 
     ('illegal_immigrant', 'Нелегальный иммигрант', 'Illegal Immigrant',
-     'Работает быстро и незаметно: тихие шаги, проворство, низкая заметность (Pehkui), но мало здоровья и удачи.',
-     'Fast, silent, and off the grid: silent steps, faster mining/movement, reduced visibility (Pehkui), fragile HP.',
+     'Работает быстро и незаметно: тихие шаги, проворство, низкая заметность, но мало здоровья и удачи.',
+     'Fast, silent, and off the grid: silent steps, faster mining/movement, reduced visibility, fragile HP.',
      'minecraft:leather_boots', 2, [
          ('illegal_stealth', 'Вне радаров', 'Off the Grid',
-          'Бесшумные шаги, +15% скорости передвижения, +20% скорости копания и сниженная дистанция обнаружения мобами (Pehkui, KubeJS).',
-          'Silent steps, +15% speed, +20% mining speed, and reduced mob detection range (Pehkui, KubeJS).',
-          p_mult('Вне радаров', 'Бесшумные шаги, +15% скорости передвижения, +20% скорости копания и сниженная дистанция обнаружения мобами (Pehkui, KubeJS).', {
+          'Бесшумные шаги, +15% скорости передвижения, +20% скорости копания и сниженная дистанция обнаружения мобами.',
+          'Silent steps, +15% speed, +20% mining speed, and reduced mob detection range.',
+          p_mult('Вне радаров', 'Бесшумные шаги, +15% скорости передвижения, +20% скорости копания и сниженная дистанция обнаружения мобами.', {
               'step': {'type': 'origins:prevent_game_event', 'events': ['minecraft:step']},
               'spd': {'type': 'origins:attribute', 'modifier': attr_mod('Illegal Speed', 'minecraft:generic.movement_speed', 0.15, 'multiply_base')},
               'mine': {'type': 'origins:modify_break_speed', 'modifier': {'name': 'Illegal Mine', 'operation': 'multiply_base', 'value': 0.2}},
@@ -302,9 +302,9 @@ ORIGINS_SPEC = [
      'Left with wits and connections: +25% XP, +1.5 luck, and +15% contract bonuses, weaker in melee.',
      'minecraft:compass', 2, [
          ('emigre_connections', 'Диссидентские связи', 'Exile Network',
-          '+25% опыта, +1.5 удачи и +15% к денежным наградам контрактов/грантов OpenTTD (KubeJS).',
-          '+25% XP gain, +1.5 luck, and +15% contract & OpenTTD grant payouts (KubeJS).',
-          p_mult('Диссидентские связи', '+25% опыта, +1.5 удачи и +15% к денежным наградам контрактов/грантов OpenTTD (KubeJS).', {
+          '+25% опыта, +1.5 удачи и +15% к денежным наградам контрактов/грантов OpenTTD.',
+          '+25% XP gain, +1.5 luck, and +15% contract & OpenTTD grant payouts.',
+          p_mult('Диссидентские связи', '+25% опыта, +1.5 удачи и +15% к денежным наградам контрактов/грантов OpenTTD.', {
               'xp': {'type': 'origins:modify_xp_gain', 'modifier': {'name': 'Emigre XP', 'operation': 'multiply_base', 'value': 0.25}},
               'luck': {'type': 'origins:attribute', 'modifier': attr_mod('Emigre Luck', 'minecraft:generic.luck', 1.5)},
           })),
@@ -333,21 +333,21 @@ ORIGINS_SPEC = [
               'imm': {'type': 'origins:effect_immunity', 'effects': ['minecraft:poison']},
           })),
          ('convict_record', 'Судимость в базе', 'Criminal Record',
-          '-1.0 удачи и +25% к стоимости регистрации компании / операций OpenTTD (KubeJS).',
-          '-1.0 luck and +25% OpenTTD company registration & trade fees (KubeJS).',
-          p_attr('Судимость в базе', '-1.0 удачи и +25% к стоимости регистрации компании / операций OpenTTD (KubeJS).', [
+          '-1.0 удачи и +25% к стоимости регистрации компании / операций OpenTTD.',
+          '-1.0 luck and +25% OpenTTD company registration & trade fees.',
+          p_attr('Судимость в базе', '-1.0 удачи и +25% к стоимости регистрации компании / операций OpenTTD.', [
               attr_mod('Convict Luck', 'minecraft:generic.luck', -1.0),
           ])),
      ]),
 
     ('heavyweight', 'Жирдяй', 'Heavyweight',
-     'Солидная масса (ширина 1.28x через Pehkui): +4 сердца, +3 брони и не сдвинуть с места, но медленный и прожорливый.',
-     'Massive frame (1.28x Pehkui width): +4 hearts, +3 armor, and 50% knockback resistance, slow and hungry.',
+     'Солидная масса (ширина 1.28x): +4 сердца, +3 брони и не сдвинуть с места, но медленный и прожорливый.',
+     'Massive frame (1.28x width): +4 hearts, +3 armor, and 50% knockback resistance, slow and hungry.',
      'minecraft:cooked_porkchop', 2, [
          ('heavy_bulk', 'Массивная туша', 'Massive Bulk',
-          '+4 сердца здоровья, +3 природной брони, +50% сопротивления отбрасыванию и увеличенная ширина тела 1.28x (Pehkui, KubeJS).',
-          '+4 hearts health, +3 armor, +50% knockback resistance, and 1.28x body width (Pehkui, KubeJS).',
-          p_attr('Массивная туша', '+4 сердца здоровья, +3 природной брони, +50% сопротивления отбрасыванию и увеличенная ширина тела 1.28x (Pehkui, KubeJS).', [
+          '+4 сердца здоровья, +3 природной брони, +50% сопротивления отбрасыванию и увеличенная ширина тела 1.28x.',
+          '+4 hearts health, +3 armor, +50% knockback resistance, and 1.28x body width.',
+          p_attr('Массивная туша', '+4 сердца здоровья, +3 природной брони, +50% сопротивления отбрасыванию и увеличенная ширина тела 1.28x.', [
               attr_mod('Heavy HP', 'minecraft:generic.max_health', 8.0),
               attr_mod('Heavy Armor', 'minecraft:generic.armor', 3.0),
               attr_mod('Heavy KB', 'minecraft:generic.knockback_resistance', 0.5),
@@ -366,9 +366,9 @@ ORIGINS_SPEC = [
      'Night-owl coder: night vision, +25% XP, and +30% CC:Tweaked challenge payouts, weakened in direct sunlight.',
      'computercraft:computer_advanced', 2, [
          ('programmer_code', 'Ночной деплой', 'Night Shift Coding',
-          '+25% опыта, ночное зрение и +30% к наградам за проверки CC:Tweaked (/lh cc verify) и логистику AE2 (KubeJS).',
-          '+25% XP, night vision, and +30% CC:Tweaked verification & AE2 logistics bonuses (KubeJS).',
-          p_mult('Ночной деплой', '+25% опыта, ночное зрение и +30% к наградам за проверки CC:Tweaked (/lh cc verify) и логистику AE2 (KubeJS).', {
+          '+25% опыта, ночное зрение и +30% к наградам за проверки CC:Tweaked (/lh cc verify) и логистику AE2.',
+          '+25% XP, night vision, and +30% CC:Tweaked verification & AE2 logistics bonuses.',
+          p_mult('Ночной деплой', '+25% опыта, ночное зрение и +30% к наградам за проверки CC:Tweaked (/lh cc verify) и логистику AE2.', {
               'xp': {'type': 'origins:modify_xp_gain', 'modifier': {'name': 'Dev XP', 'operation': 'multiply_base', 'value': 0.25}},
               'nv': {'type': 'origins:night_vision', 'strength': 0.85},
           })),
@@ -390,9 +390,9 @@ ORIGINS_SPEC = [
      'Saltwater veteran: rapid swim speed and +30% OpenTTD water route & Small Ships bonuses.',
      'minecraft:oak_boat', 2, [
          ('sailor_sea', 'Властелин волн', 'Sea Legs',
-          '+50% скорости плавания и +30% бонуса к водным маршрутам OpenTTD / навигации на судах (KubeJS).',
-          '+50% swim speed and +30% OpenTTD water route & vessel navigation bonus (KubeJS).',
-          p_attr('Властелин волн', '+50% скорости плавания и +30% бонуса к водным маршрутам OpenTTD / навигации на судах (KubeJS).', [
+          '+50% скорости плавания и +30% бонуса к водным маршрутам OpenTTD / навигации на судах.',
+          '+50% swim speed and +30% OpenTTD water route & vessel navigation bonus.',
+          p_attr('Властелин волн', '+50% скорости плавания и +30% бонуса к водным маршрутам OpenTTD / навигации на судах.', [
               attr_mod('Sailor Swim', 'forge:swim_speed', 0.5, 'multiply_base'),
           ])),
          ('sailor_land', 'Земля качается', 'Landlubber Sway',
@@ -406,13 +406,13 @@ ORIGINS_SPEC = [
      ]),
 
     ('lighthouse_keeper', 'Смотритель маяка', 'Lighthouse Keeper',
-     'Сторож скал и штормов: ночное зрение, дальность блока 1.15x (Pehkui), иммунитет к кислотным дождям и молниям.',
-     'Beacon watcher: night vision, 1.15x block reach (Pehkui), and immunity to toxic rain corrosion & storm lightning.',
+     'Сторож скал и штормов: ночное зрение, дальность блока 1.15x, иммунитет к кислотным дождям и молниям.',
+     'Beacon watcher: night vision, 1.15x block reach, and immunity to toxic rain corrosion & storm lightning.',
      'minecraft:sea_lantern', 2, [
          ('keeper_beacon', 'Страж шторма', 'Storm Sentinel',
-          'Ночное зрение, дальность блока 1.15x (Pehkui) и иммунитет к кислотной коррозии дождя и разрядам грозы (KubeJS).',
-          'Night vision, 1.15x block reach (Pehkui), and immunity to toxic rain corrosion & storm lightning (KubeJS).',
-          p_mult('Страж шторма', 'Ночное зрение, дальность блока 1.15x (Pehkui) и иммунитет к кислотной коррозии дождя и разрядам грозы (KubeJS).', {
+          'Ночное зрение, дальность блока 1.15x и иммунитет к кислотной коррозии дождя и разрядам грозы.',
+          'Night vision, 1.15x block reach, and immunity to toxic rain corrosion & storm lightning.',
+          p_mult('Страж шторма', 'Ночное зрение, дальность блока 1.15x и иммунитет к кислотной коррозии дождя и разрядам грозы.', {
               'nv': {'type': 'origins:night_vision', 'strength': 0.9},
           })),
          ('keeper_stairs', 'Скрип винтовой лестницы', 'Tower Knees',
@@ -429,9 +429,9 @@ ORIGINS_SPEC = [
      'Forest warden: +20% projectile damage, forest/taiga stride boost, and wilderness agility.',
      'minecraft:bow', 2, [
          ('gamekeeper_hunt', 'Верный выстрел', 'Forest Marksman',
-          '+20% урона от луков и снарядов и ускорение в лесных/таёжных биомах (KubeJS).',
-          '+20% projectile damage and movement boost in forest/taiga biomes (KubeJS).',
-          p_mult('Верный выстрел', '+20% урона от луков и снарядов и ускорение в лесных/таёжных биомах (KubeJS).', {
+          '+20% урона от луков и снарядов и ускорение в лесных/таёжных биомах.',
+          '+20% projectile damage and movement boost in forest/taiga biomes.',
+          p_mult('Верный выстрел', '+20% урона от луков и снарядов и ускорение в лесных/таёжных биомах.', {
               'proj': {'type': 'origins:modify_projectile_damage', 'modifier': {'name': 'Gamekeeper Bow', 'operation': 'multiply_base', 'value': 0.2}},
           })),
          ('gamekeeper_woods', 'Не привык к шахтам', 'Surface Dweller',
@@ -444,13 +444,13 @@ ORIGINS_SPEC = [
      ]),
 
     ('disabled_veteran', 'Инвалид', 'Disabled Person',
-     'Тело подводит, но голова и руки цепки: -25% скорости, -2 сердца и слабый прыжок, зато +20% опыта, +2 брони и дальний хват (Pehkui).',
-     'Limited mobility (-25% speed, -2 hearts, lower jump), compensated by +20% XP, +2 armor, and 1.25x reach (Pehkui).',
+     'Тело подводит, но голова и руки цепки: -25% скорости, -2 сердца и слабый прыжок, зато +20% опыта, +2 брони и дальний хват.',
+     'Limited mobility (-25% speed, -2 hearts, lower jump), compensated by +20% XP, +2 armor, and 1.25x reach.',
      'minecraft:shield', 3, [
          ('disabled_adapt', 'Адаптация и опыт', 'Adaptive Reach',
-          '+20% опыта, +2 природной брони и увеличенная дальность взаимодействия с блоками 1.25x (Pehkui, KubeJS).',
-          '+20% XP gain, +2 natural armor, and 1.25x block reach via Pehkui (KubeJS).',
-          p_mult('Адаптация и опыт', '+20% опыта, +2 природной брони и увеличенная дальность взаимодействия с блоками 1.25x (Pehkui, KubeJS).', {
+          '+20% опыта, +2 природной брони и увеличенная дальность взаимодействия с блоками 1.25x.',
+          '+20% XP gain, +2 natural armor, and 1.25x block reach.',
+          p_mult('Адаптация и опыт', '+20% опыта, +2 природной брони и увеличенная дальность взаимодействия с блоками 1.25x.', {
               'xp': {'type': 'origins:modify_xp_gain', 'modifier': {'name': 'Disabled XP', 'operation': 'multiply_base', 'value': 0.2}},
               'arm': {'type': 'origins:attribute', 'modifier': attr_mod('Disabled Armor', 'minecraft:generic.armor', 2.0)},
           })),
@@ -487,9 +487,9 @@ ORIGINS_SPEC = [
                       'modifier': {'name': 'Veteran Res', 'operation': 'multiply_base', 'value': -0.25}},
           })),
          ('veteran_ptsd', 'Флешбэки и шрамы', 'Lingering Scars',
-          'Эффективность лечения ниже на 25%; во время грозы возможны короткие приступы Тьмы (KubeJS).',
-          '-25% healing received and brief Darkness flashbacks during thunderstorms (KubeJS).',
-          p_mult('Флешбэки и шрамы', 'Эффективность лечения ниже на 25%; во время грозы возможны короткие приступы Тьмы (KubeJS).', {
+          'Эффективность лечения ниже на 25%; во время грозы возможны короткие приступы Тьмы.',
+          '-25% healing received and brief Darkness flashbacks during thunderstorms.',
+          p_mult('Флешбэки и шрамы', 'Эффективность лечения ниже на 25%; во время грозы возможны короткие приступы Тьмы.', {
               'heal': {'type': 'origins:modify_healing', 'modifier': {'name': 'Veteran Heal', 'operation': 'multiply_base', 'value': -0.25}},
           })),
      ]),
@@ -499,9 +499,9 @@ ORIGINS_SPEC = [
      'Raider & gunfighter: faster sprint, +15% ranged/TaCZ damage, and +25% OpenTTD raid loot.',
      'minecraft:crossbow', 2, [
          ('bandit_raid', 'Вооружённый налёт', 'Armed Raid',
-          '+10% скорости передвижения, +15% урона из луков/арбалетов/TaCZ и +25% добычи при рейдах OpenTTD (KubeJS).',
-          '+10% movement speed, +15% projectile/TaCZ damage, and +25% OpenTTD raid payouts (KubeJS).',
-          p_mult('Вооружённый налёт', '+10% скорости передвижения, +15% урона из луков/арбалетов/TaCZ и +25% добычи при рейдах OpenTTD (KubeJS).', {
+          '+10% скорости передвижения, +15% урона из луков/арбалетов/TaCZ и +25% добычи при рейдах OpenTTD.',
+          '+10% movement speed, +15% projectile/TaCZ damage, and +25% OpenTTD raid payouts.',
+          p_mult('Вооружённый налёт', '+10% скорости передвижения, +15% урона из луков/арбалетов/TaCZ и +25% добычи при рейдах OpenTTD.', {
               'spd': {'type': 'origins:attribute', 'modifier': attr_mod('Bandit Speed', 'minecraft:generic.movement_speed', 0.1, 'multiply_base')},
               'proj': {'type': 'origins:modify_projectile_damage', 'modifier': {'name': 'Bandit Ranged', 'operation': 'multiply_base', 'value': 0.15}},
           })),
@@ -536,9 +536,9 @@ ORIGINS_SPEC = [
                            'condition': {'type': 'origins:relative_health', 'comparison': '<=', 'compare_to': 0.5}},
           })),
          ('patriot_isol', 'Осаждённая крепость', 'Siege Mentality',
-          '+25% расхода голода и +25% наценка при торговле с ботами / странствующим торговцем (KubeJS).',
-          '+25% hunger exhaustion and +25% bot/trader price markup (KubeJS).',
-          p_mult('Осаждённая крепость', '+25% расхода голода и +25% наценка при торговле с ботами / странствующим торговцем (KubeJS).', {
+          '+25% расхода голода и +25% наценка при торговле с ботами / странствующим торговцем.',
+          '+25% hunger exhaustion and +25% bot/trader price markup.',
+          p_mult('Осаждённая крепость', '+25% расхода голода и +25% наценка при торговле с ботами / странствующим торговцем.', {
               'exh': {'type': 'origins:modify_exhaustion', 'modifier': {'name': 'Patriot Exhaustion', 'operation': 'multiply_base', 'value': 0.25}},
           })),
      ]),
@@ -548,9 +548,9 @@ ORIGINS_SPEC = [
      'Traveling bard: +15% XP, +1.0 luck, and ally Regen/Speed aura when holding or playing MIMI instruments.',
      'minecraft:note_block', 2, [
          ('musician_melody', 'Живая мелодия', 'Inspirational Chord',
-          '+15% опыта, +1.0 удачи; удержание инструментов MIMI или нотных блоков даёт союзникам рядом Регенерацию и Скорость (KubeJS).',
-          '+15% XP, +1.0 luck; MIMI instruments or note blocks buff nearby allies with Regeneration & Speed (KubeJS).',
-          p_mult('Живая мелодия', '+15% опыта, +1.0 удачи; удержание инструментов MIMI или нотных блоков даёт союзникам рядом Регенерацию и Скорость (KubeJS).', {
+          '+15% опыта, +1.0 удачи; удержание инструментов MIMI или нотных блоков даёт союзникам рядом Регенерацию и Скорость.',
+          '+15% XP, +1.0 luck; MIMI instruments or note blocks buff nearby allies with Regeneration & Speed.',
+          p_mult('Живая мелодия', '+15% опыта, +1.0 удачи; удержание инструментов MIMI или нотных блоков даёт союзникам рядом Регенерацию и Скорость.', {
               'xp': {'type': 'origins:modify_xp_gain', 'modifier': {'name': 'Musician XP', 'operation': 'multiply_base', 'value': 0.15}},
               'luck': {'type': 'origins:attribute', 'modifier': attr_mod('Musician Luck', 'minecraft:generic.luck', 1.0)},
           })),
@@ -568,9 +568,9 @@ ORIGINS_SPEC = [
      'Field chef: boosted food saturation, Poison immunity, spore spoilage protection, and healing Farmer\'s Delight meals.',
      'farmersdelight:cooking_pot', 1, [
          ('cook_kitchen', 'Золотой половник', 'Master Chef',
-          'Еда даёт +2 сытости и +30% насыщения, иммунитет к Яду; сырая пища не гниёт, а блюда Farmer\'s Delight лечат +2 HP (KubeJS).',
-          '+2 food and +30% saturation from meals, Poison immunity, no spore spoilage, and +2 HP healing on Farmer\'s Delight food (KubeJS).',
-          p_mult('Золотой половник', 'Еда даёт +2 сытости и +30% насыщения, иммунитет к Яду; сырая пища не гниёт, а блюда Farmer\'s Delight лечат +2 HP (KubeJS).', {
+          'Еда даёт +2 сытости и +30% насыщения, иммунитет к Яду; сырая пища не гниёт, а блюда Farmer\'s Delight лечат +2 HP.',
+          '+2 food and +30% saturation from meals, Poison immunity, no spore spoilage, and +2 HP healing on Farmer\'s Delight food.',
+          p_mult('Золотой половник', 'Еда даёт +2 сытости и +30% насыщения, иммунитет к Яду; сырая пища не гниёт, а блюда Farmer\'s Delight лечат +2 HP.', {
               'food': {'type': 'origins:modify_food',
                        'food_modifier': {'name': 'Cook Food', 'operation': 'addition', 'value': 2.0},
                        'saturation_modifier': {'name': 'Cook Sat', 'operation': 'multiply_base', 'value': 0.3}},
@@ -586,13 +586,13 @@ ORIGINS_SPEC = [
      ]),
 
     ('artist', 'Художник', 'Artist',
-     'Видит форму на расстоянии: +1.5 удачи, дальность строительства 1.25x (Pehkui) и двойной прогресс урбаниста.',
-     'Visionary builder: +1.5 luck, 1.25x building reach (Pehkui), and 2x urbanist aspect progression.',
+     'Видит форму на расстоянии: +1.5 удачи, дальность строительства 1.25x и двойной прогресс урбаниста.',
+     'Visionary builder: +1.5 luck, 1.25x building reach, and 2x urbanist aspect progression.',
      'minecraft:painting', 1, [
          ('artist_vision', 'Широкий мазок', 'Architect\'s Brush',
-          '+1.5 удачи, дальность установки блоков 1.25x (Pehkui) и ускоренный прогресс аспекта «Урбанист» при постройках (KubeJS).',
-          '+1.5 luck, 1.25x block reach (Pehkui), and 2x Urbanist aspect credit on decorative blocks (KubeJS).',
-          p_attr('Широкий мазок', '+1.5 удачи, дальность установки блоков 1.25x (Pehkui) и ускоренный прогресс аспекта «Урбанист» при постройках (KubeJS).', [
+          '+1.5 удачи, дальность установки блоков 1.25x и ускоренный прогресс аспекта «Урбанист» при постройках.',
+          '+1.5 luck, 1.25x block reach, and 2x Urbanist aspect credit on decorative blocks.',
+          p_attr('Широкий мазок', '+1.5 удачи, дальность установки блоков 1.25x и ускоренный прогресс аспекта «Урбанист» при постройках.', [
               attr_mod('Artist Luck', 'minecraft:generic.luck', 1.5),
           ])),
          ('artist_fragile', 'Тонкая натура', 'Delicate Constitution',
@@ -606,13 +606,13 @@ ORIGINS_SPEC = [
 
     # --- WEAKER CHALLENGE TIER (7) ---
     ('hikikomori_nerd', 'Хиккан-задрот', 'Hikikomori Nerd',
-     '[Ослабленное] Хрупкий домосед (-3 сердца, -1.5 урона, -20% скорости атаки, слабость на солнце), но +15% опыта и ночное зрение.',
-     '[Weak Tier] Fragile shut-in (-3 hearts, -1.5 melee, -20% attack speed, sunlight debuffs) with night vision and +15% XP.',
+     'Хрупкий домосед (-3 сердца, -1.5 урона, -20% скорости атаки, слабость на солнце), но +15% опыта и ночное зрение.',
+     'Fragile shut-in (-3 hearts, -1.5 melee, -20% attack speed, sunlight debuffs) with night vision and +15% XP.',
      'minecraft:tinted_glass', 3, [
          ('nerd_atrophy', 'Ослабленное тело', 'Shut-in Atrophy',
-          '-3 сердца здоровья, -1.5 урона в ближнем бою, -20% скорости атаки; под дневным солнцем получает Слабость и Медлительность (KubeJS).',
-          '-3 hearts health, -1.5 melee damage, -20% attack speed; gains Weakness & Slowness under open daytime sky (KubeJS).',
-          p_mult('Ослабленное тело', '-3 сердца здоровья, -1.5 урона в ближнем бою, -20% скорости атаки; под дневным солнцем получает Слабость и Медлительность (KubeJS).', {
+          '-3 сердца здоровья, -1.5 урона в ближнем бою, -20% скорости атаки; под дневным солнцем получает Слабость и Медлительность.',
+          '-3 hearts health, -1.5 melee damage, -20% attack speed; gains Weakness & Slowness under open daytime sky.',
+          p_mult('Ослабленное тело', '-3 сердца здоровья, -1.5 урона в ближнем бою, -20% скорости атаки; под дневным солнцем получает Слабость и Медлительность.', {
               'attr': {'type': 'origins:attribute', 'modifiers': [
                   attr_mod('Nerd HP', 'minecraft:generic.max_health', -6.0),
                   attr_mod('Nerd Dmg', 'minecraft:generic.attack_damage', -1.5),
@@ -634,8 +634,8 @@ ORIGINS_SPEC = [
      ]),
 
     ('furry', 'Фурри', 'Furry',
-     '[Ослабленное] Хрупкий и заметный (-3 сердца, +35% урона от огня и снарядов, +30% расхода голода), слегка выше скорость и прыжок.',
-     '[Weak Tier] Fragile plush frame (-3 hearts, +35% fire & projectile damage, +30% hunger drain), slight speed & jump boost.',
+     'Хрупкий и заметный (-3 сердца, +35% урона от огня и снарядов, +30% расхода голода), слегка выше скорость и прыжок.',
+     'Fragile plush frame (-3 hearts, +35% fire & projectile damage, +30% hunger drain), slight speed & jump boost.',
      'minecraft:rabbit_foot', 3, [
          ('furry_fragile', 'Плюшевая уязвимость', 'Flammable Fursuit',
           '-3 сердца здоровья, +35% входящего урона от огня и снарядов и +30% расхода голода.',
@@ -660,8 +660,8 @@ ORIGINS_SPEC = [
      ]),
 
     ('reddit_admin', 'Админ реддита', 'Reddit Admin',
-     '[Ослабленное] Неповоротливый диванный модератор (-3 сердца, -18% скорости, -20% скорости атаки, +35% голода), зато трудно отбросить.',
-     '[Weak Tier] Sluggish moderator (-3 hearts, -18% movement, -20% attack speed, +35% hunger drain), +25% knockback resistance.',
+     'Неповоротливый диванный модератор (-3 сердца, -18% скорости, -20% скорости атаки, +35% голода), зато трудно отбросить.',
+     'Sluggish moderator (-3 hearts, -18% movement, -20% attack speed, +35% hunger drain), +25% knockback resistance.',
      'minecraft:cake', 3, [
          ('reddit_sluggish', 'Тяжесть кресла', 'Armchair Burden',
           '-3 сердца здоровья, -18% скорости передвижения, -20% скорости атаки и +35% расхода голода.',
@@ -683,13 +683,13 @@ ORIGINS_SPEC = [
      ]),
 
     ('domovenok', 'Домовёнок', 'Domovenok',
-     '[Ослабленное] Крошечный дух (рост 0.65x через Pehkui): всего 6 сердец (-4), -2.0 урона и боится открытого неба, зато тихий.',
-     '[Weak Tier] Tiny house spirit (0.65x Pehkui scale): -4 hearts, -2.0 melee, +30% sky damage, quiet steps & night vision.',
+     'Тихий дух избы: бесшумные шаги, ночное зрение и сниженная заметность для мобов, но всего 6 сердец (-4), -2.0 урона и боится открытого неба.',
+     'Quiet house spirit: silent footsteps, night vision, and lower mob detection, but -4 hearts, -2.0 melee, and +30% sky damage.',
      'minecraft:candle', 3, [
-         ('domovenok_tiny', 'Хрупкий дух избы', 'Tiny Hearth Spirit',
-          'Размер 0.65x (Pehkui, KubeJS), -4 сердца здоровья, -2.0 урона в ближнем бою и +30% получаемого урона под открытым небом.',
-          '0.65x scale (Pehkui, KubeJS), -4 hearts health, -2.0 melee damage, and +30% damage taken under open sky.',
-          p_mult('Хрупкий дух избы', 'Размер 0.65x (Pehkui, KubeJS), -4 сердца здоровья, -2.0 урона в ближнем бою и +30% получаемого урона под открытым небом.', {
+         ('domovenok_tiny', 'Хрупкий дух избы', 'Fragile Hearth Spirit',
+          'Сниженная заметность для мобов, -4 сердца здоровья, -2.0 урона в ближнем бою и +30% получаемого урона под открытым небом.',
+          'Reduced mob detection range, -4 hearts health, -2.0 melee damage, and +30% damage taken under open sky.',
+          p_mult('Хрупкий дух избы', 'Сниженная заметность для мобов, -4 сердца здоровья, -2.0 урона в ближнем бою и +30% получаемого урона под открытым небом.', {
               'attr': {'type': 'origins:attribute', 'modifiers': [
                   attr_mod('Domovenok HP', 'minecraft:generic.max_health', -8.0),
                   attr_mod('Domovenok Dmg', 'minecraft:generic.attack_damage', -2.0),
@@ -708,13 +708,13 @@ ORIGINS_SPEC = [
      ]),
 
     ('dwarf', 'Дворф', 'Dwarf',
-     '[Ослабленное] Низкий рост (0.74x через Pehkui), -2 сердца, -15% скорости и быстро тонет, зато быстрее копает киркой.',
-     '[Weak Tier] Short stout miner (0.74x Pehkui scale): -2 hearts, -15% speed, +35% drowning damage, +25% pickaxe speed.',
+     'Подземный рудокоп: быстрее копает киркой и дальше дотягивается до блоков (1.15x), но -2 сердца, -15% скорости и быстро тонет.',
+     'Subterranean miner: +25% pickaxe speed and 1.15x block reach, but -2 hearts, -15% speed, and +35% drowning damage.',
      'minecraft:iron_pickaxe', 3, [
-         ('dwarf_stout', 'Низкий и тяжёлый', 'Short & Heavy',
-          'Рост 0.74x (Pehkui, KubeJS), -2 сердца здоровья, -15% скорости передвижения и +35% урона от утопления.',
-          '0.74x height (Pehkui, KubeJS), -2 hearts health, -15% movement speed, and +35% drowning damage.',
-          p_mult('Низкий и тяжёлый', 'Рост 0.74x (Pehkui, KubeJS), -2 сердца здоровья, -15% скорости передвижения и +35% урона от утопления.', {
+         ('dwarf_stout', 'Подземная тяжесть', 'Subterranean Weight',
+          '-2 сердца здоровья, -15% скорости передвижения и +35% урона от утопления.',
+          '-2 hearts health, -15% movement speed, and +35% drowning damage.',
+          p_mult('Подземная тяжесть', '-2 сердца здоровья, -15% скорости передвижения и +35% урона от утопления.', {
               'attr': {'type': 'origins:attribute', 'modifiers': [
                   attr_mod('Dwarf HP', 'minecraft:generic.max_health', -4.0),
                   attr_mod('Dwarf Speed', 'minecraft:generic.movement_speed', -0.15, 'multiply_base'),
@@ -724,17 +724,17 @@ ORIGINS_SPEC = [
                         'modifier': {'name': 'Dwarf Drown', 'operation': 'multiply_base', 'value': 0.35}},
           })),
          ('dwarf_pick', 'Старая кирка', 'Stout Pickaxe',
-          '+25% скорости копания киркой.',
-          '+25% pickaxe mining speed.',
-          {'name': 'Старая кирка', 'description': '+25% скорости копания киркой.',
+          '+25% скорости копания киркой и дальность блока 1.15x.',
+          '+25% pickaxe mining speed and 1.15x block reach.',
+          {'name': 'Старая кирка', 'description': '+25% скорости копания киркой и дальность блока 1.15x.',
            'type': 'origins:modify_break_speed',
            'block_condition': {'type': 'origins:in_tag', 'tag': 'minecraft:mineable/pickaxe'},
            'modifier': {'name': 'Dwarf Mine', 'operation': 'multiply_base', 'value': 0.25}}),
      ]),
 
     ('nonbinary', 'Небинарная личность', 'Non-Binary Person',
-     '[Ослабленное] Хрупкая конституция (-2.5 сердца, -1.5 урона, -15% лечения, +25% расхода голода), слегка выше скорость.',
-     '[Weak Tier] Fragile build (-2.5 hearts, -1.5 melee, -15% healing, +25% hunger drain) with +10% movement speed.',
+     'Хрупкая конституция (-2.5 сердца, -1.5 урона, -15% лечения, +25% расхода голода), слегка выше скорость.',
+     'Fragile build (-2.5 hearts, -1.5 melee, -15% healing, +25% hunger drain) with +10% movement speed.',
      'minecraft:amethyst_shard', 3, [
          ('nonbinary_fragile', 'Хрупкий баланс', 'Fragile Balance',
           '-2.5 сердца здоровья, -1.5 урона в ближнем бою, -15% эффективности лечения и +25% расхода голода.',
@@ -756,8 +756,8 @@ ORIGINS_SPEC = [
      ]),
 
     ('robo_woman', 'Робо-Женщина', 'Robo-Woman',
-     '[Ослабленное] Замыкает в воде и под дождём, -2 сердца и -30% лечения, зато +2 брони и иммунитет к яду.',
-     '[Weak Tier] Short-circuits in water/rain, -2 hearts and -30% healing, compensated by +2 armor and Poison immunity.',
+     'Замыкает в воде и под дождём, -2 сердца и -30% лечения, зато +2 брони и иммунитет к яду.',
+     'Short-circuits in water/rain, -2 hearts and -30% healing, compensated by +2 armor and Poison immunity.',
      'minecraft:iron_ingot', 3, [
          ('robowoman_short', 'Короткое замыкание', 'Water Short-Circuit',
           'Получает урон в воде и под дождём, -2 сердца здоровья и -30% естественного лечения.',

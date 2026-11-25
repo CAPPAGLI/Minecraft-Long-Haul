@@ -1,6 +1,6 @@
 {
   "name": "Бумажная хватка",
-  "description": "+15% опыта, +1.0 удачи и +15% бонуса к выплатам контрактов консорциума и OpenTTD (KubeJS).",
+  "description": "+15% опыта, +1.0 удачи и +15% бонуса к выплатам контрактов консорциума и OpenTTD.",
   "type": "origins:multiple",
   "xp": {
     "type": "origins:modify_xp_gain",

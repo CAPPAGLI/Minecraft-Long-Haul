@@ -1,6 +1,6 @@
 {
   "name": "Лужёная глотка",
-  "description": "Полный иммунитет к Тошноте, +20% сопротивления отбрасыванию; напитки Vinery/Brewin' дают Силу и Сопротивление (KubeJS).",
+  "description": "Полный иммунитет к Тошноте, +20% сопротивления отбрасыванию; напитки Vinery/Brewin' дают Силу и Сопротивление.",
   "type": "origins:multiple",
   "imm": {
     "type": "origins:effect_immunity",

@@ -1,6 +1,6 @@
 {
   "name": "Дурная слава",
-  "description": "-1.5 удачи, +20% урона от снарядов и наценка +20% при торговле/регистрации OpenTTD (KubeJS).",
+  "description": "-1.5 удачи, +20% урона от снарядов и наценка +20% при торговле/регистрации OpenTTD.",
   "type": "origins:multiple",
   "luck": {
     "type": "origins:attribute",

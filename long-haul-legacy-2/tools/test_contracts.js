@@ -694,7 +694,9 @@ test('Spawn/border safety guards and native Xaero territory integration are wire
     });
   });
   const s29 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/29_origins_mod_integrations.js'), 'utf8');
-  assert(s29.includes('OriginsAPI') && s29.includes('pehkui:base') && s29.includes('doomedmatu:cigarette'), '29_origins_mod_integrations wires OriginsAPI + Pehkui + mod integrations');
+  assert(s29.includes('OriginsAPI') && s29.includes('pehkui:') && s29.includes('doomedmatu:cigarette'), '29_origins_mod_integrations wires OriginsAPI + Pehkui + mod integrations');
+  assert(!/pehkui:base\s+0\./.test(s29), 'no origin shrinks pehkui:base below 1.0');
+  assert(!JSON.stringify(ruLang).includes('[Ослабленное]') && !JSON.stringify(ruLang).includes('(KubeJS)') && !JSON.stringify(ruLang).includes('(Pehkui)'), 'Origins lang has no meta-tags');
   [
     'runtime-mod/src/main/java/longhaul/runtime/mixin/LongHaulMixinPlugin.java',
     'runtime-mod/src/main/java/longhaul/runtime/mixin/WorldMapRegistryMixin.java',

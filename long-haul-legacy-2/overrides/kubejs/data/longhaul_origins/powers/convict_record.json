@@ -1,6 +1,6 @@
 {
   "name": "Судимость в базе",
-  "description": "-1.0 удачи и +25% к стоимости регистрации компании / операций OpenTTD (KubeJS).",
+  "description": "-1.0 удачи и +25% к стоимости регистрации компании / операций OpenTTD.",
   "type": "origins:attribute",
   "modifiers": [
     {

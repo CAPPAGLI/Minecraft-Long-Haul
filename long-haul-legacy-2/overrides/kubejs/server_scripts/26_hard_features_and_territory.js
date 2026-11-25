@@ -647,17 +647,22 @@ function lhTerritoryCounts(server) {
   return global.LHTerritoryMath.computeBorder(totalMain, effectiveUnlocked);
 }
 
-function lhApplyTerritoryBorder(server, announce) {
+function lhApplyTerritoryBorder(server, announce, forceApply) {
   var info = lhTerritoryCounts(server);
   var db = lhProgRead(server);
   var prev = Number(db.lastBorderSize || 0);
+  if (!forceApply && prev === info.size && prev > 0) {
+    return info;
+  }
   var ow = server.overworld();
   if (ow && ow.worldBorder) {
     ow.worldBorder.setCenter(0, 0);
     ow.worldBorder.setSize(info.size);
   }
-  db.lastBorderSize = info.size;
-  lhProgSave(server);
+  if (prev !== info.size) {
+    db.lastBorderSize = info.size;
+    lhProgSave(server);
+  }
 
   if (prev > 0 && info.size > prev) {
     if (typeof lhSpawnBotOnBorderExpansion === 'function') {
@@ -959,25 +964,30 @@ function lhChapterForkPick(server, player, chId, dryRun) {
 }
 
 function lhMarkPlayerChapter(db, pid, chapterId) {
-  if (!db || !pid || !chapterId) return;
+  if (!db || !pid || !chapterId) return false;
   if (!db.chaptersByPlayer) db.chaptersByPlayer = {};
   if (!db.chaptersByPlayer[pid]) db.chaptersByPlayer[pid] = {};
+  if (db.chaptersByPlayer[pid][chapterId]) return false;
   db.chaptersByPlayer[pid][chapterId] = true;
+  return true;
 }
 
 function lhUnlockChapter(server, chapterId, triggerSpin, dryRun, playerOrPid) {
   var db = lhProgRead(server);
   var pid = null;
+  var metaChanged = false;
   if (playerOrPid) {
     pid = typeof playerOrPid === 'string' ? playerOrPid : lhId(playerOrPid);
-    lhMarkPlayerChapter(db, pid, chapterId);
+    metaChanged = lhMarkPlayerChapter(db, pid, chapterId);
   } else {
     if (!db.adminChapters) db.adminChapters = {};
-    db.adminChapters[chapterId] = true;
+    if (!db.adminChapters[chapterId]) {
+      db.adminChapters[chapterId] = true;
+      metaChanged = true;
+    }
   }
   if (db.chapters[chapterId]) {
-    lhProgSave(server);
-    lhApplyTerritoryBorder(server, !dryRun);
+    if (metaChanged) lhProgSave(server);
     return false;
   }
   db.chapters[chapterId] = true;
@@ -1442,8 +1452,10 @@ ServerEvents.tick(function (event) {
 
   for (var i = 0; i < plist.length; i++) {
     var p = plist[i];
-    if (typeof lhStageRecompute === 'function') lhStageRecompute(server, p);
-    lhProgressionRecompute(server, p, false);
+    if (LHProgTick % 200 === 0) {
+      if (typeof lhStageRecompute === 'function') lhStageRecompute(server, p);
+      lhProgressionRecompute(server, p, false);
+    }
 
     if (String(p.level.dimension) !== 'minecraft:overworld') continue;
     var creative = (typeof p.isCreative === 'function' && p.isCreative()) ||
@@ -1461,9 +1473,11 @@ ServerEvents.tick(function (event) {
     var py = Number(p.y);
     var px = Math.floor(Number(p.x));
     var pz = Math.floor(Number(p.z));
-    var pPos = new LHBlockPos(px, Math.floor(py) + 1, pz);
+    var needSky = (LHProgTick % 320 === 0 || LHProgTick % 480 === 0 || LHProgTick % 1200 === 0);
     var seeSky = false;
-    try { seeSky = p.level.canSeeSky(pPos); } catch (eSky) {}
+    if (needSky) {
+      try { seeSky = p.level.canSeeSky(new LHBlockPos(px, Math.floor(py) + 1, pz)); } catch (eSky) {}
+    }
 
     if (LHProgTick % 240 === 0 && lhHardIsActive(server, 'acid_pollution') && py < 92) {
       var compAcid = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, p) : null;
@@ -1867,6 +1881,6 @@ ServerEvents.commandRegistry(function (event) {
 
 ServerEvents.loaded(function (event) {
   lhProgRead(event.server);
-  lhApplyTerritoryBorder(event.server, false);
+  lhApplyTerritoryBorder(event.server, false, true);
   console.info('[LH] Territory scaling + Casino Wheel hard-feature gate + global difficulty k loaded.');
 });

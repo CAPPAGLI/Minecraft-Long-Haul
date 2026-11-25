@@ -19,25 +19,23 @@ def build_core_chapters():
              'Семья, ипотека, чужие ожидания, одинаковые будни — ты был винтиком в чужом механизме, пока внутри что-то не перегорело дотла.',
              'На столе лежит старый бумажный чек. Подтверди шаг и забери его — пора уходить.',
          ], [], {
-             'xp': r_xp(25, 'POINTS'),
+             'xp': r_xp(5, 'POINTS'),
              'item': r_item('minecraft:paper', 1),
-             'bread': r_item('minecraft:bread', 2),
          }),
         ('story_02_bakery_burned', 'Акт II · Вещи, которыми ты владеешь', 'minecraft:bread', [-260, -60],
          t_item('minecraft:paper', 1), [
              '«Вещи, которыми ты владеешь, в конце концов начинают владеть тобой.»',
              'Ты сжимаешь старый чек (выдан в Акте I): «Хлеб, молоко». Квартира давит стенами, воздух стал вязким. Нужно выйти хотя бы на пять минут.',
          ], ['story_01_left_for_bread'], {
-             'xp': r_xp(30, 'POINTS'),
-             'item': r_item('minecraft:wheat', 6),
-             'milk': r_item('minecraft:milk_bucket', 1),
+             'xp': r_xp(5, 'POINTS'),
+             'bread': r_item('minecraft:bread', 1),
          }),
         ('story_02b_smoke_break', 'Акт III · За хлебом, молоком и сигаретами', 'minecraft:flint_and_steel', [-130, -60],
          t_check('Выйти за порог с пачкой сигарет'), [
              'Ты бросаешь ключи в прихожей. «Я выйду — за хлебом, молоком и пачкой сигарет». Голос звучит чужим, будто из соседней комнаты.',
              'Забери награду: получишь зажигалку, а при установленном опциональном моде DOOMED — настоящую пачку сигарет Matulls и карманную зажигалку.',
          ], ['story_02_bakery_burned'], {
-             'xp': r_xp(40, 'POINTS'),
+             'xp': r_xp(5, 'POINTS'),
              'item': r_item('minecraft:flint_and_steel', 1),
              'smoke': r_command('lh prologue smoke', 'Получить сигареты DOOMED (если мод установлен)', 'minecraft:flint_and_steel'),
          }),
@@ -46,16 +44,15 @@ def build_core_chapters():
              'Щелчок зажигалки (выдана в Акте III). Первая затяжка обжигает горло, а серый пепел падает на облупленный бетон подъезда.',
              'Именно в эту секунду ты понимаешь: ты не хочешь возвращаться на этот этаж. Вообще никогда.',
          ], ['story_02b_smoke_break'], {
-             'xp': r_xp(40, 'POINTS'),
-             'item': r_item('minecraft:charcoal', 2),
-             'camp': r_item('minecraft:campfire', 1),
+             'xp': r_xp(5, 'POINTS'),
+             'item': r_item('minecraft:charcoal', 1),
          }),
         ('story_04_snail_at_door', 'Акт V · Осколки старой жизни', 'minecraft:charcoal', [130, -60],
-         t_item('minecraft:charcoal', 2), [
+         t_item('minecraft:charcoal', 1), [
              'Там, за железной дверью, остался человек, который пытался всем угодить и выгорел до угольков.',
              'Держи горсть пепла (выдана в Акте IV) как доказательство: старая жизнь уже догорела.',
          ], ['story_02c_stairwell_ash'], {
-             'xp': r_xp(50, 'POINTS'),
+             'xp': r_xp(10, 'POINTS'),
              'item': r_item('minecraft:leather_boots', 1),
              'lantern': r_item('minecraft:lantern', 1),
          }),
@@ -64,44 +61,39 @@ def build_core_chapters():
              'Мокрый асфальт, жёлтые фонари и последний ночной рейс, уходящий далеко за городскую черту.',
              'Старые ботинки (выданы в Акте V) ещё держатся. Никаких обратных билетов и никаких будильников в 07:00.',
          ], ['story_04_snail_at_door'], {
-             'xp': r_xp(50, 'POINTS'),
+             'xp': r_xp(10, 'POINTS'),
              'item': r_item('minecraft:map', 1),
-             'food': r_item('minecraft:cooked_beef', 4),
          }),
         ('story_04c_empty_pockets', 'Акт VII · Пустые карманы — чистый лист', 'minecraft:lantern', [260, 60],
          t_item('minecraft:lantern', 1), [
              '«Лишь утратив всё до конца, мы обретаем свободу делать что угодно.»',
              'Тёплый фонарь в руках (выдан в Акте V) светит честнее, чем все бетонные стены прошлой квартиры.',
          ], ['story_04b_last_bus'], {
-             'xp': r_xp(60, 'POINTS'),
+             'xp': r_xp(10, 'POINTS'),
              'item': r_item('minecraft:spyglass', 1),
-             'torches': r_item('minecraft:torch', 16),
          }),
         ('story_05_continental_bakery', 'Акт VIII · Горизонт больше, чем квартал', 'minecraft:spyglass', [130, 60],
          t_item('minecraft:spyglass', 1), [
              'Годами ты смотрел в стену напротив. В подзорную трубу (выдана в Акте VII) видно: за старой чертой города лежит целый континент.',
              'И больше никто не скажет тебе, куда идти, что строить и кем быть.',
          ], ['story_04c_empty_pockets'], {
-             'xp': r_xp(60, 'POINTS'),
+             'xp': r_xp(10, 'POINTS'),
              'item': r_item('minecraft:compass', 1),
-             'iron': r_item('minecraft:iron_ingot', 4),
          }),
         ('story_05b_no_looking_back', 'Акт IX · Первое правило дороги', 'minecraft:map', [0, 60],
          t_item('minecraft:map', 1), [
              'Первое правило новой жизни: не оглядываться назад. Второе правило: не застревать на одном месте.',
              'Чистая карта (выдана в Акте VI) ждёт твоих первых трасс, морей, железных дорог и далёких маршрутов.',
          ], ['story_05_continental_bakery'], {
-             'xp': r_xp(70, 'POINTS'),
-             'item': r_item('create:andesite_alloy', 8),
-             'logs': r_item('minecraft:oak_log', 8),
+             'xp': r_xp(10, 'POINTS'),
+             'torches': r_item('minecraft:torch', 4),
          }),
         ('story_05c_road_gear', 'Акт X · Всё своё ношу с собой', 'minecraft:emerald', [-130, 60],
          t_check('Собраться в бесконечное путешествие'), [
              'Хлеб, молоко, пачка сигарет и пара простых инструментов — вот и весь твой новый багаж.',
              'Впереди — вечные путешествия, новые биомы, компании OpenTTD и изучение мира без оглядки на прошлое.',
          ], ['story_05b_no_looking_back'], {
-             'xp': r_xp(80, 'POINTS'),
-             'item': r_item('minecraft:emerald', 2),
+             'xp': r_xp(15, 'POINTS'),
              'manifest': r_item('longhaul:cargo_manifest', 1),
          }),
         ('story_05d_point_of_no_return', 'Акт XI · Точка невозврата', 'minecraft:oak_door', [-260, 60],
@@ -109,9 +101,7 @@ def build_core_chapters():
              'Тот выгоревший человек остался на кухне с остывшим чаем. Перед дверью в большой мир стоит уже совсем другой странник.',
              'Тесная стартовая граница 724×724 вот-вот рухнет под ногами.',
          ], ['story_05c_road_gear'], {
-             'xp': r_xp(1, 'LEVEL'),
-             'item': r_item('minecraft:copper_ingot', 6),
-             'coal': r_item('minecraft:coal', 8),
+             'xp': r_xp(15, 'POINTS'),
          }),
         ('story_06_forgot_the_milk', 'Финал пролога · Свобода открытой дороги', 'minecraft:compass', [-390, 60],
          t_item('minecraft:compass', 1), [
@@ -119,18 +109,18 @@ def build_core_chapters():
              'Ты вышел за хлебом, молоком и сигаретами — и ушёл в вечное путешествие к новой жизни. Держи компас (выдан в Акте VIII) и забери награду!',
              'Завершение Пролога СУЩЕСТВЕННО расширяет границу мира (с 724×724 до 31825×31825), открывает земли для будущих игроков и привата чанков и запускает Колесо Угроз!',
          ], ['story_05d_point_of_no_return'], {
-             'xp': r_xp(2, 'LEVEL'),
-             'item': r_item('longhaul:field_rations', 4),
+             'xp': r_xp(25, 'POINTS'),
+             'item': r_item('longhaul:field_rations', 1),
              'tablet': r_item('longhaul:control_tablet', 1),
              'prologue_done': r_command('lh prologue complete', 'Расширить границу мира и начать новую жизнь', 'minecraft:compass'),
          }),
     ]
     for _adv_story, _xp in (
-        ('story/01_left_for_bread', 30),
-        ('story/02_bakery_burned', 50),
-        ('story/04_snail_at_door', 70),
-        ('story/05_continental_bakery', 90),
-        ('story/06_forgot_the_milk', 110),
+        ('story/01_left_for_bread', 10),
+        ('story/02_bakery_burned', 10),
+        ('story/04_snail_at_door', 15),
+        ('story/05_continental_bakery', 15),
+        ('story/06_forgot_the_milk', 25),
     ):
         adv(_adv_story, _xp)
     for qid, title, icon, pos, tasks, desc, deps, rew in story_ch00:

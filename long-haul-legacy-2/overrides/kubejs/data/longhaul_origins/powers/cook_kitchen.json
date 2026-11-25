@@ -1,6 +1,6 @@
 {
   "name": "Золотой половник",
-  "description": "Еда даёт +2 сытости и +30% насыщения, иммунитет к Яду; сырая пища не гниёт, а блюда Farmer's Delight лечат +2 HP (KubeJS).",
+  "description": "Еда даёт +2 сытости и +30% насыщения, иммунитет к Яду; сырая пища не гниёт, а блюда Farmer's Delight лечат +2 HP.",
   "type": "origins:multiple",
   "food": {
     "type": "origins:modify_food",

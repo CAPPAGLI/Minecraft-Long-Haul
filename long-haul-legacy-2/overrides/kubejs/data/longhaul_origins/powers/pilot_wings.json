@@ -1,6 +1,6 @@
 {
   "name": "Полёт без границ",
-  "description": "Встроенное планирование без элитр, -35% урона от падения и +30% к авиамаршрутам OpenTTD / полётам Immersive Aircraft (KubeJS).",
+  "description": "Встроенное планирование без элитр, -35% урона от падения и +30% к авиамаршрутам OpenTTD / полётам Immersive Aircraft.",
   "type": "origins:multiple",
   "glide": {
     "type": "origins:elytra_flight",

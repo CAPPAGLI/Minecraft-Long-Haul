@@ -6,10 +6,12 @@ var LHOriginsAPICls = null;
 var LHOriginLayerKey = null;
 var LHResourceLocationCls = null;
 var LHResourceKeyCls = null;
+var LHOriginBlockPosCls = null;
 try {
   LHOriginsAPICls = Java.loadClass('io.github.edwinmindcraft.origins.api.OriginsAPI');
   LHResourceLocationCls = Java.loadClass('net.minecraft.resources.ResourceLocation');
   LHResourceKeyCls = Java.loadClass('net.minecraft.resources.ResourceKey');
+  LHOriginBlockPosCls = Java.loadClass('net.minecraft.core.BlockPos');
   var LHOriRegsCls = Java.loadClass('io.github.edwinmindcraft.origins.api.registry.OriginsDynamicRegistries');
   LHOriginLayerKey = LHResourceKeyCls.create(LHOriRegsCls.LAYERS_REGISTRY, new LHResourceLocationCls('origins', 'origin'));
 } catch (eOriginsBoot) {
@@ -21,36 +23,27 @@ var LHOriginTickCount = 0;
 
 var LH_ORIGIN_PEHKUI_PROFILES = {
   dwarf: [
-    'scale set pehkui:base 0.74',
-    'scale set pehkui:block_reach 1.15',
-    'scale persist set true'
+    'scale set pehkui:block_reach 1.15'
   ],
   domovenok: [
-    'scale set pehkui:base 0.65',
-    'scale set pehkui:visibility 0.75',
-    'scale persist set true'
+    'scale set pehkui:visibility 0.75'
   ],
   heavyweight: [
     'scale set pehkui:width 1.28',
     'scale set pehkui:height 1.03',
-    'scale set pehkui:visibility 1.20',
-    'scale persist set true'
+    'scale set pehkui:visibility 1.20'
   ],
   illegal_immigrant: [
-    'scale set pehkui:visibility 0.72',
-    'scale persist set true'
+    'scale set pehkui:visibility 0.72'
   ],
   lighthouse_keeper: [
-    'scale set pehkui:block_reach 1.15',
-    'scale persist set true'
+    'scale set pehkui:block_reach 1.15'
   ],
   disabled_veteran: [
-    'scale set pehkui:block_reach 1.25',
-    'scale persist set true'
+    'scale set pehkui:block_reach 1.25'
   ],
   artist: [
-    'scale set pehkui:block_reach 1.25',
-    'scale persist set true'
+    'scale set pehkui:block_reach 1.25'
   ]
 };
 
@@ -85,17 +78,16 @@ function lhSyncOriginPehkuiScale(server, player, force) {
   if (!uname) return;
   var pid = typeof lhId === 'function' ? lhId(player) : String(player.uuid || uname);
   var oid = lhGetPlayerOriginId(player);
-  if (!force && LHOriginScaleState[pid] === oid) return;
+  var hasPrev = Object.prototype.hasOwnProperty.call(LHOriginScaleState, pid);
+  if (!force && hasPrev && LHOriginScaleState[pid] === oid) return;
 
-  var prev = LHOriginScaleState[pid];
   LHOriginScaleState[pid] = oid;
 
-  if (prev && LH_ORIGIN_PEHKUI_PROFILES[prev]) {
-    server.runCommandSilent('scale reset ' + uname);
-  }
+  // Always reset all Pehkui scales cleanly on login/respawn or origin change so
+  // legacy persisted sizes (e.g. old 0.65x/0.74x scales) never leave the player tiny.
+  server.runCommandSilent('scale reset ' + uname);
   var cmds = LH_ORIGIN_PEHKUI_PROFILES[oid];
   if (cmds && cmds.length) {
-    if (!prev) server.runCommandSilent('scale reset ' + uname);
     for (var i = 0; i < cmds.length; i++) {
       server.runCommandSilent(cmds[i] + ' ' + uname);
     }
@@ -216,15 +208,16 @@ if (typeof ItemEvents !== 'undefined' && ItemEvents.rightClicked) {
 
 ServerEvents.tick(function (event) {
   LHOriginTickCount++;
-  if (LHOriginTickCount % 40 !== 0) return;
+  if (LHOriginTickCount % 60 !== 0) return;
   var server = event.server;
   var plist = server ? server.players : null;
   if (!plist || !plist.length) return;
+  var syncScaleNow = (LHOriginTickCount % 120 === 0);
 
   for (var i = 0; i < plist.length; i++) {
     var p = plist[i];
     if (!p) continue;
-    lhSyncOriginPehkuiScale(server, p, false);
+    if (syncScaleNow) lhSyncOriginPehkuiScale(server, p, false);
 
     var creative = (typeof p.isCreative === 'function' && p.isCreative()) ||
       (typeof p.isSpectator === 'function' && p.isSpectator());
@@ -289,14 +282,16 @@ ServerEvents.tick(function (event) {
     } else if (oid === 'hikikomori_nerd') {
       try {
         var tod = Number(p.level.dayTime()) % 24000;
-        var posN = new (Java.loadClass('net.minecraft.core.BlockPos'))(px, py + 1, pz);
-        if (tod < 12500 && p.level.canSeeSky(posN)) {
-          server.runCommandSilent('effect give ' + uname + ' minecraft:weakness 4 0 true');
+        if (tod < 12500 && LHOriginBlockPosCls) {
+          var posN = new LHOriginBlockPosCls(px, py + 1, pz);
+          if (p.level.canSeeSky(posN)) {
+            server.runCommandSilent('effect give ' + uname + ' minecraft:weakness 5 0 true');
+          }
         }
       } catch (eNerd) {}
     } else if (oid === 'war_veteran') {
       try {
-        if (p.level.isThundering() && LHOriginTickCount % 160 === 0 && Math.random() < 0.35) {
+        if (p.level.isThundering() && LHOriginTickCount % 180 === 0 && Math.random() < 0.35) {
           server.runCommandSilent('effect give ' + uname + ' minecraft:darkness 3 0 true');
         }
       } catch (eVet) {}

@@ -78,6 +78,7 @@ function lhStageRecompute(server, player) {
     if (unlocked.indexOf('longhaul_finale') !== -1) lhUnlock(player, 'longhaul:story/06_forgot_the_milk');
   }
 
+  var hadPrev = Object.prototype.hasOwnProperty.call(stDb.players, pid);
   var prev = stDb.players[pid] || [];
   var added = [];
   unlocked.forEach(function (stg) {
@@ -86,8 +87,11 @@ function lhStageRecompute(server, player) {
       player.stages.add(stg);
     }
   });
-  stDb.players[pid] = unlocked;
-  lhStageSave(server);
+  var changed = !hadPrev || added.length > 0 || prev.length !== unlocked.length;
+  if (changed) {
+    stDb.players[pid] = unlocked;
+    lhStageSave(server);
+  }
 
   if (added.length > 0 && player && typeof lhMsg === 'function') {
     added.forEach(function (stg) {

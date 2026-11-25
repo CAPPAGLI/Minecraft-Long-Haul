@@ -1,6 +1,6 @@
 {
   "name": "Диссидентские связи",
-  "description": "+25% опыта, +1.5 удачи и +15% к денежным наградам контрактов/грантов OpenTTD (KubeJS).",
+  "description": "+25% опыта, +1.5 удачи и +15% к денежным наградам контрактов/грантов OpenTTD.",
   "type": "origins:multiple",
   "xp": {
     "type": "origins:modify_xp_gain",
