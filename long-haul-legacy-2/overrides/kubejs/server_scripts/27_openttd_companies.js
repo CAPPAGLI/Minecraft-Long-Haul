@@ -1646,7 +1646,7 @@ function lhSpawnBotMobRaids(server, st) {
       var nbtStr = JSON.stringify({
         Tags: ['lh_bot_raid_mob', 'lh_raid_' + raid.id],
         PersistenceRequired: 0,
-        CustomName: JSON.stringify({ text: 'Рейдер «' + (raid.attackerName || raid.attackerCid) + '»', color: 'dark_red' }),
+        CustomName: JSON.stringify({ text: (raid.isPirateRaid ? 'Корсар «' : 'Рейдер «') + (raid.attackerName || raid.attackerCid) + '»', color: raid.isPirateRaid ? 'gold' : 'dark_red' }),
         CustomNameVisible: 1
       });
       server.runCommandSilent('execute in ' + dim + ' run summon ' + mobId + ' ' + sx + ' ' + ry + ' ' + sz + ' ' + nbtStr);
@@ -1658,8 +1658,8 @@ function lhSpawnBotMobRaids(server, st) {
       var pl = plist[pi];
       var pc = lhGetPlayerCompany(server, pl);
       if (pc && pc.id === raid.targetCid) {
-        lhMsg(pl, '§c§l[БОТ-РЕЙД · ' + raid.id + '] §fКомпания «' + (raid.attackerName || raid.attackerCid) +
-          '» высадила отряд мобов (' + count + '×) на ваш сектор (' + raid.sx + ', ' + raid.sz + ')!');
+        lhMsg(pl, (raid.isPirateRaid ? '§6§l[ПИРАТСКИЙ НАБЕГ · ' : '§c§l[БОТ-РЕЙД · ') + raid.id + '] §f' +
+          (raid.attackerName || raid.attackerCid) + ' высадил отряд (' + count + '×) на ваш сектор (' + raid.sx + ', ' + raid.sz + ')!');
       }
     }
   }
@@ -1690,16 +1690,36 @@ function lhBotTick(server, dryRun) {
 
   var expansions = global.LHOpenTTD.botExpandStep(st, maxSectorAbs);
 
+  // Process Central Bank loans & key rate updates
+  if (global.LHOpenTTD.tickBankLoans) {
+    var loanEvs = global.LHOpenTTD.tickBankLoans(st, LHOTTDTick);
+    if (!dryRun && loanEvs && loanEvs.length > 0 && typeof lhLogEvent === 'function') {
+      loanEvs.forEach(function (le) {
+        if (le.type === 'loan_default') {
+          lhLogEvent(server, 'market', 'Дефолт по кредиту ' + le.companyId + ' (' + le.debt + ' Cr)! Активы выставлены на аукцион (' + le.auctionsCreated + ').', { chatMode: 'important' });
+        }
+      });
+    }
+  }
+
   if (st.botCycle % 4 === 0) {
     global.LHOpenTTD.refreshBotOrders(st);
     global.LHOpenTTD.refreshBotSupplyContracts(st);
-    var buyOrders = st.marketOrders.filter(function (o) { return o.isBot && o.side === 'buy'; });
-    if (buyOrders.length > 0) {
-      var pick = buyOrders[Math.floor(Math.random() * buyOrders.length)];
-      st.subsidy = { companyId: pick.companyId, item: pick.item, orderId: pick.id, sx: st.companies[pick.companyId] ? st.companies[pick.companyId].hqSx : 0, sz: st.companies[pick.companyId] ? st.companies[pick.companyId].hqSz : 0 };
+    var underdogSub = global.LHOpenTTD.selectDynamicSubsidyTarget ? global.LHOpenTTD.selectDynamicSubsidyTarget(st) : null;
+    if (underdogSub) {
       if (!dryRun && typeof lhLogEvent === 'function') {
-        var bName = st.companies[pick.companyId] ? st.companies[pick.companyId].name : pick.companyId;
-        lhLogEvent(server, 'market', 'Субсидия Консорциума: ' + bName + ' (+35% выпуск, −40% доставка, ×1.75 за ' + pick.item + ')', { chatMode: 'never' });
+        var uName = st.companies[underdogSub.companyId] ? st.companies[underdogSub.companyId].name : underdogSub.companyId;
+        lhLogEvent(server, 'market', 'Антикризисная субсидия отстающей компании: ' + uName + ' (+35% выпуск, −40% доставка, −50% топливо)', { chatMode: 'never' });
+      }
+    } else {
+      var buyOrders = st.marketOrders.filter(function (o) { return o.isBot && o.side === 'buy'; });
+      if (buyOrders.length > 0) {
+        var pick = buyOrders[Math.floor(Math.random() * buyOrders.length)];
+        st.subsidy = { companyId: pick.companyId, item: pick.item, orderId: pick.id, sx: st.companies[pick.companyId] ? st.companies[pick.companyId].hqSx : 0, sz: st.companies[pick.companyId] ? st.companies[pick.companyId].hqSz : 0 };
+        if (!dryRun && typeof lhLogEvent === 'function') {
+          var bName = st.companies[pick.companyId] ? st.companies[pick.companyId].name : pick.companyId;
+          lhLogEvent(server, 'market', 'Субсидия Консорциума: ' + bName + ' (+35% выпуск, −40% доставка, ×1.75 за ' + pick.item + ')', { chatMode: 'never' });
+        }
       }
     }
   }
@@ -2635,6 +2655,13 @@ EntityEvents.death(function (event) {
   if (typeof ent.isPlayer === 'function' && ent.isPlayer()) return;
   // Track bot-launched hostile mob raid defense kills
   try {
+    if (ent.tags && ent.tags.contains('lh_site_corsair')) {
+      var srvC = ent.server || killer.server;
+      if (srvC && typeof lhCompanyReward === 'function') {
+        lhCompanyReward(srvC, killer, 65, 'contract', null);
+        lhMsg(killer, '§a[Корсар повержен!] §e+65 Cr §fна счёт вашей компании за защиту каравана!');
+      }
+    }
     if (ent.tags && ent.tags.contains('lh_bot_raid_mob')) {
       var srvR = ent.server || killer.server;
       if (srvR && global.LHOpenTTD && global.LHOpenTTD.resolveBotMobRaid) {
@@ -2763,6 +2790,22 @@ ServerEvents.tick(function (event) {
   if (LHOTTDTick % 1200 === 0) {
     var stProd = lhOttdRead(server);
     global.LHOpenTTD.tickCompanyBuildings(stProd);
+    // Apply world comeback buffs (Speed / Haste) for lagging player companies
+    if (global.LHOpenTTD.getComebackStatus) {
+      var cPlayers = server.players || [];
+      for (var cpi = 0; cpi < cPlayers.length; cpi++) {
+        var cp = cPlayers[cpi];
+        var pComp = lhGetPlayerCompany(server, cp);
+        if (!pComp) continue;
+        var cb = global.LHOpenTTD.getComebackStatus(stProd, pComp.id);
+        if (cb && cb.active) {
+          try {
+            cp.potionEffects.add('minecraft:speed', 1200, cb.tier >= 3 ? 1 : 0, false, false);
+            cp.potionEffects.add('minecraft:haste', 1200, cb.tier >= 2 ? 1 : 0, false, false);
+          } catch (eCbEff) {}
+        }
+      }
+    }
     lhOttdSave(server);
   }
   if (LHOTTDTick % 2400 === 0) {
@@ -2805,6 +2848,11 @@ ServerEvents.tick(function (event) {
       var logAuto = lhLogisticsRead(server);
       var routeEvs = global.LHTradeLogistics.tickAutomatedRoutes(logAuto, stPeriod, LHOTTDTick);
       if (routeEvs && routeEvs.length > 0) {
+        routeEvs.forEach(function (rev) {
+          if (rev && rev.pirateHit && typeof lhLogEvent === 'function') {
+            lhLogEvent(server, 'raid', 'Корсары ограбили караван ' + rev.routeId + ': похищено ' + rev.pirateHit.stolenQty + '× ' + rev.pirateHit.stolenItem + '!', { chatMode: 'important' });
+          }
+        });
         lhLogisticsSave(server);
         changedPeriod = true;
       }
@@ -3792,6 +3840,20 @@ ServerEvents.commandRegistry(function (event) {
     lhMsg(p, res.ok ? ('Маршрут ' + (res.enabled ? 'включён' : 'остановлен')) : 'Маршрут не найден');
     return res.ok ? 1 : 0;
   })));
+  routeCmd.then(C.literal('escort').then(C.argument('id', LHOTTDStringArg.word()).executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, comp = lhGetPlayerCompany(server, p);
+    var logSt = lhLogisticsRead(server);
+    var rid = LHOTTDStringArg.getString(ctx, 'id');
+    var found = null;
+    (logSt.automatedRoutes || []).forEach(function (r) {
+      if (r && r.id === rid && (!comp || r.companyId === comp.id)) found = r;
+    });
+    if (!found) { lhMsg(p, 'Маршрут не найден.'); return 0; }
+    found.escortEnabled = !found.escortEnabled;
+    lhLogisticsSave(server);
+    lhMsg(p, '§e[Маршрут ' + rid + '] Охрана каравана: ' + (found.escortEnabled ? '§aВКЛ (−82% риска пиратов)' : '§cВЫКЛ'));
+    return 1;
+  })));
   root.then(routeCmd);
 
   var strCmd = C.literal('structure');
@@ -3819,12 +3881,177 @@ ServerEvents.commandRegistry(function (event) {
     var ex = global.LHOpenTTD.computeCompanyExpenses(st, comp.id);
     lhMsg(p, '=== Оценка компании ' + comp.colorCode + comp.name + ' §f: §e' + v.totalValuation + ' Cr ===');
     lhMsg(p, 'Нал: ' + v.cash + ' | Склад/запасы: ' + v.inventoryValue + ' | Объекты: ' + v.facilitiesValue +
-      ' | Потенциал: ' + v.productionPotentialValue + ' | Земля: ' + v.territoryValue + ' | Ср.доход/ч: ' + v.avgHourlyIncome);
+      ' | Акции: ' + (v.equityPortfolioValue || 0) + ' | Потенциал: ' + v.productionPotentialValue + ' | Земля: ' + v.territoryValue);
     lhMsg(p, 'Расходы/цикл: ' + ex.total + ' Cr (объекты ' + ex.facilityUpkeep + ', апгрейды ' + ex.upgradeUpkeep +
-      ', налог ' + ex.landTax + ', охрана ' + ex.securityUpkeep + (ex.antiMonopolyTax > 0 ? (', §cантимонополия ' + ex.antiMonopolyTax) : '') + ')');
+      ', земля ' + ex.landTax + ', прогрессивный налог ' + (ex.progressiveTax || 0) + ' [' + (ex.progressiveBracketLabel || '5%') + ']' +
+      (ex.antiMonopolyTax > 0 ? (', §cантимонополия ' + ex.antiMonopolyTax) : '') +
+      (ex.auditPenaltyTax > 0 ? (', §4штраф аудита ' + ex.auditPenaltyTax) : '') +
+      (ex.comebackDiscount > 0 ? (', §aкамбэк −' + ex.comebackDiscount) : '') + ')');
     return 1;
   });
   root.then(valCmd);
+
+  var bankCmd = C.literal('bank');
+  bankCmd.then(C.literal('status').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
+    var comp = lhGetPlayerCompany(server, p);
+    var cb = global.LHOpenTTD.updateCentralBankKeyRate(st);
+    lhMsg(p, '=== Центральный Банк ===');
+    lhMsg(p, 'Ключевая ставка: §e' + Math.round(cb.keyRate * 1000) / 10 + '% §7(индекс инфляции: ' + cb.inflationIndex + ')');
+    if (comp) {
+      var lim = global.LHOpenTTD.getMaxLoanLimit(st, comp.id);
+      var eff = global.LHOpenTTD.getEffectiveLoanRate(st, comp.id);
+      var debt = global.LHOpenTTD.getCompanyActiveDebt(st, comp.id);
+      lhMsg(p, 'Ваш лимит кредита: §a' + lim + ' Cr §7| Ваша ставка: §e' + Math.round(eff * 1000) / 10 + '% §7| Текущий долг: §c' + debt + ' Cr');
+    }
+    return 1;
+  }));
+  bankCmd.then(C.literal('loan').then(C.argument('amount', LHOTTDStringArg.word()).executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
+    var comp = lhGetPlayerCompany(server, p);
+    if (!comp) { lhMsg(p, 'Сначала создайте компанию.'); return 0; }
+    var amt = parseInt(LHOTTDStringArg.getString(ctx, 'amount'), 10);
+    var res = global.LHOpenTTD.takeBankLoan(st, comp.id, isNaN(amt) ? 500 : amt, 5, LHOTTDTick);
+    if (!res.ok) { lhMsg(p, '§cОтказ банка: ' + res.reason + (res.limit !== undefined ? (' (лимит ' + res.limit + ' Cr)') : '')); return 0; }
+    lhOttdSave(server);
+    lhMsg(p, '§a[Банк · ' + res.loan.id + '] Выдан заём ' + res.loan.principal + ' Cr под ' + Math.round(res.effectiveRate * 1000) / 10 + '%/цикл. К возврату: ' + res.loan.totalDue + ' Cr.');
+    return 1;
+  })));
+  bankCmd.then(C.literal('repay').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
+    var comp = lhGetPlayerCompany(server, p);
+    if (!comp) return 0;
+    var res = global.LHOpenTTD.repayBankLoan(st, comp.id);
+    if (!res.ok) { lhMsg(p, '§cНе удалось погасить: ' + res.reason); return 0; }
+    lhOttdSave(server);
+    lhMsg(p, '§a[Банк] Погашено ' + res.paid + ' Cr. Остаток долга: ' + res.remainingDebt + ' Cr.');
+    return 1;
+  }));
+  root.then(bankCmd);
+
+  var taxCmd = C.literal('tax');
+  taxCmd.then(C.literal('status').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
+    var comp = lhGetPlayerCompany(server, p);
+    if (!comp) { lhMsg(p, 'Сначала создайте компанию.'); return 0; }
+    var ex = global.LHOpenTTD.computeCompanyExpenses(st, comp.id);
+    lhMsg(p, '=== Налоги и содержание ===');
+    lhMsg(p, 'Итого/цикл: §e' + ex.total + ' Cr §7| Скобка: §b' + ex.progressiveBracketLabel + ' §7| Долг: §c' + (comp.unpaidUpkeep || 0) + ' Cr');
+    if (comp.taxAuditPenaltyCycles > 0) lhMsg(p, '§4Активен штраф аудита (+35% на ' + comp.taxAuditPenaltyCycles + ' цикл.)');
+    return 1;
+  }));
+  taxCmd.then(C.literal('evade').then(C.argument('method', LHOTTDStringArg.word()).executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
+    var comp = lhGetPlayerCompany(server, p);
+    if (!comp) { lhMsg(p, 'Сначала создайте компанию.'); return 0; }
+    var m = LHOTTDStringArg.getString(ctx, 'method');
+    var res = global.LHOpenTTD.attemptTaxEvasion(st, comp.id, m, LHOTTDTick);
+    if (!res.ok) { lhMsg(p, '§cНевозможно: ' + res.reason); return 0; }
+    lhOttdSave(server);
+    if (res.succeeded) {
+      lhMsg(p, '§a[Схема удалась] Скидка на налог в этом цикле −' + res.discountPct + '%, списано ' + res.debtForgiven + ' Cr долга!');
+    } else {
+      lhMsg(p, '§c[АУДИТ ПРОВАЛЕН!] Штраф +' + res.fine + ' Cr к долгу и доп.налог +35% на 3 цикла!');
+    }
+    return 1;
+  })));
+  root.then(taxCmd);
+
+  var eqCmd = C.literal('equity');
+  eqCmd.then(C.literal('list').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
+    lhMsg(p, '=== Рынок акций компаний ===');
+    Object.keys(st.companies || {}).forEach(function (cid) {
+      var c = st.companies[cid];
+      if (!c || c.isPirate) return;
+      var sp = global.LHOpenTTD.getSharePrice(st, cid);
+      lhMsg(p, c.colorCode + c.name + ' [' + cid + '] §f| 1% = §e' + sp + ' Cr §7| Свободно: ' + (c.shareHoldings ? (c.shareHoldings[cid] || 0) : 100) + '%');
+    });
+    return 1;
+  }));
+  eqCmd.then(C.literal('buy').then(C.argument('target', LHOTTDStringArg.word()).then(C.argument('shares', LHOTTDStringArg.word()).executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
+    var comp = lhGetPlayerCompany(server, p);
+    if (!comp) return 0;
+    var cnt = parseInt(LHOTTDStringArg.getString(ctx, 'shares'), 10);
+    var res = global.LHOpenTTD.buyCompanyShares(st, comp.id, LHOTTDStringArg.getString(ctx, 'target'), isNaN(cnt) ? 10 : cnt);
+    if (!res.ok) { lhMsg(p, '§cОшибка покупки акций: ' + res.reason); return 0; }
+    lhOttdSave(server);
+    lhMsg(p, '§aКуплено ' + res.sharesBought + '% акций ' + res.targetCid + ' за ' + res.cost + ' Cr!');
+    return 1;
+  }))));
+  eqCmd.then(C.literal('sell').then(C.argument('target', LHOTTDStringArg.word()).then(C.argument('shares', LHOTTDStringArg.word()).executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
+    var comp = lhGetPlayerCompany(server, p);
+    if (!comp) return 0;
+    var cnt = parseInt(LHOTTDStringArg.getString(ctx, 'shares'), 10);
+    var res = global.LHOpenTTD.sellCompanyShares(st, comp.id, LHOTTDStringArg.getString(ctx, 'target'), isNaN(cnt) ? 10 : cnt);
+    if (!res.ok) { lhMsg(p, '§cОшибка продажи акций: ' + res.reason); return 0; }
+    lhOttdSave(server);
+    lhMsg(p, '§aПродано ' + res.sharesSold + '% акций ' + res.targetCid + ' за ' + res.proceeds + ' Cr!');
+    return 1;
+  }))));
+  root.then(eqCmd);
+
+  var cbCmd = C.literal('comeback');
+  cbCmd.then(C.literal('status').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
+    var comp = lhGetPlayerCompany(server, p);
+    if (!comp) return 0;
+    var cb = global.LHOpenTTD.getComebackStatus(st, comp.id);
+    lhMsg(p, cb.active
+      ? ('§a[Камбэк Ур.' + cb.tier + '] §fСкидка на налоги −' + Math.round(cb.taxDiscount * 100) + '%, выпуск ×' + cb.yieldMult + ', скидка на захват −' + Math.round(cb.claimDiscount * 100) + '%, ставка ЦБ ×0.5!')
+      : '§7Ваша компания не нуждается в антикризисном камбэке.');
+    return 1;
+  }));
+  cbCmd.then(C.literal('bailout').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
+    var comp = lhGetPlayerCompany(server, p);
+    if (!comp) return 0;
+    var res = global.LHOpenTTD.activateComebackBailout(st, comp.id, LHOTTDTick);
+    if (!res.ok) { lhMsg(p, '§cГрант недоступен: ' + res.reason); return 0; }
+    lhOttdSave(server);
+    lhMsg(p, '§a[Антикризисная помощь] Получено +' + res.grantCash + ' Cr, +' + res.grantCoal + '× угля на склад и списано ' + res.debtForgiven + ' Cr долга!');
+    return 1;
+  }));
+  root.then(cbCmd);
+
+  var pirCmd = C.literal('pirate');
+  pirCmd.then(C.literal('status').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
+    var ps = global.LHOpenTTD.ensurePirateSyndicate(st);
+    lhMsg(p, '=== Синдикат Корсаров (Ур.' + ps.level + ', мощь ' + ps.power + ') ===');
+    lhMsg(p, 'Казна: §e' + ps.cash + ' Cr §7| Ограблено караванов: §c' + ps.caravansRobbed + ' §7| Набегов: §c' + ps.raidsCompleted);
+    return 1;
+  }));
+  pirCmd.then(C.literal('order')
+    .then(C.argument('target', LHOTTDStringArg.word())
+      .then(C.argument('tier', LHOTTDStringArg.word()).executes(function (ctx) {
+        var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
+        var comp = lhGetPlayerCompany(server, p);
+        if (!comp) return 0;
+        var tgtId = LHOTTDStringArg.getString(ctx, 'target');
+        var tgt = st.companies[tgtId];
+        if (!tgt) { lhMsg(p, 'Цель не найдена.'); return 0; }
+        var tier = parseInt(LHOTTDStringArg.getString(ctx, 'tier'), 10);
+        var res = global.LHOpenTTD.orderPirateRaid(st, comp.id, tgtId, tgt.hqSx, tgt.hqSz, isNaN(tier) ? 1 : tier, LHOTTDTick, { anonymous: true });
+        if (!res.ok) { lhMsg(p, '§cЗаказ отклонён: ' + res.reason); return 0; }
+        lhSpawnBotMobRaids(server, st);
+        lhOttdSave(server);
+        lhMsg(p, '§6[Синдикат Корсаров] Заказан анонимный набег тира ' + res.raid.tier + ' на «' + tgt.name + '» за ' + res.cost + ' Cr!');
+        return 1;
+      }))));
+  pirCmd.then(C.literal('immunity').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
+    var comp = lhGetPlayerCompany(server, p);
+    if (!comp) return 0;
+    var res = global.LHOpenTTD.buyPirateImmunity(st, comp.id, 12000, LHOTTDTick);
+    if (!res.ok) { lhMsg(p, '§cНе хватает средств: нужно ' + res.cost + ' Cr.'); return 0; }
+    lhOttdSave(server);
+    lhMsg(p, '§a[Корсары] Куплен чёрный пакт неприкосновенности на 10 мин за ' + res.cost + ' Cr!');
+    return 1;
+  }));
+  root.then(pirCmd);
 
   event.register(root);
 });

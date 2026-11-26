@@ -192,9 +192,45 @@ function lhSiteProduce(server, player, siteId, mode) {
     var pCat = siteId === 'iron_basin' ? 'mining' : (siteId === 'timber_valley' ? 'forestry' : (siteId === 'breadbasket_plains' ? 'food' : (siteId === 'oil_steppe' ? 'energy' : 'contract')));
     lhCompanyReward(server, player, mode === 'industrial' ? 260 : 120, pCat, null);
   }
+  if (typeof lhCheckSiteCaravanPirateAmbush === 'function') {
+    lhCheckSiteCaravanPirateAmbush(server, player, site, spec.product, outCount);
+  }
   if (typeof lhStageRecompute === 'function') lhStageRecompute(server, player);
   lhMsg(player, 'Выпущено ' + outCount + 'x ' + spec.product + ' на площадке "' + site.name + '". Всего выпущено: ' + site.producedTotal);
   return 1;
+}
+
+function lhCheckSiteCaravanPirateAmbush(server, player, site, productId, outCount) {
+  try {
+    if (!server || !player || !global.LHOpenTTD || typeof lhOttdRead !== 'function') return 0;
+    var st = lhOttdRead(server);
+    var comp = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, player) : null;
+    if (!comp) return 0;
+    var sc = global.LHOpenTTD.sectorCoords(site.x, site.z);
+    var risk = global.LHOpenTTD.computeCaravanPiracyRisk(st, comp.id, comp.hqSx, comp.hqSz, sc.sx, sc.sz, false, server.tickCount || 0);
+    if (risk <= 0 || Math.random() > Math.min(0.35, risk * 0.6)) return 0;
+    var ps = global.LHOpenTTD.ensurePirateSyndicate(st);
+    var count = Math.min(4, 2 + Math.floor(ps.level / 3));
+    for (var i = 0; i < count; i++) {
+      var ang = (Math.PI * 2 * i) / count;
+      var sx = Math.round(player.x + Math.cos(ang) * 9);
+      var sz = Math.round(player.z + Math.sin(ang) * 9);
+      var sy = Math.round(player.y + 1);
+      var mob = i === 0 ? 'minecraft:vindicator' : 'minecraft:pillager';
+      var nbt = JSON.stringify({
+        Tags: ['lh_site_corsair'],
+        PersistenceRequired: 0,
+        CustomName: JSON.stringify({ text: 'Корсар Каравана (Ур.' + ps.level + ')', color: 'gold' }),
+        CustomNameVisible: 1
+      });
+      server.runCommandSilent('execute in minecraft:overworld run summon ' + mob + ' ' + sx + ' ' + sy + ' ' + sz + ' ' + nbt);
+    }
+    global.LHOpenTTD.interceptCaravanByPirates(st, comp.id, productId, Math.max(1, Math.floor(outCount / 2)), 80, server.tickCount || 0);
+    if (typeof lhOttdSave === 'function') lhOttdSave(server);
+    lhMsg(player, '§6§l[ЗАСАДА КОРСАРОВ!] §fПираты Ур.' + ps.level + ' перехватили часть каравана у «' + site.name + '»! Отбейте атаку за награду.');
+    return count;
+  } catch (ePir) {}
+  return 0;
 }
 
 function lhSiteArchive(server, player) {

@@ -907,17 +907,23 @@ test('Structure production (6 Diablo rarities, 4 dims), archetypes/traits, requi
   const adjMult = O.getPowerPlantAdjacencyMultiplier(st, 'alpha', 4, 5, 'minecraft:overworld');
   assert(adjMult >= 1.20, 'adjacent power plant boosts production: ' + adjMult);
 
-  // 3. Required inputs pause facility when depleted, resume when supplied, and fill outputContainerQueue
+  // 3. Fuel is mandatory (pauses with missing_fuel), while raw inputs give +45% boost over partial out-of-thin-air output
   assert(O.claimOrCaptureSector(st, 'alpha', 4, 6, false).ok);
   const mineRes = O.buildCompanyBuilding(st, 'alpha', 4, 6, 'mine_shaft', 1024, 70, 1536, { emptyInputs: true });
   assert(mineRes.ok);
   O.tickCompanyBuildings(st);
-  assert.equal(mineRes.building.pausedReason, 'missing_inputs', 'building pauses without required input items');
+  assert.equal(mineRes.building.pausedReason, 'missing_fuel', 'building pauses without fuel');
   assert.equal(mineRes.building.cyclesDone, 0);
+  assert(O.supplyBuildingInputs(st, 'alpha', 4, 6, { 'minecraft:coal': 4 }).ok);
+  O.tickCompanyBuildings(st);
+  assert.equal(mineRes.building.pausedReason, null, 'resumes with fuel alone (partial out-of-thin-air production)');
+  assert.equal(mineRes.building.cyclesDone, 1, 'produces partial output without raw inputs when fueled');
+  const qtyPartial = mineRes.building.stockBuffer['minecraft:raw_iron'] || 0;
+  assert(qtyPartial > 0 && Object.keys(mineRes.building.outputContainerQueue).length > 0, 'queues items for physical output barrel');
   assert(O.supplyBuildingInputs(st, 'alpha', 4, 6, { 'minecraft:oak_planks': 8, 'minecraft:coal': 4 }).ok);
   O.tickCompanyBuildings(st);
-  assert.equal(mineRes.building.pausedReason, null, 'resumes once inputs supplied');
-  assert.equal(mineRes.building.cyclesDone === 1 && Object.keys(mineRes.building.outputContainerQueue).length > 0, true, 'queues items for physical output barrel');
+  const qtyTotal = mineRes.building.stockBuffer['minecraft:raw_iron'] || 0;
+  assert(qtyTotal - qtyPartial >= qtyPartial, 'supplying optional raw inputs grants boost over partial output');
 
   // 4. Ongoing expenses (facility, upgrade, land tax, security, anti-monopoly) & Valuation breakdown
   O.upgradeCompanyBuilding(st, 'alpha', 4, 6, O.BUILDING_CATALOG.mine_shaft.tier1Fork[0].id);
@@ -983,6 +989,132 @@ test('Structure production (6 Diablo rarities, 4 dims), archetypes/traits, requi
   const s27 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/27_openttd_companies.js'), 'utf8');
   assert(s26.includes('minPlayerDist') && s26.includes('minAnyDist'), 'lhFirstJoinRandomSpawn enforces wide early company HQ spacing');
   assert(s27.includes('preserveWorldStructure') && s27.includes('lhEnsureBarrelAt') && s27.includes('lhSyncBuildingPhysicalContainers'), '27_openttd_companies preserves world structures and barrels');
+});
+
+test('38. Progressive taxes, Central Bank loans & defaults, tax evasion, equity valuation, no-player-merger, comeback & pirate syndicate', () => {
+  const O = sandbox.global.LHOpenTTD;
+  const TL = sandbox.global.LHTradeLogistics;
+  const st = O.createInitialState();
+  assert(O.companyCreate(st, 'p1', 'alpha', 'Alpha Corp', 0, 0).ok);
+  assert(O.companyCreate(st, 'p2', 'beta', 'Beta Corp', 0, 4096).ok);
+  st.companies.alpha.cash = 4000;
+  st.companies.beta.cash = 3500;
+
+  // 1. Progressive tax brackets scale with income
+  st.companies.alpha._cycleGrossIncome = 100;
+  const expLow = O.computeCompanyExpenses(st, 'alpha');
+  st.companies.alpha._cycleGrossIncome = 2000;
+  const expHigh = O.computeCompanyExpenses(st, 'alpha');
+  assert(expHigh.progressiveTax > expLow.progressiveTax, 'higher income triggers higher progressive tax bracket');
+  assert(String(expHigh.progressiveBracketLabel).startsWith('35%'));
+
+  // 2. Central Bank key rate, loans, and forced debt auctions on loan default / unpaid upkeep
+  const cb = O.updateCentralBankKeyRate(st);
+  assert(cb.keyRate >= 0.04 && cb.keyRate <= 0.25);
+  const aHqX = st.companies.alpha.hqSx;
+  const aHqZ = st.companies.alpha.hqSz;
+  assert(O.claimOrCaptureSector(st, 'alpha', aHqX + 1, aHqZ, false).ok);
+  assert(O.claimOrCaptureSector(st, 'alpha', aHqX + 1, aHqZ + 1, false).ok);
+  assert(O.buildCompanyBuilding(st, 'alpha', aHqX + 1, aHqZ, 'mine_shaft', (aHqX + 1) * 256, 70, aHqZ * 256).ok);
+
+  const loanRes = O.takeBankLoan(st, 'alpha', 600, 3, 100);
+  assert(loanRes.ok && loanRes.loan.totalDue > 600);
+  // Drain alpha cash so loan misses once (warning) then defaults on 2nd missed cycle and triggers forced auctions
+  st.companies.alpha.cash = 0;
+  const loanEvs1 = O.tickBankLoans(st, 4000);
+  assert(loanEvs1.some(e => e.type === 'loan_missed'), '1st missed payment logs loan_missed');
+  const loanEvs = O.tickBankLoans(st, 5000);
+  assert(loanEvs.some(e => e.type === 'loan_default'), '2nd missed payment triggers loan_default');
+  const forcedAucs = st.auctions.filter(a => a.status === 'open' && a.isForcedDebtAuction);
+  assert(forcedAucs.length >= 1, 'default forces company facilities/sectors onto auction');
+  assert.equal(O.cancelFacilityAuction(st, forcedAucs[0].id, 'alpha').reason, 'forced_debt_auction');
+  const bidF = O.placeAuctionBid(st, forcedAucs[0].id, 'beta', (forcedAucs[0].startPrice || 200) + 50, 5100);
+  assert(bidF.ok);
+  const settledF = O.tickAuctions(st, forcedAucs[0].endsAtTick + 10);
+  assert(settledF.length >= 1 && settledF[0].sold, 'forced debt auction settles and transfers asset');
+  assert(O.getCompanyActiveDebt(st, 'alpha') < loanRes.loan.totalDue, 'auction proceeds pay down company debt');
+
+  // Last remaining HQ sector is protected from forced elimination
+  const alphaSecs = Object.keys(st.claims || {}).filter(k => st.claims[k] && st.claims[k].owner === 'alpha');
+  assert(alphaSecs.length >= 1, 'player company never loses its last HQ sector to forced auction');
+
+  // 3. Tax evasion: failed evasion imposes audit penalty; successful evasion grants discount
+  st.companies.alpha.cash = 1000;
+  st.companies.alpha.unpaidUpkeep = 200;
+  const failEv = O.attemptTaxEvasion(st, 'alpha', 'forged_docs', 6000, () => 0.99);
+  assert(failEv.ok && failEv.succeeded === false && st.companies.alpha.taxAuditPenaltyCycles === 3);
+  const expAudit = O.computeCompanyExpenses(st, 'alpha');
+  assert(expAudit.auditPenaltyTax > 0, 'failed evasion imposes extra penalty tax');
+  const okEv = O.attemptTaxEvasion(st, 'alpha', 'bribe', 9000, () => 0.01);
+  assert(okEv.ok && okEv.succeeded === true && okEv.discountPct >= 30);
+
+  // 4. Shares included in valuation & anti-monopoly; player-eliminating mergers forbidden
+  st.companies.beta.cash = 15000;
+  const buySh = O.buyCompanyShares(st, 'beta', 'alpha', 25);
+  assert(buySh.ok && buySh.sharesBought === 25);
+  const betaVal = O.getCompanyValuationBreakdown(st, 'beta');
+  assert(betaVal.equityPortfolioValue > 0 && betaVal.totalValuation >= betaVal.cash + betaVal.equityPortfolioValue, 'shares count in valuation');
+  const monoShares = O.getMonopolyMetrics(st);
+  assert(monoShares.some(m => m.cid === 'beta' && m.assetValuationWithEquity === betaVal.totalValuation), 'valuation including shares feeds monopoly metrics');
+
+  // Cannot buy > 49% of a player company
+  const overCap = O.buyCompanyShares(st, 'beta', 'alpha', 30);
+  assert.equal(overCap.ok, false);
+  assert.equal(overCap.reason, 'equity_cap_reached');
+  // Cannot merge two player companies
+  const mergeRes = O.companyMerge(st, 'beta', 'alpha');
+  assert.equal(mergeRes.ok, false);
+  assert.equal(mergeRes.reason, 'player_merge_disabled');
+
+  // 5. Comeback mechanics & dynamic underdog subsidy
+  st.companies.alpha.cash = 40;
+  st.companies.alpha.unpaidUpkeep = 300;
+  st.companies.beta.cash = 25000;
+  const cbAlpha = O.getComebackStatus(st, 'alpha');
+  assert(cbAlpha.active && cbAlpha.taxDiscount > 0 && cbAlpha.yieldMult > 1.0 && cbAlpha.loanRateMult < 1.0, 'underdog gets comeback buffs');
+  const subTgt = O.selectDynamicSubsidyTarget(st);
+  assert(subTgt && subTgt.companyId === 'alpha', 'dynamic subsidy picks struggling player company');
+  const bailRes = O.activateComebackBailout(st, 'alpha', 15000);
+  assert(bailRes.ok && bailRes.grantCash > 0 && bailRes.debtForgiven > 0);
+
+  // 6. Pirate syndicate, caravan robbery, growth & hired raids
+  const ps = O.ensurePirateSyndicate(st);
+  assert.equal(ps.level, 1);
+  assert(O.countActiveBots(st) === 4, 'pirate syndicate does not distort standard AI bot count');
+  const bHqX = st.companies.beta.hqSx;
+  const bHqZ = st.companies.beta.hqSz;
+  st.companies.beta.cash = 10000;
+  assert(O.claimOrCaptureSector(st, 'beta', bHqX + 1, bHqZ, false).ok);
+  assert(O.claimOrCaptureSector(st, 'beta', bHqX + 4, bHqZ, false).ok);
+  assert(O.buildCompanyBuilding(st, 'beta', bHqX + 1, bHqZ, 'mine_shaft', (bHqX + 1) * 256, 70, bHqZ * 256).ok);
+  assert(O.buildCompanyBuilding(st, 'beta', bHqX + 4, bHqZ, 'factory', (bHqX + 4) * 256, 70, bHqZ * 256).ok);
+  st.buildings[(bHqX + 1) + ',' + bHqZ].stockBuffer['minecraft:iron_ingot'] = 24;
+
+  const logPir = TL.createState();
+  const rtLong = TL.createAutomatedRoute(logPir, st, 'beta', bHqX + 1, bHqZ, bHqX + 4, bHqZ, 'minecraft:iron_ingot', 10, { nowTick: 0 });
+  assert(rtLong.ok);
+  const rEvs = TL.tickAutomatedRoutes(logPir, st, 2500, { rng: () => 0.001 });
+  assert(rEvs.some(e => e.pirateHit), 'unprotected long route gets robbed by pirates');
+  assert(ps.caravansRobbed >= 1 && Object.keys(ps.lootStash || {}).length >= 1 && ps.cash > 0, 'pirate syndicate grows stronger and stores loot from robberies');
+
+  // Black market buy & hired anonymous raid
+  const lootKey = Object.keys(ps.lootStash)[0];
+  const bmBuy = O.buyPirateBlackMarketLoot(st, 'alpha', lootKey, 1);
+  assert(bmBuy.ok && bmBuy.qty >= 1);
+  st.companies.alpha.cash = 2000;
+  const hireRaid = O.orderPirateRaid(st, 'alpha', 'beta', bHqX, bHqZ, 2, 20000, { anonymous: true });
+  assert(hireRaid.ok && hireRaid.raid.isPirateRaid && hireRaid.raid.anonymous === true);
+  assert(ps.power > 10, 'pirate syndicate gains power from caravan robberies and hired raids');
+
+  // 7. Integration markers across server scripts & ChestGUI
+  const path = require('path');
+  const ROOT = path.resolve(__dirname, '..');
+  const s15 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/15_sites_and_economy.js'), 'utf8');
+  const s27 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/27_openttd_companies.js'), 'utf8');
+  const s30 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/30_lh_gui.js'), 'utf8');
+  assert(s15.includes('lhCheckSiteCaravanPirateAmbush'), '15_sites_and_economy triggers pirate ambushes on site caravans');
+  assert(s27.includes('tickBankLoans') && s27.includes('orderPirateRaid') && s27.includes('attemptTaxEvasion'), '27_openttd_companies wires bank, tax evasion, and pirates');
+  assert(s30.includes('lhGuiRenderBank') && s30.includes('lhGuiRenderPirates'), '30_lh_gui exposes Bank/Tax/Shares and Pirates/Caravans tabs');
 });
 
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');

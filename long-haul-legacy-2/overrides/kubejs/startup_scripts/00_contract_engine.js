@@ -2179,6 +2179,103 @@ global.LHOpenTTD = (function () {
     }
   };
 
+  var PROGRESSIVE_TAX_BRACKETS = [
+    { upTo: 200, rate: 0.05, label: '5% (Стартовая)' },
+    { upTo: 600, rate: 0.12, label: '12% (Средняя)' },
+    { upTo: 1500, rate: 0.22, label: '22% (Высокая)' },
+    { upTo: 1e12, rate: 0.35, label: '35% (Корпоративная)' }
+  ];
+
+  var FUEL_EQUIVALENTS = {
+    'minecraft:coal': 1,
+    'minecraft:charcoal': 1,
+    'longhaul:technical_oil': 3,
+    'gtceu:oil_bucket': 3,
+    'minecraft:lava_bucket': 4,
+    'minecraft:coal_block': 9,
+    'minecraft:blaze_rod': 4
+  };
+
+  var PIRATE_SYNDICATE_ID = 'bot_pirates';
+  var MAX_PLAYER_EXTERNAL_SHARES = 49;
+
+  function ensureCompanyFinancialFields(comp, cid) {
+    if (!comp) return comp;
+    if (!comp.shareHoldings || typeof comp.shareHoldings !== 'object') {
+      comp.shareHoldings = {};
+      comp.shareHoldings[cid || comp.id] = 100;
+    }
+    if (!(comp.totalShares > 0)) comp.totalShares = 100;
+    if (!(comp.unpaidUpkeep >= 0)) comp.unpaidUpkeep = 0;
+    if (!(comp.taxAuditPenaltyCycles >= 0)) comp.taxAuditPenaltyCycles = 0;
+    if (!(comp.taxAuditPenaltyRate >= 0)) comp.taxAuditPenaltyRate = 0;
+    if (!(comp.taxEvasionDiscount >= 0)) comp.taxEvasionDiscount = 0;
+    if (!(comp.lastComebackBailoutTick >= 0)) comp.lastComebackBailoutTick = 0;
+    if (!(comp.pirateImmunityUntilTick >= 0)) comp.pirateImmunityUntilTick = 0;
+    if (!(comp.forcedAuctionCount >= 0)) comp.forcedAuctionCount = 0;
+    return comp;
+  }
+
+  function ensurePirateSyndicate(state) {
+    if (!state) return null;
+    if (!state.pirateSyndicate) {
+      state.pirateSyndicate = {
+        id: PIRATE_SYNDICATE_ID,
+        name: 'Синдикат Корсаров',
+        level: 1,
+        power: 12,
+        cash: 1200,
+        caravansRobbed: 0,
+        raidsCompleted: 0,
+        lootStash: {
+          'minecraft:iron_ingot': 12,
+          'minecraft:coal': 24,
+          'longhaul:technical_oil': 4
+        },
+        ordersHistory: []
+      };
+    }
+    var ps = state.pirateSyndicate;
+    if (!ps.lootStash) ps.lootStash = {};
+    if (!ps.ordersHistory) ps.ordersHistory = [];
+    if (!state.companies) state.companies = {};
+    if (!state.companies[PIRATE_SYNDICATE_ID]) {
+      state.companies[PIRATE_SYNDICATE_ID] = {
+        id: PIRATE_SYNDICATE_ID,
+        name: 'Синдикат Корсаров',
+        archetype: 'raider_cartel',
+        archetypeName: 'Корсарский синдикат',
+        traits: ['raider_elite', 'smuggler_net'],
+        color: 'dark_red',
+        colorCode: '§4',
+        tag: 'PIR',
+        isBot: true,
+        isPirate: true,
+        owner: 'AI_PIRATES',
+        members: [],
+        cash: ps.cash || 1200,
+        transportSpec: 'sea',
+        resourceSpec: 'logistics',
+        envType: 'sea',
+        hqSx: -14,
+        hqSz: -14,
+        hqX: -14 * SECTOR_SIZE,
+        hqY: 64,
+        hqZ: -14 * SECTOR_SIZE,
+        stockBuffer: {},
+        incomeHistory: [],
+        physicalStockEstimate: 0,
+        stats: { deliveries: 0, tradeVolume: 0, blocksMined: 0, sectorsCaptured: 0, contractsDone: 0, routesDone: 0, raidsLaunched: 0, hostileCaptures: 0 }
+      };
+    }
+    var pComp = state.companies[PIRATE_SYNDICATE_ID];
+    pComp.isBot = true;
+    pComp.isPirate = true;
+    ensureCompanyFinancialFields(pComp, PIRATE_SYNDICATE_ID);
+    ps.cash = pComp.cash;
+    return ps;
+  }
+
   function ensureDiplomacyState(state) {
     if (!state.buildings) state.buildings = {};
     if (!state.relations) state.relations = {};
@@ -2190,12 +2287,30 @@ global.LHOpenTTD = (function () {
     if (!state.auctions) state.auctions = [];
     if (!state.activeMobRaids) state.activeMobRaids = [];
     if (!state.coalitions) state.coalitions = {};
+    if (!state.centralBank) {
+      state.centralBank = {
+        keyRate: 0.08,
+        baseRate: 0.08,
+        inflationIndex: 1.0,
+        totalIssued: 0,
+        totalRepaid: 0,
+        totalDefaulted: 0
+      };
+    }
+    if (!state.loans) state.loans = [];
+    if (!(state.nextLoanSeq > 0)) state.nextLoanSeq = 1;
     if (!(state.nextBuildingSeq > 0)) state.nextBuildingSeq = 1;
     if (!(state.nextSupplySeq > 0)) state.nextSupplySeq = 1;
     if (!(state.nextAuctionSeq > 0)) state.nextAuctionSeq = 1;
     if (!(state.nextMobRaidSeq > 0)) state.nextMobRaidSeq = 1;
     if (!(state.botChapterSpawnsDone >= 0)) state.botChapterSpawnsDone = 0;
     if (!(state.completedChapters >= 0)) state.completedChapters = 0;
+    if (state.companies) {
+      Object.keys(state.companies).forEach(function (cid) {
+        ensureCompanyFinancialFields(state.companies[cid], cid);
+      });
+    }
+    ensurePirateSyndicate(state);
     return state;
   }
 
@@ -2669,6 +2784,34 @@ global.LHOpenTTD = (function () {
     return (spec && spec.inputItems) ? spec.inputItems : {};
   }
 
+  function getBuildingFuelRequirements(b) {
+    if (!b) return { fuelUnits: 1, preferredItem: 'minecraft:coal' };
+    var spec = BUILDING_CATALOG[b.type] || {};
+    var req = getBuildingRequiredInputs(b);
+    var fuelUnits = 0;
+    Object.keys(req || {}).forEach(function (iid) {
+      if (FUEL_EQUIVALENTS[iid]) {
+        fuelUnits += Math.max(1, Math.round(Number(req[iid] || 1))) * FUEL_EQUIVALENTS[iid];
+      }
+    });
+    if (fuelUnits <= 0) {
+      fuelUnits = (b.type === 'power_plant' || b.type === 'chemical_plant' || b.type === 'factory') ? 2 : 1;
+    }
+    return {
+      fuelUnits: Math.max(1, fuelUnits),
+      preferredItem: spec.fuelItem || 'minecraft:coal'
+    };
+  }
+
+  function getBuildingOptionalInputs(b) {
+    var req = getBuildingRequiredInputs(b);
+    var opt = {};
+    Object.keys(req || {}).forEach(function (iid) {
+      if (!FUEL_EQUIVALENTS[iid]) opt[iid] = Math.max(1, Math.round(Number(req[iid] || 1)));
+    });
+    return opt;
+  }
+
   function supplyBuildingInputs(state, cid, sx, sz, itemsMap, dimension) {
     ensureDiplomacyState(state);
     var b = getSectorBuilding(state, sx, sz, dimension);
@@ -2682,8 +2825,9 @@ global.LHOpenTTD = (function () {
         added += q;
       }
     });
-    if (added > 0 && b.pausedReason === 'missing_inputs') {
+    if (added > 0 && (b.pausedReason === 'missing_inputs' || b.pausedReason === 'missing_fuel')) {
       b.pausedReason = null;
+      b.missingItem = null;
     }
     return { ok: true, added: added, inputBuffer: b.inputBuffer };
   }
@@ -2692,9 +2836,15 @@ global.LHOpenTTD = (function () {
     if (!b.inputBuffer) b.inputBuffer = {};
     var c = Math.max(0, Math.round(Number(cycles || 2)));
     if (c <= 0) return;
+    var fuelInfo = getBuildingFuelRequirements(b);
+    var hadFuel = false;
     Object.keys(reqInputs || {}).forEach(function (iid) {
+      if (FUEL_EQUIVALENTS[iid]) hadFuel = true;
       b.inputBuffer[iid] = Number(b.inputBuffer[iid] || 0) + Math.max(1, Math.round(Number(reqInputs[iid] || 1))) * c;
     });
+    if (!hadFuel) {
+      b.inputBuffer[fuelInfo.preferredItem] = Number(b.inputBuffer[fuelInfo.preferredItem] || 0) + fuelInfo.fuelUnits * c;
+    }
   }
 
   function buildCompanyBuilding(state, cid, sx, sz, bType, wx, wy, wz, options) {
@@ -2966,14 +3116,16 @@ global.LHOpenTTD = (function () {
 
   function getBuildingYieldProfile(b, adjMultOrOpts, compOrNull) {
     var spec = BUILDING_CATALOG[b.type];
-    if (!spec) return { income: 0, items: {}, adjacencyMult: 1.0, subsidyMult: 1.0 };
+    if (!spec) return { income: 0, items: {}, adjacencyMult: 1.0, subsidyMult: 1.0, inputBoostMult: 1.0, comebackMult: 1.0 };
     var adjMult = (typeof adjMultOrOpts === 'number') ? Math.max(1.0, adjMultOrOpts) : 1.0;
     var subsidyMult = (adjMultOrOpts && typeof adjMultOrOpts === 'object' && adjMultOrOpts.subsidyMult) ? Number(adjMultOrOpts.subsidyMult) : 1.0;
+    var inputBoostMult = (adjMultOrOpts && typeof adjMultOrOpts === 'object' && adjMultOrOpts.inputBoostMult) ? Number(adjMultOrOpts.inputBoostMult) : 1.0;
+    var comebackMult = (adjMultOrOpts && typeof adjMultOrOpts === 'object' && adjMultOrOpts.comebackMult) ? Number(adjMultOrOpts.comebackMult) : 1.0;
     if (adjMultOrOpts && typeof adjMultOrOpts === 'object' && adjMultOrOpts.adjMult) adjMult = Math.max(1.0, Number(adjMultOrOpts.adjMult));
     var tMods = compOrNull ? getCompanyTraitModifiers(compOrNull) : getCompanyTraitModifiers(null);
 
-    var incMult = adjMult * subsidyMult * tMods.incomeMult;
-    var yMult = adjMult * subsidyMult * tMods.yieldMult * (b.type === 'structure_facility' ? tMods.structureYieldMult : 1.0);
+    var incMult = adjMult * subsidyMult * inputBoostMult * comebackMult * tMods.incomeMult;
+    var yMult = adjMult * subsidyMult * inputBoostMult * comebackMult * tMods.yieldMult * (b.type === 'structure_facility' ? tMods.structureYieldMult : 1.0);
     var items = {};
     var f1 = null, f2 = null;
     if (b.branch1 && spec.tier1Fork) {
@@ -2996,11 +3148,18 @@ global.LHOpenTTD = (function () {
     var income = Math.round(baseInc * incMult);
     items[baseProd] = Math.max(1, Math.round(baseQ * yMult));
     if (f1 && f1.bonusProduct) {
-      items[f1.bonusProduct] = (items[f1.bonusProduct] || 0) + Math.max(1, Math.round((f1.bonusQty || 1) * (f2 ? f2.yieldMult : 1.0) * adjMult * subsidyMult));
+      items[f1.bonusProduct] = (items[f1.bonusProduct] || 0) + Math.max(1, Math.round((f1.bonusQty || 1) * (f2 ? f2.yieldMult : 1.0) * adjMult * subsidyMult * inputBoostMult * comebackMult));
     } else if (b.type === 'structure_facility' && f1 && b.bonusProduct) {
-      items[b.bonusProduct] = (items[b.bonusProduct] || 0) + Math.max(1, Math.round(2 * (f2 ? f2.yieldMult : 1.0) * adjMult * subsidyMult));
+      items[b.bonusProduct] = (items[b.bonusProduct] || 0) + Math.max(1, Math.round(2 * (f2 ? f2.yieldMult : 1.0) * adjMult * subsidyMult * inputBoostMult * comebackMult));
     }
-    return { income: income, items: items, adjacencyMult: adjMult, subsidyMult: subsidyMult };
+    return {
+      income: income,
+      items: items,
+      adjacencyMult: adjMult,
+      subsidyMult: subsidyMult,
+      inputBoostMult: inputBoostMult,
+      comebackMult: comebackMult
+    };
   }
 
   function getPatrolProfile(b) {
@@ -3082,6 +3241,281 @@ global.LHOpenTTD = (function () {
     return out;
   }
 
+  // ---- Shares / Equity & Asset Valuation Helpers ----
+  function getOperationalValuationBreakdown(state, cid) {
+    var c = state.companies && state.companies[cid];
+    if (!c) {
+      return {
+        cash: 0, inventoryValue: 0, facilitiesValue: 0, productionPotentialValue: 0,
+        territoryValue: 0, activityValue: 0, avgHourlyIncome: 0, operationalTotal: 0
+      };
+    }
+    var cash = Math.max(0, Math.round(Number(c.cash || 0)));
+    var tMods = getCompanyTraitModifiers(c);
+    var invVal = Math.max(0, Math.round(Number(c.physicalStockEstimate || 0)));
+    Object.keys(c.stockBuffer || {}).forEach(function (iid) {
+      invVal += estimateItemUnitPrice(iid) * Math.max(0, Number(c.stockBuffer[iid] || 0));
+    });
+
+    var bldgs = listCompanyBuildings(state, cid);
+    var bldgValue = 0;
+    var hourlyNet = 0;
+    var cyclesPerHour = 20;
+    for (var i = 0; i < bldgs.length; i++) {
+      var b = bldgs[i];
+      var sp = BUILDING_CATALOG[b.type] || {};
+      var baseCost = (b.type === 'structure_facility' && b.rarityRank) ? (360 * (1 + (b.rarityRank - 1) * 0.35)) : Number(sp.cost || 320);
+      var upgInvested = (Number(b.level || 1) >= 2 ? 420 : 0) + (Number(b.level || 1) >= 3 ? 820 : 0);
+      bldgValue += Math.round((baseCost + upgInvested) * (Number(b.integrityPct || 100) / 100));
+      bldgValue += Math.round(Number(b.cashBuffer || 0));
+      Object.keys(b.stockBuffer || {}).forEach(function (iidB) {
+        invVal += estimateItemUnitPrice(iidB) * Math.max(0, Number(b.stockBuffer[iidB] || 0));
+      });
+      Object.keys(b.inputBuffer || {}).forEach(function (iidIn) {
+        invVal += estimateItemUnitPrice(iidIn) * Math.max(0, Number(b.inputBuffer[iidIn] || 0));
+      });
+      if (b.operational !== false) {
+        var adjM = getPowerPlantAdjacencyMultiplier(state, cid, b.sx, b.sz, b.dimension || 'minecraft:overworld');
+        var subM = isCompanySubsidized(state, cid, b.sx, b.sz) ? 1.35 : 1.0;
+        var yp = getBuildingYieldProfile(b, { adjMult: adjM, subsidyMult: subM }, c);
+        var itemYieldWorth = 0;
+        Object.keys(yp.items || {}).forEach(function (yi) {
+          itemYieldWorth += estimateItemUnitPrice(yi) * Number(yp.items[yi] || 0);
+        });
+        var upkeepC = Number(b.upkeepCost || sp.upkeepCost || 14) + Math.max(0, Number(b.level || 1) - 1) * Number(sp.upgradeUpkeepPerLevel || 15);
+        hourlyNet += Math.max(0, (yp.income + itemYieldWorth - upkeepC) * cyclesPerHour);
+      }
+    }
+    var productionPotentialValue = Math.round(hourlyNet * 1.6);
+
+    var territoryValue = 0;
+    var claimKeys = Object.keys(state.claims || {});
+    for (var k = 0; k < claimKeys.length; k++) {
+      var cl = state.claims[claimKeys[k]];
+      if (!cl || cl.owner !== cid) continue;
+      var dimB = cl.dimension === 'minecraft:the_end' ? 1.50 : (cl.dimension === 'minecraft:the_nether' ? 1.30 : 1.0);
+      territoryValue += Math.round((300 + Math.max(0, Number(cl.strength || 1) - 1) * 140) * dimB);
+    }
+
+    var avgHourlyIncome = Math.round(hourlyNet);
+    if (Array.isArray(c.incomeHistory) && c.incomeHistory.length > 0) {
+      var sumH = 0;
+      for (var h = 0; h < c.incomeHistory.length; h++) sumH += Number(c.incomeHistory[h] || 0);
+      avgHourlyIncome = Math.round((sumH / c.incomeHistory.length) * cyclesPerHour);
+    }
+
+    var s = c.stats || {};
+    var activityValue = Math.round(
+      Number(s.deliveries || 0) * 45 +
+      Number(s.tradeVolume || 0) * 0.5 +
+      Number(s.contractsDone || 0) * 200 +
+      Number(s.routesDone || 0) * 250
+    );
+
+    var rawTotal = cash + invVal + bldgValue + productionPotentialValue + territoryValue + Math.max(0, Math.round(avgHourlyIncome * 0.5)) + activityValue;
+    var operationalTotal = Math.max(0, Math.round(rawTotal * tMods.valuationMult));
+    return {
+      cash: cash,
+      inventoryValue: Math.round(invVal),
+      facilitiesValue: Math.round(bldgValue),
+      productionPotentialValue: productionPotentialValue,
+      territoryValue: territoryValue,
+      activityValue: activityValue,
+      avgHourlyIncome: avgHourlyIncome,
+      operationalTotal: operationalTotal
+    };
+  }
+
+  function getSharePrice(state, targetCid) {
+    ensureDiplomacyState(state);
+    var br = getOperationalValuationBreakdown(state, targetCid);
+    return Math.max(5, Math.round(br.operationalTotal / 100));
+  }
+
+  function getExternalSharesOwnedPct(state, targetCid) {
+    var tgt = state.companies && state.companies[targetCid];
+    if (!tgt) return 0;
+    ensureCompanyFinancialFields(tgt, targetCid);
+    var ext = 0;
+    Object.keys(tgt.shareHoldings || {}).forEach(function (holderCid) {
+      if (holderCid !== targetCid) ext += Math.max(0, Number(tgt.shareHoldings[holderCid] || 0));
+    });
+    return ext;
+  }
+
+  function getCompanyPortfolioDetails(state, ownerCid) {
+    ensureDiplomacyState(state);
+    var holdings = [];
+    var externalEquityValue = 0;
+    var selfEquityValue = 0;
+    var cids = Object.keys(state.companies || {});
+    for (var i = 0; i < cids.length; i++) {
+      var tCid = cids[i];
+      var tc = state.companies[tCid];
+      if (!tc) continue;
+      ensureCompanyFinancialFields(tc, tCid);
+      var cnt = Math.max(0, Number(tc.shareHoldings[ownerCid] || 0));
+      if (cnt <= 0) continue;
+      var sp = getSharePrice(state, tCid);
+      var val = cnt * sp;
+      if (tCid === ownerCid) {
+        selfEquityValue += val;
+      } else {
+        externalEquityValue += val;
+        holdings.push({ targetCid: tCid, targetName: tc.name, shares: cnt, sharePrice: sp, value: val });
+      }
+    }
+    return {
+      holdings: holdings,
+      externalEquityValue: Math.round(externalEquityValue),
+      selfEquityValue: Math.round(selfEquityValue),
+      totalEquityBookValue: Math.round(externalEquityValue)
+    };
+  }
+
+  function buyCompanyShares(state, buyerCid, targetCid, count) {
+    ensureDiplomacyState(state);
+    var buyer = state.companies && state.companies[buyerCid];
+    var target = state.companies && state.companies[targetCid];
+    if (!buyer || !target || buyerCid === targetCid) return { ok: false, reason: 'bad_company' };
+    if (target.isPirate) return { ok: false, reason: 'pirate_no_equity' };
+    ensureCompanyFinancialFields(target, targetCid);
+    var qty = Math.max(1, Math.min(50, Math.round(Number(count || 10))));
+    var issuerOwned = Math.max(0, Number(target.shareHoldings[targetCid] || 0));
+    var currentExt = getExternalSharesOwnedPct(state, targetCid);
+    var maxExt = target.isBot ? 90 : MAX_PLAYER_EXTERNAL_SHARES;
+    if (currentExt + qty > maxExt) {
+      return { ok: false, reason: 'equity_cap_reached', maxExternal: maxExt, currentExternal: currentExt };
+    }
+    if (issuerOwned < qty) return { ok: false, reason: 'no_shares_available', available: issuerOwned };
+    var unitPrice = getSharePrice(state, targetCid);
+    var cost = unitPrice * qty;
+    if (buyer.cash < cost) return { ok: false, reason: 'no_cash', cost: cost, cash: buyer.cash };
+    buyer.cash -= cost;
+    target.cash += Math.round(cost * 0.85);
+    target.shareHoldings[targetCid] = issuerOwned - qty;
+    target.shareHoldings[buyerCid] = Number(target.shareHoldings[buyerCid] || 0) + qty;
+    adjustRelation(state, buyerCid, targetCid, 4, 'Покупка ' + qty + '% акций компании');
+    return { ok: true, targetCid: targetCid, sharesBought: qty, unitPrice: unitPrice, cost: cost, buyerOwnedPct: target.shareHoldings[buyerCid] };
+  }
+
+  function sellCompanyShares(state, sellerCid, targetCid, count) {
+    ensureDiplomacyState(state);
+    var seller = state.companies && state.companies[sellerCid];
+    var target = state.companies && state.companies[targetCid];
+    if (!seller || !target || sellerCid === targetCid) return { ok: false, reason: 'bad_company' };
+    ensureCompanyFinancialFields(target, targetCid);
+    var held = Math.max(0, Number(target.shareHoldings[sellerCid] || 0));
+    var qty = Math.max(1, Math.min(held, Math.round(Number(count || held))));
+    if (held <= 0 || qty <= 0) return { ok: false, reason: 'no_shares_held' };
+    var unitPrice = getSharePrice(state, targetCid);
+    var proceeds = Math.max(5, Math.round(unitPrice * qty * 0.95));
+    target.shareHoldings[sellerCid] = held - qty;
+    target.shareHoldings[targetCid] = Number(target.shareHoldings[targetCid] || 0) + qty;
+    seller.cash += proceeds;
+    return { ok: true, targetCid: targetCid, sharesSold: qty, unitPrice: unitPrice, proceeds: proceeds };
+  }
+
+  // ---- Comeback Mechanics & Dynamic Underdog Subsidies ----
+  function getComebackStatus(state, cid) {
+    ensureDiplomacyState(state);
+    var comp = state.companies && state.companies[cid];
+    if (!comp || comp.isPirate) return { active: false, tier: 0, taxDiscount: 0, yieldMult: 1.0, incomeMult: 1.0, claimDiscount: 0, loanRateMult: 1.0, hqAuctionImmune: false };
+    var myOp = getOperationalValuationBreakdown(state, cid).operationalTotal + getCompanyPortfolioDetails(state, cid).externalEquityValue;
+    var leaderVal = 0;
+    var cids = Object.keys(state.companies || {});
+    var nonPirateCount = 0;
+    for (var i = 0; i < cids.length; i++) {
+      var oc = state.companies[cids[i]];
+      if (!oc || oc.isPirate || cids[i] === cid) continue;
+      nonPirateCount++;
+      var ov = getOperationalValuationBreakdown(state, cids[i]).operationalTotal + getCompanyPortfolioDetails(state, cids[i]).externalEquityValue;
+      if (ov > leaderVal) leaderVal = ov;
+    }
+    if (nonPirateCount === 0 || leaderVal < 2200) {
+      return { active: false, tier: 0, ratio: 1.0, taxDiscount: 0, yieldMult: 1.0, incomeMult: 1.0, claimDiscount: 0, loanRateMult: 1.0, hqAuctionImmune: !comp.isBot };
+    }
+    var ratio = myOp / Math.max(1, leaderVal);
+    var claimsCnt = countClaims(state, cid);
+    var distressed = (comp.forcedAuctionCount || 0) > 0 || (comp.unpaidUpkeep || 0) >= 120 || claimsCnt <= 1;
+    var tier = 0;
+    if (ratio <= 0.20 || (ratio <= 0.35 && distressed)) tier = 3;
+    else if (ratio <= 0.35) tier = 2;
+    else if (ratio <= 0.50 && !comp.isBot) tier = 1;
+
+    if (tier <= 0) {
+      return { active: false, tier: 0, ratio: Math.round(ratio * 100) / 100, taxDiscount: 0, yieldMult: 1.0, incomeMult: 1.0, claimDiscount: 0, loanRateMult: 1.0, hqAuctionImmune: !comp.isBot };
+    }
+    var taxDisc = tier === 3 ? 0.75 : (tier === 2 ? 0.55 : 0.35);
+    var yMult = tier === 3 ? 1.55 : (tier === 2 ? 1.35 : 1.20);
+    var iMult = tier === 3 ? 1.55 : (tier === 2 ? 1.35 : 1.20);
+    var cDisc = tier === 3 ? 0.50 : (tier === 2 ? 0.35 : 0.20);
+    return {
+      active: true,
+      tier: tier,
+      ratio: Math.round(ratio * 100) / 100,
+      leaderVal: leaderVal,
+      myVal: myOp,
+      taxDiscount: taxDisc,
+      yieldMult: yMult,
+      incomeMult: iMult,
+      claimDiscount: cDisc,
+      loanRateMult: 0.50,
+      hqAuctionImmune: true
+    };
+  }
+
+  function activateComebackBailout(state, cid, nowTick) {
+    ensureDiplomacyState(state);
+    var comp = state.companies && state.companies[cid];
+    if (!comp || comp.isBot) return { ok: false, reason: 'not_eligible' };
+    var cb = getComebackStatus(state, cid);
+    if (!cb.active) return { ok: false, reason: 'not_lagging', ratio: cb.ratio };
+    var tick = Math.round(Number(nowTick || 0));
+    var cooldown = 6000;
+    if (comp.lastComebackBailoutTick && tick - comp.lastComebackBailoutTick < cooldown) {
+      return { ok: false, reason: 'cooldown', waitTicks: cooldown - (tick - comp.lastComebackBailoutTick) };
+    }
+    var grant = cb.tier >= 3 ? 600 : (cb.tier === 2 ? 420 : 280);
+    var coalGrant = cb.tier >= 2 ? 16 : 10;
+    comp.cash += grant;
+    if (!comp.stockBuffer) comp.stockBuffer = {};
+    comp.stockBuffer['minecraft:coal'] = Number(comp.stockBuffer['minecraft:coal'] || 0) + coalGrant;
+    var forgiven = Math.round(Number(comp.unpaidUpkeep || 0) * 0.60);
+    comp.unpaidUpkeep = Math.max(0, Number(comp.unpaidUpkeep || 0) - forgiven);
+    comp.lastComebackBailoutTick = tick;
+    return { ok: true, tier: cb.tier, grantCash: grant, grantCoal: coalGrant, debtForgiven: forgiven };
+  }
+
+  function selectDynamicSubsidyTarget(state) {
+    ensureDiplomacyState(state);
+    var candidates = [];
+    Object.keys(state.companies || {}).forEach(function (cid) {
+      var c = state.companies[cid];
+      if (!c || c.isBot || c.isPirate) return;
+      var val = getOperationalValuationBreakdown(state, cid).operationalTotal + getCompanyPortfolioDetails(state, cid).externalEquityValue;
+      candidates.push({ cid: cid, comp: c, val: val });
+    });
+    if (!candidates.length) return null;
+    candidates.sort(function (a, b) { return a.val - b.val; });
+    var lowest = candidates[0];
+    var cb = getComebackStatus(state, lowest.cid);
+    if (!cb.active && candidates.length < 2) return null;
+    var bldgs = listCompanyBuildings(state, lowest.cid);
+    var sx = bldgs.length ? bldgs[0].sx : lowest.comp.hqSx;
+    var sz = bldgs.length ? bldgs[0].sz : lowest.comp.hqSz;
+    var item = bldgs.length && BUILDING_CATALOG[bldgs[0].type] ? BUILDING_CATALOG[bldgs[0].type].baseProduct : 'minecraft:iron_ingot';
+    state.subsidy = {
+      companyId: lowest.cid,
+      item: item,
+      sx: sx,
+      sz: sz,
+      reason: 'comeback_underdog',
+      tier: cb.tier || 1
+    };
+    return state.subsidy;
+  }
+
   function getMonopolyMetrics(state) {
     ensureDiplomacyState(state);
     var claimKeys = Object.keys(state.claims || {});
@@ -3091,28 +3525,46 @@ global.LHOpenTTD = (function () {
       var cl = state.claims[claimKeys[i]];
       if (cl && cl.owner) byCid[cl.owner] = (byCid[cl.owner] || 0) + 1;
     }
-    var list = [];
+    var valsByCid = {};
+    var totalMarketVal = 0;
     var cids = Object.keys(state.companies || {});
+    for (var vi = 0; vi < cids.length; vi++) {
+      var vc = state.companies[cids[vi]];
+      if (!vc || vc.isPirate) continue;
+      var v = getOperationalValuationBreakdown(state, vc.id).operationalTotal + getCompanyPortfolioDetails(state, vc.id).externalEquityValue;
+      valsByCid[vc.id] = v;
+      totalMarketVal += v;
+    }
+    totalMarketVal = Math.max(1, totalMarketVal);
+
+    var list = [];
     for (var j = 0; j < cids.length; j++) {
       var c = state.companies[cids[j]];
-      if (!c) continue;
+      if (!c || c.isPirate) continue;
       var claims = byCid[c.id] || 0;
       var share = claims / totalClaims;
+      var assetVal = valsByCid[c.id] || 0;
+      var assetShare = assetVal / totalMarketVal;
       var tMods = getCompanyTraitModifiers(c);
       var raidScore = Number((c.stats && c.stats.raidsLaunched) || 0) * 12 + Number((c.stats && c.stats.hostileCaptures) || 0) * 15;
       var aggr = Math.min(100, tMods.aggressionWeight + raidScore + (claims > 8 ? Math.round((share - 0.15) * 80) : 0));
-      var threat = Math.round(share * 100 + aggr * 0.5);
-      var isMonop = (claims >= 5 && share >= 0.22) || (claims >= 4 && aggr >= 35);
+      var threat = Math.round(Math.max(share, assetShare) * 100 + aggr * 0.5);
+      var isMonop = (claims >= 5 && share >= 0.22) || (assetShare >= 0.34 && assetVal >= 3500) || (claims >= 4 && aggr >= 35);
+      var taxRate = 0;
+      if (share > 0.35 || assetShare > 0.45) taxRate = 0.45;
+      else if ((claims >= 5 && share > 0.22) || (assetShare > 0.32 && assetVal >= 3500)) taxRate = 0.25;
       list.push({
         cid: c.id,
         name: c.name,
         isBot: !!c.isBot,
         claims: claims,
         territoryShare: Math.round(share * 1000) / 1000,
+        assetShare: Math.round(assetShare * 1000) / 1000,
+        assetValuationWithEquity: assetVal,
         aggressionScore: Math.max(0, aggr),
         monopolyThreat: Math.max(0, threat),
         isMonopolyTarget: isMonop,
-        antiMonopolyTaxRate: share > 0.35 ? 0.45 : (share > 0.22 ? 0.25 : 0)
+        antiMonopolyTaxRate: taxRate
       });
     }
     list.sort(function (a, b) { return b.monopolyThreat - a.monopolyThreat; });
@@ -3170,10 +3622,42 @@ global.LHOpenTTD = (function () {
     };
   }
 
+  // ---- Progressive Taxes, Upkeep, Central Bank, Loans & Tax Evasion ----
+  function computeProgressiveTaxForIncome(incomeAmount) {
+    var inc = Math.max(0, Math.round(Number(incomeAmount || 0)));
+    if (inc <= 0) return { tax: 0, effectiveRate: 0, topRate: 0.05, bracketLabel: PROGRESSIVE_TAX_BRACKETS[0].label };
+    var prevCap = 0;
+    var tax = 0;
+    var topBracket = PROGRESSIVE_TAX_BRACKETS[0];
+    for (var i = 0; i < PROGRESSIVE_TAX_BRACKETS.length; i++) {
+      var br = PROGRESSIVE_TAX_BRACKETS[i];
+      if (inc > prevCap) {
+        var slice = Math.min(inc, br.upTo) - prevCap;
+        tax += slice * br.rate;
+        topBracket = br;
+      }
+      prevCap = br.upTo;
+      if (inc <= br.upTo) break;
+    }
+    var rounded = Math.round(tax);
+    return {
+      tax: rounded,
+      effectiveRate: Math.round((rounded / inc) * 1000) / 1000,
+      topRate: topBracket.rate,
+      bracketLabel: topBracket.label
+    };
+  }
+
   function computeCompanyExpenses(state, cid) {
     ensureDiplomacyState(state);
     var comp = state.companies && state.companies[cid];
-    if (!comp) return { facilityUpkeep: 0, upgradeUpkeep: 0, landTax: 0, securityUpkeep: 0, antiMonopolyTax: 0, total: 0 };
+    if (!comp) {
+      return {
+        facilityUpkeep: 0, upgradeUpkeep: 0, landTax: 0, securityUpkeep: 0,
+        progressiveTax: 0, progressiveTaxRate: 0.05, progressiveBracketLabel: '5%',
+        antiMonopolyTax: 0, auditPenaltyTax: 0, evasionDiscount: 0, comebackDiscount: 0, total: 0
+      };
+    }
     var tMods = getCompanyTraitModifiers(comp);
     var bldgs = listCompanyBuildings(state, cid);
     var facilityUpkeep = 0;
@@ -3205,38 +3689,359 @@ global.LHOpenTTD = (function () {
     var rawLandTax = Math.round(claims * 12 * tMods.landTaxMult);
     var totalAllClaims = Math.max(1, cKeys.length);
     var share = claims / totalAllClaims;
-    var antiMonopolyTax = 0;
-    if (claims >= 5 && share > 0.22) {
-      var rate = share > 0.35 ? 0.45 : 0.25;
-      antiMonopolyTax = Math.round((rawLandTax + facilityUpkeep) * rate);
+
+    // Progressive income tax across gross cycle income
+    var grossRef = Math.max(0, Number(comp._cycleGrossIncome || 0));
+    if (grossRef <= 0 && Array.isArray(comp.incomeHistory) && comp.incomeHistory.length > 0) {
+      grossRef = Math.max(0, Number(comp.incomeHistory[comp.incomeHistory.length - 1] || 0));
     }
-    var total = facilityUpkeep + upgradeUpkeep + rawLandTax + securityUpkeep + antiMonopolyTax;
+    var progInfo = computeProgressiveTaxForIncome(grossRef);
+    var progressiveTax = progInfo.tax;
+
+    // Anti-monopoly tax considers BOTH territory share AND asset/equity valuation share
+    var monoRate = 0;
+    if (claims >= 5 && share > 0.22) monoRate = share > 0.35 ? 0.45 : 0.25;
+    var port = getCompanyPortfolioDetails(state, cid);
+    var myAssetVal = getOperationalValuationBreakdown(state, cid).operationalTotal + port.externalEquityValue;
+    var totalAllAssets = 0;
+    Object.keys(state.companies || {}).forEach(function (ocid) {
+      var oc = state.companies[ocid];
+      if (!oc || oc.isPirate) return;
+      totalAllAssets += getOperationalValuationBreakdown(state, ocid).operationalTotal + getCompanyPortfolioDetails(state, ocid).externalEquityValue;
+    });
+    var assetShare = totalAllAssets > 0 ? (myAssetVal / totalAllAssets) : 0;
+    if (assetShare > 0.45 && myAssetVal >= 4500) monoRate = Math.max(monoRate, 0.45);
+    else if (assetShare > 0.32 && myAssetVal >= 3500) monoRate = Math.max(monoRate, 0.25);
+
+    var antiMonopolyTax = monoRate > 0 ? Math.round((rawLandTax + facilityUpkeep + progressiveTax) * monoRate) : 0;
+
+    var preAdjust = facilityUpkeep + upgradeUpkeep + rawLandTax + securityUpkeep + progressiveTax + antiMonopolyTax;
+    var auditPenaltyTax = (comp.taxAuditPenaltyCycles > 0) ? Math.round(preAdjust * Number(comp.taxAuditPenaltyRate || 0.35)) : 0;
+    var cb = getComebackStatus(state, cid);
+    var comebackDiscount = cb.active ? Math.round(preAdjust * cb.taxDiscount) : 0;
+    var evasionDiscount = (comp.taxEvasionDiscount > 0) ? Math.round((preAdjust - comebackDiscount) * Math.min(0.85, Number(comp.taxEvasionDiscount))) : 0;
+    var total = Math.max(0, preAdjust + auditPenaltyTax - comebackDiscount - evasionDiscount);
+
     return {
       facilityUpkeep: facilityUpkeep,
       upgradeUpkeep: upgradeUpkeep,
       landTax: rawLandTax,
       securityUpkeep: securityUpkeep,
+      progressiveTax: progressiveTax,
+      progressiveTaxRate: progInfo.topRate,
+      progressiveBracketLabel: progInfo.bracketLabel,
       antiMonopolyTax: antiMonopolyTax,
+      assetShare: Math.round(assetShare * 1000) / 1000,
+      auditPenaltyTax: auditPenaltyTax,
+      comebackDiscount: comebackDiscount,
+      evasionDiscount: evasionDiscount,
       total: total
     };
   }
 
-  function tickCompanyUpkeep(state) {
+  function createSectorAuction(state, sellerCid, sx, sz, startPrice, durationTicks, nowTick, opts) {
     ensureDiplomacyState(state);
+    var o = opts || {};
+    var dim = o.dimension ? (global.LHStructureProduction ? global.LHStructureProduction.normalizeDimension(o.dimension) : o.dimension) : 'minecraft:overworld';
+    var k = sectorKey(sx, sz, dim);
+    var cl = state.claims[k];
+    if (!cl || cl.owner !== sellerCid) return { ok: false, reason: 'not_owned_sector' };
+    if (cl.isHq && !state.companies[sellerCid].isBot) return { ok: false, reason: 'hq_protected' };
+    for (var i = 0; i < state.auctions.length; i++) {
+      var ex = state.auctions[i];
+      if (ex && ex.status === 'open' && ex.sx === sx && ex.sz === sz && (ex.dimension || 'minecraft:overworld') === dim) {
+        return { ok: false, reason: 'already_on_auction', auction: ex };
+      }
+    }
+    var minPrice = Math.max(80, Math.round(Number(startPrice || (200 * Number(cl.strength || 1)))));
+    var dur = Math.max(400, Math.round(Number(durationTicks || 3600)));
+    var tick = Math.round(Number(nowTick || 0));
+    var auc = {
+      id: 'auc_' + (state.nextAuctionSeq++),
+      assetType: 'sector',
+      sellerCid: sellerCid,
+      sx: sx,
+      sz: sz,
+      dimension: dim,
+      buildingKey: k,
+      buildingType: 'sector',
+      buildingName: 'Сектор (' + sx + ', ' + sz + ')',
+      buildingLevel: cl.strength || 1,
+      rarityLabel: null,
+      startPrice: minPrice,
+      currentBid: 0,
+      minIncrement: Math.max(20, Math.round(minPrice * 0.10)),
+      highestBidderCid: null,
+      bidHistory: [],
+      createdTick: tick,
+      endsAtTick: tick + dur,
+      buyoutPrice: o.buyoutPrice ? Math.max(minPrice * 2, Math.round(Number(o.buyoutPrice))) : null,
+      isForcedDebtAuction: !!o.isForcedDebtAuction,
+      debtReason: o.debtReason || null,
+      debtLoanId: o.debtLoanId || null,
+      status: 'open'
+    };
+    state.auctions.push(auc);
+    return { ok: true, auction: auc };
+  }
+
+  function enforceDebtAuctions(state, cid, debtAmount, reason, nowTick, rngFn) {
+    ensureDiplomacyState(state);
+    var comp = state.companies && state.companies[cid];
+    var debt = Math.max(0, Math.round(Number(debtAmount || 0)));
+    if (!comp || debt <= 0) return [];
+    var rng = rngFn || Math.random;
+    var candidates = [];
+
+    // Gather non-HQ facilities first & non-HQ sectors
+    var bldgs = listCompanyBuildings(state, cid);
+    for (var i = 0; i < bldgs.length; i++) {
+      var b = bldgs[i];
+      var bCl = state.claims[sectorKey(b.sx, b.sz, b.dimension)];
+      if (bCl && bCl.isHq && !comp.isBot) continue;
+      var alreadyAuc = state.auctions.some(function (a) {
+        return a && a.status === 'open' && a.sx === b.sx && a.sz === b.sz && (a.dimension || 'minecraft:overworld') === (b.dimension || 'minecraft:overworld');
+      });
+      if (alreadyAuc) continue;
+      var sp = BUILDING_CATALOG[b.type] || {};
+      var est = Math.max(150, Math.round((Number(sp.cost || 320) * Number(b.level || 1)) * 0.70));
+      candidates.push({ kind: 'building', sx: b.sx, sz: b.sz, dimension: b.dimension || 'minecraft:overworld', startPrice: est });
+    }
+    Object.keys(state.claims || {}).forEach(function (ck) {
+      var cl = state.claims[ck];
+      if (!cl || cl.owner !== cid || cl.isHq) return;
+      if (getSectorBuilding(state, cl.sx, cl.sz, cl.dimension)) return;
+      var alreadyAuc2 = state.auctions.some(function (a) {
+        return a && a.status === 'open' && a.sx === cl.sx && a.sz === cl.sz && (a.dimension || 'minecraft:overworld') === (cl.dimension || 'minecraft:overworld');
+      });
+      if (alreadyAuc2) return;
+      var estSec = Math.max(100, Math.round((220 * Number(cl.strength || 1)) * 0.70));
+      candidates.push({ kind: 'sector', sx: cl.sx, sz: cl.sz, dimension: cl.dimension || 'minecraft:overworld', startPrice: estSec });
+    });
+
+    // Shuffle randomly (Fisher-Yates)
+    for (var s = candidates.length - 1; s > 0; s--) {
+      var j = Math.floor(rng() * (s + 1));
+      var tmp = candidates[s];
+      candidates[s] = candidates[j];
+      candidates[j] = tmp;
+    }
+
+    var created = [];
+    var covered = 0;
+    for (var c = 0; c < candidates.length && covered < debt; c++) {
+      var item = candidates[c];
+      var res = item.kind === 'building'
+        ? createFacilityAuction(state, cid, item.sx, item.sz, item.startPrice, 2400, nowTick || 0, { dimension: item.dimension, isForcedDebtAuction: true, debtReason: reason || 'tax_debt' })
+        : createSectorAuction(state, cid, item.sx, item.sz, item.startPrice, 2400, nowTick || 0, { dimension: item.dimension, isForcedDebtAuction: true, debtReason: reason || 'tax_debt' });
+      if (res && res.ok) {
+        created.push(res.auction);
+        covered += item.startPrice;
+      }
+    }
+    if (created.length > 0) comp.forcedAuctionCount = (comp.forcedAuctionCount || 0) + created.length;
+    return created;
+  }
+
+  function attemptTaxEvasion(state, cid, method, nowTick, rngFn) {
+    ensureDiplomacyState(state);
+    var comp = state.companies && state.companies[cid];
+    if (!comp) return { ok: false, reason: 'no_company' };
+    var exp = computeCompanyExpenses(state, cid);
+    var m = String(method || 'bribe').toLowerCase();
+    if (m === 'forged_docs') m = 'forge_docs';
+    if (m !== 'bribe' && m !== 'forge_docs') return { ok: false, reason: 'bad_method' };
+    var bribeCost = m === 'bribe' ? Math.max(40, Math.round(exp.total * 0.15)) : 20;
+    if (comp.cash < bribeCost) return { ok: false, reason: 'no_cash', cost: bribeCost, cash: comp.cash };
+    comp.cash -= bribeCost;
+
+    var rng = rngFn || Math.random;
+    var baseChance = m === 'bribe' ? 0.65 : 0.45;
+    if ((comp.taxAuditPenaltyCycles || 0) > 0) baseChance -= 0.15;
+    var monoPenalty = exp.antiMonopolyTax > 0 ? 0.15 : 0;
+    var chance = Math.max(0.15, Math.min(0.85, baseChance - monoPenalty));
+
+    if (rng() < chance) {
+      comp.taxEvasionDiscount = m === 'bribe' ? 0.70 : 0.55;
+      var debtForgiven = Math.round(Number(comp.unpaidUpkeep || 0) * 0.30);
+      comp.unpaidUpkeep = Math.max(0, Number(comp.unpaidUpkeep || 0) - debtForgiven);
+      return { ok: true, succeeded: true, method: m, cost: bribeCost, discountPct: Math.round(comp.taxEvasionDiscount * 100), debtForgiven: debtForgiven };
+    }
+    // Audit failure: fine added to debt + extra penalty tax for 3 cycles
+    var fine = Math.max(120, Math.round(exp.total * 0.40));
+    comp.unpaidUpkeep = Number(comp.unpaidUpkeep || 0) + fine;
+    comp.taxAuditPenaltyCycles = 3;
+    comp.taxAuditPenaltyRate = 0.35;
+    return { ok: true, succeeded: false, method: m, cost: bribeCost, fine: fine, penaltyCycles: 3, penaltyRate: 0.35 };
+  }
+
+  // ---- Central Bank, Key Rate & Loans ----
+  function updateCentralBankKeyRate(state) {
+    ensureDiplomacyState(state);
+    var totalCash = 0;
+    var cnt = 0;
+    Object.keys(state.companies || {}).forEach(function (cid) {
+      var c = state.companies[cid];
+      if (!c || c.isPirate) return;
+      totalCash += Math.max(0, Number(c.cash || 0));
+      cnt++;
+    });
+    var avgCash = cnt > 0 ? totalCash / cnt : 1000;
+    // Key rate rises when average liquidity inflates, falls when economy is tight
+    var inflation = Math.max(0.5, Math.min(3.0, avgCash / 2000));
+    var rawRate = 0.05 + (inflation - 0.5) * 0.06;
+    var clamped = Math.max(0.04, Math.min(0.22, Math.round(rawRate * 1000) / 1000));
+    state.centralBank.inflationIndex = Math.round(inflation * 100) / 100;
+    state.centralBank.keyRate = clamped;
+    return state.centralBank;
+  }
+
+  function getEffectiveLoanRate(state, cid) {
+    ensureDiplomacyState(state);
+    var base = Number(state.centralBank.keyRate || 0.08);
+    var comp = state.companies && state.companies[cid];
+    var cb = getComebackStatus(state, cid);
+    var riskSpread = (comp && (comp.unpaidUpkeep || 0) > 100) ? 0.04 : 0.01;
+    var rate = (base + riskSpread) * (cb.active ? cb.loanRateMult : 1.0);
+    return Math.max(0.02, Math.round(rate * 1000) / 1000);
+  }
+
+  function getCompanyActiveDebt(state, cid) {
+    ensureDiplomacyState(state);
+    var total = 0;
+    for (var i = 0; i < state.loans.length; i++) {
+      var l = state.loans[i];
+      if (l && l.companyId === cid && (l.status === 'active' || l.status === 'defaulted')) {
+        total += Math.max(0, Number(l.remainingDebt || 0));
+      }
+    }
+    return Math.round(total);
+  }
+
+  function getMaxLoanLimit(state, cid) {
+    ensureDiplomacyState(state);
+    var val = getOperationalValuationBreakdown(state, cid).operationalTotal + getCompanyPortfolioDetails(state, cid).externalEquityValue;
+    var cb = getComebackStatus(state, cid);
+    var cap = Math.max(500, Math.round(val * (cb.active ? 0.85 : 0.65)));
+    return Math.max(0, cap - getCompanyActiveDebt(state, cid));
+  }
+
+  function takeBankLoan(state, cid, amount, termCycles, nowTick) {
+    ensureDiplomacyState(state);
+    var comp = state.companies && state.companies[cid];
+    if (!comp) return { ok: false, reason: 'no_company' };
+    var principal = Math.max(100, Math.round(Number(amount || 500)));
+    var limit = getMaxLoanLimit(state, cid);
+    if (principal > limit) return { ok: false, reason: 'exceeds_credit_limit', limit: limit };
+    var terms = Math.max(2, Math.min(12, Math.round(Number(termCycles || 5))));
+    var rate = getEffectiveLoanRate(state, cid);
+    var totalDue = Math.round(principal * (1 + rate * terms));
+    var paymentPerCycle = Math.max(20, Math.ceil(totalDue / terms));
+    var loan = {
+      id: 'loan_' + (state.nextLoanSeq++),
+      companyId: cid,
+      principal: principal,
+      ratePerCycle: rate,
+      termCycles: terms,
+      cyclesRemaining: terms,
+      totalDue: totalDue,
+      remainingDebt: totalDue,
+      paymentPerCycle: paymentPerCycle,
+      missedPayments: 0,
+      createdTick: Math.round(Number(nowTick || 0)),
+      status: 'active'
+    };
+    state.loans.push(loan);
+    state.centralBank.totalIssued = (state.centralBank.totalIssued || 0) + principal;
+    comp.cash += principal;
+    return { ok: true, loan: loan, keyRate: state.centralBank.keyRate, effectiveRate: rate };
+  }
+
+  function repayBankLoan(state, cid, loanId, amount) {
+    ensureDiplomacyState(state);
+    var comp = state.companies && state.companies[cid];
+    if (!comp) return { ok: false, reason: 'no_company' };
+    var loan = null;
+    for (var i = 0; i < state.loans.length; i++) {
+      var l = state.loans[i];
+      if (l && l.companyId === cid && (!loanId || l.id === loanId) && (l.status === 'active' || l.status === 'defaulted')) {
+        loan = l;
+        break;
+      }
+    }
+    if (!loan) return { ok: false, reason: 'no_active_loan' };
+    var pay = Math.min(comp.cash, loan.remainingDebt, amount ? Math.max(1, Math.round(Number(amount))) : loan.remainingDebt);
+    if (pay <= 0) return { ok: false, reason: 'no_cash', remainingDebt: loan.remainingDebt };
+    comp.cash -= pay;
+    loan.remainingDebt -= pay;
+    state.centralBank.totalRepaid = (state.centralBank.totalRepaid || 0) + pay;
+    if (loan.remainingDebt <= 0) {
+      loan.remainingDebt = 0;
+      loan.status = 'repaid';
+    }
+    return { ok: true, paid: pay, remainingDebt: loan.remainingDebt, status: loan.status };
+  }
+
+  function tickBankLoans(state, nowTick, rngFn) {
+    ensureDiplomacyState(state);
+    updateCentralBankKeyRate(state);
+    var events = [];
+    for (var i = 0; i < state.loans.length; i++) {
+      var l = state.loans[i];
+      if (!l || l.status !== 'active') continue;
+      var comp = state.companies[l.companyId];
+      if (!comp) continue;
+      var due = Math.min(l.remainingDebt, l.paymentPerCycle);
+      var paid = Math.min(Math.max(0, Number(comp.cash || 0)), due);
+      comp.cash = Math.max(0, Number(comp.cash || 0) - paid);
+      l.remainingDebt -= paid;
+      state.centralBank.totalRepaid = (state.centralBank.totalRepaid || 0) + paid;
+      l.cyclesRemaining = Math.max(0, l.cyclesRemaining - 1);
+
+      if (paid < due) {
+        l.missedPayments = (l.missedPayments || 0) + 1;
+        var penalty = Math.max(25, Math.round((due - paid) * 0.25));
+        l.remainingDebt += penalty;
+        if (l.missedPayments >= 2 || (l.cyclesRemaining <= 0 && l.remainingDebt > 0)) {
+          l.status = 'defaulted';
+          state.centralBank.totalDefaulted = (state.centralBank.totalDefaulted || 0) + l.remainingDebt;
+          var aucs = enforceDebtAuctions(state, comp.id, l.remainingDebt, 'loan_default', nowTick || 0, rngFn);
+          events.push({ type: 'loan_default', loanId: l.id, companyId: comp.id, debt: l.remainingDebt, auctionsCreated: aucs.length });
+          continue;
+        }
+        events.push({ type: 'loan_missed', loanId: l.id, companyId: comp.id, shortfall: due - paid, missedPayments: l.missedPayments });
+      } else if (l.remainingDebt <= 0) {
+        l.remainingDebt = 0;
+        l.status = 'repaid';
+        events.push({ type: 'loan_repaid', loanId: l.id, companyId: comp.id });
+      }
+    }
+    return events;
+  }
+
+  function tickCompanyUpkeep(state, opts) {
+    ensureDiplomacyState(state);
+    var o = opts || {};
     var summary = {};
     var cids = Object.keys(state.companies || {});
     for (var i = 0; i < cids.length; i++) {
       var cid = cids[i];
       var comp = state.companies[cid];
-      if (!comp) continue;
+      if (!comp || comp.isPirate) continue;
+      ensureCompanyFinancialFields(comp, cid);
       var exp = computeCompanyExpenses(state, cid);
       comp.lastExpenses = exp;
+      if (comp.taxAuditPenaltyCycles > 0) comp.taxAuditPenaltyCycles -= 1;
+      if (comp.taxAuditPenaltyCycles <= 0) comp.taxAuditPenaltyRate = 0;
+      comp.taxEvasionDiscount = 0;
+
       var paid = Math.min(Math.max(0, Number(comp.cash || 0)), exp.total);
       comp.cash = Math.max(0, Number(comp.cash || 0) - paid);
       var shortfall = exp.total - paid;
+      var forcedAuctions = [];
       if (shortfall > 0) {
         comp.unpaidUpkeep = Number(comp.unpaidUpkeep || 0) + shortfall;
-        // Prolonged insolvency decays fortification strength on non-HQ sectors
+        comp.taxDefaultCycles = Number(comp.taxDefaultCycles || 0) + 1;
         if (comp.unpaidUpkeep >= 150) {
           var cKeys = Object.keys(state.claims || {});
           for (var k = 0; k < cKeys.length; k++) {
@@ -3247,7 +4052,12 @@ global.LHOpenTTD = (function () {
             }
           }
         }
+        // Trigger forced random auctions of facilities/territories until debt is covered
+        if (o.autoAuctionDebt !== false && (comp.unpaidUpkeep >= 100 || comp.taxDefaultCycles >= 1)) {
+          forcedAuctions = enforceDebtAuctions(state, cid, comp.unpaidUpkeep, 'tax_debt', o.nowTick || 0, o.rng);
+        }
       } else {
+        comp.taxDefaultCycles = 0;
         comp.unpaidUpkeep = Math.max(0, Number(comp.unpaidUpkeep || 0) - Math.min(Number(comp.unpaidUpkeep || 0), 50));
       }
       var cycleIncome = Number(comp._cycleGrossIncome || 0);
@@ -3256,48 +4066,94 @@ global.LHOpenTTD = (function () {
       if (!Array.isArray(comp.incomeHistory)) comp.incomeHistory = [];
       comp.incomeHistory.push(net);
       if (comp.incomeHistory.length > 24) comp.incomeHistory.shift();
-      summary[cid] = { expenses: exp, paid: paid, shortfall: shortfall, net: net };
+
+      // Distribute modest equity dividends (25% of positive net profit across external shareholders)
+      if (net > 20 && comp.shareHoldings) {
+        var divPool = Math.round(net * 0.25);
+        Object.keys(comp.shareHoldings).forEach(function (hCid) {
+          if (hCid === cid) return;
+          var sh = Number(comp.shareHoldings[hCid] || 0);
+          if (sh > 0 && state.companies[hCid] && comp.cash >= Math.round(divPool * (sh / 100))) {
+            var divPay = Math.round(divPool * (sh / 100));
+            comp.cash -= divPay;
+            state.companies[hCid].cash += divPay;
+          }
+        });
+      }
+      summary[cid] = { expenses: exp, paid: paid, shortfall: shortfall, net: net, forcedAuctions: forcedAuctions };
     }
     return summary;
   }
 
-  function consumeBuildingInputs(state, comp, b, strictInputs) {
-    var req = getBuildingRequiredInputs(b);
-    var reqKeys = Object.keys(req || {});
-    if (!reqKeys.length) return { ok: true };
+  function consumeBuildingFuel(state, comp, b, strictFuel) {
+    var req = getBuildingFuelRequirements(b);
+    var needUnits = Math.max(1, Number(req.fuelUnits || 1));
     if (!b.inputBuffer) b.inputBuffer = {};
     if (!comp.stockBuffer) comp.stockBuffer = {};
 
-    // Verify availability across b.inputBuffer + comp.stockBuffer
-    for (var i = 0; i < reqKeys.length; i++) {
-      var iid = reqKeys[i];
-      var need = Math.max(1, Math.round(Number(req[iid] || 1)));
-      var haveB = Number(b.inputBuffer[iid] || 0);
-      var haveC = Number(comp.stockBuffer[iid] || 0);
-      if (haveB + haveC < need) {
-        if (strictInputs !== false) {
-          return { ok: false, missingItem: iid, need: need, have: haveB + haveC };
-        }
+    var fuelKeys = Object.keys(FUEL_EQUIVALENTS);
+    var totalAvail = 0;
+    for (var i = 0; i < fuelKeys.length; i++) {
+      var fk = fuelKeys[i];
+      var eq = FUEL_EQUIVALENTS[fk];
+      totalAvail += Number(b.inputBuffer[fk] || 0) * eq + Number(comp.stockBuffer[fk] || 0) * eq;
+    }
+    if (totalAvail < needUnits) {
+      if (strictFuel !== false) {
+        return { ok: false, missingItem: req.preferredItem, needUnits: needUnits, haveUnits: totalAvail };
       }
     }
-    // Deduct from b.inputBuffer first, then comp.stockBuffer
-    for (var j = 0; j < reqKeys.length; j++) {
-      var iid2 = reqKeys[j];
-      var rem = Math.max(1, Math.round(Number(req[iid2] || 1)));
-      var takeB = Math.min(rem, Number(b.inputBuffer[iid2] || 0));
-      if (takeB > 0) {
-        b.inputBuffer[iid2] -= takeB;
-        rem -= takeB;
+    var remUnits = needUnits;
+    for (var j = 0; j < fuelKeys.length && remUnits > 0; j++) {
+      var fk2 = fuelKeys[j];
+      var eq2 = FUEL_EQUIVALENTS[fk2];
+      var bQty = Math.max(0, Number(b.inputBuffer[fk2] || 0));
+      if (bQty > 0) {
+        var takeB = Math.min(bQty, Math.ceil(remUnits / eq2));
+        b.inputBuffer[fk2] -= takeB;
+        if (b.inputBuffer[fk2] <= 0) delete b.inputBuffer[fk2];
+        remUnits -= takeB * eq2;
       }
+    }
+    for (var k = 0; k < fuelKeys.length && remUnits > 0; k++) {
+      var fk3 = fuelKeys[k];
+      var eq3 = FUEL_EQUIVALENTS[fk3];
+      var cQty = Math.max(0, Number(comp.stockBuffer[fk3] || 0));
+      if (cQty > 0) {
+        var takeC = Math.min(cQty, Math.ceil(remUnits / eq3));
+        comp.stockBuffer[fk3] -= takeC;
+        if (comp.stockBuffer[fk3] <= 0) delete comp.stockBuffer[fk3];
+        remUnits -= takeC * eq3;
+      }
+    }
+    return { ok: true, consumedUnits: needUnits };
+  }
+
+  function consumeOptionalInputs(state, comp, b) {
+    var opt = getBuildingOptionalInputs(b);
+    var optKeys = Object.keys(opt || {});
+    if (!optKeys.length) return { boosted: false };
+    if (!b.inputBuffer) b.inputBuffer = {};
+    if (!comp.stockBuffer) comp.stockBuffer = {};
+
+    for (var i = 0; i < optKeys.length; i++) {
+      var iid = optKeys[i];
+      var need = Math.max(1, Math.round(Number(opt[iid] || 1)));
+      if (Number(b.inputBuffer[iid] || 0) + Number(comp.stockBuffer[iid] || 0) < need) {
+        return { boosted: false };
+      }
+    }
+    for (var j = 0; j < optKeys.length; j++) {
+      var iid2 = optKeys[j];
+      var rem = Math.max(1, Math.round(Number(opt[iid2] || 1)));
+      var takeB = Math.min(rem, Number(b.inputBuffer[iid2] || 0));
+      if (takeB > 0) { b.inputBuffer[iid2] -= takeB; rem -= takeB; }
       if (rem > 0) {
         var takeC = Math.min(rem, Number(comp.stockBuffer[iid2] || 0));
-        if (takeC > 0) {
-          comp.stockBuffer[iid2] -= takeC;
-          rem -= takeC;
-        }
+        if (takeC > 0) { comp.stockBuffer[iid2] -= takeC; rem -= takeC; }
       }
     }
-    return { ok: true };
+    return { boosted: true, mult: 1.45 };
   }
 
   function tickCompanyBuildings(state, opts) {
@@ -3313,18 +4169,27 @@ global.LHOpenTTD = (function () {
         b.pausedReason = 'unpaid_upkeep';
         continue;
       }
-      var inpRes = consumeBuildingInputs(state, comp, b, o.strictInputs !== false);
-      if (!inpRes.ok) {
-        b.pausedReason = 'missing_inputs';
-        b.missingItem = inpRes.missingItem;
+      // Fuel is mandatory; missing optional raw materials only skips the +45% input boost (partial out-of-thin-air output continues)
+      var fuelRes = consumeBuildingFuel(state, comp, b, o.strictInputs !== false && o.strictFuel !== false);
+      if (!fuelRes.ok) {
+        b.pausedReason = 'missing_fuel';
+        b.missingItem = fuelRes.missingItem;
         continue;
       }
+      var optRes = consumeOptionalInputs(state, comp, b);
       b.pausedReason = null;
       b.missingItem = null;
+      b.lastInputBoosted = !!optRes.boosted;
       var dim = b.dimension || 'minecraft:overworld';
       var adjMult = getPowerPlantAdjacencyMultiplier(state, b.owner, b.sx, b.sz, dim);
       var subMult = isCompanySubsidized(state, b.owner, b.sx, b.sz) ? 1.35 : 1.0;
-      var prof = getBuildingYieldProfile(b, { adjMult: adjMult, subsidyMult: subMult }, comp);
+      var cbStat = getComebackStatus(state, b.owner);
+      var prof = getBuildingYieldProfile(b, {
+        adjMult: adjMult,
+        subsidyMult: subMult,
+        inputBoostMult: optRes.boosted ? optRes.mult : 1.0,
+        comebackMult: cbStat.active ? cbStat.yieldMult : 1.0
+      }, comp);
       var capCash = prof.income * 8;
       if ((b.cashBuffer || 0) < capCash) {
         b.cashBuffer = Math.min(capCash, (b.cashBuffer || 0) + prof.income);
@@ -3756,82 +4621,23 @@ global.LHOpenTTD = (function () {
     if (!c) {
       return {
         cash: 0, inventoryValue: 0, facilitiesValue: 0, productionPotentialValue: 0,
-        territoryValue: 0, activityValue: 0, avgHourlyIncome: 0, totalValuation: 0
+        territoryValue: 0, activityValue: 0, equityPortfolioValue: 0, sharePrice: 5,
+        avgHourlyIncome: 0, totalValuation: 0
       };
     }
-    var cash = Math.max(0, Math.round(Number(c.cash || 0)));
-    var tMods = getCompanyTraitModifiers(c);
-
-    var invVal = Math.max(0, Math.round(Number(c.physicalStockEstimate || 0)));
-    Object.keys(c.stockBuffer || {}).forEach(function (iid) {
-      invVal += estimateItemUnitPrice(iid) * Math.max(0, Number(c.stockBuffer[iid] || 0));
-    });
-
-    var bldgs = listCompanyBuildings(state, cid);
-    var bldgValue = 0;
-    var hourlyNet = 0;
-    var cyclesPerHour = 20;
-    for (var i = 0; i < bldgs.length; i++) {
-      var b = bldgs[i];
-      var sp = BUILDING_CATALOG[b.type] || {};
-      var baseCost = (b.type === 'structure_facility' && b.rarityRank) ? (360 * (1 + (b.rarityRank - 1) * 0.35)) : Number(sp.cost || 320);
-      var upgInvested = (Number(b.level || 1) >= 2 ? 420 : 0) + (Number(b.level || 1) >= 3 ? 820 : 0);
-      bldgValue += Math.round((baseCost + upgInvested) * (Number(b.integrityPct || 100) / 100));
-      bldgValue += Math.round(Number(b.cashBuffer || 0));
-      Object.keys(b.stockBuffer || {}).forEach(function (iidB) {
-        invVal += estimateItemUnitPrice(iidB) * Math.max(0, Number(b.stockBuffer[iidB] || 0));
-      });
-      Object.keys(b.inputBuffer || {}).forEach(function (iidIn) {
-        invVal += estimateItemUnitPrice(iidIn) * Math.max(0, Number(b.inputBuffer[iidIn] || 0));
-      });
-      if (b.operational !== false) {
-        var adjM = getPowerPlantAdjacencyMultiplier(state, cid, b.sx, b.sz, b.dimension || 'minecraft:overworld');
-        var subM = isCompanySubsidized(state, cid, b.sx, b.sz) ? 1.35 : 1.0;
-        var yp = getBuildingYieldProfile(b, { adjMult: adjM, subsidyMult: subM }, c);
-        var itemYieldWorth = 0;
-        Object.keys(yp.items || {}).forEach(function (yi) {
-          itemYieldWorth += estimateItemUnitPrice(yi) * Number(yp.items[yi] || 0);
-        });
-        var upkeepC = Number(b.upkeepCost || sp.upkeepCost || 14) + Math.max(0, Number(b.level || 1) - 1) * Number(sp.upgradeUpkeepPerLevel || 15);
-        hourlyNet += Math.max(0, (yp.income + itemYieldWorth - upkeepC) * cyclesPerHour);
-      }
-    }
-    var productionPotentialValue = Math.round(hourlyNet * 1.6);
-
-    var territoryValue = 0;
-    var claimKeys = Object.keys(state.claims || {});
-    for (var k = 0; k < claimKeys.length; k++) {
-      var cl = state.claims[claimKeys[k]];
-      if (!cl || cl.owner !== cid) continue;
-      var dimB = cl.dimension === 'minecraft:the_end' ? 1.50 : (cl.dimension === 'minecraft:the_nether' ? 1.30 : 1.0);
-      territoryValue += Math.round((300 + Math.max(0, Number(cl.strength || 1) - 1) * 140) * dimB);
-    }
-
-    var avgHourlyIncome = Math.round(hourlyNet);
-    if (Array.isArray(c.incomeHistory) && c.incomeHistory.length > 0) {
-      var sumH = 0;
-      for (var h = 0; h < c.incomeHistory.length; h++) sumH += Number(c.incomeHistory[h] || 0);
-      avgHourlyIncome = Math.round((sumH / c.incomeHistory.length) * cyclesPerHour);
-    }
-
-    var s = c.stats || {};
-    var activityValue = Math.round(
-      Number(s.deliveries || 0) * 45 +
-      Number(s.tradeVolume || 0) * 0.5 +
-      Number(s.contractsDone || 0) * 200 +
-      Number(s.routesDone || 0) * 250
-    );
-
-    var rawTotal = cash + invVal + bldgValue + productionPotentialValue + territoryValue + Math.max(0, Math.round(avgHourlyIncome * 0.5)) + activityValue;
-    var totalValuation = Math.max(0, Math.round(rawTotal * tMods.valuationMult));
+    var op = getOperationalValuationBreakdown(state, cid);
+    var port = getCompanyPortfolioDetails(state, cid);
+    var totalValuation = Math.max(0, Math.round(op.operationalTotal + port.externalEquityValue));
     return {
-      cash: cash,
-      inventoryValue: Math.round(invVal),
-      facilitiesValue: Math.round(bldgValue),
-      productionPotentialValue: productionPotentialValue,
-      territoryValue: territoryValue,
-      activityValue: activityValue,
-      avgHourlyIncome: avgHourlyIncome,
+      cash: op.cash,
+      inventoryValue: op.inventoryValue,
+      facilitiesValue: op.facilitiesValue,
+      productionPotentialValue: op.productionPotentialValue,
+      territoryValue: op.territoryValue,
+      activityValue: op.activityValue,
+      equityPortfolioValue: port.externalEquityValue,
+      sharePrice: getSharePrice(state, cid),
+      avgHourlyIncome: op.avgHourlyIncome,
       totalValuation: totalValuation
     };
   }
@@ -3845,12 +4651,13 @@ global.LHOpenTTD = (function () {
     var cids = Object.keys(state.companies || {});
     for (var i = 0; i < cids.length; i++) {
       var c = state.companies[cids[i]];
+      if (!c || c.isPirate) continue;
       anchors.push({ cid: c.id, sx: Number(c.hqSx || 0), sz: Number(c.hqSz || 0), weight: 1.0 });
     }
     var claimKeys = Object.keys(state.claims || {});
     for (var j = 0; j < claimKeys.length; j++) {
       var cl = state.claims[claimKeys[j]];
-      if (cl && state.companies[cl.owner] && (!cl.dimension || cl.dimension === 'minecraft:overworld')) {
+      if (cl && state.companies[cl.owner] && !state.companies[cl.owner].isPirate && (!cl.dimension || cl.dimension === 'minecraft:overworld')) {
         anchors.push({ cid: cl.owner, sx: cl.sx, sz: cl.sz, weight: 1.0 });
       }
     }
@@ -3962,6 +4769,8 @@ global.LHOpenTTD = (function () {
       specMult = Math.max(0.35, specMult * Math.max(0.75, 1.0 - Math.min(0.25, warehouseCount * 0.10)));
     }
     var exclaveMult = adjacent ? 1.0 : (1.0 + 1.5 * (sectorDist - 1) + 0.5 * (sectorDist - 1) * (sectorDist - 1));
+    var cbStat = getComebackStatus(state, cid);
+    var comebackClaimMult = (cbStat.active && ownerInfo.kind !== 'claimed') ? Math.max(0.45, 1.0 - cbStat.claimDiscount) : 1.0;
 
     if (ownerInfo.kind === 'claimed') {
       if (ownerInfo.owner === cid) return { ok: false, reason: 'already_yours', cost: 0, adjacent: true, sectorDist: 0, exclaveMult: 1.0 };
@@ -3991,7 +4800,7 @@ global.LHOpenTTD = (function () {
       adjacent: adjacent,
       sectorDist: sectorDist,
       exclaveMult: exclaveMult,
-      cost: Math.round(BASE_CLAIM_COST * specMult * exclaveMult * dimMult * tMods.claimCostMult)
+      cost: Math.round(BASE_CLAIM_COST * specMult * exclaveMult * dimMult * tMods.claimCostMult * comebackClaimMult)
     };
   }
 
@@ -4154,6 +4963,64 @@ global.LHOpenTTD = (function () {
     return { ok: false, reason: 'bad_kind' };
   }
 
+  function relocateHqIfNeeded(state, cid) {
+    var comp = state.companies && state.companies[cid];
+    if (!comp) return false;
+    var hqKey = sectorKey(comp.hqSx, comp.hqSz);
+    var hqCl = state.claims[hqKey];
+    if (hqCl && hqCl.owner === cid && hqCl.isHq) return true;
+    var keys = Object.keys(state.claims || {});
+    for (var i = 0; i < keys.length; i++) {
+      var cl = state.claims[keys[i]];
+      if (cl && cl.owner === cid && (!cl.dimension || cl.dimension === 'minecraft:overworld')) {
+        cl.isHq = true;
+        comp.hqSx = cl.sx;
+        comp.hqSz = cl.sz;
+        comp.hqX = cl.sx * SECTOR_SIZE;
+        comp.hqZ = cl.sz * SECTOR_SIZE;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function wouldEliminatePlayerCompany(state, targetCid, targetCl) {
+    var tc = state.companies && state.companies[targetCid];
+    if (!tc || tc.isBot) return false;
+    if (!targetCl || targetCl.owner !== targetCid) return false;
+    return countClaims(state, targetCid) <= 1;
+  }
+
+  function companyMerge(state, fromCid, toCid) {
+    ensureDiplomacyState(state);
+    var fromComp = state.companies && state.companies[fromCid];
+    var toComp = state.companies && state.companies[toCid];
+    if (!fromComp || !toComp || fromCid === toCid) return { ok: false, reason: 'bad_company' };
+    // Never allow full player company absorption/elimination so friends are never kicked out of progression
+    if (!fromComp.isBot) {
+      return {
+        ok: false,
+        reason: 'player_merge_disabled',
+        message: 'Полное поглощение/слияние компаний игроков отключено — купите до 49% акций вместо поглощения.'
+      };
+    }
+    // Only bot companies can be dissolved/merged if needed
+    Object.keys(state.claims || {}).forEach(function (ck) {
+      var cl = state.claims[ck];
+      if (cl && cl.owner === fromCid) {
+        cl.owner = toCid;
+        cl.isHq = false;
+      }
+    });
+    Object.keys(state.buildings || {}).forEach(function (bk) {
+      var b = state.buildings[bk];
+      if (b && b.owner === fromCid) b.owner = toCid;
+    });
+    toComp.cash += Math.max(0, Math.round(Number(fromComp.cash || 0)));
+    delete state.companies[fromCid];
+    return { ok: true, merged: fromCid, into: toCid };
+  }
+
   function claimOrCaptureSector(state, cid, sx, sz, allowCapture, opts) {
     var comp = state.companies[cid];
     if (!comp) return { ok: false, reason: 'no_company' };
@@ -4164,6 +5031,10 @@ global.LHOpenTTD = (function () {
       return { ok: false, reason: 'not_adjacent_remote', sectorDist: info.sectorDist, cost: info.cost };
     }
     if (info.mode === 'capture' && !allowCapture) return { ok: false, reason: 'enemy_claimed', targetOwner: info.targetOwner, cost: info.cost };
+    var kCheck = sectorKey(sx, sz, dim);
+    if (info.mode === 'capture' && info.targetOwner && wouldEliminatePlayerCompany(state, info.targetOwner, state.claims[kCheck])) {
+      return { ok: false, reason: 'cannot_eliminate_player_company', targetOwner: info.targetOwner };
+    }
     var discountFactor = (opts && opts.discountFactor > 0) ? Number(opts.discountFactor) : 1.0;
     var costMult = (opts && opts.costMultiplier > 0) ? Number(opts.costMultiplier) : 1.0;
     var finalCost = Math.max(10, Math.round(info.cost * discountFactor * costMult));
@@ -4181,7 +5052,9 @@ global.LHOpenTTD = (function () {
       }
     }
     var k = sectorKey(sx, sz, dim);
+    var prevWasHq = !!(state.claims[k] && state.claims[k].isHq);
     state.claims[k] = { sx: sx, sz: sz, dimension: dim, owner: cid, strength: 1, isHq: false };
+    if (prevWasHq && info.targetOwner) relocateHqIfNeeded(state, info.targetOwner);
     comp.stats.sectorsCaptured = (comp.stats.sectorsCaptured || 0) + 1;
     return {
       ok: true,
@@ -4213,7 +5086,13 @@ global.LHOpenTTD = (function () {
     var dmg = Math.max(1, Math.round(Number(powerLevels || 1)) + Number(coalMod.raidPowerBonus || 0) - Number(coalMod.defenseBonus || 0));
     var rem = Number(cl.strength || 1) - dmg;
     if (rem <= 0) {
+      if (wouldEliminatePlayerCompany(state, prevOwner, cl)) {
+        cl.strength = 1;
+        return { ok: true, captured: false, protectedLastHq: true, previousOwner: prevOwner, newStrength: 1, cost: cost, coalitionAttack: coalMod.isCoalitionAttack };
+      }
+      var wasHq = !!cl.isHq;
       state.claims[k] = { sx: sx, sz: sz, dimension: dim, owner: attackerCid, strength: 1, isHq: false };
+      if (wasHq) relocateHqIfNeeded(state, prevOwner);
       comp.stats.sectorsCaptured = (comp.stats.sectorsCaptured || 0) + 1;
       comp.stats.hostileCaptures = (comp.stats.hostileCaptures || 0) + 1;
       if (coalMod.isCoalitionAttack && coalMod.captureBounty > 0) comp.cash += coalMod.captureBounty;
@@ -4231,10 +5110,12 @@ global.LHOpenTTD = (function () {
     var k = sectorKey(sx, sz, dimension);
     var cl = state.claims[k];
     if (!cl || cl.owner !== fromCid) return { ok: false, reason: 'not_owned' };
-    if (cl.isHq && countClaims(state, fromCid) <= 1) return { ok: false, reason: 'last_hq' };
+    if (wouldEliminatePlayerCompany(state, fromCid, cl)) return { ok: false, reason: 'last_hq' };
+    var wasHq = !!cl.isHq;
     cl.owner = toCid;
     cl.isHq = false;
     cl.strength = 1;
+    if (wasHq) relocateHqIfNeeded(state, fromCid);
     toComp.stats.sectorsCaptured = (toComp.stats.sectorsCaptured || 0) + 1;
     return { ok: true, key: k, from: fromCid, to: toCid };
   }
@@ -4246,6 +5127,7 @@ global.LHOpenTTD = (function () {
     var cl = state.claims[k];
     if (!cl || !state.companies[cl.owner]) return { ok: false, reason: 'not_claimed' };
     if (cl.owner === attackerCid) return { ok: false, reason: 'already_yours' };
+    if (wouldEliminatePlayerCompany(state, cl.owner, cl)) return { ok: false, reason: 'cannot_eliminate_player_company' };
     if (!isAdjacentOwned(state, attackerCid, sx, sz, dimension)) return { ok: false, reason: 'not_adjacent' };
     if ((cl.strength || 1) > 1) return { ok: false, reason: 'fortified', strength: cl.strength };
     var target = state.companies[cl.owner];
@@ -4290,7 +5172,7 @@ global.LHOpenTTD = (function () {
       var cl = state.claims[keys[i]];
       if (!cl || !cl.owner) continue;
       var comp = state.companies && state.companies[cl.owner];
-      if (comp && comp.isBot) cnt++;
+      if (comp && comp.isBot && !comp.isPirate) cnt++;
     }
     return cnt;
   }
@@ -4299,7 +5181,8 @@ global.LHOpenTTD = (function () {
     var cnt = 0;
     var cids = Object.keys(state.companies || {});
     for (var i = 0; i < cids.length; i++) {
-      if (state.companies[cids[i]] && state.companies[cids[i]].isBot) cnt++;
+      var c = state.companies[cids[i]];
+      if (c && c.isBot && !c.isPirate) cnt++;
     }
     return cnt;
   }
@@ -4450,7 +5333,7 @@ global.LHOpenTTD = (function () {
     var botIds = [];
     Object.keys(state.companies || {}).forEach(function (cid) {
       var c = state.companies[cid];
-      if (!c) return;
+      if (!c || c.isPirate) return;
       if (c.isBot) botIds.push(cid);
       else playerVals.push(computeValuation(state, cid));
     });
@@ -4518,6 +5401,218 @@ global.LHOpenTTD = (function () {
     return { ok: true, raid: raid };
   }
 
+  function evolvePirateSyndicate(state, rngFn) {
+    ensureDiplomacyState(state);
+    var ps = ensurePirateSyndicate(state);
+    var pComp = state.companies[PIRATE_SYNDICATE_ID];
+    ps.cash = pComp.cash;
+    var score = Math.floor(ps.cash / 800) + ps.caravansRobbed * 2 + ps.raidsCompleted * 3;
+    ps.level = Math.max(1, Math.min(10, 1 + Math.floor(score / 4)));
+    ps.power = Math.max(12, 12 + ps.level * 6 + ps.caravansRobbed * 2 + ps.raidsCompleted * 3);
+
+    // Pirates establish remote hideout claims when growing strong
+    var pirateClaims = countClaims(state, PIRATE_SYNDICATE_ID);
+    var desiredClaims = Math.min(5, Math.floor(ps.level / 2));
+    if (pirateClaims < desiredClaims && pComp.cash >= 600) {
+      var rng = rngFn || Math.random;
+      var spots = [
+        [-14, -14], [14, -14], [-14, 14], [14, 14],
+        [-12, 0], [12, 0], [0, -12], [0, 12]
+      ];
+      for (var i = 0; i < spots.length; i++) {
+        var pick = spots[Math.floor(rng() * spots.length)];
+        var k = sectorKey(pick[0], pick[1]);
+        if (!isSpawnProtectedSector(pick[0], pick[1]) && !state.claims[k]) {
+          state.claims[k] = {
+            sx: pick[0],
+            sz: pick[1],
+            dimension: 'minecraft:overworld',
+            owner: PIRATE_SYNDICATE_ID,
+            strength: Math.min(3, 1 + Math.floor(ps.level / 3)),
+            isHq: pirateClaims === 0,
+            isPirateDen: true
+          };
+          pComp.cash -= 300;
+          ps.cash = pComp.cash;
+          break;
+        }
+      }
+    }
+    return ps;
+  }
+
+  function computeCaravanPiracyRisk(state, cid, srcSx, srcSz, dstSx, dstSz, hasEscort, nowTick) {
+    ensureDiplomacyState(state);
+    var ps = ensurePirateSyndicate(state);
+    var comp = state.companies && state.companies[cid];
+    if (comp && comp.pirateImmunityUntilTick && Number(nowTick || 0) < comp.pirateImmunityUntilTick) {
+      return 0;
+    }
+    var span = Math.max(1, Math.abs(Number(dstSx || 0) - Number(srcSx || 0)) + Math.abs(Number(dstSz || 0) - Number(srcSz || 0)));
+    var baseRisk = Math.min(0.45, 0.04 + span * 0.02 + (ps.level - 1) * 0.03);
+    // Patrol posts near origin or destination lower piracy risk
+    var patrols = findPatrolPostsCovering(state, cid, Number(srcSx || 0) * SECTOR_SIZE, Number(srcSz || 0) * SECTOR_SIZE).length +
+      findPatrolPostsCovering(state, cid, Number(dstSx || 0) * SECTOR_SIZE, Number(dstSz || 0) * SECTOR_SIZE).length;
+    if (patrols > 0) baseRisk *= Math.max(0.35, 1.0 - patrols * 0.25);
+    if (hasEscort) baseRisk *= 0.18;
+    return Math.max(0, Math.min(0.65, Math.round(baseRisk * 1000) / 1000));
+  }
+
+  function interceptCaravanByPirates(state, victimCid, itemId, qty, cashValue, nowTick, rngFn) {
+    ensureDiplomacyState(state);
+    var ps = ensurePirateSyndicate(state);
+    var pComp = state.companies[PIRATE_SYNDICATE_ID];
+    var rng = rngFn || Math.random;
+    var stolenPct = 0.35 + rng() * 0.25;
+    var stolenQty = Math.max(1, Math.round(Number(qty || 1) * stolenPct));
+    var stolenCash = Math.max(20, Math.round(Number(cashValue || 60) * 0.40));
+    if (itemId) {
+      ps.lootStash[itemId] = Number(ps.lootStash[itemId] || 0) + stolenQty;
+    }
+    pComp.cash += stolenCash;
+    ps.cash = pComp.cash;
+    ps.caravansRobbed += 1;
+    evolvePirateSyndicate(state, rngFn);
+    if (victimCid && state.companies[victimCid]) {
+      adjustRelation(state, PIRATE_SYNDICATE_ID, victimCid, -10, 'Ограбление каравана пиратами');
+    }
+    return {
+      robbed: true,
+      stolenItem: itemId,
+      stolenQty: stolenQty,
+      stolenCash: stolenCash,
+      pirateLevel: ps.level,
+      piratePower: ps.power
+    };
+  }
+
+  function buyPirateImmunity(state, cid, durationTicks, nowTick) {
+    ensureDiplomacyState(state);
+    var ps = ensurePirateSyndicate(state);
+    var comp = state.companies && state.companies[cid];
+    var pComp = state.companies[PIRATE_SYNDICATE_ID];
+    if (!comp) return { ok: false, reason: 'no_company' };
+    var dur = Math.max(2400, Math.round(Number(durationTicks || 12000)));
+    var cost = Math.max(180, Math.round((180 + ps.level * 45) * (dur / 12000)));
+    if (comp.cash < cost) return { ok: false, reason: 'no_cash', cost: cost, cash: comp.cash };
+    comp.cash -= cost;
+    pComp.cash += cost;
+    ps.cash = pComp.cash;
+    var startTick = Math.max(Number(nowTick || 0), Number(comp.pirateImmunityUntilTick || 0));
+    comp.pirateImmunityUntilTick = startTick + dur;
+    return { ok: true, cost: cost, untilTick: comp.pirateImmunityUntilTick };
+  }
+
+  function buyPirateBlackMarketLoot(state, cid, itemId, qty) {
+    ensureDiplomacyState(state);
+    var ps = ensurePirateSyndicate(state);
+    var comp = state.companies && state.companies[cid];
+    var pComp = state.companies[PIRATE_SYNDICATE_ID];
+    if (!comp) return { ok: false, reason: 'no_company' };
+    var avail = Math.max(0, Number(ps.lootStash[itemId] || 0));
+    if (avail <= 0) return { ok: false, reason: 'out_of_stock' };
+    var take = Math.max(1, Math.min(avail, Math.round(Number(qty || avail))));
+    var unitMarket = estimateItemUnitPrice(itemId);
+    // Black market fenced loot sold at ~65% of market price
+    var cost = Math.max(10, Math.round(unitMarket * take * 0.65));
+    if (comp.cash < cost) return { ok: false, reason: 'no_cash', cost: cost, cash: comp.cash };
+    comp.cash -= cost;
+    pComp.cash += cost;
+    ps.cash = pComp.cash;
+    ps.lootStash[itemId] -= take;
+    if (ps.lootStash[itemId] <= 0) delete ps.lootStash[itemId];
+    if (!comp.stockBuffer) comp.stockBuffer = {};
+    comp.stockBuffer[itemId] = Number(comp.stockBuffer[itemId] || 0) + take;
+    return { ok: true, itemId: itemId, qty: take, cost: cost };
+  }
+
+  function orderPirateRaid(state, clientCid, targetCid, sx, sz, tier, nowTick, opts) {
+    ensureDiplomacyState(state);
+    var ps = ensurePirateSyndicate(state);
+    var pComp = state.companies[PIRATE_SYNDICATE_ID];
+    var client = state.companies && state.companies[clientCid];
+    var target = state.companies && state.companies[targetCid];
+    if (!client || !target || clientCid === targetCid || target.isPirate) {
+      return { ok: false, reason: 'bad_company' };
+    }
+    var o = opts || {};
+    var t = Math.max(1, Math.min(3, Math.round(Number(tier || 1))));
+    var basePrice = t === 3 ? 750 : (t === 2 ? 450 : 250);
+    var anonFee = o.anonymous ? Math.round(basePrice * 0.25) : 0;
+    var cost = basePrice + anonFee;
+    if (client.cash < cost) return { ok: false, reason: 'no_cash', cost: cost, cash: client.cash };
+
+    client.cash -= cost;
+    pComp.cash += Math.round(cost * 0.85);
+    ps.cash = pComp.cash;
+
+    var strength = Math.max(1, Math.min(5, t + Math.floor(ps.level / 3)));
+    var mobRoster = strength >= 3
+      ? ['minecraft:pillager', 'minecraft:vindicator', 'minecraft:ravager']
+      : ['minecraft:pillager', 'minecraft:vindicator', 'minecraft:witch'];
+    var raid = {
+      id: 'raid_' + (state.nextMobRaidSeq++),
+      attackerCid: PIRATE_SYNDICATE_ID,
+      attackerName: o.anonymous ? 'Неизвестные Корсары' : ('Корсары (заказ ' + client.name + ')'),
+      clientCid: clientCid,
+      anonymous: !!o.anonymous,
+      isPirateRaid: true,
+      tier: t,
+      targetCid: targetCid,
+      targetName: target.name,
+      sx: sx,
+      sz: sz,
+      dimension: o.dimension || 'minecraft:overworld',
+      x: sx * SECTOR_SIZE,
+      z: sz * SECTOR_SIZE,
+      strength: strength,
+      mobCount: 4 + strength * 2,
+      mobRoster: mobRoster,
+      spawnedInWorld: false,
+      startedTick: Number(nowTick || 0),
+      expiresTick: Number(nowTick || 0) + 5400,
+      status: 'active'
+    };
+    state.activeMobRaids.push(raid);
+    ps.ordersHistory.push({ raidId: raid.id, clientCid: clientCid, targetCid: targetCid, tier: t, cost: cost, tick: Number(nowTick || 0) });
+    if (ps.ordersHistory.length > 30) ps.ordersHistory.shift();
+    if (!o.anonymous) {
+      adjustRelation(state, clientCid, targetCid, -25, 'Заказан пиратский набег на (' + sx + ',' + sz + ')');
+    }
+    evolvePirateSyndicate(state);
+    return { ok: true, raid: raid, cost: cost, pirateLevel: ps.level };
+  }
+
+  function raidForeignCaravan(state, attackerCid, route, nowTick, rngFn) {
+    ensureDiplomacyState(state);
+    var attacker = state.companies && state.companies[attackerCid];
+    if (!attacker || !route || route.companyId === attackerCid) return { ok: false, reason: 'bad_target' };
+    var victim = state.companies[route.companyId];
+    if (!victim) return { ok: false, reason: 'no_victim' };
+    var rng = rngFn || Math.random;
+    var raidCost = 80;
+    if (attacker.cash < raidCost) return { ok: false, reason: 'no_cash', cost: raidCost };
+    attacker.cash -= raidCost;
+
+    var risk = route.escortEnabled ? 0.45 : 0.85;
+    if (rng() > risk) {
+      adjustRelation(state, attackerCid, victim.id, -15, 'Неудачная попытка ограбить караван');
+      return { ok: true, robbed: false, reason: 'escort_repelled' };
+    }
+    var lootQty = Math.max(1, Math.round(Number(route.qtyPerRun || 8) * 0.50));
+    var lootCash = Math.max(40, Math.round(Number((route.costProfile && route.costProfile.totalCashCost) || 60) * 1.5));
+    var takeCash = Math.min(victim.cash, lootCash);
+    victim.cash -= takeCash;
+    attacker.cash += takeCash;
+    if (route.itemId && route.itemId !== 'auto') {
+      if (!attacker.stockBuffer) attacker.stockBuffer = {};
+      attacker.stockBuffer[route.itemId] = Number(attacker.stockBuffer[route.itemId] || 0) + lootQty;
+    }
+    attacker.stats.raidsLaunched = (attacker.stats.raidsLaunched || 0) + 1;
+    adjustRelation(state, attackerCid, victim.id, -30, 'Ограбление каравана ' + route.id);
+    return { ok: true, robbed: true, lootCash: takeCash, lootQty: lootQty, itemId: route.itemId };
+  }
+
   function resolveBotMobRaid(state, raidId, outcome) {
     ensureDiplomacyState(state);
     for (var i = 0; i < state.activeMobRaids.length; i++) {
@@ -4537,6 +5632,26 @@ global.LHOpenTTD = (function () {
       if (cl && cl.owner === r.targetCid) {
         if ((cl.strength || 1) > 1) cl.strength -= 1;
         else weakenOrCaptureSector(state, r.attackerCid, r.sx, r.sz, 1, 0, r.dimension);
+      }
+      if (r.isPirateRaid) {
+        var ps = ensurePirateSyndicate(state);
+        var pComp = state.companies[PIRATE_SYNDICATE_ID];
+        var tgt = state.companies[r.targetCid];
+        var lootCash = tgt ? Math.min(tgt.cash, 90 * r.strength) : 0;
+        if (tgt && lootCash > 0) tgt.cash -= lootCash;
+        pComp.cash += lootCash + 80;
+        ps.cash = pComp.cash;
+        ps.raidsCompleted += 1;
+        if (bldg && bldg.stockBuffer) {
+          Object.keys(bldg.stockBuffer).forEach(function (iid) {
+            var q = Math.floor(Number(bldg.stockBuffer[iid] || 0) * 0.4);
+            if (q > 0) {
+              bldg.stockBuffer[iid] -= q;
+              ps.lootStash[iid] = Number(ps.lootStash[iid] || 0) + q;
+            }
+          });
+        }
+        evolvePirateSyndicate(state);
       }
       return { ok: true, status: 'breached', raid: r };
     }
@@ -4564,7 +5679,7 @@ global.LHOpenTTD = (function () {
     var limit = Math.max(1, Math.floor(Number(maxSectorAbs || 1)));
     var events = [];
     var allBotIds = Object.keys(state.companies || {}).filter(function (cid) {
-      return state.companies[cid] && state.companies[cid].isBot;
+      return state.companies[cid] && state.companies[cid].isBot && !state.companies[cid].isPirate;
     });
 
     applyBotCatchupBalancing(state);
@@ -4593,7 +5708,7 @@ global.LHOpenTTD = (function () {
             var bType = (arch.preferredBuildings && arch.preferredBuildings.length)
               ? arch.preferredBuildings[botBldgs.length % arch.preferredBuildings.length]
               : 'mine_shaft';
-            var bRes = buildCompanyBuilding(state, bot.id, bType, bcl.sx, bcl.sz, null, bcl.dimension);
+            var bRes = buildCompanyBuilding(state, bot.id, bcl.sx, bcl.sz, bType, null, null, null, { dimension: bcl.dimension });
             if (bRes.ok) {
               events.push({ type: 'bot_build', botId: bot.id, botName: bot.name, buildingType: bType, sx: bcl.sx, sz: bcl.sz });
               break;
@@ -4604,7 +5719,7 @@ global.LHOpenTTD = (function () {
         for (var ub = 0; ub < botBldgs.length; ub++) {
           var tgtB = botBldgs[ub];
           if ((tgtB.level || 1) < 3) {
-            var uRes = upgradeCompanyBuilding(state, bot.id, tgtB.sx, tgtB.sz, tgtB.dimension);
+            var uRes = upgradeCompanyBuilding(state, bot.id, tgtB.sx, tgtB.sz, null, tgtB.dimension);
             if (uRes.ok) {
               events.push({ type: 'bot_upgrade', botId: bot.id, botName: bot.name, buildingType: tgtB.type, level: uRes.level, sx: tgtB.sx, sz: tgtB.sz });
               break;
@@ -4695,7 +5810,7 @@ global.LHOpenTTD = (function () {
     var rng = rngFn || Math.random;
     var kept = (state.marketOrders || []).filter(function (o) { return !o.isBot; });
     var allBots = Object.keys(state.companies || {}).filter(function (cid) {
-      return state.companies[cid] && state.companies[cid].isBot;
+      return state.companies[cid] && state.companies[cid].isBot && !state.companies[cid].isPirate;
     });
 
     for (var i = 0; i < allBots.length; i++) {
@@ -4815,6 +5930,9 @@ global.LHOpenTTD = (function () {
       createdTick: tick,
       endsAtTick: tick + dur,
       buyoutPrice: o.buyoutPrice ? Math.max(minPrice * 2, Math.round(Number(o.buyoutPrice))) : null,
+      assetType: 'building',
+      isForcedDebtAuction: !!o.isForcedDebtAuction,
+      debtReason: o.debtReason || null,
       status: 'open'
     };
     state.auctions.push(auc);
@@ -4862,36 +5980,71 @@ global.LHOpenTTD = (function () {
     }
     if (!auc || auc.status !== 'open') return { ok: false, reason: 'auction_closed' };
 
-    var b = getSectorBuilding(state, auc.sx, auc.sz, auc.dimension);
-    if (!auc.highestBidderCid || !state.companies[auc.highestBidderCid] || !b) {
+    var isSectorLot = auc.assetType === 'sector';
+    var b = isSectorLot ? null : getSectorBuilding(state, auc.sx, auc.sz, auc.dimension);
+    var cl = state.claims[sectorKey(auc.sx, auc.sz, auc.dimension)];
+    var assetValid = isSectorLot ? !!(cl && cl.owner === auc.sellerCid) : !!b;
+
+    if (!auc.highestBidderCid || !state.companies[auc.highestBidderCid] || !assetValid) {
       if (auc.highestBidderCid && state.companies[auc.highestBidderCid]) {
         state.companies[auc.highestBidderCid].cash += auc.currentBid;
       }
       auc.status = 'unsold';
-      return { ok: true, sold: false, reason: b ? 'no_bids' : 'building_missing', auction: auc };
+      return { ok: true, sold: false, reason: assetValid ? 'no_bids' : 'asset_missing', auction: auc };
     }
 
     var seller = state.companies[auc.sellerCid];
     var buyer = state.companies[auc.highestBidderCid];
     var fee = Math.round(auc.currentBid * 0.05);
     var payout = Math.max(0, auc.currentBid - fee);
+    var debtPaid = 0;
     if (seller) {
-      seller.cash += payout;
       seller.stats.tradeVolume = (seller.stats.tradeVolume || 0) + auc.currentBid;
+      if (auc.isForcedDebtAuction) {
+        var remPayout = payout;
+        if (auc.debtReason === 'loan_default') {
+          for (var li = 0; li < (state.loans || []).length && remPayout > 0; li++) {
+            var ln = state.loans[li];
+            if (ln && ln.companyId === seller.id && (ln.status === 'active' || ln.status === 'defaulted') && ln.remainingDebt > 0) {
+              var payL = Math.min(remPayout, ln.remainingDebt);
+              ln.remainingDebt -= payL;
+              remPayout -= payL;
+              debtPaid += payL;
+              state.centralBank.totalRepaid = (state.centralBank.totalRepaid || 0) + payL;
+              if (ln.remainingDebt <= 0) { ln.remainingDebt = 0; ln.status = 'repaid'; }
+            }
+          }
+        }
+        if (remPayout > 0 && (seller.unpaidUpkeep || 0) > 0) {
+          var payTax = Math.min(remPayout, seller.unpaidUpkeep);
+          seller.unpaidUpkeep -= payTax;
+          remPayout -= payTax;
+          debtPaid += payTax;
+          if (seller.unpaidUpkeep <= 0) seller.taxDefaultCycles = 0;
+        }
+        seller.cash += remPayout;
+      } else {
+        seller.cash += payout;
+      }
     }
     buyer.stats.tradeVolume = (buyer.stats.tradeVolume || 0) + auc.currentBid;
-    b.owner = buyer.id;
-    // Transfer sector claim ownership unless it's the seller's HQ sector with no other claims
-    var cl = state.claims[sectorKey(auc.sx, auc.sz, auc.dimension)];
-    if (cl && cl.owner === auc.sellerCid && !cl.isHq) {
-      cl.owner = buyer.id;
+    if (b) b.owner = buyer.id;
+    // Transfer sector claim ownership unless it's the seller's protected last HQ sector
+    if (cl && cl.owner === auc.sellerCid && !wouldEliminatePlayerCompany(state, auc.sellerCid, cl)) {
+      if (!cl.isHq || isSectorLot) {
+        var wasHq = !!cl.isHq;
+        cl.owner = buyer.id;
+        cl.isHq = false;
+        if (wasHq) relocateHqIfNeeded(state, auc.sellerCid);
+      }
     }
     auc.status = 'sold';
     auc.finalPrice = auc.currentBid;
     auc.fee = fee;
     auc.payout = payout;
-    adjustRelation(state, auc.sellerCid, buyer.id, 8, 'Успешный аукцион предприятия ' + auc.buildingName);
-    return { ok: true, sold: true, buyerCid: buyer.id, sellerCid: auc.sellerCid, finalPrice: auc.currentBid, payout: payout, fee: fee, auction: auc };
+    auc.debtPaid = debtPaid;
+    adjustRelation(state, auc.sellerCid, buyer.id, auc.isForcedDebtAuction ? 0 : 8, 'Успешный аукцион ' + auc.buildingName);
+    return { ok: true, sold: true, buyerCid: buyer.id, sellerCid: auc.sellerCid, finalPrice: auc.currentBid, payout: payout, debtPaid: debtPaid, fee: fee, auction: auc };
   }
 
   function cancelFacilityAuction(state, auctionId, requesterCid) {
@@ -4900,6 +6053,7 @@ global.LHOpenTTD = (function () {
       var auc = state.auctions[i];
       if (!auc || auc.id !== auctionId) continue;
       if (auc.status !== 'open') return { ok: false, reason: 'auction_closed' };
+      if (auc.isForcedDebtAuction) return { ok: false, reason: 'forced_debt_auction' };
       if (requesterCid && auc.sellerCid !== requesterCid) return { ok: false, reason: 'not_seller' };
       if (auc.highestBidderCid && state.companies[auc.highestBidderCid]) {
         state.companies[auc.highestBidderCid].cash += auc.currentBid;
@@ -4956,6 +6110,10 @@ global.LHOpenTTD = (function () {
     DEFAULT_BOT_COMPANIES: DEFAULT_BOT_COMPANIES,
     BOT_ORDER_TEMPLATES: BOT_ORDER_TEMPLATES,
     BUILDING_CATALOG: BUILDING_CATALOG,
+    PROGRESSIVE_TAX_BRACKETS: PROGRESSIVE_TAX_BRACKETS,
+    FUEL_EQUIVALENTS: FUEL_EQUIVALENTS,
+    PIRATE_SYNDICATE_ID: PIRATE_SYNDICATE_ID,
+    MAX_PLAYER_EXTERNAL_SHARES: MAX_PLAYER_EXTERNAL_SHARES,
     getCompanyEnvType: getCompanyEnvType,
     setCompanyEnvType: setCompanyEnvType,
     preferredBuildingY: preferredBuildingY,
@@ -4970,6 +6128,7 @@ global.LHOpenTTD = (function () {
     createInitialState: createInitialState,
     ensureBots: ensureBots,
     ensureDiplomacyState: ensureDiplomacyState,
+    ensurePirateSyndicate: ensurePirateSyndicate,
     hasPact: hasPact,
     togglePact: togglePact,
     countClaims: countClaims,
@@ -4980,6 +6139,14 @@ global.LHOpenTTD = (function () {
     spawnDynamicBotCompany: spawnDynamicBotCompany,
     onChapterCompletedBotSpawn: onChapterCompletedBotSpawn,
     applyBotCatchupBalancing: applyBotCatchupBalancing,
+    getOperationalValuationBreakdown: getOperationalValuationBreakdown,
+    getSharePrice: getSharePrice,
+    getCompanyPortfolioDetails: getCompanyPortfolioDetails,
+    buyCompanyShares: buyCompanyShares,
+    sellCompanyShares: sellCompanyShares,
+    getComebackStatus: getComebackStatus,
+    activateComebackBailout: activateComebackBailout,
+    selectDynamicSubsidyTarget: selectDynamicSubsidyTarget,
     getCompanyValuationBreakdown: getCompanyValuationBreakdown,
     computeValuation: computeValuation,
     resolveSectorOwner: resolveSectorOwner,
@@ -4990,6 +6157,7 @@ global.LHOpenTTD = (function () {
     companyCreate: companyCreate,
     companyJoin: companyJoin,
     companyLeave: companyLeave,
+    companyMerge: companyMerge,
     setSpecialization: setSpecialization,
     claimOrCaptureSector: claimOrCaptureSector,
     weakenOrCaptureSector: weakenOrCaptureSector,
@@ -5001,7 +6169,16 @@ global.LHOpenTTD = (function () {
     triggerBotMobRaid: triggerBotMobRaid,
     resolveBotMobRaid: resolveBotMobRaid,
     tickBotMobRaids: tickBotMobRaids,
+    evolvePirateSyndicate: evolvePirateSyndicate,
+    computeCaravanPiracyRisk: computeCaravanPiracyRisk,
+    interceptCaravanByPirates: interceptCaravanByPirates,
+    buyPirateImmunity: buyPirateImmunity,
+    buyPirateBlackMarketLoot: buyPirateBlackMarketLoot,
+    orderPirateRaid: orderPirateRaid,
+    raidForeignCaravan: raidForeignCaravan,
     createFacilityAuction: createFacilityAuction,
+    createSectorAuction: createSectorAuction,
+    enforceDebtAuctions: enforceDebtAuctions,
     placeAuctionBid: placeAuctionBid,
     settleAuction: settleAuction,
     cancelFacilityAuction: cancelFacilityAuction,
@@ -5036,6 +6213,8 @@ global.LHOpenTTD = (function () {
     damageBuildingIntegrity: damageBuildingIntegrity,
     repairBuildingIntegrity: repairBuildingIntegrity,
     getBuildingRequiredInputs: getBuildingRequiredInputs,
+    getBuildingFuelRequirements: getBuildingFuelRequirements,
+    getBuildingOptionalInputs: getBuildingOptionalInputs,
     supplyBuildingInputs: supplyBuildingInputs,
     getPowerPlantAdjacencyMultiplier: getPowerPlantAdjacencyMultiplier,
     isCompanySubsidized: isCompanySubsidized,
@@ -5048,7 +6227,16 @@ global.LHOpenTTD = (function () {
     joinAntiMonopolyCoalition: joinAntiMonopolyCoalition,
     leaveAntiMonopolyCoalition: leaveAntiMonopolyCoalition,
     getCoalitionModifiers: getCoalitionModifiers,
+    computeProgressiveTaxForIncome: computeProgressiveTaxForIncome,
     computeCompanyExpenses: computeCompanyExpenses,
+    attemptTaxEvasion: attemptTaxEvasion,
+    updateCentralBankKeyRate: updateCentralBankKeyRate,
+    getEffectiveLoanRate: getEffectiveLoanRate,
+    getMaxLoanLimit: getMaxLoanLimit,
+    getCompanyActiveDebt: getCompanyActiveDebt,
+    takeBankLoan: takeBankLoan,
+    repayBankLoan: repayBankLoan,
+    tickBankLoans: tickBankLoans,
     tickCompanyUpkeep: tickCompanyUpkeep,
     calculateUpkeepAwareContractPrice: calculateUpkeepAwareContractPrice,
     createSupplyContract: createSupplyContract,
@@ -5957,10 +7145,12 @@ global.LHTradeLogistics = (function () {
       periodTicks: Math.max(600, Math.round(Number(o.periodTicks || 2400))),
       nextRunTick: Number(o.nowTick || 0) + Math.max(600, Math.round(Number(o.periodTicks || 2400))),
       enabled: true,
+      escortEnabled: !!o.escortEnabled,
       mode: o.mode || 'to_input', // 'to_input' | 'to_stock'
       costProfile: costInfo,
       totalTransferred: 0,
       totalRuns: 0,
+      robbedCount: 0,
       lastStatus: 'ready'
     };
     lState.automatedRoutes.push(route);
@@ -5988,9 +7178,11 @@ global.LHTradeLogistics = (function () {
     return { ok: lState.automatedRoutes.length < before };
   }
 
-  function tickAutomatedRoutes(lState, ottdState, nowTick) {
+  function tickAutomatedRoutes(lState, ottdState, nowTick, opts) {
     ensureState(lState);
     if (!ottdState || !global.LHOpenTTD) return [];
+    var o = opts || {};
+    var rng = typeof o.rng === 'function' ? o.rng : Math.random;
     var tick = Number(nowTick || 0);
     var events = [];
     for (var i = 0; i < lState.automatedRoutes.length; i++) {
@@ -6006,11 +7198,12 @@ global.LHTradeLogistics = (function () {
 
       var costP = computeAutomatedRouteCost(ottdState, r.companyId, srcB, dstB, r.qtyPerRun);
       r.costProfile = costP;
+      var escortFee = r.escortEnabled ? Math.max(10, Math.round(costP.sectorsSpan * 4)) : 0;
       // Coal/oil can be drawn from company stockBuffer OR paid as cash fuel equivalent
       var coalAvail = Number((comp.stockBuffer && comp.stockBuffer[costP.coalItem]) || 0);
       var coalFromStock = Math.min(coalAvail, costP.coalQty);
       var missingCoal = costP.coalQty - coalFromStock;
-      var cashNeeded = costP.totalCashCost + missingCoal * 4 + costP.oilQty * 10;
+      var cashNeeded = costP.totalCashCost + escortFee + missingCoal * 4 + costP.oilQty * 10;
 
       if (comp.cash < cashNeeded) {
         r.lastStatus = 'no_cash_for_fuel';
@@ -6048,19 +7241,42 @@ global.LHTradeLogistics = (function () {
 
       srcB.stockBuffer[chosenItem] -= moveQty;
       if (srcB.stockBuffer[chosenItem] <= 0) delete srcB.stockBuffer[chosenItem];
-      if (r.mode === 'to_input') {
-        if (!dstB.inputBuffer) dstB.inputBuffer = {};
-        dstB.inputBuffer[chosenItem] = (dstB.inputBuffer[chosenItem] || 0) + moveQty;
-        if (dstB.status === 'missing_inputs') dstB.status = 'active';
-      } else {
-        if (!dstB.stockBuffer) dstB.stockBuffer = {};
-        dstB.stockBuffer[chosenItem] = (dstB.stockBuffer[chosenItem] || 0) + moveQty;
+
+      // Long-distance / cross-dim caravans risk pirate interception unless escorted or immune
+      var pirateHit = null;
+      var isLongCaravan = costP.sectorsSpan >= 2 || costP.crossDim;
+      if (!o.skipPiracy && isLongCaravan && global.LHOpenTTD.computeCaravanPiracyRisk && global.LHOpenTTD.interceptCaravanByPirates) {
+        var pRisk = global.LHOpenTTD.computeCaravanPiracyRisk(ottdState, r.companyId, r.srcSx, r.srcSz, r.dstSx, r.dstSz, !!r.escortEnabled, tick);
+        if (pRisk > 0 && rng() < pRisk) {
+          pirateHit = global.LHOpenTTD.interceptCaravanByPirates(ottdState, r.companyId, chosenItem, moveQty, cashNeeded, tick, rng);
+          moveQty = Math.max(0, moveQty - pirateHit.stolenQty);
+          r.robbedCount = (r.robbedCount || 0) + 1;
+        }
+      }
+
+      if (moveQty > 0) {
+        if (r.mode === 'to_input') {
+          if (!dstB.inputBuffer) dstB.inputBuffer = {};
+          dstB.inputBuffer[chosenItem] = (dstB.inputBuffer[chosenItem] || 0) + moveQty;
+          if (dstB.pausedReason === 'missing_inputs' || dstB.pausedReason === 'missing_fuel') dstB.pausedReason = null;
+        } else {
+          if (!dstB.stockBuffer) dstB.stockBuffer = {};
+          dstB.stockBuffer[chosenItem] = (dstB.stockBuffer[chosenItem] || 0) + moveQty;
+        }
       }
       r.totalTransferred = (r.totalTransferred || 0) + moveQty;
       r.totalRuns = (r.totalRuns || 0) + 1;
-      r.lastStatus = 'ok';
+      r.lastStatus = pirateHit ? 'robbed_by_pirates' : 'ok';
       comp.stats.routesDone = (comp.stats.routesDone || 0) + 1;
-      events.push({ routeId: r.id, ok: true, itemId: chosenItem, qty: moveQty, cashCost: cashNeeded, coalUsed: coalFromStock });
+      events.push({
+        routeId: r.id,
+        ok: true,
+        itemId: chosenItem,
+        qty: moveQty,
+        cashCost: cashNeeded,
+        coalUsed: coalFromStock,
+        pirateHit: pirateHit
+      });
     }
     return events;
   }

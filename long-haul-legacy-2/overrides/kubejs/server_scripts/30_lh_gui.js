@@ -25,6 +25,8 @@ var LH_GUI_TABS = [
   { id: 'diplomacy', label: 'Дипломатия' },
   { id: 'territory', label: 'Карта 9x5' },
   { id: 'market', label: 'Биржа' },
+  { id: 'bank', label: 'Банк и Налоги' },
+  { id: 'pirates', label: 'Корсары и Караваны' },
   { id: 'events', label: 'События' },
   { id: 'world', label: 'Мир и Угрозы' },
   { id: 'help', label: 'Справка' }
@@ -320,6 +322,24 @@ function lhGuiRenderHub(gui, server, player) {
     '§7проверка этапа, каталога и транспорта.',
     '§e▶ Нажмите, чтобы открыть'
   ], function (p) { lhOpenGui(server, p, 'recovery'); });
+
+  var cbBank = global.LHOpenTTD && global.LHOpenTTD.updateCentralBankKeyRate ? global.LHOpenTTD.updateCentralBankKeyRate(st) : { keyRate: 0.08 };
+  var psHub = global.LHOpenTTD && global.LHOpenTTD.ensurePirateSyndicate ? global.LHOpenTTD.ensurePirateSyndicate(st) : { level: 1, caravansRobbed: 0 };
+  var myDebtHub = (snap.company && global.LHOpenTTD && global.LHOpenTTD.getCompanyActiveDebt) ? global.LHOpenTTD.getCompanyActiveDebt(st, snap.company.id) : 0;
+
+  lhGuiSlot(gui, 2, 2, 'minecraft:gold_block', '§e🏛 Банк, Налоги, Акции и Камбэк', [
+    '§fСтавка ЦБ: §e' + Math.round((cbBank.keyRate || 0.08) * 1000) / 10 + '% §7| Ваш долг: §c' + myDebtHub + ' Cr',
+    '§7Кредиты под ставку, прогрессивные налоги,',
+    '§7покупка акций (до 49%), уклонение и камбэк.',
+    '§e▶ Нажмите, чтобы открыть'
+  ], function (p) { lhOpenGui(server, p, 'bank'); });
+
+  lhGuiSlot(gui, 6, 2, 'minecraft:crossbow', '§6☠ Синдикат Корсаров и Караваны', [
+    '§fУровень корсаров: §cУр.' + (psHub.level || 1) + ' §7| Ограблений: §c' + (psHub.caravansRobbed || 0),
+    '§7Охрана караванов, чёрный рынок лута,',
+    '§7анонимные заказные налёты на конкурентов.',
+    '§e▶ Нажмите, чтобы открыть'
+  ], function (p) { lhOpenGui(server, p, 'pirates'); });
 
   lhGuiSlot(gui, 1, 3, 'minecraft:emerald', '§aOpenTTD: Компании и Пакты', [
     snap.company ? ('§fВаша компания: §a' + snap.company.name + ' (' + snap.company.cash + ' Cr)') : '§cВы не состоите в компании',
@@ -667,10 +687,12 @@ function lhGuiRenderLogistics(gui, server, player) {
     });
     autoList.slice(0, 4).forEach(function (ar, aIdx) {
       var cp = ar.costProfile || {};
-      lhGuiSlot(gui, 5 + aIdx, 4, ar.enabled ? 'minecraft:lime_dye' : 'minecraft:gray_dye',
-        (ar.enabled ? '§a[ВКЛ] ' : '§c[ПАУЗА] ') + 'Маршрут ' + ar.id, [
+      var statusTag = !ar.enabled ? '§c[ПАУЗА] ' : (ar.pausedReason === 'robbed_by_pirates' ? '§6[ОГРАБЛЕН] ' : '§a[ВКЛ] ');
+      lhGuiSlot(gui, 5 + aIdx, 4, ar.enabled ? (ar.escortEnabled ? 'minecraft:shield' : 'minecraft:lime_dye') : 'minecraft:gray_dye',
+        statusTag + 'Маршрут ' + ar.id, [
           '§f(' + ar.srcSx + ',' + ar.srcSz + ') → (' + ar.dstSx + ',' + ar.dstSz + ')',
           '§fГруз: §e' + ar.qtyPerRun + '× ' + ar.itemId + ' §7(перевезено: ' + (ar.totalTransferred || 0) + ')',
+          '§fОхрана каравана: ' + (ar.escortEnabled ? '§aВКЛ (−82% пиратов)' : '§cВЫКЛ §7(/lh route escort ' + ar.id + ')'),
           '§fРасход: §7' + (cp.coalQty || 1) + ' угля, ' + (cp.oilQty || 0) + ' нефти, §6' + (cp.totalCashCost || 10) + ' Cr (таможня ' + (cp.customsTax || 0) + ')',
           '§eЛКМ: вкл/выкл | ПКМ: удалить'
         ], function (pl) {
@@ -743,12 +765,13 @@ function lhGuiRenderOpenTTD(gui, server, player) {
     var expBr = global.LHOpenTTD.computeCompanyExpenses ? global.LHOpenTTD.computeCompanyExpenses(st, myComp.id) : { total: 0, facilityUpkeep: 0, upgradeUpkeep: 0, landTax: 0, securityUpkeep: 0, antiMonopolyTax: 0 };
     var trText = global.LHOpenTTD.formatCompanyTraits ? global.LHOpenTTD.formatCompanyTraits(myComp) : '-';
     var isSub = global.LHOpenTTD.isCompanySubsidized && global.LHOpenTTD.isCompanySubsidized(st, myComp.id, myComp.hqSx, myComp.hqSz);
+    var cbMy = global.LHOpenTTD.getComebackStatus ? global.LHOpenTTD.getComebackStatus(st, myComp.id) : { active: false };
     lhGuiSlot(gui, 1, 0, 'minecraft:emerald_block', myComp.colorCode + myComp.name + ' §7[' + myComp.id + ']', [
       '§fНаличные: §e' + myComp.cash + ' Cr §7| Капитал: §a' + vBr.totalValuation + ' Cr',
-      '§7Запасы: §f' + vBr.inventoryValue + ' §7| Объекты: §f' + vBr.facilitiesValue + ' §7| Потенциал: §f' + vBr.productionPotentialValue,
-      '§7Земля: §f' + vBr.territoryValue + ' §7| Ср.доход/ч: §a' + vBr.avgHourlyIncome + ' Cr',
-      '§cРасходы/цикл: §f' + expBr.total + ' Cr §7(объекты ' + expBr.facilityUpkeep + ', апгр ' + expBr.upgradeUpkeep + ', земля ' + expBr.landTax + ', охрана ' + expBr.securityUpkeep + (expBr.antiMonopolyTax > 0 ? (', §cантимоноп ' + expBr.antiMonopolyTax) : '') + ')',
-      '§dЧерты: §f' + trText,
+      '§7Запасы: §f' + vBr.inventoryValue + ' §7| Объекты: §f' + vBr.facilitiesValue + ' §7| Акции: §b' + (vBr.equityPortfolioValue || 0),
+      '§7Потенциал: §f' + vBr.productionPotentialValue + ' §7| Земля: §f' + vBr.territoryValue + ' §7| Ср.доход/ч: §a' + vBr.avgHourlyIncome + ' Cr',
+      '§cРасходы/цикл: §f' + expBr.total + ' Cr §7(прогр. ' + (expBr.progressiveTax || 0) + ' [' + (expBr.progressiveBracketLabel || '5%') + '], земля ' + expBr.landTax + (expBr.antiMonopolyTax > 0 ? (', §cантимоноп ' + expBr.antiMonopolyTax) : '') + ')',
+      '§dЧерты: §f' + trText + (cbMy.active ? (' §a| Камбэк Ур.' + cbMy.tier) : ''),
       '§fСреда: §d' + (myComp.envType || 'normal') + ' §7| Спец.: §f' + (myComp.transportSpec || 'нет') + ' / ' + (myComp.resourceSpec || 'нет'),
       isSub ? '§e★ СУБСИДИЯ: +35% выпуск, −40% доставка, −50% топливо!' : '§7Команда: /lh valuation'
     ]);
@@ -785,6 +808,14 @@ function lhGuiRenderOpenTTD(gui, server, player) {
     }
     lhOpenGui(server, pl, 'openttd');
   });
+
+  lhGuiSlot(gui, 7, 0, 'minecraft:gold_block', '§e🏛 Банк, Налоги, Акции', [
+    '§7Кредиты ЦБ, уклонение от налогов, акции и камбэк.'
+  ], function (pl) { lhOpenGui(server, pl, 'bank'); });
+
+  lhGuiSlot(gui, 8, 0, 'minecraft:crossbow', '§6☠ Синдикат Корсаров', [
+    '§7Охрана караванов и заказные налёты.'
+  ], function (pl) { lhOpenGui(server, pl, 'pirates'); });
 
   // Row 1: Environment selection (/lh company env <normal|air|sea|underground>)
   var envSpecs = (global.LHOpenTTD && global.LHOpenTTD.COMPANY_ENV_TYPES) || {
@@ -1076,10 +1107,12 @@ function lhGuiRenderBuildings(gui, server, player) {
     var gy = Math.floor(idx / 9);
     var spec = global.LHOpenTTD.BUILDING_CATALOG[bt];
     var reqIn = spec.inputItems ? Object.keys(spec.inputItems).map(function (k) { return spec.inputItems[k] + '×' + k.replace('minecraft:', ''); }).join(', ') : 'нет';
+    var reqFuel = global.LHOpenTTD.getBuildingFuelCost ? global.LHOpenTTD.getBuildingFuelCost(spec) : 1;
     var lore = [
       '§7Категория: §e' + spec.categoryName,
       '§fСтоимость: §6' + spec.cost + ' Cr §7| Содержание: §c' + (spec.upkeepCost || 12) + ' Cr',
-      '§fСырьё/цикл: §b' + reqIn,
+      '§6Обяз. топливо/цикл: §e' + reqFuel + ' угля §7(или нефть/лава)',
+      '§fСырьё (+45% бонус): §b' + reqIn + ' §7(без сырья работает частично)',
       spec.baseRadius
         ? ('§fРадиус охраны: §b' + spec.baseRadius + ' м §7(на 3 ур. спавнит стражу)')
         : ('§fДоход за цикл: §a' + spec.baseIncome + ' Cr §7+ ' + (spec.baseQty || 0) + '× ' + (spec.baseProduct || '')),
@@ -1106,10 +1139,10 @@ function lhGuiRenderBuildings(gui, server, player) {
     lhOpenGui(server, pl, 'buildings');
   });
 
-  lhGuiSlot(gui, 7, 1, 'minecraft:coal', '§b⛽ Загрузить сырьё в объект', [
-    '§7Передаёт требуемое сырьё из вашего инвентаря',
-    '§7в текущий объект (или положите в бочку сырья).',
-    '§e▶ ЛКМ: загрузить 2 цикла сырья (/lh building supply)'
+  lhGuiSlot(gui, 7, 1, 'minecraft:coal', '§b⛽ Загрузить топливо и сырьё', [
+    '§7Передаёт топливо (обязательно) и сырьё (+45% бонус)',
+    '§7из вашего инвентаря в буфер объекта.',
+    '§e▶ ЛКМ: загрузить 2 цикла (/lh building supply)'
   ], function (pl) {
     lhGuiDeferAction(server, pl, function (p2) {
       if (typeof lhSupplyBuildingCmd === 'function') lhSupplyBuildingCmd(server, p2, sc.sx, sc.sz, false);
@@ -1128,6 +1161,8 @@ function lhGuiRenderBuildings(gui, server, player) {
     var bSpec = global.LHOpenTTD.BUILDING_CATALOG[curBldg.type] || {};
     var intPct = typeof curBldg.integrityPct === 'number' ? curBldg.integrityPct : 100;
     var reqMap = global.LHOpenTTD.getBuildingRequiredInputs ? global.LHOpenTTD.getBuildingRequiredInputs(curBldg) : {};
+    var reqFuelNeed = global.LHOpenTTD.getBuildingFuelCost ? global.LHOpenTTD.getBuildingFuelCost(curBldg) : 1;
+    var fuelHave = Math.round((curBldg.fuelBuffer || 0) * 10) / 10;
     var reqStr = Object.keys(reqMap).map(function (rk) {
       var haveIn = (curBldg.inputBuffer && curBldg.inputBuffer[rk]) || 0;
       return rk.replace('minecraft:', '') + ' ' + haveIn + '/' + reqMap[rk];
@@ -1137,10 +1172,10 @@ function lhGuiRenderBuildings(gui, server, player) {
     lhGuiSlot(gui, 0, 2, bIcons[curBldg.type] || 'minecraft:anvil',
       (curBldg.rarityColor || '§a') + (curBldg.structureName || bSpec.name || curBldg.type), [
       '§fСектор: §e(' + sc.sx + ', ' + sc.sz + ') §7| Уровень: §b' + curBldg.level + '/3',
-      '§fБочка выхода: §7' + curBldg.x + ', ' + curBldg.y + ', ' + curBldg.z + ' §7| Сырья: §b' + (curBldg.x + 1) + ', ' + curBldg.y + ', ' + curBldg.z,
-      '§fСтатус: ' + (curBldg.pausedReason === 'missing_inputs' ? '§cПАУЗА (нет сырья!)' : (curBldg.operational === false ? '§c[НЕ РАБОТАЕТ]' : '§aРаботает')) +
+      '§fБочка выхода: §7' + curBldg.x + ', ' + curBldg.y + ', ' + curBldg.z + ' §7| Сырья/топлива: §b' + (curBldg.x + 1) + ', ' + curBldg.y + ', ' + curBldg.z,
+      '§fСтатус: ' + (curBldg.pausedReason === 'missing_fuel' ? '§cПАУЗА (НЕТ ТОПЛИВА!)' : (curBldg.pausedReason === 'missing_inputs' ? '§cПАУЗА (нет сырья)' : (curBldg.operational === false ? '§c[НЕ РАБОТАЕТ]' : '§aРаботает'))) +
         ' §7| Прочность: ' + (intPct >= 75 ? '§a' : (intPct >= 35 ? '§e' : '§c')) + intPct + '%',
-      '§fСырьё в буфере: §b' + reqStr + (adjM > 1.0 ? (' §e| Энергосеть ×' + Math.round(adjM * 100) / 100) : ''),
+      '§6Топливо: §e' + fuelHave + '/' + reqFuelNeed + ' §7| §fСырьё (+45%): §b' + reqStr + (adjM > 1.0 ? (' §e| Энергосеть ×' + Math.round(adjM * 100) / 100) : ''),
       '§fНакоплено: §e' + (curBldg.cashBuffer || 0) + ' Cr',
       curBldg.branch1 ? ('§aT1 ветка: ' + curBldg.branch1) : '§7T1: выберите 1 из 2 веток справа →',
       curBldg.branch2 ? ('§aT2 ветка: ' + curBldg.branch2) : (curBldg.level === 2 ? '§7T2: выберите 1 из 2 веток справа →' : '§7T2: откроется после T1'),
@@ -1745,6 +1780,256 @@ function lhGuiRenderHelp(gui, server, player) {
   ]);
 }
 
+function lhGuiRenderBank(gui, server, player) {
+  var st = lhOttdRead(server);
+  var myComp = lhGetPlayerCompany(server, player);
+  var nowTick = typeof LHOTTDTick === 'number' ? LHOTTDTick : 0;
+  var cb = global.LHOpenTTD.updateCentralBankKeyRate ? global.LHOpenTTD.updateCentralBankKeyRate(st) : { keyRate: 0.08, inflationIndex: 1.0 };
+
+  if (!myComp) {
+    lhGuiSlot(gui, 4, 1, 'minecraft:barrier', '§cНет компании', [
+      '§7Сначала создайте или выберите компанию на вкладке «Компании».'
+    ]);
+    return;
+  }
+
+  var lim = global.LHOpenTTD.getMaxLoanLimit ? global.LHOpenTTD.getMaxLoanLimit(st, myComp.id) : 1000;
+  var effRate = global.LHOpenTTD.getEffectiveLoanRate ? global.LHOpenTTD.getEffectiveLoanRate(st, myComp.id) : cb.keyRate;
+  var debt = global.LHOpenTTD.getCompanyActiveDebt ? global.LHOpenTTD.getCompanyActiveDebt(st, myComp.id) : 0;
+  var expBr = global.LHOpenTTD.computeCompanyExpenses ? global.LHOpenTTD.computeCompanyExpenses(st, myComp.id) : { total: 0, progressiveTax: 0, progressiveBracketLabel: '5%', antiMonopolyTax: 0, auditPenaltyTax: 0 };
+  var comeback = global.LHOpenTTD.getComebackStatus ? global.LHOpenTTD.getComebackStatus(st, myComp.id) : { active: false };
+
+  lhGuiSlot(gui, 1, 0, 'minecraft:gold_block', '§e🏛 Центральный Банк Консорциума', [
+    '§fКлючевая ставка ЦБ: §e' + Math.round(cb.keyRate * 1000) / 10 + '% §7(инфляция ' + cb.inflationIndex + ')',
+    '§fВаша ставка по займу: §b' + Math.round(effRate * 1000) / 10 + '%/цикл',
+    '§fКредитный лимит: §a' + lim + ' Cr',
+    '§fТекущий долг по кредитам: §c' + debt + ' Cr',
+    '§7При просрочке активы и сектора уходят на принудительный аукцион!'
+  ]);
+
+  lhGuiSlot(gui, 2, 0, 'minecraft:gold_ingot', '§aВзять заём 500 Cr', [
+    '§7Срок: 5 циклов | Ставка: ' + Math.round(effRate * 1000) / 10 + '%',
+    '§e▶ ЛКМ: оформить заём 500 Cr'
+  ], function (pl) {
+    var r1 = global.LHOpenTTD.takeBankLoan(st, myComp.id, 500, 5, nowTick);
+    if (r1.ok) { lhOttdSave(server); lhMsg(pl, '§a[Банк] Получен заём 500 Cr. К возврату: ' + r1.loan.totalDue + ' Cr.'); }
+    else { lhMsg(pl, '§cОтказ банка: ' + r1.reason); }
+    lhOpenGui(server, pl, 'bank');
+  });
+
+  lhGuiSlot(gui, 3, 0, 'minecraft:emerald_block', '§aВзять заём 1500 Cr', [
+    '§7Срок: 5 циклов | Ставка: ' + Math.round(effRate * 1000) / 10 + '%',
+    '§e▶ ЛКМ: оформить заём 1500 Cr'
+  ], function (pl) {
+    var r2 = global.LHOpenTTD.takeBankLoan(st, myComp.id, 1500, 5, nowTick);
+    if (r2.ok) { lhOttdSave(server); lhMsg(pl, '§a[Банк] Получен заём 1500 Cr. К возврату: ' + r2.loan.totalDue + ' Cr.'); }
+    else { lhMsg(pl, '§cОтказ банка: ' + r2.reason); }
+    lhOpenGui(server, pl, 'bank');
+  });
+
+  lhGuiSlot(gui, 4, 0, 'minecraft:emerald', '§bПогасить кредит', [
+    '§fТекущий долг: §c' + debt + ' Cr §7| Касса: §e' + myComp.cash + ' Cr',
+    '§e▶ ЛКМ: погасить максимум из кассы'
+  ], function (pl) {
+    var rp = global.LHOpenTTD.repayBankLoan(st, myComp.id);
+    if (rp.ok) { lhOttdSave(server); lhMsg(pl, '§a[Банк] Погашено ' + rp.paid + ' Cr. Остаток: ' + rp.remainingDebt + ' Cr.'); }
+    else { lhMsg(pl, '§cНе удалось погасить: ' + rp.reason); }
+    lhOpenGui(server, pl, 'bank');
+  });
+
+  lhGuiSlot(gui, 6, 0, 'minecraft:paper', '§6Налоги и Содержание', [
+    '§fСкобка прогрессии: §b' + (expBr.progressiveBracketLabel || '5%'),
+    '§fПрогрессивный налог: §e' + (expBr.progressiveTax || 0) + ' Cr',
+    '§fАнтимонопольный (с акциями): §c' + (expBr.antiMonopolyTax || 0) + ' Cr',
+    '§fШтраф аудита: §4' + (expBr.auditPenaltyTax || 0) + ' Cr §7| Недоимка: §c' + (myComp.unpaidUpkeep || 0) + ' Cr',
+    '§7Итого за цикл: §e' + expBr.total + ' Cr'
+  ]);
+
+  lhGuiSlot(gui, 7, 0, 'minecraft:amethyst_shard', '§dУклонение: Подкуп инспектора', [
+    '§7Стоимость: §e80 Cr §7| Риск поимки ~28%',
+    '§7Успех: скидка −35% на налоги, −60 Cr долга.',
+    '§cПровал: штраф +220 Cr и аудит +35% на 3 цикла!',
+    '§e▶ ЛКМ: рискнуть'
+  ], function (pl) {
+    var ev1 = global.LHOpenTTD.attemptTaxEvasion(st, myComp.id, 'bribe', nowTick);
+    if (ev1.ok) {
+      lhOttdSave(server);
+      lhMsg(pl, ev1.succeeded ? ('§a[Подкуп удался] −' + ev1.discountPct + '% налога!') : ('§c[ПРОВАЛ АУДИТА!] Штраф +' + ev1.fine + ' Cr и доп.налог на 3 цикла!'));
+    } else {
+      lhMsg(pl, '§cНедоступно: ' + ev1.reason);
+    }
+    lhOpenGui(server, pl, 'bank');
+  });
+
+  lhGuiSlot(gui, 8, 0, 'minecraft:writable_book', '§dУклонение: Подделка отчётов', [
+    '§7Стоимость: §e140 Cr §7| Риск поимки ~42%',
+    '§7Успех: скидка −55% на налоги, −140 Cr долга.',
+    '§cПровал: крупный штраф +350 Cr и аудит +35% на 3 цикла!',
+    '§e▶ ЛКМ: рискнуть'
+  ], function (pl) {
+    var ev2 = global.LHOpenTTD.attemptTaxEvasion(st, myComp.id, 'forge_docs', nowTick);
+    if (ev2.ok) {
+      lhOttdSave(server);
+      lhMsg(pl, ev2.succeeded ? ('§a[Подлог удался] −' + ev2.discountPct + '% налога!') : ('§c[ПРОВАЛ АУДИТА!] Штраф +' + ev2.fine + ' Cr и доп.налог на 3 цикла!'));
+    } else {
+      lhMsg(pl, '§cНедоступно: ' + ev2.reason);
+    }
+    lhOpenGui(server, pl, 'bank');
+  });
+
+  lhGuiSlot(gui, 1, 1, comeback.active ? 'minecraft:totem_of_undying' : 'minecraft:iron_ingot',
+    comeback.active ? ('§a★ Камбэк-бонусы (Ур.' + comeback.tier + ')') : '§7Камбэк-программа', [
+      comeback.active
+        ? ('§fНалоги: §a−' + Math.round(comeback.taxDiscount * 100) + '% §7| Выпуск: §a×' + comeback.yieldMult)
+        : '§7Вы не отстаёте от лидера достаточно сильно.',
+      comeback.active
+        ? ('§fЗахват земли: §a−' + Math.round(comeback.claimDiscount * 100) + '% §7| ЦБ ставка: §a×0.5')
+        : '§7Бонусы включаются автоматически при отставании <45% лидера.',
+      '§e▶ ЛКМ: запросить антикризисный грант (/lh comeback bailout)'
+    ], function (pl) {
+      var cbRes = global.LHOpenTTD.activateComebackBailout(st, myComp.id, nowTick);
+      if (cbRes.ok) {
+        lhOttdSave(server);
+        lhMsg(pl, '§a[Антикризисная помощь] +' + cbRes.grantCash + ' Cr, +' + cbRes.grantCoal + ' угля, списано ' + cbRes.debtForgiven + ' Cr долга!');
+      } else {
+        lhMsg(pl, '§cГрант недоступен: ' + cbRes.reason);
+      }
+      lhOpenGui(server, pl, 'bank');
+    });
+
+  // Row 3: Equity Market (buy +10% LMB / sell -10% RMB)
+  var compKeys = Object.keys(st.companies || {}).filter(function (cid) {
+    return st.companies[cid] && !st.companies[cid].isPirate;
+  });
+  compKeys.slice(0, 9).forEach(function (cid, idx) {
+    var tc = st.companies[cid];
+    var sp = global.LHOpenTTD.getSharePrice ? global.LHOpenTTD.getSharePrice(st, cid) : 50;
+    var myShares = (tc.shareHoldings && tc.shareHoldings[myComp.id]) ? tc.shareHoldings[myComp.id] : 0;
+    var freeShares = (tc.shareHoldings && tc.shareHoldings[cid]) ? tc.shareHoldings[cid] : 0;
+    var capNote = tc.isBot ? 'до 100%' : 'до 49% (без поглощения)';
+    lhGuiSlot(gui, idx, 3, cid === myComp.id ? 'minecraft:diamond' : 'minecraft:emerald',
+      tc.colorCode + 'Акции: ' + tc.name, [
+        '§fЦена 1% доли: §e' + sp + ' Cr §7(10% = ' + (sp * 10) + ' Cr)',
+        '§fВаша доля: §a' + myShares + '% §7| Свободно: §b' + freeShares + '%',
+        '§7Лимит владения: ' + capNote,
+        '§eЛКМ: купить +10% | ПКМ: продать −10%'
+      ], function (pl) {
+        var br = global.LHOpenTTD.buyCompanyShares(st, myComp.id, cid, 10);
+        if (br.ok) { lhOttdSave(server); lhMsg(pl, '§aКуплено 10% акций ' + tc.name + ' за ' + br.cost + ' Cr.'); }
+        else { lhMsg(pl, '§cОшибка покупки: ' + br.reason); }
+        lhOpenGui(server, pl, 'bank');
+      }, function (pl) {
+        var sr = global.LHOpenTTD.sellCompanyShares(st, myComp.id, cid, 10);
+        if (sr.ok) { lhOttdSave(server); lhMsg(pl, '§aПродано 10% акций ' + tc.name + ' за ' + sr.proceeds + ' Cr.'); }
+        else { lhMsg(pl, '§cОшибка продажи: ' + sr.reason); }
+        lhOpenGui(server, pl, 'bank');
+      });
+  });
+}
+
+function lhGuiRenderPirates(gui, server, player) {
+  var st = lhOttdRead(server);
+  var logSt = typeof lhLogisticsRead === 'function' ? lhLogisticsRead(server) : { automatedRoutes: [] };
+  var myComp = lhGetPlayerCompany(server, player);
+  var nowTick = typeof LHOTTDTick === 'number' ? LHOTTDTick : 0;
+  var ps = global.LHOpenTTD.ensurePirateSyndicate ? global.LHOpenTTD.ensurePirateSyndicate(st) : { level: 1, power: 10, cash: 0, caravansRobbed: 0, raidsCompleted: 0, lootStash: [] };
+
+  lhGuiSlot(gui, 1, 0, 'minecraft:skeleton_skull', '§c☠ Синдикат Корсаров (Ур.' + ps.level + ')', [
+    '§fБоевая мощь: §c' + ps.power + ' §7| Казна: §e' + ps.cash + ' Cr',
+    '§fОграблено караванов: §c' + ps.caravansRobbed + ' §7| Набегов: §c' + ps.raidsCompleted,
+    '§7Корсары усиливаются от каждого грабежа и заказа!',
+    '§7Длинные маршруты (>=2 секторов) без охраны под угрозой.'
+  ]);
+
+  if (myComp) {
+    var immuneUntil = Number(myComp.pirateImmunityUntilTick || 0);
+    var isImm = immuneUntil > nowTick;
+    var immCost = 180 + ps.level * 45;
+    lhGuiSlot(gui, 3, 0, isImm ? 'minecraft:totem_of_undying' : 'minecraft:shield',
+      isImm ? '§a✔ Чёрный пакт активен' : '§eКупить Чёрный пакт неприкосновенности', [
+        '§7Защищает ваши караваны от пиратов на 10 минут.',
+        '§fЦена: §6' + immCost + ' Cr',
+        '§e▶ ЛКМ: заключить пакт (/lh pirate immunity)'
+      ], function (pl) {
+        var rImm = global.LHOpenTTD.buyPirateImmunity(st, myComp.id, 12000, nowTick);
+        if (rImm.ok) { lhOttdSave(server); lhMsg(pl, '§a[Корсары] Пакт неприкосновенности активирован!'); }
+        else { lhMsg(pl, '§cНе хватает Cr (нужно ' + rImm.cost + ').'); }
+        lhOpenGui(server, pl, 'pirates');
+      });
+
+    // Row 1: Hire anonymous pirate raids against rival companies
+    var targets = Object.keys(st.companies || {}).filter(function (cid) {
+      return cid !== myComp.id && st.companies[cid] && !st.companies[cid].isPirate;
+    });
+    targets.slice(0, 8).forEach(function (tid, idx) {
+      var tc = st.companies[tid];
+      var c1 = Math.round(250 * 1.25);
+      var c3 = Math.round(750 * 1.25);
+      lhGuiSlot(gui, idx, 1, 'minecraft:crossbow', '§6Наёмный налёт на ' + tc.colorCode + tc.name, [
+        '§7Штаб цели: (' + tc.hqSx + ', ' + tc.hqSz + ') | Наём анонимный',
+        '§fТир 1 (разведгруппа): §e~' + c1 + ' Cr',
+        '§fТир 3 (тяжёлый штурм): §c~' + c3 + ' Cr',
+        '§eЛКМ: налёт Тир 1 | ПКМ: штурм Тир 3'
+      ], function (pl) {
+        var o1 = global.LHOpenTTD.orderPirateRaid(st, myComp.id, tid, tc.hqSx, tc.hqSz, 1, nowTick, { anonymous: true });
+        if (o1.ok) {
+          if (typeof lhSpawnBotMobRaids === 'function') lhSpawnBotMobRaids(server, st);
+          lhOttdSave(server);
+          lhMsg(pl, '§6[Корсары] Направлен анонимный налёт на «' + tc.name + '» (' + o1.cost + ' Cr)!');
+        } else { lhMsg(pl, '§cОтказ: ' + o1.reason); }
+        lhOpenGui(server, pl, 'pirates');
+      }, function (pl) {
+        var o3 = global.LHOpenTTD.orderPirateRaid(st, myComp.id, tid, tc.hqSx, tc.hqSz, 3, nowTick, { anonymous: true });
+        if (o3.ok) {
+          if (typeof lhSpawnBotMobRaids === 'function') lhSpawnBotMobRaids(server, st);
+          lhOttdSave(server);
+          lhMsg(pl, '§c[Корсары] Направлен штурм Тир 3 на «' + tc.name + '» (' + o3.cost + ' Cr)!');
+        } else { lhMsg(pl, '§cОтказ: ' + o3.reason); }
+        lhOpenGui(server, pl, 'pirates');
+      });
+    });
+
+    // Row 3: Black market loot stash (object { itemId: qty })
+    var lootKeys = Object.keys(ps.lootStash || {}).filter(function (lk) { return Number(ps.lootStash[lk] || 0) > 0; });
+    lootKeys.slice(0, 8).forEach(function (itemId, lIdx) {
+      var lQty = Number(ps.lootStash[itemId] || 0);
+      var estUnit = global.LHOpenTTD.estimateItemUnitPrice ? global.LHOpenTTD.estimateItemUnitPrice(itemId) : 10;
+      var lotPrice = Math.max(10, Math.round(estUnit * lQty * 0.65));
+      lhGuiSlot(gui, lIdx, 3, 'minecraft:chest', '§dТрофей: ' + lQty + '× ' + itemId, [
+        '§7Склад трофеев Синдиката Корсаров',
+        '§fЦена выкупа (−35%): §e' + lotPrice + ' Cr',
+        '§e▶ ЛКМ: выкупить на склад компании'
+      ], function (pl) {
+        var bm = global.LHOpenTTD.buyPirateBlackMarketLoot(st, myComp.id, itemId, lQty);
+        if (bm.ok) {
+          lhOttdSave(server);
+          lhMsg(pl, '§a[Чёрный рынок] Куплено ' + bm.qty + '× ' + bm.itemId + ' за ' + bm.cost + ' Cr!');
+        } else { lhMsg(pl, '§cНе удалось выкупить: ' + bm.reason); }
+        lhOpenGui(server, pl, 'pirates');
+      });
+    });
+
+    // Row 4: My automated caravans (toggle escort)
+    var myRoutes = (logSt.automatedRoutes || []).filter(function (r) { return r && r.companyId === myComp.id; });
+    myRoutes.slice(0, 8).forEach(function (rt, rIdx) {
+      var risk = global.LHOpenTTD.computeCaravanPiracyRisk
+        ? global.LHOpenTTD.computeCaravanPiracyRisk(st, myComp.id, rt.srcSx, rt.srcSz, rt.dstSx, rt.dstSz, !!rt.escortEnabled, nowTick)
+        : 0;
+      lhGuiSlot(gui, rIdx, 4, rt.escortEnabled ? 'minecraft:shield' : 'minecraft:minecart',
+        (rt.escortEnabled ? '§a[ОХРАНА] ' : '§e[БЕЗ ОХРАНЫ] ') + 'Караван ' + rt.id, [
+          '§f(' + rt.srcSx + ',' + rt.srcSz + ') → (' + rt.dstSx + ',' + rt.dstSz + ')',
+          '§fРиск грабежа: §c' + Math.round(risk * 100) + '% §7| Ограблен раз: ' + (rt.robbedCount || 0),
+          '§e▶ ЛКМ: переключить охрану каравана'
+        ], function (pl) {
+          rt.escortEnabled = !rt.escortEnabled;
+          if (typeof lhLogisticsSave === 'function') lhLogisticsSave(server);
+          lhMsg(pl, '§eОхрана каравана ' + rt.id + ': ' + (rt.escortEnabled ? '§aВКЛ' : '§cВЫКЛ'));
+          lhOpenGui(server, pl, 'pirates');
+        });
+    });
+  }
+}
+
 function lhRenderGuiTab(gui, server, player, tab, arg) {
   var activeTab = String(tab || 'hub').toLowerCase();
   lhGuiFillBg(gui, 6);
@@ -1758,6 +2043,8 @@ function lhRenderGuiTab(gui, server, player, tab, arg) {
   else if (activeTab === 'diplomacy') lhGuiRenderDiplomacy(gui, server, player);
   else if (activeTab === 'territory') lhGuiRenderTerritory(gui, server, player);
   else if (activeTab === 'market') lhGuiRenderMarket(gui, server, player);
+  else if (activeTab === 'bank') lhGuiRenderBank(gui, server, player);
+  else if (activeTab === 'pirates') lhGuiRenderPirates(gui, server, player);
   else if (activeTab === 'events') lhGuiRenderEvents(gui, server, player, arg || 'all');
   else if (activeTab === 'world') lhGuiRenderWorld(gui, server, player);
   else if (activeTab === 'help') lhGuiRenderHelp(gui, server, player);
@@ -1780,6 +2067,8 @@ function lhOpenGui(server, player, tab, arg) {
     diplomacy: '§dLong Haul — Дипломатия и лицензии',
     territory: '§bLong Haul — Карта секторов 7×5 (Зум)',
     market: '§6Long Haul — Биржа и P2P-сделки',
+    bank: '§eLong Haul — Банк, Налоги, Акции и Камбэк',
+    pirates: '§6Long Haul — Синдикат Корсаров и Караваны',
     events: '§dLong Haul — Лог событий',
     world: '§cLong Haul — Мир, угрозы и вехи',
     help: '§eLong Haul — Справка'
