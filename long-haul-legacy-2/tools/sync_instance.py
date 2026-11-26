@@ -128,6 +128,7 @@ def main():
     ap.add_argument('--server', action='store_true', help='Server mode: skip client_only mods and resourcepacks')
     ap.add_argument('--libs-dir', default=None, help='Explicit Forge 47.4.10 libraries directory for rebuilding longhaul-runtime')
     ap.add_argument('--force-runtime', action='store_true', help='Force rebuilding longhaul-runtime-*.jar')
+    ap.add_argument('--reset-keys', action='store_true', help='Remove old key_* lines from options.txt (with options.txt.bak backup) so DefaultOptions applies keybindings.txt on next launch')
     ap.add_argument('--dry-run', action='store_true', help='Show what would change without modifying instance files')
     args = ap.parse_args()
 
@@ -356,6 +357,17 @@ def main():
             rm_cfg.parent.mkdir(parents=True, exist_ok=True)
             rm_cfg.write_text(json.dumps({'loadedUserSongpack': songpack}, indent=2) + '\n', encoding='utf-8')
 
+    # Optional: reset key_* entries in options.txt so DefaultOptions reapplies keybindings.txt
+    reset_keys_count = 0
+    options_txt = instance_dir / 'options.txt'
+    if args.reset_keys and not args.server and options_txt.exists():
+        orig_lines = options_txt.read_text(encoding='utf-8', errors='replace').splitlines(keepends=True)
+        kept_lines = [ln for ln in orig_lines if not ln.startswith('key_')]
+        reset_keys_count = len(orig_lines) - len(kept_lines)
+        if reset_keys_count > 0 and not args.dry_run:
+            shutil.copy2(options_txt, instance_dir / 'options.txt.bak')
+            options_txt.write_text(''.join(kept_lines), encoding='utf-8')
+
     if not args.dry_run:
         state_file.write_text(json.dumps({
             'version': lock.get('version'),
@@ -371,9 +383,10 @@ def main():
             cf = json.loads(cf_path.read_text(encoding='utf-8'))
             present_names = [p.name.lower() for p in mods_dir.glob('*.jar')]
             for addon in cf.get('addons', []):
-                hint = (addon.get('slug') or '').split('-')[0]
-                if not any(hint in n or 'walkietalkies' in n for n in present_names):
-                    print(f"! CurseForge addon not found in mods/: {addon['title']} -> {addon['url']}", flush=True)
+                mod_id = (addon.get('mod_id') or '').lower()
+                name = addon.get('name') or addon.get('title') or mod_id or 'Addon'
+                if mod_id and not any(mod_id in n for n in present_names):
+                    print(f"! CurseForge addon not found in mods/: {name} -> {addon['url']}", flush=True)
         except Exception:
             pass
 
@@ -385,6 +398,8 @@ def main():
     print(f'Resourcepacks:     {copied_rps} updated')
     print(f'Runtime JAR:       {"updated" if copied_rt else "up to date"}')
     print(f'Overrides updated: {copied_overrides} ({kb_ovr:.1f} KB), removed obsolete: {removed_overrides}')
+    if args.reset_keys:
+        print(f'Keys reset:        {reset_keys_count} key_* entries cleared from options.txt (backup: options.txt.bak)')
     if args.dry_run:
         print('(DRY RUN: no files were modified)')
 
