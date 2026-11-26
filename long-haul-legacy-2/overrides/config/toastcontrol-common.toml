@@ -1,0 +1,16 @@
+#Client Configuration
+[client]
+
+	[client.blocked_toasts]
+		#Keep advancement popups visible while silencing recipe-unlock & vanilla tutorial toast spam across 485 mods.
+		advancements = false
+		recipes = true
+		system = false
+		tutorial = true
+		global_vanilla = false
+		global_modded = false
+		global = false
+
+	[client.visual_options]
+		translucent = true
+		toast_count = 3

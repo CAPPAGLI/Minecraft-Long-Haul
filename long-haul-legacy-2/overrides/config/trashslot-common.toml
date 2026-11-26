@@ -1,0 +1,2 @@
+#Protect essential Long Haul progression items from accidental deletion
+deletionDenyList = ["longhaul:control_tablet", "heracles:quest_book", "eccentrictome:tome"]

@@ -1,0 +1,7 @@
+[key]
+	#True if you want to hold the right mouse button to aim
+	HoldToAim = true
+	#Toggle prone/crawl with Ctrl+C instead of holding the combo
+	HoldToCrawl = false
+	#Automatically reload when firing an empty magazine
+	AutoReload = true

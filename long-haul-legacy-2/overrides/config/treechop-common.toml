@@ -1,0 +1,7 @@
+[mod]
+	enabled = true
+	printDebugInfo = false
+
+[treeDetection]
+	breakLeaves = true
+	ignorePersistentLeaves = true

@@ -1,0 +1,6 @@
+#Prevent explosions from destroying unlooted Lootr containers
+blast_resistant = true
+#Disregard chests and chunks outside the Long Haul 31,825-block world border
+check_world_border = true
+#Keep player chat free of unresolved loot-table warnings
+report_unresolved_tables = false

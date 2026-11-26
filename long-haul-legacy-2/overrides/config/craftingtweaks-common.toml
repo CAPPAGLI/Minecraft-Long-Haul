@@ -1,0 +1,5 @@
+[client]
+	#Right-clicking the crafting result crafts a full stack
+	rightClickCraftsStack = true
+	#Hide Vanilla's green recipe book button since EMI + JEI are active
+	hideVanillaCraftingGuide = true

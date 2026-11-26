@@ -1495,19 +1495,7 @@ function lhBotTick(server, dryRun) {
 function lhClearLegacyMinimapHud(player) {
   if (!player || typeof player.paint !== 'function') return;
   try {
-    var clearPayload = {
-      lh_mm_bg: { remove: true },
-      lh_mm_title: { remove: true },
-      lh_mm_sub: { remove: true },
-      lh_mm_me: { remove: true }
-    };
-    for (var cr = -4; cr <= 4; cr++) {
-      for (var cc = -4; cc <= 4; cc++) {
-        clearPayload['lh_mm_c_' + (cc + 4) + '_' + (cr + 4)] = { remove: true };
-        clearPayload['lh_mm_b_' + (cc + 4) + '_' + (cr + 4)] = { remove: true };
-      }
-    }
-    player.paint(clearPayload);
+    player.paint({ '*': { remove: true } });
   } catch (eClr) {}
 }
 

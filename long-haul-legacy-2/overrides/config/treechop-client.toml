@@ -1,0 +1,11 @@
+[chopping]
+	choppingEnabled = true
+	fellingEnabled = true
+	sneakBehavior = "INVERT_CHOPPING"
+	treesMustHaveLeaves = true
+	chopInCreativeMode = false
+
+[visuals]
+
+	[visuals.choppingIndicator]
+		enabled = true

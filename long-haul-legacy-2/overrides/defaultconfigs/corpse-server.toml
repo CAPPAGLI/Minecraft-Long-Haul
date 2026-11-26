@@ -1,0 +1,16 @@
+#The time (in real life days) deaths get stored (-1 = infinite)
+death_storage_duration = -1
+
+[corpse]
+	#If the corpse should fall into the void
+	fall_into_void = false
+	#If the corpse should get removed when in lava
+	lava_damage = false
+
+	[corpse.access]
+		#Allow co-op teammates to help recover items from corpses
+		only_owner = false
+
+	[corpse.despawn]
+		#Never force-despawn corpses that still contain items
+		force_time = -1

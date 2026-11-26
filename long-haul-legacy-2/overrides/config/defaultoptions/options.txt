@@ -1,0 +1,6 @@
+autoJump:false
+tutorialStep:none
+skipMultiplayerWarning:true
+onboardAccessibility:false
+narrator:0
+realmsNotifications:false

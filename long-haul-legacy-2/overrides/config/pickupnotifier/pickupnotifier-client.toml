@@ -1,0 +1,13 @@
+[general]
+	include_items = true
+	include_experience = false
+	include_arrows = false
+
+[behavior]
+	combine_entries = "ALWAYS"
+	display_time = 60
+
+[display]
+	inventory_count = true
+	screen_corner = "BOTTOM_RIGHT"
+	entry_background = "CHAT"

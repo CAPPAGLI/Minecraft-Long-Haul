@@ -1,0 +1,19 @@
+[Stamina_HUD_Configuration]
+	stamina_hud_type = "Light"
+	hide_hud_if_stamina_infinite = true
+	show_light_hud_always = false
+
+[Animations]
+	enable_camera_rotation_dodge = false
+	enable_camera_rotation_back_wall_jump = false
+	enable_camera_rotation_roll = false
+	enable_camera_rotation_flipping = false
+	enable_camera_animation_vault = false
+
+[Control]
+	crawl_control = "Toggle"
+	enable_double_tapping_for_dodge = false
+	substitute_sprint = false
+
+[Other_Configuration]
+	notify_limitation_auto_resync = false

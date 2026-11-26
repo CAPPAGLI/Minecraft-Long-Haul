@@ -1,0 +1,36 @@
+#General Settings
+[settings]
+	#Larger Entities slow down the player more
+	heavyEntities = true
+	#More complex Tile Entities slow down the player more
+	heavyTiles = true
+	#Whether hostile mobs should be able to picked up in survival mode
+	pickupHostileMobs = false
+	#Whether Players can be picked up. Creative players can't be picked up in Survival Mode
+	pickupPlayers = false
+	#Whether the player drops the carried object when hit or not
+	dropCarriedWhenHit = false
+
+#Blacklist
+[blacklist]
+	#Blocks that cannot be picked up (upstream defaults + Long Haul multiblocks, logistics, physics, and protected loot/facility blocks)
+	forbiddenTiles = [
+		"#forge:immovable", "#forge:relocation_not_supported", "#neoforge:immovable", "#neoforge:relocation_not_supported",
+		"#c:relocation_not_supported", "minecraft:end_portal", "minecraft:piston_head", "minecraft:end_gateway",
+		"minecraft:tall_grass", "minecraft:large_fern", "minecraft:peony", "minecraft:rose_bush", "minecraft:lilac",
+		"minecraft:sunflower", "minecraft:*_bed", "minecraft:*_door", "minecraft:big_dripleaf_stem",
+		"minecraft:waterlily", "minecraft:cake", "minecraft:nether_portal", "minecraft:tall_seagrass",
+		"minecraft:spawner", "quark:colored_bed_*", "quark:tiny_potato",
+		"create:*", "create*:*", "railways:*", "railcraft:*", "littlelogistics:*",
+		"valkyrienskies:*", "vs_clockwork:*", "vs_eureka:*",
+		"immersiveengineering:*", "immersivepetroleum:*", "immersivegeology:*",
+		"pneumaticcraft:*", "ae2:*", "functionalstorage:*", "modularrouters:*", "sfm:*",
+		"integrateddynamics:*", "toms_peripherals:*", "computercraft:*", "advancedperipherals:*",
+		"electrodynamics:*", "nuclearcraft:*", "ballistix:*", "nuclearscience:*", "draconicevolution:*",
+		"bigreactors:*", "ironchest:*", "ironbarrels:*", "vibrant_vaults:*",
+		"lootr:*", "torchmaster:*", "easy_npc:*", "heracles:*", "waystones:*",
+		"framedblocks:*", "chipped:*", "cookingforblockheads:cabinet", "cookingforblockheads:corner",
+		"cookingforblockheads:counter", "cookingforblockheads:oven", "cookingforblockheads:toaster",
+		"cookingforblockheads:milk_jar", "cookingforblockheads:cow_jar", "cookingforblockheads:fruit_basket",
+		"cookingforblockheads:cooking_table", "cookingforblockheads:fridge", "cookingforblockheads:sink"
+	]
