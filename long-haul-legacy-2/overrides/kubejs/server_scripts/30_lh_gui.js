@@ -25,6 +25,7 @@ var LH_GUI_TABS = [
   { id: 'diplomacy', label: 'Дипломатия' },
   { id: 'territory', label: 'Карта 9x5' },
   { id: 'market', label: 'Биржа' },
+  { id: 'trading', label: 'Торг и Витрина' },
   { id: 'bank', label: 'Банк и Налоги' },
   { id: 'pirates', label: 'Корсары и Караваны' },
   { id: 'events', label: 'События' },
@@ -327,6 +328,27 @@ function lhGuiRenderHub(gui, server, player) {
   var psHub = global.LHOpenTTD && global.LHOpenTTD.ensurePirateSyndicate ? global.LHOpenTTD.ensurePirateSyndicate(st) : { level: 1, caravansRobbed: 0 };
   var myDebtHub = (snap.company && global.LHOpenTTD && global.LHOpenTTD.getCompanyActiveDebt) ? global.LHOpenTTD.getCompanyActiveDebt(st, snap.company.id) : 0;
 
+  lhGuiSlot(gui, 0, 2, 'minecraft:beacon', '§b🧭 3D-Границы & Xaero', [
+    '§7Вкл/Выкл видимые границы в 3D-мире',
+    '§7(частицы на границах секторов) и на карте Xaero.',
+    '§e▶ ЛКМ: 3D-границы | ПКМ: слой Xaero'
+  ], function (p) {
+    if (server && server.commands && typeof p.createCommandSourceStack === 'function') {
+      server.commands.performPrefixedCommand(p.createCommandSourceStack(), 'lh border toggle');
+    }
+    lhOpenGui(server, p, 'hub');
+  }, function (p) {
+    if (!st.minimapPrefs) st.minimapPrefs = {};
+    var pidH = typeof lhId === 'function' ? lhId(p) : String(p.uuid || '');
+    var curH = st.minimapPrefs[pidH] || { enabled: true, size: 'medium', worldBorders: true };
+    curH.enabled = !curH.enabled;
+    st.minimapPrefs[pidH] = curH;
+    lhOttdSave(server);
+    if (typeof lhSyncXaeroTerritories === 'function') lhSyncXaeroTerritories(server, p);
+    lhMsg(p, 'Границы в Xaero: ' + (curH.enabled ? '§aВКЛ' : '§cВЫКЛ'));
+    lhOpenGui(server, p, 'hub');
+  });
+
   lhGuiSlot(gui, 2, 2, 'minecraft:gold_block', '§e🏛 Банк, Налоги, Акции и Камбэк', [
     '§fСтавка ЦБ: §e' + Math.round((cbBank.keyRate || 0.08) * 1000) / 10 + '% §7| Ваш долг: §c' + myDebtHub + ' Cr',
     '§7Кредиты под ставку, прогрессивные налоги,',
@@ -334,12 +356,33 @@ function lhGuiRenderHub(gui, server, player) {
     '§e▶ Нажмите, чтобы открыть'
   ], function (p) { lhOpenGui(server, p, 'bank'); });
 
+  lhGuiSlot(gui, 4, 2, 'minecraft:emerald', '§a🤝 Витрина, Торг, P2P и Доставки', [
+    '§7Оценить предмет в руке, выставить на витрину,',
+    '§7начать живой торг (haggle) с ботами, P2P-обмен',
+    '§7рядом и забрать прибывшие доставки в 1 клик!',
+    '§e▶ Нажмите, чтобы открыть'
+  ], function (p) { lhOpenGui(server, p, 'trading'); });
+
   lhGuiSlot(gui, 6, 2, 'minecraft:crossbow', '§6☠ Синдикат Корсаров и Караваны', [
     '§fУровень корсаров: §cУр.' + (psHub.level || 1) + ' §7| Ограблений: §c' + (psHub.caravansRobbed || 0),
     '§7Охрана караванов, чёрный рынок лута,',
     '§7анонимные заказные налёты на конкурентов.',
     '§e▶ Нажмите, чтобы открыть'
   ], function (p) { lhOpenGui(server, p, 'pirates'); });
+
+  lhGuiSlot(gui, 8, 2, 'minecraft:spyglass', '§e🤖 Масштаб ботов и Рация', [
+    '§7Показать статус и линейный лимит ботов,',
+    '§7выдать стартовую рацию (/lh radio kit).',
+    '§e▶ ЛКМ: статус ботов | ПКМ: выдать рацию'
+  ], function (p) {
+    if (server && server.commands && typeof p.createCommandSourceStack === 'function') {
+      server.commands.performPrefixedCommand(p.createCommandSourceStack(), 'lh bot status');
+    }
+  }, function (p) {
+    lhGuiDeferAction(server, p, function (p2) {
+      if (typeof lhGrantStarterRadio === 'function') lhGrantStarterRadio(server, p2, true);
+    });
+  });
 
   lhGuiSlot(gui, 1, 3, 'minecraft:emerald', '§aOpenTTD: Компании и Пакты', [
     snap.company ? ('§fВаша компания: §a' + snap.company.name + ' (' + snap.company.cash + ' Cr)') : '§cВы не состоите в компании',
@@ -435,9 +478,30 @@ function lhGuiRenderContracts(gui, server, player) {
 
   lhGuiSlot(gui, 7, 0, 'minecraft:name_tag', '§bВыйти из консорциума (/lh team leave)', [
     '§fТекущая команда: §e' + (p.team || 'нет'),
-    '§7Для входа: /lh team join <имя>'
+    '§e▶ ЛКМ: выйти из консорциума'
   ], function (pl) {
     lhTeamLeave(server, pl);
+    lhOpenGui(server, pl, 'contracts');
+  });
+
+  lhGuiSlot(gui, 8, 0, 'minecraft:player_head', '§aВступить в консорциум (/lh team join)', [
+    '§7Автоматически подключает вас к команде вашей',
+    '§7компании OpenTTD, ближайшего игрока или создаёт свою.',
+    '§e▶ ЛКМ: вступить / создать консорциум'
+  ], function (pl) {
+    var compJ = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, pl) : null;
+    var teamId = compJ ? compJ.id : null;
+    if (!teamId) {
+      var plist = server.players || [];
+      for (var pi = 0; pi < plist.length; pi++) {
+        var o = plist[pi];
+        if (!o || lhId(o) === lhId(pl)) continue;
+        var opr = lhProfile(server, o);
+        if (opr && opr.team) { teamId = opr.team; break; }
+      }
+    }
+    if (!teamId) teamId = String(pl.username || 'team').toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 14) || 'team';
+    if (typeof lhTeamJoin === 'function') lhTeamJoin(server, pl, teamId);
     lhOpenGui(server, pl, 'contracts');
   });
 
@@ -563,6 +627,16 @@ function lhGuiRenderSites(gui, server, player) {
     });
     if (best && typeof lhCCVerify === 'function') lhCCVerify(server, pl, best);
     lhOpenGui(server, pl, 'sites');
+  });
+
+  lhGuiSlot(gui, 7, 3, 'minecraft:paper', '§fСтатус фото и CC (/lh photo / cc status)', [
+    '§7Выводит в чат отчёт по фото-верификациям',
+    '§7и статусу телеметрии ComputerCraft.'
+  ], function (pl) {
+    if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
+      server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh photo status');
+      server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh cc status');
+    }
   });
 }
 
@@ -728,6 +802,24 @@ function lhGuiRenderRecovery(gui, server, player) {
     });
   });
 
+  lhGuiSlot(gui, 0, 3, 'minecraft:writable_book', '§eПроверить след. заказ каталога (/lh catalog verify)', [
+    '§7Автоматически находит первый невыполненный заказ',
+    '§7и сдаёт его из вашего инвентаря или буфера.'
+  ], function (pl) {
+    var catDb = typeof lhCatRead === 'function' ? lhCatRead(server) : { done: {} };
+    var nextQ = null;
+    (global.LHQuestCatalog || []).some(function (q) {
+      if (!catDb.done || !catDb.done[q.id]) { nextQ = q; return true; }
+      return false;
+    });
+    if (!nextQ) { lhMsg(pl, '§aВсе заказы каталога уже выполнены!'); return; }
+    lhGuiDeferAction(server, pl, function (p2) {
+      if (server && server.commands && typeof p2.createCommandSourceStack === 'function') {
+        server.commands.performPrefixedCommand(p2.createCommandSourceStack(), 'lh catalog verify ' + nextQ.id);
+      }
+    }, 'recovery');
+  });
+
   lhGuiSlot(gui, 2, 3, 'minecraft:experience_bottle', '§aПроверить этап (/lh stage)', [
     '§7Пересчитывает этапы прогрессии I–IV и GameStages.'
   ], function (pl) {
@@ -744,7 +836,7 @@ function lhGuiRenderRecovery(gui, server, player) {
     var catDb = typeof lhCatRead === 'function' ? lhCatRead(server) : { done: {} };
     var total = (global.LHQuestCatalog || []).length;
     var doneCount = Object.keys(catDb.done || {}).length;
-    lhMsg(pl, 'Каталог заказов: выполнено ' + doneCount + ' из ' + total + '. Проверить заказ: /lh catalog verify <id>.');
+    lhMsg(pl, 'Каталог заказов: выполнено ' + doneCount + ' из ' + total + '. Следующий проверяется кнопкой слева.');
   });
 
   lhGuiSlot(gui, 6, 3, 'minecraft:saddle', '§bТелеметрия транспорта (/lh vehicle status)', [
@@ -753,6 +845,12 @@ function lhGuiRenderRecovery(gui, server, player) {
     var tel = typeof lhTelemetryRead === 'function' ? lhTelemetryRead(server) : { players: {} };
     var pr = tel.players ? tel.players[lhId(pl)] : null;
     lhMsg(pl, 'Пробег транспорта: ' + JSON.stringify(pr || {}));
+  });
+
+  lhGuiSlot(gui, 8, 3, 'minecraft:raw_iron', '§6Рудоразведка чанка (/lh prospect)', [
+    '§7Быстрая проверка глубоких рудных жил под вами.'
+  ], function (pl) {
+    if (typeof lhProspectChunk === 'function') lhProspectChunk(server, pl);
   });
 }
 
@@ -1056,11 +1154,20 @@ function lhGuiRenderTerritory(gui, server, player) {
     });
   });
 
-  lhGuiSlot(gui, 7, 4, 'minecraft:iron_sword', '§cРейд / Антимонополия', [
-    '§7ЛКМ: Начать 60с рейд сектора (75 Cr)',
+  lhGuiSlot(gui, 7, 4, 'minecraft:iron_sword', '§cРейд / Захват / Антимонополия', [
+    '§7ЛКМ: Начать 60с рейд сектора (75 Cr) или перебить ставку',
     '§7ПКМ: Антимонопольный отбор лидера'
   ], function (pl) {
-    lhCompanyStartRaid(server, pl);
+    if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
+      var stT = lhOttdRead(server);
+      var scT = global.LHOpenTTD.sectorCoords(pl.x, pl.z);
+      var rActive = (stT.raids || {})[global.LHOpenTTD.sectorKey(scT.sx, scT.sz)];
+      if (rActive && rActive.status === 'active') {
+        server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh territory outbid');
+      } else {
+        lhCompanyStartRaid(server, pl);
+      }
+    }
     lhOpenGui(server, pl, 'territory');
   }, function (pl) {
     lhCompanyAntitrustSeize(server, pl, false);
@@ -1068,10 +1175,24 @@ function lhGuiRenderTerritory(gui, server, player) {
   });
 
   var border = typeof lhApplyTerritoryBorder === 'function' ? lhApplyTerritoryBorder(server, false) : { size: 724, unlocked: 0, total: 61, areaShare: 0 };
-  lhGuiSlot(gui, 8, 4, 'minecraft:bedrock', '§bГраница: ' + border.size + '×' + border.size, [
-    '§fГлав: §a' + border.unlocked + '/' + border.total + ' §7(§e' + Math.round((border.areaShare || 0) * 100) + '%§7)',
-    '§7Наковальня = здание, Золото = штаб, Лайм = ваш сектор.'
-  ]);
+  var wbOn = mmPref.worldBorders !== false;
+  lhGuiSlot(gui, 8, 4, wbOn ? 'minecraft:beacon' : 'minecraft:bedrock', (wbOn ? '§a✦ 3D-граница в мире: ВКЛ' : '§c✦ 3D-граница в мире: ВЫКЛ'), [
+    '§fГраница мира: §b' + border.size + '×' + border.size + ' §7(глав §a' + border.unlocked + '/' + border.total + '§7)',
+    '§7Рисует цветной контур частиц на рёбрах секторов.',
+    '§eЛКМ: Вкл/Выкл 3D-границу в мире (/lh border toggle)',
+    '§bПКМ: Заселить сектор грузом (/lh territory settle)'
+  ], function (pl) {
+    if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
+      server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh border toggle');
+    }
+    lhOpenGui(server, pl, 'territory');
+  }, function (pl) {
+    lhGuiDeferAction(server, pl, function (p2) {
+      if (server && server.commands && typeof p2.createCommandSourceStack === 'function') {
+        server.commands.performPrefixedCommand(p2.createCommandSourceStack(), 'lh territory settle');
+      }
+    }, 'territory');
+  });
 }
 
 function lhGuiRenderBuildings(gui, server, player) {
@@ -1124,11 +1245,19 @@ function lhGuiRenderBuildings(gui, server, player) {
     });
   });
 
-  // Row 1 cols 6..8: Convert World Structure, Supply Inputs, Collect All
+  // Row 1 cols 5..8: Scan Structures, Convert World Structure, Supply Inputs, Collect All
   var sectorStructs = (typeof lhScanNearbyStructuresForSector === 'function')
     ? lhScanNearbyStructuresForSector(server, player, st)
     : (global.LHOpenTTD.getSectorStructures ? global.LHOpenTTD.getSectorStructures(st, sc.sx, sc.sz, dim) : []);
   var topStruct = sectorStructs.length > 0 ? sectorStructs[0] : null;
+  lhGuiSlot(gui, 5, 1, 'minecraft:spyglass', '§b🔍 Сканировать структуры (/lh structure scan)', [
+    '§fНайдено в этом секторе: §e' + sectorStructs.length,
+    '§e▶ ЛКМ: вывести подробный список в чат'
+  ], function (pl) {
+    if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
+      server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh structure scan');
+    }
+  });
   lhGuiSlot(gui, 6, 1, 'minecraft:lodestone', '§d🏛 Освоить структуру мира', [
     topStruct ? (topStruct.rarityColor + '[' + topStruct.rarityName + '] §f' + topStruct.displayName) : '§7Нет найденных структур в этом секторе',
     topStruct ? ('§fДобыча: §e' + topStruct.itemId + ' §7(' + topStruct.cost + ' Cr)') : '§7Встаньте в сектор со структурой (крепость/храм/город)',
@@ -1170,8 +1299,9 @@ function lhGuiRenderBuildings(gui, server, player) {
     var adjM = global.LHOpenTTD.getPowerPlantAdjacencyMultiplier ? global.LHOpenTTD.getPowerPlantAdjacencyMultiplier(st, myComp.id, sc.sx, sc.sz, dim) : 1.0;
 
     lhGuiSlot(gui, 0, 2, bIcons[curBldg.type] || 'minecraft:anvil',
-      (curBldg.rarityColor || '§a') + (curBldg.structureName || bSpec.name || curBldg.type), [
+      (curBldg.rarityColor || '§a') + (curBldg.variantName || curBldg.structureName || bSpec.name || curBldg.type), [
       '§fСектор: §e(' + sc.sx + ', ' + sc.sz + ') §7| Уровень: §b' + curBldg.level + '/3',
+      curBldg.customProduct ? ('§fВыпуск: §e' + curBldg.customProduct) : ('§fВыпуск: §e' + (curBldg.productItem || bSpec.baseProduct || '-')),
       '§fБочка выхода: §7' + curBldg.x + ', ' + curBldg.y + ', ' + curBldg.z + ' §7| Сырья/топлива: §b' + (curBldg.x + 1) + ', ' + curBldg.y + ', ' + curBldg.z,
       '§fСтатус: ' + (curBldg.pausedReason === 'missing_fuel' ? '§cПАУЗА (НЕТ ТОПЛИВА!)' : (curBldg.pausedReason === 'missing_inputs' ? '§cПАУЗА (нет сырья)' : (curBldg.operational === false ? '§c[НЕ РАБОТАЕТ]' : '§aРаботает'))) +
         ' §7| Прочность: ' + (intPct >= 75 ? '§a' : (intPct >= 35 ? '§e' : '§c')) + intPct + '%',
@@ -1179,7 +1309,7 @@ function lhGuiRenderBuildings(gui, server, player) {
       '§fНакоплено: §e' + (curBldg.cashBuffer || 0) + ' Cr',
       curBldg.branch1 ? ('§aT1 ветка: ' + curBldg.branch1) : '§7T1: выберите 1 из 2 веток справа →',
       curBldg.branch2 ? ('§aT2 ветка: ' + curBldg.branch2) : (curBldg.level === 2 ? '§7T2: выберите 1 из 2 веток справа →' : '§7T2: откроется после T1'),
-      intPct < 100 ? '§e▶ ЛКМ: восстановить физическое здание (/lh building repair)' : '§7Выставить товар на витрину: /lh shop sell hand <кол-во> <цена>'
+      intPct < 100 ? '§e▶ ЛКМ: восстановить физическое здание (/lh building repair)' : '§7Выставить товар на витрину: вкладка «Торг и Витрина»'
     ], function (pl) {
       if (intPct < 100) {
         var rep = global.LHOpenTTD.repairBuildingIntegrity(st, myComp.id, sc.sx, sc.sz, dim);
@@ -1192,6 +1322,30 @@ function lhGuiRenderBuildings(gui, server, player) {
         }
         lhOpenGui(server, pl, 'buildings');
       }
+    });
+
+    var hasVarPool = global.LHOpenTTD.BUILDING_VARIANTS && global.LHOpenTTD.BUILDING_VARIANTS[curBldg.type];
+    if (hasVarPool) {
+      var vKeys = Object.keys(hasVarPool);
+      var vCur = hasVarPool[curBldg.variant] || hasVarPool[vKeys[0]];
+      lhGuiSlot(gui, 1, 2, vCur ? vCur.product : 'minecraft:oak_log', '§e🔄 Сорт: §f' + (vCur ? vCur.name : curBldg.type), [
+        '§fТекущий товар: §a' + (curBldg.customProduct || (vCur ? vCur.product : '-')),
+        '§7Доступно вариантов: §e' + vKeys.length,
+        '§e▶ ЛКМ: переключить сорт продукции (/lh building variant)'
+      ], function (pl) {
+        if (typeof lhCycleBuildingVariant === 'function') lhCycleBuildingVariant(server, pl, false);
+        lhOpenGui(server, pl, 'buildings');
+      });
+    }
+
+    lhGuiSlot(gui, 7, 2, 'minecraft:anvil', '§a🔧 Ремонт объекта (' + intPct + '%)', [
+      '§7Восстанавливает целостность и физические блоки.',
+      '§e▶ ЛКМ: починить (/lh building repair)'
+    ], function (pl) {
+      if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
+        server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh building repair');
+      }
+      lhOpenGui(server, pl, 'buildings');
     });
 
     (bSpec.tier1Fork || []).forEach(function (opt, oi) {
@@ -1661,6 +1815,20 @@ function lhGuiRenderWorld(gui, server, player) {
   var gas = typeof lhGasComputeStatus === 'function' ? lhGasComputeStatus(server) : { phase: 1, level: 0 };
   var progDb = typeof lhProgRead === 'function' ? lhProgRead(server) : { featureOrder: [], rulesConfirmed: false, nuclearVerified: false, doomedVerified: false };
 
+  lhGuiSlot(gui, 0, 1, 'minecraft:lantern', '§6Пролог: Статус / Smoke / Завершить', [
+    '§7ЛКМ: Проверить пролог (ch00) и дымовую проверку',
+    '§7ПКМ: Завершить пролог (/lh prologue complete)'
+  ], function (pl) {
+    if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
+      server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh prologue smoke');
+    }
+  }, function (pl) {
+    if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
+      server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh prologue complete');
+    }
+    lhOpenGui(server, pl, 'world');
+  });
+
   lhGuiSlot(gui, 1, 1, 'minecraft:raw_iron', '§6Рудоразведка чанка (/lh prospect)', [
     '§7Проверяет богатые глубокие жилы в текущем чанке.'
   ], function (pl) {
@@ -1676,10 +1844,15 @@ function lhGuiRenderWorld(gui, server, player) {
   });
 
   lhGuiSlot(gui, 5, 1, 'minecraft:green_dye', '§2Токсичный газ (/lh gas status)', [
-    '§fФаза: §e' + (gas.phase || 1) + ' §7| Опасность: ' + (gas.level || 0)
+    '§fФаза: §e' + (gas.phase || 1) + ' §7| Опасность: ' + (gas.level || 0),
+    '§eЛКМ: статус газа | ПКМ: проверка противогаза'
   ], function (pl) {
     if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
       server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh gas status');
+    }
+  }, function (pl) {
+    if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
+      server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh gas mask');
     }
   });
 
@@ -1689,6 +1862,31 @@ function lhGuiRenderWorld(gui, server, player) {
     '§fРадиус спауна: §e' + (diff.respawnRadius || 0) + ' м'
   ], function (pl) {
     lhMsg(pl, 'Сложность k=' + (Math.round(diff.coeff * 100) / 100) + ', смертей онлайн=' + diff.onlineDeaths + ', Voidout=' + (Math.round((diff.voidoutPower || 1) * 100) / 100));
+  });
+
+  lhGuiSlot(gui, 8, 1, 'minecraft:crying_obsidian', '§5Статус Voidout (/lh voidout status)', [
+    '§7Показывает расписание и радиус кратеров Voidout.'
+  ], function (pl) {
+    if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
+      server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh voidout status');
+    }
+  });
+
+  lhGuiSlot(gui, 0, 3, 'minecraft:iron_helmet', '§eСтатус ботов и лимит (/lh bot status)', [
+    '§7Показывает линейный лимит чанков/секторов ботов',
+    '§7от числа компаний и секторов игроков + прогресс.'
+  ], function (pl) {
+    if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
+      server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh bot status');
+    }
+  });
+
+  lhGuiSlot(gui, 1, 3, 'minecraft:book', '§aСтатус глав (/lh chapter status)', [
+    '§7Показывает открытые, активные и завершённые главы.'
+  ], function (pl) {
+    if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
+      server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh chapter status');
+    }
   });
 
   var totalPool = (typeof global !== 'undefined' && global.LHHardFeatureCatalog) ? global.LHHardFeatureCatalog.length : 100;
@@ -2030,6 +2228,182 @@ function lhGuiRenderPirates(gui, server, player) {
   }
 }
 
+function lhGuiRenderTrading(gui, server, player) {
+  var st = lhOttdRead(server);
+  var econ = (typeof lhEconRead === 'function' && global.LHEconomyEngine) ? lhEconRead(server) : null;
+  var logSt = typeof lhLogisticsRead === 'function' ? lhLogisticsRead(server) : { haggles: {}, p2pSessions: {}, deliveries: {} };
+  var myComp = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, player) : null;
+  var pid = lhId(player);
+
+  var hand = player.mainHandItem;
+  var hasHand = hand && !hand.empty;
+  var handId = hasHand ? String(hand.id) : 'minecraft:iron_ingot';
+  var handQty = hasHand ? Math.max(1, Number(hand.count || 1)) : 1;
+  var handQuote = (econ && global.LHEconomyEngine) ? global.LHEconomyEngine.getMarketQuote(econ, handId) : { price: 25, multiplier: 1.0 };
+
+  lhGuiSlot(gui, 1, 0, handId, '§6💰 Оценка и Витрина (рынок: ' + handQuote.price + ' Cr)', [
+    '§fПредмет в руке: §e' + (hasHand ? (handQty + '× ' + handId) : 'рука пуста (' + handId + ')'),
+    '§fЖивая цена: §a' + handQuote.price + ' Cr §7(×' + (handQuote.multiplier || 1) + ')',
+    '§e▶ ЛКМ: выставить 1 шт на витрину по ' + handQuote.price + ' Cr',
+    '§b▶ ПКМ: выставить всю стопку (' + handQty + ' шт) по ' + handQuote.price + ' Cr'
+  ], function (pl) {
+    if (!hasHand) { lhMsg(pl, '§eВозьмите предмет в правую руку.'); return; }
+    lhGuiDeferAction(server, pl, function (p2) {
+      if (server && server.commands && typeof p2.createCommandSourceStack === 'function') {
+        server.commands.performPrefixedCommand(p2.createCommandSourceStack(), 'lh shop sell hand 1 ' + Math.max(1, handQuote.price));
+      }
+    }, 'trading');
+  }, function (pl) {
+    if (!hasHand) { lhMsg(pl, '§eВозьмите предмет в правую руку.'); return; }
+    lhGuiDeferAction(server, pl, function (p2) {
+      if (server && server.commands && typeof p2.createCommandSourceStack === 'function') {
+        server.commands.performPrefixedCommand(p2.createCommandSourceStack(), 'lh shop sell hand ' + handQty + ' ' + Math.max(1, handQuote.price));
+      }
+    }, 'trading');
+  });
+
+  lhGuiSlot(gui, 3, 0, 'minecraft:gold_nugget', '§e⚖ Выставить со скидкой / наценкой', [
+    '§7Быстрое выставление предмета из руки на витрину',
+    '§aЛКМ: со скидкой −15% (' + Math.max(1, Math.round(handQuote.price * 0.85)) + ' Cr/шт)',
+    '§cПКМ: с наценкой +25% (' + Math.max(1, Math.round(handQuote.price * 1.25)) + ' Cr/шт)'
+  ], function (pl) {
+    if (!hasHand) { lhMsg(pl, '§eВозьмите предмет в правую руку.'); return; }
+    lhGuiDeferAction(server, pl, function (p2) {
+      if (server && server.commands && typeof p2.createCommandSourceStack === 'function') {
+        server.commands.performPrefixedCommand(p2.createCommandSourceStack(), 'lh shop sell hand ' + handQty + ' ' + Math.max(1, Math.round(handQuote.price * 0.85)));
+      }
+    }, 'trading');
+  }, function (pl) {
+    if (!hasHand) { lhMsg(pl, '§eВозьмите предмет в правую руку.'); return; }
+    lhGuiDeferAction(server, pl, function (p2) {
+      if (server && server.commands && typeof p2.createCommandSourceStack === 'function') {
+        server.commands.performPrefixedCommand(p2.createCommandSourceStack(), 'lh shop sell hand ' + handQty + ' ' + Math.max(1, Math.round(handQuote.price * 1.25)));
+      }
+    }, 'trading');
+  });
+
+  lhGuiSlot(gui, 5, 0, 'minecraft:minecart', '§a📦 Доставки в терминал (/lh delivery)', [
+    '§7Получить прибывшие партии товаров со сделок.',
+    '§eЛКМ: забрать все прибывшие доставки в терминале',
+    '§bПКМ: вывести список доставок в чат'
+  ], function (pl) {
+    lhGuiDeferAction(server, pl, function (p2) {
+      if (typeof lhClaimArrivedDeliveriesAtTerminal === 'function') lhClaimArrivedDeliveriesAtTerminal(server, p2, null);
+    }, 'trading');
+  }, function (pl) {
+    if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
+      server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh delivery list');
+    }
+  });
+
+  var nearP = null, nearD = 12;
+  (server.players || []).forEach(function (op) {
+    if (!op || lhId(op) === pid) return;
+    var d = Math.hypot(op.x - player.x, op.z - player.z);
+    if (d <= nearD) { nearD = d; nearP = op; }
+  });
+  lhGuiSlot(gui, 7, 0, 'minecraft:emerald', '§b🤝 P2P-обмен с игроком рядом', [
+    nearP ? ('§fБлижайший игрок: §a' + nearP.username + ' §7(' + Math.round(nearD) + ' м)') : '§7Нет игроков в радиусе 12 м',
+    '§eЛКМ: предложить ' + (hasHand ? (handQty + '× ' + handId) : 'предмет из руки') + ' за ' + Math.max(50, handQuote.price * handQty) + ' Cr',
+    '§bПКМ: список P2P-сделок в чат'
+  ], function (pl) {
+    if (!nearP || !hasHand) { lhMsg(pl, '§eНужен игрок рядом (<=12 м) и предмет в руке.'); return; }
+    lhGuiDeferAction(server, pl, function (p2) {
+      if (typeof lhP2PPropose === 'function') {
+        lhP2PPropose(server, p2, String(nearP.username), handId, handQty, 'minecraft:air', 0, Math.max(50, handQuote.price * handQty), false);
+      }
+    }, 'trading');
+  }, function (pl) {
+    if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
+      server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh p2p list');
+    }
+  });
+
+  // Row 1: Open P2P Sessions to accept
+  var openP2P = Object.keys(logSt.p2pSessions || {}).map(function (k) { return logSt.p2pSessions[k]; })
+    .filter(function (t) { return t && t.status === 'open' && (t.sideB.uuid === pid || t.sideA.uuid === pid); });
+  if (openP2P.length === 0) {
+    lhGuiSlot(gui, 0, 1, 'minecraft:glass_pane', '§7Нет активных P2P-сделок', ['§7Подойдите к игроку и нажмите P2P-обмен в верхнем ряду.']);
+  } else {
+    openP2P.slice(0, 9).forEach(function (t, ti) {
+      var aItems = (t.sideA.items || []).map(function (it) { return it.count + '×' + it.itemId; }).join(', ') || 'нет';
+      lhGuiSlot(gui, ti, 1, 'minecraft:chest', '§dP2P ' + t.id + ': ' + t.sideA.name + ' ↔ ' + t.sideB.name, [
+        '§fОтдаёт: §e' + aItems,
+        '§fДоплата: §6' + (t.sideB.currency || 0) + ' Cr',
+        '§e▶ ЛКМ: принять P2P-сделку'
+      ], function (pl) {
+        lhGuiDeferAction(server, pl, function (p2) {
+          if (typeof lhP2PAccept === 'function') lhP2PAccept(server, p2, t.id, false);
+        }, 'trading');
+      });
+    });
+  }
+
+  // Row 2: Live Haggle Sessions or Start New Haggle with a Company
+  var myHaggles = Object.keys(logSt.haggles || {}).map(function (k) { return logSt.haggles[k]; })
+    .filter(function (s) { return s && s.playerId === pid && (s.status === 'active' || s.status === 'agreed'); });
+  if (myHaggles.length > 0) {
+    var hs = myHaggles[0];
+    var curP = hs.agreedPrice || (hs.botSide === 'seller' ? hs.sellerAsk : hs.buyerBid);
+    lhGuiSlot(gui, 1, 2, hs.itemId || 'minecraft:gold_ingot', '§6Торг ' + hs.id + ' с ' + hs.targetCid, [
+      '§fЛот: §e' + hs.qty + '× ' + hs.itemId + ' §7(' + hs.botSide + ')',
+      '§fТекущая цена: §a' + curP + ' Cr §7[' + hs.status + ']',
+      '§7Раундов: ' + (hs.rounds || 0)
+    ]);
+    var lowerP = Math.max(1, Math.round(curP * 0.90));
+    var higherP = Math.max(1, Math.round(curP * 1.10));
+    lhGuiSlot(gui, 3, 2, 'minecraft:red_dye', '§cПредложить −10% (' + lowerP + ' Cr)', ['§7Снизить цену и отправить контрагенту.'], function (pl) {
+      if (typeof lhHaggleOffer === 'function') lhHaggleOffer(server, pl, hs.id, lowerP, false);
+      lhOpenGui(server, pl, 'trading');
+    });
+    lhGuiSlot(gui, 5, 2, 'minecraft:yellow_dye', '§eПредложить +10% (' + higherP + ' Cr)', ['§7Повысить цену и отправить контрагенту.'], function (pl) {
+      if (typeof lhHaggleOffer === 'function') lhHaggleOffer(server, pl, hs.id, higherP, false);
+      lhOpenGui(server, pl, 'trading');
+    });
+    lhGuiSlot(gui, 7, 2, 'minecraft:lime_dye', '§a✔ Принять цену (' + curP + ' Cr)', ['§7Заключает сделку и запускает доставку!'], function (pl) {
+      lhGuiDeferAction(server, pl, function (p2) {
+        if (typeof lhHaggleAccept === 'function') lhHaggleAccept(server, p2, hs.id, false);
+      }, 'trading');
+    });
+  } else {
+    var compsH = Object.keys(st.companies || {}).filter(function (cid) { return !myComp || cid !== myComp.id; });
+    compsH.slice(0, 9).forEach(function (cid, ci) {
+      var c = st.companies[cid];
+      lhGuiSlot(gui, ci, 2, LH_COMP_WOOL[lhCompanyMcColor(c)] || 'minecraft:white_wool', '§6Торг с ' + c.name, [
+        '§fТовар: §e' + Math.min(16, Math.max(1, handQty)) + '× ' + handId,
+        '§aЛКМ: начать торг на ПОКУПКУ у них',
+        '§bПКМ: начать торг на ПРОДАЖУ им'
+      ], function (pl) {
+        if (typeof lhHaggleStart === 'function') lhHaggleStart(server, pl, cid, 'buy', handId, Math.min(16, Math.max(1, handQty)), false);
+        lhOpenGui(server, pl, 'trading');
+      }, function (pl) {
+        if (typeof lhHaggleStart === 'function') lhHaggleStart(server, pl, cid, 'sell', handId, Math.min(16, Math.max(1, handQty)), false);
+        lhOpenGui(server, pl, 'trading');
+      });
+    });
+  }
+
+  // Row 3: Active Deliveries
+  var dels = Object.keys(logSt.deliveries || {}).map(function (k) { return logSt.deliveries[k]; })
+    .filter(function (d) { return d && d.status !== 'claimed' && (d.buyerPlayer === pid || (myComp && d.buyerCid === myComp.id)); });
+  if (dels.length === 0) {
+    lhGuiSlot(gui, 0, 3, 'minecraft:chest_minecart', '§7Нет активных доставок в пути', ['§7Покупки с биржи или торга появятся здесь.']);
+  } else {
+    dels.slice(0, 9).forEach(function (d, di) {
+      lhGuiSlot(gui, di, 3, d.status === 'arrived' ? 'minecraft:lime_concrete' : 'minecraft:rail',
+        (d.status === 'arrived' ? '§a[ПРИБЫЛ] ' : '§e[В ПУТИ] ') + 'Груз ' + d.id, [
+          '§fЛот: §e' + d.qty + '× ' + d.itemId,
+          '§fОткуда: §7' + (d.sellerCid || '-') + ' §7| Статус: ' + d.status,
+          '§e▶ ЛКМ: забрать в терминале'
+        ], function (pl) {
+          lhGuiDeferAction(server, pl, function (p2) {
+            if (typeof lhClaimArrivedDeliveriesAtTerminal === 'function') lhClaimArrivedDeliveriesAtTerminal(server, p2, d.id);
+          }, 'trading');
+        });
+    });
+  }
+}
+
 function lhRenderGuiTab(gui, server, player, tab, arg) {
   var activeTab = String(tab || 'hub').toLowerCase();
   lhGuiFillBg(gui, 6);
@@ -2043,6 +2417,7 @@ function lhRenderGuiTab(gui, server, player, tab, arg) {
   else if (activeTab === 'diplomacy') lhGuiRenderDiplomacy(gui, server, player);
   else if (activeTab === 'territory') lhGuiRenderTerritory(gui, server, player);
   else if (activeTab === 'market') lhGuiRenderMarket(gui, server, player);
+  else if (activeTab === 'trading') lhGuiRenderTrading(gui, server, player);
   else if (activeTab === 'bank') lhGuiRenderBank(gui, server, player);
   else if (activeTab === 'pirates') lhGuiRenderPirates(gui, server, player);
   else if (activeTab === 'events') lhGuiRenderEvents(gui, server, player, arg || 'all');
@@ -2066,7 +2441,8 @@ function lhOpenGui(server, player, tab, arg) {
     buildings: '§eLong Haul — Здания и вилка прокачки',
     diplomacy: '§dLong Haul — Дипломатия и лицензии',
     territory: '§bLong Haul — Карта секторов 7×5 (Зум)',
-    market: '§6Long Haul — Биржа и P2P-сделки',
+    market: '§6Long Haul — Биржа и заказы',
+    trading: '§aLong Haul — Витрина, Торг, P2P и Доставки',
     bank: '§eLong Haul — Банк, Налоги, Акции и Камбэк',
     pirates: '§6Long Haul — Синдикат Корсаров и Караваны',
     events: '§dLong Haul — Лог событий',

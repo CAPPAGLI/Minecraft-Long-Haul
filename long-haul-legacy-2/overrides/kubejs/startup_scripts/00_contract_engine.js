@@ -668,7 +668,10 @@ global.LHStructureProduction = (function () {
     wood: [
       'minecraft:oak_log', 'minecraft:spruce_log', 'minecraft:birch_log', 'minecraft:jungle_log',
       'minecraft:acacia_log', 'minecraft:dark_oak_log', 'minecraft:mangrove_log', 'minecraft:cherry_log',
-      'minecraft:bamboo_block', 'minecraft:stripped_oak_log', 'minecraft:stripped_spruce_log',
+      'minecraft:bamboo_block', 'minecraft:crimson_stem', 'minecraft:warped_stem',
+      'minecraft:stripped_oak_log', 'minecraft:stripped_spruce_log', 'minecraft:stripped_birch_log',
+      'minecraft:stripped_jungle_log', 'minecraft:stripped_acacia_log', 'minecraft:stripped_dark_oak_log',
+      'minecraft:stripped_mangrove_log', 'minecraft:stripped_cherry_log',
       'minecraft:oak_planks', 'minecraft:spruce_planks', 'minecraft:dark_oak_planks'
     ],
     mining: [
@@ -854,20 +857,62 @@ global.LHStructureProduction = (function () {
     return parts.join(' ');
   }
 
+  function detectWoodPreferenceFromId(s) {
+    if (/crimson/.test(s)) return 'minecraft:crimson_stem';
+    if (/warped/.test(s)) return 'minecraft:warped_stem';
+    if (/spruce|taiga|pine|snowy|winter|boreal/.test(s)) return 'minecraft:spruce_log';
+    if (/birch|aspen/.test(s)) return 'minecraft:birch_log';
+    if (/jungle|tropical/.test(s)) return 'minecraft:jungle_log';
+    if (/bamboo/.test(s)) return 'minecraft:bamboo_block';
+    if (/acacia|savanna|baobab/.test(s)) return 'minecraft:acacia_log';
+    if (/dark_oak|dark_forest|mansion/.test(s)) return 'minecraft:dark_oak_log';
+    if (/mangrove|bayou|marsh|swamp/.test(s)) return 'minecraft:mangrove_log';
+    if (/cherry|sakura|blossom/.test(s)) return 'minecraft:cherry_log';
+    return 'minecraft:oak_log';
+  }
+
   function detectStructureTheme(structureId) {
     var s = String(structureId || '').toLowerCase();
-    if (/sawmill|lumber|logging|timber|woodcutter/.test(s)) return { category: 'wood', preferred: 'minecraft:oak_log', tier: 1 };
+    if (/sawmill|lumber|logging|timber|woodcutter|forestry|grove|cabin/.test(s)) {
+      return { category: 'wood', preferred: detectWoodPreferenceFromId(s), tier: 1 };
+    }
     if (/beekeeper|apiary|honey|windmill|farm|barn|bakery|orchard|pasture|greenhouse|tavern|winery|village/.test(s)) {
-      if (/village_taiga|snowy/.test(s)) return { category: 'wood', tier: 1 };
-      if (/village_desert|savanna/.test(s)) return { category: 'agro', tier: 1 };
+      if (/village_taiga|snowy/.test(s)) return { category: 'wood', preferred: 'minecraft:spruce_log', tier: 1 };
+      if (/village_plains/.test(s)) return { category: 'agro', preferred: 'minecraft:wheat', tier: 1 };
+      if (/village_desert/.test(s)) return { category: 'agro', preferred: 'minecraft:cactus', tier: 1 };
+      if (/village_savanna/.test(s)) return { category: 'agro', preferred: 'minecraft:melon_slice', tier: 1 };
       return { category: 'agro', tier: 1 };
     }
-    if (/end_city|end_ship|_end\b|ender|chorus|shulker|betterend/.test(s)) return { category: 'end', tier: 3 };
-    if (/fortress|bastion|nether|piglin|crimson|warped|burning_arena|soul_black_smith/.test(s)) return { category: 'nether', tier: 3 };
-    if (/ocean|shipwreck|lighthouse|sunken|monument|harbor|dock|coral|kelp|pirate|raft|port/.test(s)) return { category: 'marine', tier: 2 };
-    if (/mineshaft|quarry|excavation|crypt|catacomb|tomb|dungeon|ancient_city|stronghold|foundry|forge|smithy|drill/.test(s)) return { category: 'mining', tier: 2 };
-    if (/wizard|witch|swamp_hut|apothecary|monastery|temple|pyramid|shrine|library|observatory|altar|arcane|mage|portal|tower|citadel|aviary|sanctum/.test(s)) return { category: 'magic', tier: 2 };
-    if (/factory|workshop|station|rail|depot|bunker|camp|outpost|fort|castle|mansion|palace|bastille|pillager/.test(s)) return { category: 'industry', tier: 2 };
+    if (/end_city|end_ship|_end\b|ender|chorus|shulker|betterend/.test(s)) return { category: 'end', preferred: /ship/.test(s) ? 'minecraft:elytra' : 'minecraft:shulker_shell', tier: 3 };
+    if (/fortress|bastion|nether|piglin|crimson|warped|burning_arena|soul_black_smith/.test(s)) {
+      if (/bastion_treasure/.test(s)) return { category: 'nether', preferred: 'minecraft:ancient_debris', tier: 3 };
+      if (/bastion_hoglin/.test(s)) return { category: 'nether', preferred: 'minecraft:netherite_scrap', tier: 3 };
+      if (/fortress/.test(s)) return { category: 'nether', preferred: 'minecraft:blaze_rod', tier: 3 };
+      return { category: 'nether', tier: 3 };
+    }
+    if (/ocean|shipwreck|lighthouse|sunken|monument|harbor|dock|coral|kelp|pirate|raft|port/.test(s)) {
+      if (/monument/.test(s)) return { category: 'marine', preferred: 'minecraft:prismarine_crystals', tier: 2 };
+      if (/shipwreck/.test(s)) return { category: 'marine', preferred: 'minecraft:heart_of_the_sea', tier: 2 };
+      return { category: 'marine', tier: 2 };
+    }
+    if (/mineshaft|quarry|excavation|crypt|catacomb|tomb|dungeon|ancient_city|stronghold|foundry|forge|smithy|drill/.test(s)) {
+      if (/gold_mine|mesa|badlands/.test(s)) return { category: 'mining', preferred: 'minecraft:raw_gold', tier: 2 };
+      if (/copper/.test(s)) return { category: 'mining', preferred: 'minecraft:raw_copper', tier: 2 };
+      if (/ancient_city/.test(s)) return { category: 'mining', preferred: 'minecraft:deepslate', tier: 2 };
+      if (/foundry|forge|smithy/.test(s)) return { category: 'mining', preferred: 'create:brass_ingot', tier: 2 };
+      return { category: 'mining', tier: 2 };
+    }
+    if (/wizard|witch|swamp_hut|apothecary|monastery|temple|pyramid|shrine|library|observatory|altar|arcane|mage|portal|tower|citadel|aviary|sanctum/.test(s)) {
+      if (/desert_pyramid/.test(s)) return { category: 'magic', preferred: 'minecraft:glowstone_dust', tier: 2 };
+      if (/jungle_pyramid/.test(s)) return { category: 'magic', preferred: 'minecraft:experience_bottle', tier: 2 };
+      if (/swamp_hut|witch/.test(s)) return { category: 'magic', preferred: 'minecraft:fermented_spider_eye', tier: 2 };
+      return { category: 'magic', tier: 2 };
+    }
+    if (/factory|workshop|station|rail|depot|bunker|camp|outpost|fort|castle|mansion|palace|bastille|pillager/.test(s)) {
+      if (/mansion/.test(s)) return { category: 'industry', preferred: 'minecraft:totem_of_undying', tier: 2 };
+      if (/pillager_outpost/.test(s)) return { category: 'industry', preferred: 'create:iron_sheet', tier: 2 };
+      return { category: 'industry', tier: 2 };
+    }
     return { category: 'loot', tier: 1 };
   }
 
@@ -1000,9 +1045,14 @@ global.LHStructureProduction = (function () {
     var catPool = CATEGORY_POOLS[theme.category] || CATEGORY_POOLS.loot;
     var h = simpleHash(sid);
     var chosen = null;
-    for (var i = 0; i < catPool.length; i++) {
-      var cand = catPool[(h + i) % catPool.length];
-      if (!usedItems[cand]) { chosen = cand; break; }
+    if (theme.preferred && !usedItems[theme.preferred]) {
+      chosen = theme.preferred;
+    }
+    if (!chosen) {
+      for (var i = 0; i < catPool.length; i++) {
+        var cand = catPool[(h + i) % catPool.length];
+        if (!usedItems[cand]) { chosen = cand; break; }
+      }
     }
     if (!chosen && availableItemIds && availableItemIds.length) {
       for (var j = 0; j < availableItemIds.length; j++) {
@@ -2847,6 +2897,111 @@ global.LHOpenTTD = (function () {
     }
   }
 
+  var BUILDING_VARIANTS = {
+    sawmill: {
+      oak: { id: 'oak', name: 'Дубовая лесопилка', product: 'minecraft:oak_log', icon: 'minecraft:oak_log' },
+      spruce: { id: 'spruce', name: 'Таёжная (еловая) лесопилка', product: 'minecraft:spruce_log', icon: 'minecraft:spruce_log' },
+      birch: { id: 'birch', name: 'Берёзовая лесопилка', product: 'minecraft:birch_log', icon: 'minecraft:birch_log' },
+      jungle: { id: 'jungle', name: 'Тропическая лесопилка', product: 'minecraft:jungle_log', icon: 'minecraft:jungle_log' },
+      acacia: { id: 'acacia', name: 'Саванная (акациевая) лесопилка', product: 'minecraft:acacia_log', icon: 'minecraft:acacia_log' },
+      dark_oak: { id: 'dark_oak', name: 'Лесопилка тёмного леса', product: 'minecraft:dark_oak_log', icon: 'minecraft:dark_oak_log' },
+      mangrove: { id: 'mangrove', name: 'Мангровая лесопилка', product: 'minecraft:mangrove_log', icon: 'minecraft:mangrove_log' },
+      cherry: { id: 'cherry', name: 'Вишнёвая лесопилка', product: 'minecraft:cherry_log', icon: 'minecraft:cherry_log' },
+      bamboo: { id: 'bamboo', name: 'Бамбуковая фактория', product: 'minecraft:bamboo_block', icon: 'minecraft:bamboo_block' },
+      crimson: { id: 'crimson', name: 'Багровая лесопилка Незера', product: 'minecraft:crimson_stem', icon: 'minecraft:crimson_stem' },
+      warped: { id: 'warped', name: 'Искажённая лесопилка Незера', product: 'minecraft:warped_stem', icon: 'minecraft:warped_stem' }
+    },
+    quarry: {
+      deepslate: { id: 'deepslate', name: 'Глубинный сланец', product: 'minecraft:deepslate', icon: 'minecraft:deepslate' },
+      sandstone: { id: 'sandstone', name: 'Пустынный карьер', product: 'minecraft:sandstone', icon: 'minecraft:sandstone' },
+      terracotta: { id: 'terracotta', name: 'Глиняный карьер', product: 'minecraft:terracotta', icon: 'minecraft:terracotta' },
+      calcite: { id: 'calcite', name: 'Горный известняк', product: 'minecraft:calcite', icon: 'minecraft:calcite' },
+      basalt: { id: 'basalt', name: 'Базальтовый разлом', product: 'minecraft:basalt', icon: 'minecraft:basalt' },
+      blackstone: { id: 'blackstone', name: 'Чернитная штольня', product: 'minecraft:blackstone', icon: 'minecraft:blackstone' },
+      end_stone: { id: 'end_stone', name: 'Карьер Края', product: 'minecraft:end_stone', icon: 'minecraft:end_stone' }
+    },
+    mine_shaft: {
+      raw_iron: { id: 'raw_iron', name: 'Железный рудник', product: 'minecraft:raw_iron', icon: 'minecraft:raw_iron' },
+      raw_copper: { id: 'raw_copper', name: 'Медный рудник', product: 'minecraft:raw_copper', icon: 'minecraft:raw_copper' },
+      raw_gold: { id: 'raw_gold', name: 'Золотой прииск', product: 'minecraft:raw_gold', icon: 'minecraft:raw_gold' },
+      coal: { id: 'coal', name: 'Угольная шахта', product: 'minecraft:coal', icon: 'minecraft:coal' },
+      redstone: { id: 'redstone', name: 'Редстоун-шахта', product: 'minecraft:redstone', icon: 'minecraft:redstone' },
+      quartz: { id: 'quartz', name: 'Кварцевая выработка', product: 'minecraft:quartz', icon: 'minecraft:quartz' }
+    },
+    agro_complex: {
+      bread: { id: 'bread', name: 'Хлебопашенный комплекс', product: 'minecraft:bread', icon: 'minecraft:bread' },
+      sweet_berries: { id: 'sweet_berries', name: 'Таёжный ягодник', product: 'minecraft:sweet_berries', icon: 'minecraft:sweet_berries' },
+      cocoa_beans: { id: 'cocoa_beans', name: 'Тропическая плантация', product: 'minecraft:cocoa_beans', icon: 'minecraft:cocoa_beans' },
+      melon_slice: { id: 'melon_slice', name: 'Бахчевой комплекс', product: 'minecraft:melon_slice', icon: 'minecraft:melon_slice' },
+      sugar_cane: { id: 'sugar_cane', name: 'Тростниковая ферма', product: 'minecraft:sugar_cane', icon: 'minecraft:sugar_cane' },
+      nether_wart: { id: 'nether_wart', name: 'Незер-оранжерея', product: 'minecraft:nether_wart', icon: 'minecraft:nether_wart' }
+    }
+  };
+
+  function resolveBuildingVariant(bType, biomeId, variantId, dimension, sx, sz) {
+    var pool = BUILDING_VARIANTS[bType];
+    if (!pool) return null;
+    if (variantId && pool[variantId]) return pool[variantId];
+    var bio = String(biomeId || '').toLowerCase();
+    var dim = String(dimension || 'minecraft:overworld').toLowerCase();
+    if (bType === 'sawmill') {
+      if (dim.indexOf('nether') !== -1 || bio.indexOf('crimson') !== -1) return pool.crimson;
+      if (bio.indexOf('warped') !== -1) return pool.warped;
+      if (bio.indexOf('cherry') !== -1 || bio.indexOf('sakura') !== -1) return pool.cherry;
+      if (bio.indexOf('mangrove') !== -1 || bio.indexOf('swamp') !== -1) return pool.mangrove;
+      if (bio.indexOf('bamboo') !== -1) return pool.bamboo;
+      if (bio.indexOf('jungle') !== -1) return pool.jungle;
+      if (bio.indexOf('birch') !== -1) return pool.birch;
+      if (bio.indexOf('dark_forest') !== -1 || bio.indexOf('dark_oak') !== -1) return pool.dark_oak;
+      if (bio.indexOf('savanna') !== -1 || bio.indexOf('acacia') !== -1) return pool.acacia;
+      if (bio.indexOf('taiga') !== -1 || bio.indexOf('snowy') !== -1 || bio.indexOf('grove') !== -1 || bio.indexOf('pine') !== -1 || bio.indexOf('frozen') !== -1) return pool.spruce;
+      if (bio) return pool.oak;
+      // Deterministic variety by sector coords when biomeId is not supplied
+      var owKeys = ['oak', 'spruce', 'birch', 'jungle', 'acacia', 'dark_oak', 'mangrove', 'cherry'];
+      var h = Math.abs((Number(sx || 0) * 73856093) ^ (Number(sz || 0) * 19349663));
+      return pool[owKeys[h % owKeys.length]];
+    }
+    if (bType === 'quarry') {
+      if (dim.indexOf('end') !== -1) return pool.end_stone;
+      if (dim.indexOf('nether') !== -1) return pool.blackstone;
+      if (bio.indexOf('desert') !== -1 || bio.indexOf('beach') !== -1) return pool.sandstone;
+      if (bio.indexOf('badlands') !== -1 || bio.indexOf('mesa') !== -1) return pool.terracotta;
+      if (bio.indexOf('mountain') !== -1 || bio.indexOf('peak') !== -1 || bio.indexOf('stony') !== -1) return pool.calcite;
+      if (bio.indexOf('basalt') !== -1 || bio.indexOf('volcan') !== -1) return pool.basalt;
+      return pool.deepslate;
+    }
+    if (bType === 'mine_shaft') {
+      if (dim.indexOf('nether') !== -1) return pool.quartz;
+      if (bio.indexOf('badlands') !== -1 || bio.indexOf('mesa') !== -1) return pool.raw_gold;
+      if (bio.indexOf('dripstone') !== -1 || bio.indexOf('lush') !== -1) return pool.raw_copper;
+      if (bio.indexOf('deep_dark') !== -1) return pool.redstone;
+      return pool.raw_iron;
+    }
+    if (bType === 'agro_complex') {
+      if (dim.indexOf('nether') !== -1) return pool.nether_wart;
+      if (bio.indexOf('taiga') !== -1 || bio.indexOf('snowy') !== -1) return pool.sweet_berries;
+      if (bio.indexOf('jungle') !== -1) return pool.cocoa_beans;
+      if (bio.indexOf('savanna') !== -1) return pool.melon_slice;
+      if (bio.indexOf('swamp') !== -1 || bio.indexOf('mangrove') !== -1 || bio.indexOf('river') !== -1) return pool.sugar_cane;
+      return pool.bread;
+    }
+    return null;
+  }
+
+  function setBuildingVariant(state, cid, sx, sz, variantId, dimension) {
+    ensureDiplomacyState(state);
+    var b = getSectorBuilding(state, sx, sz, dimension);
+    if (!b || (cid && b.owner !== cid)) return { ok: false, reason: 'not_found' };
+    var pool = BUILDING_VARIANTS[b.type];
+    if (!pool) return { ok: false, reason: 'no_variants' };
+    var v = pool[variantId];
+    if (!v) return { ok: false, reason: 'bad_variant' };
+    b.variant = v.id;
+    b.variantName = v.name;
+    b.customProduct = v.product;
+    return { ok: true, building: b, variant: v };
+  }
+
   function buildCompanyBuilding(state, cid, sx, sz, bType, wx, wy, wz, options) {
     ensureDiplomacyState(state);
     var opts = options || {};
@@ -2870,12 +3025,17 @@ global.LHOpenTTD = (function () {
     var resolvedY = (dim !== 'minecraft:overworld')
       ? Math.round(Number(wy || 70))
       : (env === 'normal' ? Math.max(63, Math.round(Number(wy || 70))) : preferredBuildingY(env, wy));
+    var resolvedVariant = resolveBuildingVariant(bType, opts.biomeId || null, opts.variant || null, dim, sx, sz);
     var bldg = {
       id: 'b' + (state.nextBuildingSeq++),
       type: bType,
       category: spec.category,
       envType: env,
       dimension: dim,
+      biomeId: opts.biomeId ? String(opts.biomeId) : null,
+      variant: resolvedVariant ? resolvedVariant.id : null,
+      variantName: resolvedVariant ? resolvedVariant.name : null,
+      customProduct: resolvedVariant ? resolvedVariant.product : null,
       owner: cid,
       sx: sx,
       sz: sz,
@@ -3142,7 +3302,9 @@ global.LHOpenTTD = (function () {
     if (f2) { incMult *= f2.incomeMult; yMult *= f2.yieldMult; }
 
     var baseInc = (b.type === 'structure_facility' && b.baseIncome) ? Number(b.baseIncome) : Number(spec.baseIncome || 40);
-    var baseProd = (b.type === 'structure_facility' && b.productItem) ? String(b.productItem) : String(spec.baseProduct);
+    var baseProd = (b.type === 'structure_facility' && b.productItem)
+      ? String(b.productItem)
+      : (b.customProduct ? String(b.customProduct) : String(spec.baseProduct));
     var baseQ = (b.type === 'structure_facility' && b.baseQty) ? Number(b.baseQty) : Number(spec.baseQty || 2);
 
     var income = Math.round(baseInc * incMult);
@@ -5187,28 +5349,64 @@ global.LHOpenTTD = (function () {
     return cnt;
   }
 
+  function countPlayerCompanies(state) {
+    var cnt = 0;
+    var cids = Object.keys(state.companies || {});
+    for (var i = 0; i < cids.length; i++) {
+      var c = state.companies[cids[i]];
+      if (c && !c.isBot && !c.isPirate) cnt++;
+    }
+    return cnt;
+  }
+
   function countOverworldAvailableSectors(maxSectorAbs) {
     var limit = Math.max(2, Math.floor(Number(maxSectorAbs || 5)));
     var side = limit * 2 + 1;
     return Math.max(1, side * side - 9); // excluding 3x3 spawn sanctuary
   }
 
-  function maxBotClaimsAllowed(state, maxSectorAbs, completedChapters) {
+  function getBotScalingDetails(state, maxSectorAbs, completedChapters) {
     ensureDiplomacyState(state);
     var activeBots = countActiveBots(state);
+    var playerCompanies = countPlayerCompanies(state);
     var playerClaims = countPlayerClaimsTotal(state);
+    var playerChunks = playerClaims * 256;
     var chDone = Math.max(0, Number(completedChapters !== undefined ? completedChapters : (state.completedChapters || 0)));
-    var legacyCap = activeBots + playerClaims;
-    if (chDone <= 0 && playerClaims <= 0) {
-      return legacyCap;
-    }
-    // By 1/3 of campaign chapters (~20 of 61), bots should saturate all open non-player sectors inside the active map!
-    var oneThirdChapters = 20;
-    var progress = Math.min(1.0, chDone / oneThirdChapters);
     var totalOpen = countOverworldAvailableSectors(maxSectorAbs || 5);
     var nonPlayerOpen = Math.max(activeBots, totalOpen - playerClaims);
-    var scaledCap = Math.round(activeBots + (nonPlayerOpen - activeBots) * progress);
-    return Math.max(legacyCap, Math.min(nonPlayerOpen, scaledCap));
+
+    if (chDone <= 0 && playerCompanies <= 0 && playerClaims <= 0) {
+      return {
+        maxSectors: activeBots,
+        maxChunks: activeBots * 256,
+        activeBots: activeBots,
+        playerCompanies: 0,
+        playerSectors: 0,
+        playerChunks: 0,
+        completedChapters: 0,
+        nonPlayerOpenSectors: nonPlayerOpen
+      };
+    }
+    // Linear scaling combining player company count (+3 sectors/company), player occupied chunks/sectors (+1.5 sectors per player sector), and 1/3-campaign progress
+    var oneThirdChapters = 20;
+    var chapterProgress = Math.min(1.0, chDone / oneThirdChapters);
+    var playerLinearCap = activeBots + playerCompanies * 3 + Math.round(playerClaims * 1.5);
+    var chapterLinearCap = Math.round(activeBots + (nonPlayerOpen - activeBots) * chapterProgress);
+    var maxSectors = Math.min(nonPlayerOpen, Math.max(activeBots + playerClaims, Math.max(playerLinearCap, chapterLinearCap)));
+    return {
+      maxSectors: maxSectors,
+      maxChunks: maxSectors * 256,
+      activeBots: activeBots,
+      playerCompanies: playerCompanies,
+      playerSectors: playerClaims,
+      playerChunks: playerChunks,
+      completedChapters: chDone,
+      nonPlayerOpenSectors: nonPlayerOpen
+    };
+  }
+
+  function maxBotClaimsAllowed(state, maxSectorAbs, completedChapters) {
+    return getBotScalingDetails(state, maxSectorAbs, completedChapters).maxSectors;
   }
 
   var DYNAMIC_BOT_NAMES = [
@@ -6110,10 +6308,13 @@ global.LHOpenTTD = (function () {
     DEFAULT_BOT_COMPANIES: DEFAULT_BOT_COMPANIES,
     BOT_ORDER_TEMPLATES: BOT_ORDER_TEMPLATES,
     BUILDING_CATALOG: BUILDING_CATALOG,
+    BUILDING_VARIANTS: BUILDING_VARIANTS,
     PROGRESSIVE_TAX_BRACKETS: PROGRESSIVE_TAX_BRACKETS,
     FUEL_EQUIVALENTS: FUEL_EQUIVALENTS,
     PIRATE_SYNDICATE_ID: PIRATE_SYNDICATE_ID,
     MAX_PLAYER_EXTERNAL_SHARES: MAX_PLAYER_EXTERNAL_SHARES,
+    resolveBuildingVariant: resolveBuildingVariant,
+    setBuildingVariant: setBuildingVariant,
     getCompanyEnvType: getCompanyEnvType,
     setCompanyEnvType: setCompanyEnvType,
     preferredBuildingY: preferredBuildingY,
@@ -6133,8 +6334,10 @@ global.LHOpenTTD = (function () {
     togglePact: togglePact,
     countClaims: countClaims,
     countPlayerClaimsTotal: countPlayerClaimsTotal,
+    countPlayerCompanies: countPlayerCompanies,
     countBotClaimsTotal: countBotClaimsTotal,
     countActiveBots: countActiveBots,
+    getBotScalingDetails: getBotScalingDetails,
     maxBotClaimsAllowed: maxBotClaimsAllowed,
     spawnDynamicBotCompany: spawnDynamicBotCompany,
     onChapterCompletedBotSpawn: onChapterCompletedBotSpawn,

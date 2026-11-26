@@ -1802,14 +1802,19 @@ function lhSyncXaeroTerritories(server, targetPlayer) {
         } else {
           rel = 'hostile';
         }
-        var bldg = global.LHOpenTTD.getSectorBuilding(st, cl.sx, cl.sz);
+        var bldg = global.LHOpenTTD.getSectorBuilding(st, cl.sx, cl.sz, cl.dimension || 'minecraft:overworld');
         var bName = '';
-        if (bldg && global.LHOpenTTD.BUILDING_CATALOG && global.LHOpenTTD.BUILDING_CATALOG[bldg.type]) {
-          bName = global.LHOpenTTD.BUILDING_CATALOG[bldg.type].name;
+        if (bldg) {
+          if (bldg.variantName) bName = bldg.variantName;
+          else if (bldg.structureName) bName = bldg.structureName;
+          else if (global.LHOpenTTD.BUILDING_CATALOG && global.LHOpenTTD.BUILDING_CATALOG[bldg.type]) {
+            bName = global.LHOpenTTD.BUILDING_CATALOG[bldg.type].name;
+          }
         }
         claimsOut.push({
           sx: Number(cl.sx),
           sz: Number(cl.sz),
+          dim: String(cl.dimension || 'minecraft:overworld'),
           owner: String(cl.owner),
           name: comp ? String(comp.name) : String(cl.owner),
           color: cColor,
@@ -1839,13 +1844,157 @@ function lhSyncMinimapHud(server, player, forceClear) {
   return lhSyncXaeroTerritories(server, player);
 }
 
+var LHLastPlayerSector = {};
+
+function lhDetectBiomeId(player) {
+  try {
+    if (!player || !player.level || typeof player.blockPosition !== 'function') return null;
+    var holder = player.level.getBiome(player.blockPosition());
+    if (holder && typeof holder.unwrapKey === 'function') {
+      var opt = holder.unwrapKey();
+      if (opt && typeof opt.isPresent === 'function' && opt.isPresent()) {
+        return String(opt.get().location());
+      }
+    }
+  } catch (eBio) {}
+  return null;
+}
+
+function lhRgbFloatTriple(hexColor) {
+  var r = ((hexColor >> 16) & 0xFF) / 255;
+  var g = ((hexColor >> 8) & 0xFF) / 255;
+  var b = (hexColor & 0xFF) / 255;
+  return (Math.round(r * 100) / 100) + ' ' + (Math.round(g * 100) / 100) + ' ' + (Math.round(b * 100) / 100);
+}
+
+function lhRenderWorldBorders(server) {
+  if (!server || !global.LHOpenTTD) return;
+  var st = lhOttdRead(server);
+  var plist = server.players || [];
+  if (!plist.length) return;
+  var borderHalf = 362;
+  try {
+    if (typeof lhTerritoryCounts === 'function') {
+      borderHalf = Math.max(32, Math.floor(Number(lhTerritoryCounts(server).size || 724) / 2));
+    }
+  } catch (eB) {}
+
+  for (var pi = 0; pi < plist.length; pi++) {
+    var p = plist[pi];
+    if (!p || (typeof p.isSpectator === 'function' && p.isSpectator())) continue;
+    var pid = lhId(p);
+    var uname = String(p.username || '');
+    if (!uname) continue;
+    var dim = (p.level && p.level.dimension) ? String(p.level.dimension) : 'minecraft:overworld';
+    var px = Number(p.x || 0), py = Number(p.y || 70), pz = Number(p.z || 0);
+    var sc = global.LHOpenTTD.sectorCoords(px, pz);
+    var myComp = lhGetPlayerCompany(server, p);
+    var myCid = myComp ? myComp.id : null;
+
+    // ActionBar notification when crossing a sector boundary
+    var curKey = dim + ':' + sc.sx + ',' + sc.sz;
+    if (LHLastPlayerSector[pid] && LHLastPlayerSector[pid] !== curKey) {
+      var curInfo = global.LHOpenTTD.resolveSectorOwner(st, sc.sx, sc.sz, dim);
+      if (curInfo.kind === 'claimed' && curInfo.owner) {
+        var oComp = st.companies[curInfo.owner];
+        var passOk = !myCid || myCid === curInfo.owner || global.LHOpenTTD.canTransit(st, myCid, curInfo.owner);
+        var bMsg = (oComp ? (oComp.colorCode + oComp.name) : curInfo.owner) + ' §7(' + sc.sx + ', ' + sc.sz + ') ' +
+          (curInfo.owner === myCid ? '§a[Ваш сектор]' : (passOk ? '§e[Проход открыт]' : '§c[НЕТ ПРОПУСКА!]'));
+        try { if (typeof p.setStatusMessage === 'function') p.setStatusMessage(Text.of(bMsg)); } catch (eSm) {}
+      } else if (dim === 'minecraft:overworld' && global.LHOpenTTD.isSpawnSanctuarySector && global.LHOpenTTD.isSpawnSanctuarySector(sc.sx, sc.sz)) {
+        try { if (typeof p.setStatusMessage === 'function') p.setStatusMessage(Text.of('§bЗаповедник спауна 3×3 §7(' + sc.sx + ', ' + sc.sz + ')')); } catch (eSm2) {}
+      } else {
+        try { if (typeof p.setStatusMessage === 'function') p.setStatusMessage(Text.of('§7Свободный сектор (' + sc.sx + ', ' + sc.sz + ')')); } catch (eSm3) {}
+      }
+    }
+    LHLastPlayerSector[pid] = curKey;
+
+    var pref = (st.minimapPrefs && st.minimapPrefs[pid]) ? st.minimapPrefs[pid] : { enabled: true, worldBorders: true };
+    if (pref.worldBorders === false) continue;
+
+    var half = global.LHOpenTTD.SECTOR_SIZE / 2;
+    var minX = sc.sx * global.LHOpenTTD.SECTOR_SIZE - half;
+    var maxX = minX + global.LHOpenTTD.SECTOR_SIZE;
+    var minZ = sc.sz * global.LHOpenTTD.SECTOR_SIZE - half;
+    var maxZ = minZ + global.LHOpenTTD.SECTOR_SIZE;
+
+    var edges = [
+      { axis: 'x', coord: minX, nsx: sc.sx - 1, nsz: sc.sz },
+      { axis: 'x', coord: maxX, nsx: sc.sx + 1, nsz: sc.sz },
+      { axis: 'z', coord: minZ, nsx: sc.sx, nsz: sc.sz - 1 },
+      { axis: 'z', coord: maxZ, nsx: sc.sx, nsz: sc.sz + 1 }
+    ];
+    if (dim === 'minecraft:overworld') {
+      if (Math.abs(px - (-borderHalf)) <= 44) edges.push({ axis: 'x', coord: -borderHalf, worldBorder: true });
+      if (Math.abs(px - borderHalf) <= 44) edges.push({ axis: 'x', coord: borderHalf, worldBorder: true });
+      if (Math.abs(pz - (-borderHalf)) <= 44) edges.push({ axis: 'z', coord: -borderHalf, worldBorder: true });
+      if (Math.abs(pz - borderHalf) <= 44) edges.push({ axis: 'z', coord: borderHalf, worldBorder: true });
+    }
+
+    var infoSelf = global.LHOpenTTD.resolveSectorOwner(st, sc.sx, sc.sz, dim);
+    for (var ei = 0; ei < edges.length; ei++) {
+      var ed = edges[ei];
+      var distToEdge = ed.axis === 'x' ? Math.abs(px - ed.coord) : Math.abs(pz - ed.coord);
+      if (distToEdge > 42) continue;
+
+      var hexCol = null;
+      if (ed.worldBorder) {
+        hexCol = 0xEF4444;
+      } else {
+        var infoOther = global.LHOpenTTD.resolveSectorOwner(st, ed.nsx, ed.nsz, dim);
+        var ownerA = infoSelf.kind === 'claimed' ? infoSelf.owner : null;
+        var ownerB = infoOther.kind === 'claimed' ? infoOther.owner : null;
+        if (!ownerA && !ownerB) continue;
+        if (ownerA === ownerB) continue;
+        var chosenOwner = ownerA || ownerB;
+        if (ownerA && ownerB && myCid && ownerA !== myCid && ownerB === myCid) chosenOwner = ownerB;
+        var cObj = st.companies[chosenOwner];
+        hexCol = (cObj && cObj.color && LH_XAERO_COLOR_RGB[cObj.color]) ? LH_XAERO_COLOR_RGB[cObj.color] : 0xFACC15;
+      }
+      var rgbTxt = lhRgbFloatTriple(hexCol);
+      var spanCenter = ed.axis === 'x' ? Math.round(pz) : Math.round(px);
+      for (var off = -20; off <= 20; off += 5) {
+        var cxP = ed.axis === 'x' ? ed.coord : (spanCenter + off);
+        var czP = ed.axis === 'z' ? ed.coord : (spanCenter + off);
+        for (var dy = 0; dy <= 6; dy += 2) {
+          var cyP = Math.round(py + dy);
+          server.runCommandSilent('execute in ' + dim + ' run particle minecraft:dust ' + rgbTxt + ' 1.7 ' + cxP + ' ' + cyP + ' ' + czP + ' 0 0 0 0 1 force ' + uname);
+        }
+      }
+    }
+  }
+}
+
+function lhCycleBuildingVariant(server, player, dryRun) {
+  var st = lhOttdRead(server);
+  var comp = lhGetPlayerCompany(server, player);
+  if (!comp) { if (!dryRun) lhMsg(player, 'Сначала создайте компанию.'); return { ok: false, reason: 'no_company' }; }
+  var dim = (player.level && player.level.dimension) ? String(player.level.dimension) : 'minecraft:overworld';
+  var sc = global.LHOpenTTD.sectorCoords(player.x, player.z);
+  var b = global.LHOpenTTD.getSectorBuilding(st, sc.sx, sc.sz, dim);
+  if (!b || b.owner !== comp.id) { if (!dryRun) lhMsg(player, '§cВ этом секторе нет вашего объекта.'); return { ok: false, reason: 'not_found' }; }
+  var pool = global.LHOpenTTD.BUILDING_VARIANTS && global.LHOpenTTD.BUILDING_VARIANTS[b.type];
+  if (!pool) { if (!dryRun) lhMsg(player, '§7У этого типа здания нет вариантов продукции.'); return { ok: false, reason: 'no_variants' }; }
+  var keys = Object.keys(pool);
+  var idx = keys.indexOf(b.variant);
+  var nextKey = keys[(idx + 1) % keys.length];
+  var res = global.LHOpenTTD.setBuildingVariant(st, comp.id, sc.sx, sc.sz, nextKey, dim);
+  if (res.ok && !dryRun) {
+    lhOttdSave(server);
+    lhSyncXaeroTerritories(server, player);
+    lhMsg(player, '§a[Специализация] §f«' + res.variant.name + '» теперь производит §e' + res.variant.product + '§f!');
+  }
+  return res;
+}
+
 function lhBuildFacilityCmd(server, player, bType, sx, sz, dryRun) {
   var st = lhOttdRead(server);
   var comp = lhGetPlayerCompany(server, player);
   if (!comp) { if (!dryRun) lhMsg(player, 'Сначала создайте или вступите в компанию.'); return { ok: false, reason: 'no_company' }; }
   var dim = (player.level && player.level.dimension) ? String(player.level.dimension) : 'minecraft:overworld';
   var sc = (sx !== undefined && sz !== undefined) ? { sx: sx, sz: sz } : global.LHOpenTTD.sectorCoords(player.x, player.z);
-  var res = global.LHOpenTTD.buildCompanyBuilding(st, comp.id, sc.sx, sc.sz, bType, player.x, player.y, player.z, { dimension: dim });
+  var biomeId = lhDetectBiomeId(player);
+  var res = global.LHOpenTTD.buildCompanyBuilding(st, comp.id, sc.sx, sc.sz, bType, player.x, player.y, player.z, { dimension: dim, biomeId: biomeId });
   if (!res.ok) {
     if (!dryRun) {
       if (res.reason === 'not_your_sector') lhMsg(player, '§cСначала захватите сектор (' + sc.sx + ', ' + sc.sz + ') своей компанией!');
@@ -1865,7 +2014,8 @@ function lhBuildFacilityCmd(server, player, bType, sx, sz, dryRun) {
     }
     lhClearLegacyMinimapHud(player);
     lhSyncXaeroTerritories(server, player);
-    lhMsg(player, '§a[Инфраструктура] Построено физическое здание: ' + res.spec.icon + ' §f' + res.spec.name +
+    var builtTitle = res.building.variantName ? (res.building.variantName + ' -> ' + res.building.customProduct) : res.spec.name;
+    lhMsg(player, '§a[Инфраструктура] Построено физическое здание: ' + res.spec.icon + ' §f' + builtTitle +
       ' §7в (' + res.building.x + ', ' + res.building.y + ', ' + res.building.z + ') за ' + res.cost +
       ' Cr. Бочка выхода: §e(' + res.building.x + ',' + res.building.y + ',' + res.building.z + ')§7, бочка сырья: §b(' +
       (res.building.x + 1) + ',' + res.building.y + ',' + res.building.z + ')§7.');
@@ -2787,6 +2937,9 @@ EntityEvents.spawned(function (event) {
 ServerEvents.tick(function (event) {
   LHOTTDTick++;
   var server = event.server;
+  if (LHOTTDTick % 20 === 0) {
+    lhRenderWorldBorders(server);
+  }
   if (LHOTTDTick % 1200 === 0) {
     var stProd = lhOttdRead(server);
     global.LHOpenTTD.tickCompanyBuildings(stProd);
@@ -3060,6 +3213,10 @@ PlayerEvents.loggedIn(function (event) {
   lhOttdRead(server);
   lhClearLegacyMinimapHud(player);
   lhSyncXaeroTerritories(server, player);
+  if (server && typeof server.scheduleInTicks === 'function') {
+    server.scheduleInTicks(40, function () { lhSyncXaeroTerritories(server, player); });
+    server.scheduleInTicks(100, function () { lhSyncXaeroTerritories(server, player); });
+  }
   var comp = lhGetPlayerCompany(server, player);
   if (comp) {
     lhMsg(player, 'Компания: ' + comp.colorCode + comp.name + ' §f(баланс: ' + comp.cash + ' Cr, транспорт: ' +
@@ -3261,6 +3418,13 @@ ServerEvents.commandRegistry(function (event) {
   var bot = C.literal('bot');
   bot.then(C.literal('status').executes(function (ctx) {
     var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
+    var maxSecAbs = 5;
+    try { if (typeof lhTerritoryCounts === 'function') maxSecAbs = Math.max(2, Math.floor((lhTerritoryCounts(server).size || 724) / 2 / global.LHOpenTTD.SECTOR_SIZE)); } catch (eBs) {}
+    var scale = global.LHOpenTTD.getBotScalingDetails ? global.LHOpenTTD.getBotScalingDetails(st, maxSecAbs, st.completedChapters || 0) : null;
+    if (scale) {
+      lhMsg(p, '§e[Масштаб ботов] Лимит: §a' + scale.maxSectors + ' сект. (' + scale.maxChunks + ' чанков) §7| Игроков: ' +
+        scale.playerCompanies + ' комп., ' + scale.playerSectors + ' сект. (' + scale.playerChunks + ' чанков), глав: ' + scale.completedChapters);
+    }
     Object.keys(st.companies).forEach(function (cid) {
       var c = st.companies[cid];
       if (!c.isBot) return;
@@ -3335,7 +3499,33 @@ ServerEvents.commandRegistry(function (event) {
     lhMsg(p, '§a[Ремонт] Здание восстановлено до 100% за ' + res.cost + ' Cr!');
     return 1;
   }));
+  bldgCmd.then(C.literal('variant').then(C.argument('variantId', LHOTTDStringArg.word()).executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
+    var comp = lhGetPlayerCompany(server, p);
+    if (!comp) { lhMsg(p, 'Сначала создайте компанию.'); return 0; }
+    var dim = (p.level && p.level.dimension) ? String(p.level.dimension) : 'minecraft:overworld';
+    var sc = global.LHOpenTTD.sectorCoords(p.x, p.z);
+    var res = global.LHOpenTTD.setBuildingVariant(st, comp.id, sc.sx, sc.sz, LHOTTDStringArg.getString(ctx, 'variantId'), dim);
+    if (!res.ok) { lhMsg(p, '§cОшибка смены варианта: ' + res.reason); return 0; }
+    lhOttdSave(server);
+    lhSyncXaeroTerritories(server, p);
+    lhMsg(p, '§a[Специализация] «' + res.variant.name + '» теперь производит §e' + res.variant.product + '§f!');
+    return 1;
+  })));
   root.then(bldgCmd);
+
+  var borderCmd = C.literal('border');
+  borderCmd.then(C.literal('toggle').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server), pid = lhId(p);
+    if (!st.minimapPrefs) st.minimapPrefs = {};
+    var cur = st.minimapPrefs[pid] || { enabled: true, size: 'medium', worldBorders: true };
+    cur.worldBorders = cur.worldBorders === false;
+    st.minimapPrefs[pid] = cur;
+    lhOttdSave(server);
+    lhMsg(p, 'Видимая 3D-граница в мире (частицы): ' + (cur.worldBorders ? '§aВКЛ' : '§cВЫКЛ') + '§f.');
+    return 1;
+  }));
+  root.then(borderCmd);
 
   var dipCmd = C.literal('diplomacy');
   dipCmd.then(C.literal('status').executes(function (ctx) {

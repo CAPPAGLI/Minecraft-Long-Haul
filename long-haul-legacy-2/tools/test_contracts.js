@@ -1117,4 +1117,84 @@ test('38. Progressive taxes, Central Bank loans & defaults, tax evasion, equity 
   assert(s30.includes('lhGuiRenderBank') && s30.includes('lhGuiRenderPirates'), '30_lh_gui exposes Bank/Tax/Shares and Pirates/Caravans tabs');
 });
 
+test('39. Xaero/world borders, unique structure/building variants, tablet GUI command parity, and linear bot scaling', () => {
+  const path = require('path');
+  const ROOT = path.resolve(__dirname, '..');
+  const O = sandbox.global.LHOpenTTD;
+  const SP = sandbox.global.LHStructureProduction;
+
+  // 1. Xaero Java fixes, default configs, sync_instance preservation, and world border particles
+  const xData = fs.readFileSync(path.join(ROOT, 'runtime-mod/src/main/java/longhaul/runtime/xaero/LongHaulXaeroData.java'), 'utf8');
+  const xMini = fs.readFileSync(path.join(ROOT, 'runtime-mod/src/main/java/longhaul/runtime/xaero/MinimapSectorHighlighter.java'), 'utf8');
+  const xBridge = fs.readFileSync(path.join(ROOT, 'runtime-mod/src/main/java/longhaul/runtime/xaero/XaeroRefreshBridge.java'), 'utf8');
+  const cfgMini = fs.readFileSync(path.join(ROOT, 'overrides/config/xaerominimap.txt'), 'utf8');
+  const cfgWorld = fs.readFileSync(path.join(ROOT, 'overrides/config/xaeroworldmap.txt'), 'utf8');
+  const syncPy = fs.readFileSync(path.join(ROOT, 'tools/sync_instance.py'), 'utf8');
+  const s27 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/27_openttd_companies.js'), 'utf8');
+  const s30 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/30_lh_gui.js'), 'utf8');
+
+  assert(xData.includes('claimsByDim') && xData.includes('calculateRegionHash') && xData.includes('((rgb & 0xFFFFFF) << 8) | alpha'), 'LongHaulXaeroData uses per-dim claims and RRGGBBAA packing');
+  assert(xMini.includes('calculateRegionHash'), 'MinimapSectorHighlighter implements calculateRegionHash');
+  assert(xBridge.includes('getMethod("execute"') && xBridge.includes('setClearCache'), 'XaeroRefreshBridge schedules refresh on client main thread');
+  assert(cfgMini.includes('displayClaims:true') && cfgWorld.includes('displayClaims:true'), 'Default Xaero configs enable claim borders on minimap & worldmap');
+  assert(syncPy.includes('SEED_IF_MISSING_OVERRIDES') && syncPy.includes('xaerominimap.txt'), 'sync_instance.py preserves user Xaero configs');
+  assert(s27.includes('lhRenderWorldBorders') && s27.includes("C.literal('border')") && s27.includes('minecraft:dust'), '27_openttd_companies renders 3D world borders and /lh border toggle');
+
+  // 2. Structure & building variant product differentiation (e.g. different sawmills -> different logs)
+  const spCat = SP.buildStructureCatalog(['mod:sawmill_taiga', 'mod:sawmill_savanna', 'mod:sawmill_cherry', 'minecraft:village_savanna']);
+  const spTaiga = SP.resolveStructureSpec(spCat, 'mod:sawmill_taiga');
+  const spSavanna = SP.resolveStructureSpec(spCat, 'mod:sawmill_savanna');
+  const spCherry = SP.resolveStructureSpec(spCat, 'mod:sawmill_cherry');
+  const spVilSav = SP.resolveStructureSpec(spCat, 'minecraft:village_savanna');
+  assert.notEqual(spTaiga.itemId, spSavanna.itemId, 'taiga vs savanna sawmills produce distinct logs');
+  assert.equal(spTaiga.itemId, 'minecraft:spruce_log');
+  assert.equal(spSavanna.itemId, 'minecraft:acacia_log');
+  assert.equal(spCherry.itemId, 'minecraft:cherry_log');
+  assert.equal(spVilSav.itemId, 'minecraft:melon_slice');
+
+  const st = O.createInitialState();
+  const co = O.companyCreate(st, 'u1', 'woodco', 'WoodCo', 1024, 1024).company;
+  co.cash = 10000;
+  O.claimOrCaptureSector(st, 'woodco', 5, 4, false);
+  O.claimOrCaptureSector(st, 'woodco', 6, 4, false);
+
+  const bTaiga = O.buildCompanyBuilding(st, 'woodco', 4, 4, 'sawmill', 1024, 70, 1024, { biomeId: 'minecraft:taiga' });
+  const bCherry = O.buildCompanyBuilding(st, 'woodco', 5, 4, 'sawmill', 1280, 70, 1024, { biomeId: 'minecraft:cherry_grove' });
+  const bMangrove = O.buildCompanyBuilding(st, 'woodco', 6, 4, 'sawmill', 1536, 70, 1024, { biomeId: 'minecraft:mangrove_swamp' });
+  assert(bTaiga.ok && bCherry.ok && bMangrove.ok);
+  assert.equal(bTaiga.building.customProduct, 'minecraft:spruce_log');
+  assert.equal(bCherry.building.customProduct, 'minecraft:cherry_log');
+  assert.equal(bMangrove.building.customProduct, 'minecraft:mangrove_log');
+  assert(O.getBuildingYieldProfile(bCherry.building).items['minecraft:cherry_log'] > 0);
+
+  const swRes = O.setBuildingVariant(st, 'woodco', 4, 4, 'birch');
+  assert(swRes.ok && O.getBuildingYieldProfile(bTaiga.building).items['minecraft:birch_log'] > 0, 'setBuildingVariant updates produced item');
+
+  // 3. Control tablet GUI parity for commands
+  ['lhGuiRenderTrading', 'lhCycleBuildingVariant', 'lh border toggle', 'lh catalog verify',
+   'lh team join', 'lh prologue smoke', 'lh bot status', 'lh voidout status',
+   'lh territory settle', 'lh structure scan', 'lh building repair', 'lh shop sell hand'].forEach(marker => {
+    assert(s30.includes(marker), '30_lh_gui covers command/action: ' + marker);
+  });
+
+  // 4. Linear bot scaling from player companies and player claims
+  const stLin = O.createInitialState();
+  assert.equal(O.maxBotClaimsAllowed(stLin, 10, 0), 4, '0 player companies & 0 claims starts at 4 bot HQ sectors');
+  const pc1 = O.companyCreate(stLin, 'p1', 'pcorp1', 'PCorp1', 1024, 1024).company;
+  pc1.cash = 10000;
+  const d1 = O.getBotScalingDetails(stLin, 20, 0);
+  assert.equal(d1.playerCompanies, 1);
+  assert.equal(d1.playerSectors, 1);
+  assert(d1.maxSectors > 4, '1 player company + 1 HQ linearly expands bot cap (' + d1.maxSectors + ')');
+  assert(O.claimOrCaptureSector(stLin, 'pcorp1', 4, 5, false).ok);
+  assert(O.claimOrCaptureSector(stLin, 'pcorp1', 4, 6, false).ok);
+  const d2 = O.getBotScalingDetails(stLin, 20, 0);
+  assert.equal(d2.playerSectors, 3);
+  assert.equal(d2.maxSectors - d1.maxSectors, 3, 'each +2 player claims adds +3 bot claims linearly (1.5x)');
+  O.companyCreate(stLin, 'p2', 'pcorp2', 'PCorp2', -1024, -1024);
+  const d3 = O.getBotScalingDetails(stLin, 20, 0);
+  assert.equal(d3.playerCompanies, 2);
+  assert(d3.maxSectors > d2.maxSectors, 'adding another player company linearly increases bot cap');
+});
+
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');

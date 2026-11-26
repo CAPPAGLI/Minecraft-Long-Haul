@@ -321,6 +321,10 @@ def main():
             copied_rt = True
 
     # 4. Delta-sync overrides/ (configs, kubejs, heracles quests, defaultconfigs, etc.)
+    SEED_IF_MISSING_OVERRIDES = {
+        'config/xaerominimap.txt',
+        'config/xaeroworldmap.txt',
+    }
     overrides_root = R / 'overrides'
     desired_overrides = set()
     copied_overrides = 0
@@ -333,6 +337,8 @@ def main():
             continue
         desired_overrides.add(rel)
         dst = instance_dir / rel
+        if rel in SEED_IF_MISSING_OVERRIDES and dst.exists():
+            continue
         if dst.exists() and dst.stat().st_size == src.stat().st_size and sha256_file(dst) == sha256_file(src):
             continue
         if not args.dry_run:

@@ -1,0 +1,11 @@
+minimap:true
+displayClaims:true
+claimsBorderOpacity:95
+claimsFillOpacity:40
+chunkGrid:-1
+lockNorth:false
+minimapSize:0
+caveMaps:2
+waypointsScale:1.0
+displayWaypoints:true
+interface:0:36:36:true:false:false:false

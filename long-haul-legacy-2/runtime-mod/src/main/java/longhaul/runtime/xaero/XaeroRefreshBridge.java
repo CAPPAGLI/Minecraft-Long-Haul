@@ -10,8 +10,29 @@ public final class XaeroRefreshBridge {
     private XaeroRefreshBridge() {}
 
     public static void refreshAll() {
-        refreshWorldMap();
-        refreshMinimap();
+        Runnable task = () -> {
+            refreshWorldMap();
+            refreshMinimap();
+        };
+        try {
+            Class<?> mcCls = Class.forName("net.minecraft.client.Minecraft");
+            Object mc = null;
+            try {
+                mc = mcCls.getMethod("m_91087_").invoke(null);
+            } catch (Throwable ignored) {
+                mc = mcCls.getMethod("getInstance").invoke(null);
+            }
+            if (mc != null) {
+                try {
+                    mcCls.getMethod("execute", Runnable.class).invoke(mc, task);
+                    return;
+                } catch (Throwable ignored) {
+                    mcCls.getMethod("m_6937_", Runnable.class).invoke(mc, task);
+                    return;
+                }
+            }
+        } catch (Throwable ignored) {}
+        task.run();
     }
 
     private static void refreshWorldMap() {
@@ -54,10 +75,19 @@ public final class XaeroRefreshBridge {
             if (processor == null) return;
             Object writer = processor.getClass().getMethod("getMinimapWriter").invoke(processor);
             if (writer == null) return;
+            try {
+                writer.getClass().getMethod("setClearCache").invoke(writer);
+            } catch (Throwable ignored) {}
             Object handler = writer.getClass().getMethod("getDimensionHighlightHandler").invoke(writer);
             if (handler != null) {
-                Method m = handler.getClass().getMethod("requestRefresh");
-                m.invoke(handler);
+                try {
+                    Method m = handler.getClass().getMethod("requestRefresh");
+                    m.invoke(handler);
+                } catch (Throwable ignored) {}
+                try {
+                    Method m2 = handler.getClass().getMethod("requestRefresh", int.class, int.class);
+                    m2.invoke(handler, 0, 0);
+                } catch (Throwable ignored) {}
             }
         } catch (Throwable ignored) {}
     }

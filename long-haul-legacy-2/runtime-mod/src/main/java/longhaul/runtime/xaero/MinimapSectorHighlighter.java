@@ -15,6 +15,10 @@ public final class MinimapSectorHighlighter extends ChunkHighlighter {
         super(true);
     }
 
+    public int calculateRegionHash(ResourceKey<Level> dim, int rx, int rz) {
+        return LongHaulXaeroData.calculateRegionHash(dim, rx, rz);
+    }
+
     @Override
     public boolean regionHasHighlights(ResourceKey<Level> dim, int rx, int rz) {
         return LongHaulXaeroData.regionHasHighlights(dim, rx, rz);

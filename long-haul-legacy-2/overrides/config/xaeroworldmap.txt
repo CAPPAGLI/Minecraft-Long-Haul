@@ -1,0 +1,10 @@
+displayClaims:true
+claimsBorderOpacity:95
+claimsFillOpacity:40
+chunkGrid:false
+coordinates:true
+waypoints:true
+minimapWaypointsRenderBelow:false
+showFlowers:true
+lighting:true
+slopes:true
