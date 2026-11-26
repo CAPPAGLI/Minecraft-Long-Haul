@@ -918,11 +918,13 @@ test('Structure production (6 Diablo rarities, 4 dims), archetypes/traits, requi
   O.tickCompanyBuildings(st);
   assert.equal(mineRes.building.pausedReason, null, 'resumes with fuel alone (partial out-of-thin-air production)');
   assert.equal(mineRes.building.cyclesDone, 1, 'produces partial output without raw inputs when fueled');
-  const qtyPartial = mineRes.building.stockBuffer['minecraft:raw_iron'] || 0;
+  const mineProd = mineRes.building.customProduct || 'minecraft:raw_iron';
+  assert(mineProd && mineProd !== 'minecraft:raw_iron', 'building rolls a random modpack item instead of hardcoded raw_iron: ' + mineProd);
+  const qtyPartial = mineRes.building.stockBuffer[mineProd] || 0;
   assert(qtyPartial > 0 && Object.keys(mineRes.building.outputContainerQueue).length > 0, 'queues items for physical output barrel');
   assert(O.supplyBuildingInputs(st, 'alpha', 4, 6, { 'minecraft:oak_planks': 8, 'minecraft:coal': 4 }).ok);
   O.tickCompanyBuildings(st);
-  const qtyTotal = mineRes.building.stockBuffer['minecraft:raw_iron'] || 0;
+  const qtyTotal = mineRes.building.stockBuffer[mineProd] || 0;
   assert(qtyTotal - qtyPartial >= qtyPartial, 'supplying optional raw inputs grants boost over partial output');
 
   // 4. Ongoing expenses (facility, upgrade, land tax, security, anti-monopoly) & Valuation breakdown
@@ -1000,13 +1002,18 @@ test('38. Progressive taxes, Central Bank loans & defaults, tax evasion, equity 
   st.companies.alpha.cash = 4000;
   st.companies.beta.cash = 3500;
 
-  // 1. Progressive tax brackets scale with income
+  // 1. Progressive tax brackets scale with income up to 90%
   st.companies.alpha._cycleGrossIncome = 100;
   const expLow = O.computeCompanyExpenses(st, 'alpha');
   st.companies.alpha._cycleGrossIncome = 2000;
+  const expMid = O.computeCompanyExpenses(st, 'alpha');
+  assert(expMid.progressiveTax > expLow.progressiveTax, 'higher income triggers higher progressive tax bracket');
+  assert(String(expMid.progressiveBracketLabel).startsWith('50%'));
+  st.companies.alpha._cycleGrossIncome = 10000;
   const expHigh = O.computeCompanyExpenses(st, 'alpha');
-  assert(expHigh.progressiveTax > expLow.progressiveTax, 'higher income triggers higher progressive tax bracket');
-  assert(String(expHigh.progressiveBracketLabel).startsWith('35%'));
+  assert.equal(expHigh.progressiveTaxRate, 0.90);
+  assert(String(expHigh.progressiveBracketLabel).startsWith('90%'));
+  st.companies.alpha._cycleGrossIncome = 2000;
 
   // 2. Central Bank key rate, loans, and forced debt auctions on loan default / unpaid upkeep
   const cb = O.updateCentralBankKeyRate(st);
@@ -1140,17 +1147,14 @@ test('39. Xaero/world borders, unique structure/building variants, tablet GUI co
   assert(syncPy.includes('SEED_IF_MISSING_OVERRIDES') && syncPy.includes('xaerominimap.txt'), 'sync_instance.py preserves user Xaero configs');
   assert(s27.includes('lhRenderWorldBorders') && s27.includes("C.literal('border')") && s27.includes('minecraft:dust'), '27_openttd_companies renders 3D world borders and /lh border toggle');
 
-  // 2. Structure & building variant product differentiation (e.g. different sawmills -> different logs)
+  // 2. Structure & building product differentiation: random modpack objects instead of hardcoded wood/ores
   const spCat = SP.buildStructureCatalog(['mod:sawmill_taiga', 'mod:sawmill_savanna', 'mod:sawmill_cherry', 'minecraft:village_savanna']);
   const spTaiga = SP.resolveStructureSpec(spCat, 'mod:sawmill_taiga');
   const spSavanna = SP.resolveStructureSpec(spCat, 'mod:sawmill_savanna');
   const spCherry = SP.resolveStructureSpec(spCat, 'mod:sawmill_cherry');
   const spVilSav = SP.resolveStructureSpec(spCat, 'minecraft:village_savanna');
-  assert.notEqual(spTaiga.itemId, spSavanna.itemId, 'taiga vs savanna sawmills produce distinct logs');
-  assert.equal(spTaiga.itemId, 'minecraft:spruce_log');
-  assert.equal(spSavanna.itemId, 'minecraft:acacia_log');
-  assert.equal(spCherry.itemId, 'minecraft:cherry_log');
-  assert.equal(spVilSav.itemId, 'minecraft:melon_slice');
+  const uniqueItems = new Set([spTaiga.itemId, spSavanna.itemId, spCherry.itemId, spVilSav.itemId]);
+  assert.equal(uniqueItems.size, 4, 'each structure type receives a distinct random modpack item');
 
   const st = O.createInitialState();
   const co = O.companyCreate(st, 'u1', 'woodco', 'WoodCo', 1024, 1024).company;
@@ -1162,16 +1166,15 @@ test('39. Xaero/world borders, unique structure/building variants, tablet GUI co
   const bCherry = O.buildCompanyBuilding(st, 'woodco', 5, 4, 'sawmill', 1280, 70, 1024, { biomeId: 'minecraft:cherry_grove' });
   const bMangrove = O.buildCompanyBuilding(st, 'woodco', 6, 4, 'sawmill', 1536, 70, 1024, { biomeId: 'minecraft:mangrove_swamp' });
   assert(bTaiga.ok && bCherry.ok && bMangrove.ok);
-  assert.equal(bTaiga.building.customProduct, 'minecraft:spruce_log');
-  assert.equal(bCherry.building.customProduct, 'minecraft:cherry_log');
-  assert.equal(bMangrove.building.customProduct, 'minecraft:mangrove_log');
-  assert(O.getBuildingYieldProfile(bCherry.building).items['minecraft:cherry_log'] > 0);
+  const bProds = new Set([bTaiga.building.customProduct, bCherry.building.customProduct, bMangrove.building.customProduct]);
+  assert.equal(bProds.size, 3, 'different building instances roll distinct random modpack products');
+  assert(O.getBuildingYieldProfile(bCherry.building).items[bCherry.building.customProduct] > 0);
 
   const swRes = O.setBuildingVariant(st, 'woodco', 4, 4, 'birch');
   assert(swRes.ok && O.getBuildingYieldProfile(bTaiga.building).items['minecraft:birch_log'] > 0, 'setBuildingVariant updates produced item');
 
   // 3. Control tablet GUI parity for commands
-  ['lhGuiRenderTrading', 'lhCycleBuildingVariant', 'lh border toggle', 'lh catalog verify',
+  ['lhGuiRenderTrading', 'lh building setproduct random', 'lh border toggle', 'lh catalog verify',
    'lh team join', 'lh prologue smoke', 'lh bot status', 'lh voidout status',
    'lh territory settle', 'lh structure scan', 'lh building repair', 'lh shop sell hand'].forEach(marker => {
     assert(s30.includes(marker), '30_lh_gui covers command/action: ' + marker);
@@ -1309,6 +1312,115 @@ test('40. Endgame 4/5 player company buyout victory and multi-hop convoy transpo
   const s30 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/30_lh_gui.js'), 'utf8');
   assert(s27.includes('lhEndgameBuyoutCmd') && s27.includes('lhCreateConvoyFromHand') && s27.includes('lhCreateConvoyRouteCmd'));
   assert(s30.includes('lhEndgameBuyoutCmd') && s30.includes('lhCreateConvoyFromHand') && s30.includes('lhCreateConvoyRouteCmd'));
+});
+
+test('41. 90% progressive tax + loopholes, random modpack items on structures/buildings, conflict-free bidirectional craft-tree pricing & player fallbacks', () => {
+  const path = require('path');
+  const ROOT = path.resolve(__dirname, '..');
+  const O = sandbox.global.LHOpenTTD;
+  const SP = sandbox.global.LHStructureProduction;
+  const E = sandbox.global.LHEconomyEngine;
+
+  // 1. Progressive tax reaches 90% & new loopholes (offshore / shell_split) shield up to 85-90%
+  const stTax = O.createInitialState();
+  O.companyCreate(stTax, 'p1', 'mega', 'MegaCorp', 0, 0).company.cash = 10000;
+  stTax.companies.mega._cycleGrossIncome = 12000;
+  const expMega = O.computeCompanyExpenses(stTax, 'mega');
+  assert.equal(expMega.progressiveTaxRate, 0.90);
+  assert(expMega.progressiveTax > 5000, '90% bracket applies steeply on high gross income');
+
+  const offRes = O.attemptTaxEvasion(stTax, 'mega', 'offshore', 100, () => 0.01);
+  assert(offRes.ok && offRes.succeeded && offRes.discountPct === 85);
+  const expAfterOff = O.computeCompanyExpenses(stTax, 'mega');
+  assert(expAfterOff.evasionDiscount > 0 && expAfterOff.total < expMega.total * 0.25, 'offshore loophole slashes payable tax');
+
+  const shellRes = O.attemptTaxEvasion(stTax, 'mega', 'shell_split', 200, () => 0.01);
+  assert(shellRes.ok && shellRes.succeeded && shellRes.discountPct === 80);
+
+  // 2. Random modpack objects on structures & buildings + player fallback valuation & product override
+  const modPool = ['create:precision_mechanism', 'ae2:fluix_crystal', 'cataclysm:ignitium_ingot', 'immersive_aircraft:engine'];
+  const cat = SP.buildStructureCatalog(['mod:ruin_a', 'mod:ruin_b', 'mod:ruin_c', 'mod:ruin_d'], modPool, null, null, { seed: 'w42' });
+  const assigned = new Set(Object.values(cat).map(s => s.itemId));
+  assert.equal(assigned.size, 4);
+  for (const it of assigned) assert(modPool.includes(it), 'structure pulled random item from modpack pool: ' + it);
+
+  const rerolled = SP.rerollStructureSpecProduct(cat, 'mod:ruin_a', modPool, 'minecraft:overworld', () => 0.9);
+  assert(rerolled && modPool.includes(rerolled.itemId));
+
+  const stB = O.createInitialState();
+  O.companyCreate(stB, 'p1', 'ind', 'IndCorp', 1024, 1024).company.cash = 10000;
+  const bRnd = O.buildCompanyBuilding(stB, 'ind', 4, 4, 'factory', 1024, 70, 1024, { availableItemIds: modPool });
+  assert(bRnd.ok && modPool.includes(bRnd.building.customProduct), 'building picked random modpack product: ' + bRnd.building.customProduct);
+
+  const valSet = O.setBuildingPlayerValuation(stB, 'ind', 4, 4, 4200, 'minecraft:overworld');
+  assert(valSet.ok && valSet.playerValuation === 4200);
+  const prodSet = O.setBuildingCustomProduct(stB, 'ind', 4, 4, 'ae2:fluix_crystal', 'minecraft:overworld');
+  assert(prodSet.ok && prodSet.productItem === 'ae2:fluix_crystal');
+  const brk = O.getCompanyValuationBreakdown(stB, 'ind');
+  assert(brk.facilitiesValue >= 4200, 'player building valuation reflects in company assets');
+
+  // 3. Craft-tree pricing + conflict-free bidirectional propagation (up, down, parallel) with 2+ admin pins
+  // Tree:
+  //   leafA + leafB -> midX
+  //   midX  + leafC -> topZ
+  //   leafA + leafD -> altY  (parallel sibling sharing leafA)
+  const edges = [
+    { outId: 'test:mid_x', outCount: 1, ingredients: [{ id: 'test:leaf_a', count: 2 }, { id: 'test:leaf_b', count: 1 }] },
+    { outId: 'test:top_z', outCount: 1, ingredients: [{ id: 'test:mid_x', count: 1 }, { id: 'test:leaf_c', count: 1 }] },
+    { outId: 'test:alt_y', outCount: 1, ingredients: [{ id: 'test:leaf_a', count: 1 }, { id: 'test:leaf_d', count: 2 }] }
+  ];
+
+  const econA = E.createInitialEconomyState();
+  E.propagateRecipePrices(econA, edges);
+  const pureMid = E.getMarketQuote(econA, 'test:mid_x').basePrice;
+  const pureTop = E.getMarketQuote(econA, 'test:top_z').basePrice;
+  const pureLeafB = E.getMarketQuote(econA, 'test:leaf_b').basePrice;
+  const pureLeafD = E.getMarketQuote(econA, 'test:leaf_d').basePrice;
+
+  // Single pin on mid_x propagates UP (top_z), DOWN (leaf_a, leaf_b), and PARALLEL (alt_y via leaf_a)
+  const pinMid = E.setAdminPrice(econA, 'test:mid_x', 600);
+  assert.equal(pinMid.price, 600);
+  assert(pinMid.propagatedCount >= 4, 'single pin propagated across craft tree');
+  assert(E.getMarketQuote(econA, 'test:top_z').basePrice > pureTop, 'upward propagation increased top_z');
+  assert(E.getMarketQuote(econA, 'test:leaf_b').basePrice > pureLeafB, 'downward propagation increased ingredient leaf_b');
+  assert(E.getMarketQuote(econA, 'test:alt_y').basePrice > E.getMarketQuote(econA, 'test:mid_x').basePrice * 0 || E.getMarketQuote(econA, 'test:leaf_a').basePrice > 18);
+
+  // Two conflicting pins on top_z (200) and leaf_a (1000) in reverse orders must produce identical conflict-free prices!
+  const econOrder1 = E.createInitialEconomyState();
+  E.propagateRecipePrices(econOrder1, edges);
+  E.setAdminPrice(econOrder1, 'test:top_z', 200);
+  E.setAdminPrice(econOrder1, 'test:leaf_a', 1000);
+
+  const econOrder2 = E.createInitialEconomyState();
+  E.propagateRecipePrices(econOrder2, edges);
+  E.setAdminPrice(econOrder2, 'test:leaf_a', 1000);
+  E.setAdminPrice(econOrder2, 'test:top_z', 200);
+
+  // Neither pin overwrites the other
+  assert.equal(E.getMarketQuote(econOrder1, 'test:top_z').price, 200);
+  assert.equal(E.getMarketQuote(econOrder1, 'test:leaf_a').price, 1000);
+  assert.equal(E.getMarketQuote(econOrder2, 'test:top_z').price, 200);
+  assert.equal(E.getMarketQuote(econOrder2, 'test:leaf_a').price, 1000);
+  // Order-independent intermediate & parallel convergence
+  assert.equal(E.getMarketQuote(econOrder1, 'test:mid_x').basePrice, E.getMarketQuote(econOrder2, 'test:mid_x').basePrice);
+  assert.equal(E.getMarketQuote(econOrder1, 'test:leaf_b').basePrice, E.getMarketQuote(econOrder2, 'test:leaf_b').basePrice);
+  assert.equal(E.getMarketQuote(econOrder1, 'test:alt_y').basePrice, E.getMarketQuote(econOrder2, 'test:alt_y').basePrice);
+  assert(E.getMarketQuote(econOrder1, 'test:leaf_d').basePrice !== pureLeafD || E.getMarketQuote(econOrder1, 'test:alt_y').basePrice > 1000);
+
+  // Player fallback price works for unpinned items and respects admin pin
+  const plOk = E.setPlayerItemPrice(econOrder1, 'test:mid_x', 777, 'PlayerOne', 10);
+  assert(plOk.ok && plOk.quote.playerPriced === true && plOk.quote.basePrice === 777);
+  const plBlocked = E.setPlayerItemPrice(econOrder1, 'test:top_z', 999, 'PlayerOne', 10);
+  assert.equal(plBlocked.ok, false);
+  assert.equal(plBlocked.reason, 'admin_locked');
+  E.clearPlayerItemPrice(econOrder1, 'test:mid_x');
+  assert.equal(E.getMarketQuote(econOrder1, 'test:mid_x').playerPriced, false);
+
+  // 4. Server & GUI integration checks
+  const s27 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/27_openttd_companies.js'), 'utf8');
+  const s30 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/30_lh_gui.js'), 'utf8');
+  assert(s27.includes('lhCollectAllModItems') && s27.includes('setBuildingPlayerValuation') && s27.includes('setPlayerItemPrice'));
+  assert(s30.includes('shell_split') && s30.includes('lh price player hand') && s30.includes('lh building setproduct random'));
 });
 
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');

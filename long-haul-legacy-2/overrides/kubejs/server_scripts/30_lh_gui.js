@@ -1407,19 +1407,24 @@ function lhGuiRenderBuildings(gui, server, player, pageArg) {
       }
     });
 
-    var hasVarPool = global.LHOpenTTD.BUILDING_VARIANTS && global.LHOpenTTD.BUILDING_VARIANTS[curBldg.type];
-    if (hasVarPool) {
-      var vKeys = Object.keys(hasVarPool);
-      var vCur = hasVarPool[curBldg.variant] || hasVarPool[vKeys[0]];
-      lhGuiSlot(gui, 1, 2, vCur ? vCur.product : 'minecraft:oak_log', '§e🔄 Сорт: §f' + (vCur ? vCur.name : curBldg.type), [
-        '§fТекущий товар: §a' + (curBldg.customProduct || (vCur ? vCur.product : '-')),
-        '§7Доступно вариантов: §e' + vKeys.length,
-        '§e▶ ЛКМ: переключить сорт продукции (/lh building variant)'
-      ], function (pl) {
-        if (typeof lhCycleBuildingVariant === 'function') lhCycleBuildingVariant(server, pl, false);
-        lhOpenGui(server, pl, 'buildings');
-      });
-    }
+    var curProdIcon = curBldg.productItem || curBldg.customProduct || bSpec.baseProduct || 'minecraft:chest';
+    lhGuiSlot(gui, 1, 2, curProdIcon, '§e🔄 Продукт и Оценка здания', [
+      '§fТекущий товар: §a' + (curBldg.productItem || curBldg.customProduct || bSpec.baseProduct || '-'),
+      '§fОценка строения: §e' + (curBldg.playerValuation ? (curBldg.playerValuation + ' Cr (игрок)') : 'авто (рынок + апгрейды)'),
+      '§e▶ ЛКМ: случайный объект из модов (/lh building setproduct random)',
+      '§b▶ ПКМ: назначить предмет из руки (/lh building setproduct hand)',
+      '§7Своя цена строения: §f/lh building setprice <Cr>'
+    ], function (pl) {
+      if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
+        server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh building setproduct random');
+      }
+      lhOpenGui(server, pl, 'buildings');
+    }, function (pl) {
+      if (server && server.commands && typeof pl.createCommandSourceStack === 'function') {
+        server.commands.performPrefixedCommand(pl.createCommandSourceStack(), 'lh building setproduct hand');
+      }
+      lhOpenGui(server, pl, 'buildings');
+    });
 
     lhGuiSlot(gui, 7, 2, 'minecraft:anvil', '§a🔧 Ремонт объекта (' + intPct + '%)', [
       '§7Восстанавливает целостность и физические блоки.',
@@ -2141,7 +2146,7 @@ function lhGuiRenderBank(gui, server, player) {
       lhOpenGui(server, pl, 'bank');
     });
 
-  lhGuiSlot(gui, 6, 0, 'minecraft:paper', '§6Налоги и Содержание', [
+  lhGuiSlot(gui, 6, 0, 'minecraft:paper', '§6Налоги (прогрессия до 90%)', [
     '§fСкобка прогрессии: §b' + (expBr.progressiveBracketLabel || '5%'),
     '§fПрогрессивный налог: §e' + (expBr.progressiveTax || 0) + ' Cr',
     '§fАнтимонопольный (с акциями): §c' + (expBr.antiMonopolyTax || 0) + ' Cr',
@@ -2150,9 +2155,9 @@ function lhGuiRenderBank(gui, server, player) {
   ]);
 
   lhGuiSlot(gui, 7, 0, 'minecraft:amethyst_shard', '§dУклонение: Подкуп инспектора', [
-    '§7Стоимость: §e80 Cr §7| Риск поимки ~28%',
-    '§7Успех: скидка −35% на налоги, −60 Cr долга.',
-    '§cПровал: штраф +220 Cr и аудит +35% на 3 цикла!',
+    '§7Стоимость: §e~12% налога §7| Шанс ~68% (+склады/биржи)',
+    '§7Успех: скидка −72% на налоги, −30% долга.',
+    '§cПровал: штраф и аудит +35% на 3 цикла!',
     '§e▶ ЛКМ: рискнуть'
   ], function (pl) {
     var ev1 = global.LHOpenTTD.attemptTaxEvasion(st, myComp.id, 'bribe', nowTick);
@@ -2166,9 +2171,9 @@ function lhGuiRenderBank(gui, server, player) {
   });
 
   lhGuiSlot(gui, 8, 0, 'minecraft:writable_book', '§dУклонение: Подделка отчётов', [
-    '§7Стоимость: §e140 Cr §7| Риск поимки ~42%',
-    '§7Успех: скидка −55% на налоги, −140 Cr долга.',
-    '§cПровал: крупный штраф +350 Cr и аудит +35% на 3 цикла!',
+    '§7Стоимость: §e20 Cr §7| Шанс ~48% (+склады/биржи)',
+    '§7Успех: скидка −60% на налоги, −30% долга.',
+    '§cПровал: крупный штраф и аудит +35% на 3 цикла!',
     '§e▶ ЛКМ: рискнуть'
   ], function (pl) {
     var ev2 = global.LHOpenTTD.attemptTaxEvasion(st, myComp.id, 'forge_docs', nowTick);
@@ -2177,6 +2182,36 @@ function lhGuiRenderBank(gui, server, player) {
       lhMsg(pl, ev2.succeeded ? ('§a[Подлог удался] −' + ev2.discountPct + '% налога!') : ('§c[ПРОВАЛ АУДИТА!] Штраф +' + ev2.fine + ' Cr и доп.налог на 3 цикла!'));
     } else {
       lhMsg(pl, '§cНедоступно: ' + ev2.reason);
+    }
+    lhOpenGui(server, pl, 'bank');
+  });
+
+  lhGuiSlot(gui, 7, 1, 'minecraft:ender_chest', '§5Лазейка: Оффшорный вывод', [
+    '§7Стоимость: §e~10% налога §7| Шанс ~62% (+склады/биржи)',
+    '§7Успех: скрывает до §a85% §7налога и списывает 45% долга!',
+    '§e▶ ЛКМ: вывести в оффшор (/lh tax evade offshore)'
+  ], function (pl) {
+    var ev3 = global.LHOpenTTD.attemptTaxEvasion(st, myComp.id, 'offshore', nowTick);
+    if (ev3.ok) {
+      lhOttdSave(server);
+      lhMsg(pl, ev3.succeeded ? ('§a[Оффшор сработал] −' + ev3.discountPct + '% налога!') : ('§c[ПРОВАЛ АУДИТА!] Штраф +' + ev3.fine + ' Cr!'));
+    } else {
+      lhMsg(pl, '§cНедоступно: ' + ev3.reason);
+    }
+    lhOpenGui(server, pl, 'bank');
+  });
+
+  lhGuiSlot(gui, 8, 1, 'minecraft:chest_minecart', '§5Лазейка: Дробление оборота', [
+    '§7Стоимость: §e35 Cr §7| Шанс ~52% (+склады/биржи)',
+    '§7Успех: дробит прибыль и скрывает §a80% §7налога!',
+    '§e▶ ЛКМ: раздробить (/lh tax evade shell_split)'
+  ], function (pl) {
+    var ev4 = global.LHOpenTTD.attemptTaxEvasion(st, myComp.id, 'shell_split', nowTick);
+    if (ev4.ok) {
+      lhOttdSave(server);
+      lhMsg(pl, ev4.succeeded ? ('§a[Дробление сработало] −' + ev4.discountPct + '% налога!') : ('§c[ПРОВАЛ АУДИТА!] Штраф +' + ev4.fine + ' Cr!'));
+    } else {
+      lhMsg(pl, '§cНедоступно: ' + ev4.reason);
     }
     lhOpenGui(server, pl, 'bank');
   });
@@ -2364,6 +2399,28 @@ function lhGuiRenderTrading(gui, server, player) {
     lhGuiDeferAction(server, pl, function (p2) {
       if (server && server.commands && typeof p2.createCommandSourceStack === 'function') {
         server.commands.performPrefixedCommand(p2.createCommandSourceStack(), 'lh shop sell hand ' + handQty + ' ' + Math.max(1, handQuote.price));
+      }
+    }, 'trading');
+  });
+
+  lhGuiSlot(gui, 2, 0, 'minecraft:crafting_table', '§b⚖ Древо крафтов и Цена игрока', [
+    '§fКрафт-база: §e' + (handQuote.recipeBasePrice || handQuote.basePrice) + ' Cr',
+    '§fИсточник: ' + (handQuote.adminLocked ? '§bAdmin Pin (связан с крафтами)' : (handQuote.playerPriced ? ('§aОценка игрока (' + handQuote.playerPriceBy + ')') : '§7Авто-расчёт по дереву крафтов')),
+    '§e▶ ЛКМ: задать цену игрока +25% (/lh price player hand)',
+    '§b▶ ПКМ: сбросить к дереву крафтов (/lh price playerclear hand)',
+    '§7Админ-пин: §f/lh price set hand <Cr>'
+  ], function (pl) {
+    if (!hasHand) { lhMsg(pl, '§eВозьмите предмет в правую руку.'); return; }
+    lhGuiDeferAction(server, pl, function (p2) {
+      if (server && server.commands && typeof p2.createCommandSourceStack === 'function') {
+        server.commands.performPrefixedCommand(p2.createCommandSourceStack(), 'lh price player hand ' + Math.max(1, Math.round(handQuote.price * 1.25)));
+      }
+    }, 'trading');
+  }, function (pl) {
+    if (!hasHand) { lhMsg(pl, '§eВозьмите предмет в правую руку.'); return; }
+    lhGuiDeferAction(server, pl, function (p2) {
+      if (server && server.commands && typeof p2.createCommandSourceStack === 'function') {
+        server.commands.performPrefixedCommand(p2.createCommandSourceStack(), 'lh price playerclear hand');
       }
     }, 'trading');
   });

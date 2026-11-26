@@ -72,7 +72,7 @@ function lhEconRead(server) {
   var raw = server.persistentData.getString('longhaul_economy_v1');
   LHEconState = raw
     ? JSON.parse(String(raw))
-    : (global.LHEconomyEngine ? global.LHEconomyEngine.createInitialEconomyState() : { items: {}, adminOverrides: {}, recipePrices: {}, listings: [], pickupOrders: [] });
+    : (global.LHEconomyEngine ? global.LHEconomyEngine.createInitialEconomyState() : { items: {}, adminOverrides: {}, playerPrices: {}, recipePrices: {}, listings: [], pickupOrders: [] });
   if (global.LHEconomyEngine) global.LHEconomyEngine.ensureEconomyState(LHEconState);
   return LHEconState;
 }
@@ -82,6 +82,7 @@ function lhEconSave(server) {
     var persist = {
       items: LHEconState.items || {},
       adminOverrides: LHEconState.adminOverrides || {},
+      playerPrices: LHEconState.playerPrices || {},
       recipePrices: {},
       listings: LHEconState.listings || [],
       pickupOrders: LHEconState.pickupOrders || [],
@@ -104,6 +105,44 @@ function lhEconSave(server) {
     }
     server.persistentData.putString('longhaul_economy_v1', encoded);
   }
+}
+
+var LHCachedModItemIds = null;
+
+function lhCollectAllModItems(server) {
+  if (LHCachedModItemIds && LHCachedModItemIds.length > 50) return LHCachedModItemIds;
+  var list = [];
+  var seen = {};
+  function pushId(rawId) {
+    var s = String(rawId || '');
+    if (!s || seen[s]) return;
+    if (global.LHStructureProduction && !global.LHStructureProduction.isEligibleResourceItem(s)) return;
+    seen[s] = true;
+    list.push(s);
+  }
+  try {
+    var BuiltInRegistries = Java.loadClass('net.minecraft.core.registries.BuiltInRegistries');
+    var keyIt = BuiltInRegistries.ITEM.keySet().iterator();
+    while (keyIt.hasNext()) {
+      pushId(String(keyIt.next()));
+    }
+  } catch (eReg) {
+    try {
+      if (typeof Item !== 'undefined' && typeof Item.getList === 'function') {
+        var il = Item.getList();
+        for (var i = 0; i < il.size(); i++) {
+          pushId(String(il.get(i).id || ''));
+        }
+      }
+    } catch (eIt) {}
+  }
+  if (list.length > 0 && global.LHStructureProduction && typeof global.LHStructureProduction.setGlobalItemPool === 'function') {
+    global.LHStructureProduction.setGlobalItemPool(list);
+    LHCachedModItemIds = global.LHStructureProduction.getGlobalItemPool();
+  } else if (global.LHStructureProduction && typeof global.LHStructureProduction.getGlobalItemPool === 'function') {
+    LHCachedModItemIds = global.LHStructureProduction.getGlobalItemPool();
+  }
+  return LHCachedModItemIds || [];
 }
 
 var LHLastRecipeGraphDebug = { seen: 0, hasOut: 0, hasIngs: 0, edges: 0, firstErr: '', sample: '' };
@@ -545,6 +584,7 @@ function lhScanNearbyStructuresForSector(server, player, st) {
   } catch (eSm) {}
 
   if (foundIds.length > 0) {
+    lhCollectAllModItems(server);
     global.LHOpenTTD.recordSectorStructures(st, sc.sx, sc.sz, foundIds, dim);
     lhOttdSave(server);
   }
@@ -2127,7 +2167,8 @@ function lhBuildFacilityCmd(server, player, bType, sx, sz, dryRun) {
   var dim = (player.level && player.level.dimension) ? String(player.level.dimension) : 'minecraft:overworld';
   var sc = (sx !== undefined && sz !== undefined) ? { sx: sx, sz: sz } : global.LHOpenTTD.sectorCoords(player.x, player.z);
   var biomeId = lhDetectBiomeId(player);
-  var res = global.LHOpenTTD.buildCompanyBuilding(st, comp.id, sc.sx, sc.sz, bType, player.x, player.y, player.z, { dimension: dim, biomeId: biomeId });
+  var modPool = lhCollectAllModItems(server);
+  var res = global.LHOpenTTD.buildCompanyBuilding(st, comp.id, sc.sx, sc.sz, bType, player.x, player.y, player.z, { dimension: dim, biomeId: biomeId, availableItemIds: modPool });
   if (!res.ok) {
     if (!dryRun) {
       if (res.reason === 'not_your_sector') lhMsg(player, '§cСначала захватите сектор (' + sc.sx + ', ' + sc.sz + ') своей компанией!');
@@ -2170,7 +2211,8 @@ function lhConvertStructureCmd(server, player, structureId, sx, sz, dryRun) {
     }
     structureId = list[0].structureId;
   }
-  var res = global.LHOpenTTD.convertStructureToFacility(st, comp.id, sc.sx, sc.sz, structureId, player.x, player.y, player.z, { dimension: dim });
+  var modPool = lhCollectAllModItems(server);
+  var res = global.LHOpenTTD.convertStructureToFacility(st, comp.id, sc.sx, sc.sz, structureId, player.x, player.y, player.z, { dimension: dim, availableItemIds: modPool });
   if (!res.ok) {
     if (!dryRun) lhMsg(player, '§cНе удалось освоить структуру: ' + res.reason + (res.cost ? (' (нужно ' + res.cost + ' Cr)') : ''));
     return res;
@@ -3670,6 +3712,38 @@ ServerEvents.commandRegistry(function (event) {
     lhMsg(p, '§a[Специализация] «' + res.variant.name + '» теперь производит §e' + res.variant.product + '§f!');
     return 1;
   })));
+  bldgCmd.then(C.literal('setprice').then(C.argument('value', LHOTTDStringArg.word()).executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
+    var comp = lhGetPlayerCompany(server, p);
+    if (!comp) { lhMsg(p, 'Сначала создайте компанию.'); return 0; }
+    var dim = (p.level && p.level.dimension) ? String(p.level.dimension) : 'minecraft:overworld';
+    var sc = global.LHOpenTTD.sectorCoords(p.x, p.z);
+    var val = parseInt(LHOTTDStringArg.getString(ctx, 'value'), 10);
+    if (isNaN(val) || val < 0) { lhMsg(p, '§cУкажите цену >= 0 (0 сбрасывает пользовательскую оценку).'); return 0; }
+    var res = global.LHOpenTTD.setBuildingPlayerValuation(st, comp.id, sc.sx, sc.sz, val, dim);
+    if (!res.ok) { lhMsg(p, '§cВ этом секторе нет вашего объекта.'); return 0; }
+    lhOttdSave(server);
+    lhMsg(p, res.cleared
+      ? '§e[Оценка здания] Пользовательская цена сброшена к системной.'
+      : ('§a[Оценка здания] Ваша оценка строения: §e' + res.playerValuation + ' Cr§f.'));
+    return 1;
+  })));
+  bldgCmd.then(C.literal('setproduct').then(C.argument('item', LHOTTDStringArg.word()).executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server);
+    var comp = lhGetPlayerCompany(server, p);
+    if (!comp) { lhMsg(p, 'Сначала создайте компанию.'); return 0; }
+    var dim = (p.level && p.level.dimension) ? String(p.level.dimension) : 'minecraft:overworld';
+    var sc = global.LHOpenTTD.sectorCoords(p.x, p.z);
+    var arg = String(LHOTTDStringArg.getString(ctx, 'item') || 'random');
+    if (arg === 'hand' && p.mainHandItem && !p.mainHandItem.empty) arg = String(p.mainHandItem.id);
+    var modPool = lhCollectAllModItems(server);
+    var res = global.LHOpenTTD.setBuildingCustomProduct(st, comp.id, sc.sx, sc.sz, arg, dim, modPool);
+    if (!res.ok) { lhMsg(p, '§cНе удалось сменить продукт: ' + res.reason); return 0; }
+    lhOttdSave(server);
+    lhSyncXaeroTerritories(server, p);
+    lhMsg(p, '§a[Производство] Здание в секторе (' + sc.sx + ',' + sc.sz + ') теперь выпускает §e' + res.productItem + '§f!');
+    return 1;
+  })));
   root.then(bldgCmd);
 
   var borderCmd = C.literal('border');
@@ -3787,10 +3861,11 @@ ServerEvents.commandRegistry(function (event) {
     var econ = lhEconRead(server);
     var itemArg = lhCmdItemArg(ctx, p);
     var q = global.LHEconomyEngine.getMarketQuote(econ, itemArg);
-    lhMsg(p, '§6[Биржа] §f' + q.itemId + ' [' + q.kind + '] | База: ' + q.basePrice + ' Cr | Рынок: §e' + q.price +
+    lhMsg(p, '§6[Биржа] §f' + q.itemId + ' [' + q.kind + '] | Крафт-база: ' + (q.recipeBasePrice || q.basePrice) + ' Cr | База: ' + q.basePrice + ' Cr | Рынок: §e' + q.price +
       ' Cr §7(×' + q.multiplier + ', спрос=' + q.demand + ', предл=' + q.supply +
       (q.crashed ? (' §c[ОБВАЛ ' + q.crashTicks + ' цикл.]') : '') +
-      (q.adminLocked ? ' §b[ADMIN FIX]' : '') + ')');
+      (q.adminLocked ? ' §b[ADMIN PIN]' : '') +
+      (q.playerPriced ? (' §a[ИГРОК: ' + q.playerPriceBy + ']') : '') + ')');
     return 1;
   })));
   priceCmd.then(C.literal('set').requires(function (s) { return s.hasPermission(2); })
@@ -3803,9 +3878,40 @@ ServerEvents.commandRegistry(function (event) {
         var econ = lhEconRead(server);
         var q = global.LHEconomyEngine.setAdminPrice(econ, lhCmdItemArg(ctx, p), val);
         lhEconSave(server);
-        lhMsg(p, '§b[Admin Price] §fЦена ' + q.itemId + ' зафиксирована на §e' + q.price + ' Cr.');
+        lhMsg(p, '§b[Admin Pin] §fЦена ' + q.itemId + ' зафиксирована на §e' + q.price + ' Cr§f. По дереву крафтов (вверх/вниз/параллельно) бесконфликтно обновлено: §e' + (q.propagatedCount || 0) + ' §fпредм.');
         return 1;
       }))));
+  priceCmd.then(C.literal('player')
+    .then(C.argument('item', Args.RESOURCE_LOCATION.create(event))
+      .then(C.argument('value', LHOTTDStringArg.word()).executes(function (ctx) {
+        var server = ctx.source.server, p = ctx.source.playerOrException;
+        if (!global.LHEconomyEngine) return 0;
+        var val = parseInt(LHOTTDStringArg.getString(ctx, 'value'), 10);
+        if (!(val > 0)) { lhMsg(p, '§cУкажите цену > 0.'); return 0; }
+        var econ = lhEconRead(server);
+        var itemArg = lhCmdItemArg(ctx, p);
+        var uname = p.username || 'player';
+        var res = global.LHEconomyEngine.setPlayerItemPrice(econ, itemArg, val, uname, LHOTTDTick);
+        if (!res.ok) {
+          lhMsg(p, res.reason === 'admin_locked'
+            ? ('§cПредмет ' + itemArg + ' закреплён админом (' + res.quote.price + ' Cr).')
+            : ('§cОшибка установки цены: ' + res.reason));
+          return 0;
+        }
+        lhEconSave(server);
+        lhMsg(p, '§a[Цена игрока] §fДля ' + itemArg + ' установлена запасная оценка §e' + res.quote.price + ' Cr§f (древо крафтов: ' + res.quote.recipeBasePrice + ' Cr).');
+        return 1;
+      }))));
+  priceCmd.then(C.literal('playerclear')
+    .then(C.argument('item', Args.RESOURCE_LOCATION.create(event)).executes(function (ctx) {
+      var server = ctx.source.server, p = ctx.source.playerOrException;
+      if (!global.LHEconomyEngine) return 0;
+      var econ = lhEconRead(server);
+      var res = global.LHEconomyEngine.clearPlayerItemPrice(econ, lhCmdItemArg(ctx, p));
+      lhEconSave(server);
+      lhMsg(p, '§e[Цена игрока] §fСброшена для ' + res.quote.itemId + ', текущая цена по крафт-дереву: ' + res.quote.price + ' Cr.');
+      return 1;
+    })));
   priceCmd.then(C.literal('bounds').requires(function (s) { return s.hasPermission(2); })
     .then(C.argument('item', Args.RESOURCE_LOCATION.create(event))
       .then(C.argument('min', LHOTTDStringArg.word())
@@ -3828,7 +3934,7 @@ ServerEvents.commandRegistry(function (event) {
       var econ = lhEconRead(server);
       var q = global.LHEconomyEngine.clearAdminPrice(econ, lhCmdItemArg(ctx, p));
       lhEconSave(server);
-      lhMsg(p, '§b[Admin Price] §fСброшено для ' + q.itemId + ', текущая рыночная: ' + q.price + ' Cr.');
+      lhMsg(p, '§b[Admin Price] §fПин снят для ' + q.itemId + ', цена по дереву крафтов: ' + q.price + ' Cr (пересчитано: ' + (q.propagatedCount || 0) + ').');
       return 1;
     })));
   priceCmd.then(C.literal('crash').requires(function (s) { return s.hasPermission(2); })
@@ -4453,6 +4559,7 @@ ServerEvents.commandRegistry(function (event) {
 
 ServerEvents.loaded(function (event) {
   lhOttdRead(event.server);
+  lhCollectAllModItems(event.server);
   lhRefreshRecipeEconomyGraph(event.server);
-  console.info('[LH] OpenTTD Companies, Dynamic Economy, Physical Buildings, Facility Shops & AI Bots loaded.');
+  console.info('[LH] OpenTTD Companies, Dynamic Economy, Mod Item Pool, Physical Buildings, Facility Shops & AI Bots loaded.');
 });

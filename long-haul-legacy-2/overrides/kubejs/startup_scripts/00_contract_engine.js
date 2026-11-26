@@ -957,10 +957,117 @@ global.LHStructureProduction = (function () {
     };
   }
 
-  function buildStructureCatalog(structureIds, availableItemIds, existingCatalog, structureDimMap) {
+  var MODPACK_RANDOM_ITEM_POOL = [
+    'create:andesite_alloy', 'create:brass_ingot', 'create:precision_mechanism', 'create:electron_tube',
+    'create:sturdy_sheet', 'create:belt_connector', 'create:cogwheel', 'create:propeller',
+    'create:whisk', 'create:blaze_cake', 'create:chromatic_compound', 'create:experience_nugget',
+    'immersiveengineering:ingot_steel', 'immersiveengineering:component_steel', 'immersiveengineering:circuit_board',
+    'immersiveengineering:wire_copper', 'immersiveengineering:coil_lv', 'immersiveengineering:plate_aluminum',
+    'ae2:certus_quartz_crystal', 'ae2:fluix_crystal', 'ae2:silicon', 'ae2:calculation_processor',
+    'ae2:engineering_processor', 'ae2:logic_processor', 'ae2:annihilation_core', 'ae2:formation_core',
+    'bigreactors:yellorium_ingot', 'bigreactors:cyanite_ingot', 'bigreactors:graphite_ingot', 'bigreactors:basic_reactorcasing',
+    'electrodynamics:ingotsteel', 'electrodynamics:wirecopper', 'electrodynamics:circuitbasic', 'electrodynamics:motor',
+    'nuclearcraft:uranium_238', 'nuclearcraft:thorium_ingot', 'nuclearcraft:tough_alloy_ingot', 'nuclearcraft:basic_plating',
+    'pneumaticcraft:ingot_iron_compressed', 'pneumaticcraft:plastic', 'pneumaticcraft:printed_circuit_board', 'pneumaticcraft:turbine_rotor',
+    'alexscaves:amber_curiosity', 'alexscaves:abyssmarine', 'alexscaves:uranium', 'alexscaves:polymer_plate',
+    'alexscaves:scarlet_neodymium_ingot', 'alexscaves:azure_neodymium_ingot', 'alexscaves:moth_dust', 'alexscaves:bioluminesscence',
+    'alexsmobs:ambergris', 'alexsmobs:bone_serpent_tooth', 'alexsmobs:shark_tooth', 'alexsmobs:gazelle_horn',
+    'alexsmobs:komodo_spit_bottle', 'alexsmobs:mimicream', 'alexsmobs:cosmic_cod', 'alexsmobs:void_worm_eye',
+    'aquaculture:algae', 'aquaculture:neptunium_ingot', 'aquaculture:tin_can', 'aquaculture:treasure_chest',
+    'aquamirae:abyssal_amethyst', 'aquamirae:esca', 'aquamirae:fin', 'aquamirae:ship_graveyard_echo',
+    'automobility:automobile_engine', 'automobility:automobile_wheel', 'automobility:dash_panel', 'automobility:auto_mechanic_table',
+    'immersive_aircraft:engine', 'immersive_aircraft:boiler', 'immersive_aircraft:sail', 'immersive_aircraft:hull',
+    'smallships:sail', 'smallships:cannon', 'smallships:cannon_ball',
+    'cataclysm:ancient_metal_ingot', 'cataclysm:black_steel_ingot', 'cataclysm:ignitium_ingot', 'cataclysm:cursium_ingot',
+    'farmersdelight:rice', 'farmersdelight:tomato', 'farmersdelight:onion', 'farmersdelight:canvas',
+    'brewinandchewin:beer', 'brewinandchewin:cocoa_fudge', 'brewinandchewin:kimchi', 'brewinandchewin:jerky',
+    'biomesoplenty:rose_quartz_chunk', 'biomesoplenty:glowshroom', 'biomesoplenty:barley', 'biomesoplenty:brimstone',
+    'longhaul:machine_parts', 'longhaul:ore_concentrate', 'longhaul:technical_oil',
+    'longhaul:technical_glass', 'longhaul:refractory_mix', 'longhaul:treated_timber', 'longhaul:marine_reagent'
+  ];
+
+  var GLOBAL_MOD_ITEM_POOL = [];
+
+  function setGlobalItemPool(items) {
+    var seen = {};
+    var out = [];
+    for (var i = 0; i < (items || []).length; i++) {
+      var id = String(items[i] || '');
+      if (!seen[id] && isEligibleResourceItem(id)) {
+        seen[id] = true;
+        out.push(id);
+      }
+    }
+    GLOBAL_MOD_ITEM_POOL = out;
+    return GLOBAL_MOD_ITEM_POOL.length;
+  }
+
+  function getGlobalItemPool() {
+    if (GLOBAL_MOD_ITEM_POOL.length > 0) return GLOBAL_MOD_ITEM_POOL.slice();
+    return MODPACK_RANDOM_ITEM_POOL.slice();
+  }
+
+  function buildCombinedRandomPool(availableItemIds) {
+    var seen = {};
+    var pool = [];
+    if (availableItemIds && availableItemIds.length > 0) {
+      for (var i = 0; i < availableItemIds.length; i++) {
+        var id = String(availableItemIds[i] || '');
+        if (!seen[id] && isEligibleResourceItem(id)) {
+          seen[id] = true;
+          pool.push(id);
+        }
+      }
+      if (pool.length > 0) return pool;
+    }
+    var sources = [GLOBAL_MOD_ITEM_POOL, MODPACK_RANDOM_ITEM_POOL];
+    for (var s = 0; s < sources.length; s++) {
+      var arr = sources[s];
+      if (!arr || !arr.length) continue;
+      for (var j = 0; j < arr.length; j++) {
+        var id2 = String(arr[j] || '');
+        if (!seen[id2] && isEligibleResourceItem(id2)) {
+          seen[id2] = true;
+          pool.push(id2);
+        }
+      }
+      if (s === 0 && pool.length >= 24) break;
+    }
+    return pool;
+  }
+
+  function pickRandomItemFromPool(seedKey, availableItemIds, usedItems, rngFn) {
+    var pool = buildCombinedRandomPool(availableItemIds);
+    if (!pool.length) return 'longhaul:machine_parts';
+    var len = pool.length;
+    var startIdx = typeof rngFn === 'function'
+      ? Math.floor(Math.max(0, Math.min(0.999999, Number(rngFn()))) * len)
+      : (simpleHash(String(seedKey || 'rnd')) % len);
+    var stride = 1;
+    if (len > 7) {
+      var stepCand = (simpleHash(String(seedKey || 'rnd') + ':stride') % Math.max(2, len - 1)) + 1;
+      // Find coprime stride so full pool is visited
+      while (stepCand > 1) {
+        var a = stepCand, b = len;
+        while (b) { var t = b; b = a % b; a = t; }
+        if (a === 1) { stride = stepCand; break; }
+        stepCand--;
+      }
+    }
+    if (usedItems) {
+      for (var i = 0; i < len; i++) {
+        var cand = pool[(startIdx + i * stride) % len];
+        if (!usedItems[cand]) return cand;
+      }
+    }
+    return pool[startIdx % len];
+  }
+
+  function buildStructureCatalog(structureIds, availableItemIds, existingCatalog, structureDimMap, opts) {
     var catalog = {};
     var usedItems = {};
     var dimMap = structureDimMap || {};
+    var o = opts || {};
     var sortedIds = (structureIds || []).map(String).filter(function (s) { return s.length > 0; });
     sortedIds.sort();
 
@@ -976,57 +1083,18 @@ global.LHStructureProduction = (function () {
       });
     }
 
-    var fallbackPool = [];
-    if (availableItemIds && availableItemIds.length) {
-      for (var fi = 0; fi < availableItemIds.length; fi++) {
-        var cand = String(availableItemIds[fi]);
-        if (isEligibleResourceItem(cand)) fallbackPool.push(cand);
-      }
-      fallbackPool.sort();
-    }
-    var allCuratedPool = [];
-    Object.keys(CATEGORY_POOLS).forEach(function (ck) {
-      CATEGORY_POOLS[ck].forEach(function (it) {
-        if (allCuratedPool.indexOf(it) === -1) allCuratedPool.push(it);
-      });
-    });
-
     for (var i = 0; i < sortedIds.length; i++) {
       var sid = sortedIds[i];
       if (catalog[sid]) continue;
       var theme = detectStructureTheme(sid);
-      var chosen = null;
-      if (theme.preferred && !usedItems[theme.preferred]) chosen = theme.preferred;
-      if (!chosen) {
-        var catPool = CATEGORY_POOLS[theme.category] || CATEGORY_POOLS.loot;
-        var h = simpleHash(sid);
-        for (var p = 0; p < catPool.length; p++) {
-          var cItem = catPool[(h + p) % catPool.length];
-          if (!usedItems[cItem]) { chosen = cItem; break; }
-        }
-      }
-      if (!chosen) {
-        var h2 = simpleHash(sid + ':cur');
-        for (var q = 0; q < allCuratedPool.length; q++) {
-          var aItem = allCuratedPool[(h2 + q) % allCuratedPool.length];
-          if (!usedItems[aItem]) { chosen = aItem; break; }
-        }
-      }
-      if (!chosen && fallbackPool.length > 0) {
-        var h3 = simpleHash(sid + ':fb');
-        for (var f = 0; f < fallbackPool.length; f++) {
-          var fItem = fallbackPool[(h3 + f) % fallbackPool.length];
-          if (!usedItems[fItem]) { chosen = fItem; break; }
-        }
-      }
-      if (!chosen) chosen = 'minecraft:paper';
+      var chosen = pickRandomItemFromPool(sid + ':' + (o.seed || 'modpack'), availableItemIds, usedItems, o.rng);
       usedItems[chosen] = sid;
       catalog[sid] = makeSpec(sid, chosen, theme, dimMap[sid] || null);
     }
     return catalog;
   }
 
-  function resolveStructureSpec(catalog, structureId, availableItemIds, liveDimension) {
+  function resolveStructureSpec(catalog, structureId, availableItemIds, liveDimension, opts) {
     var sid = String(structureId || '');
     if (!sid) return null;
     if (catalog && catalog[sid]) {
@@ -1041,26 +1109,25 @@ global.LHStructureProduction = (function () {
         if (catalog[k] && catalog[k].itemId) usedItems[catalog[k].itemId] = k;
       });
     }
+    var o = opts || {};
     var theme = detectStructureTheme(sid);
-    var catPool = CATEGORY_POOLS[theme.category] || CATEGORY_POOLS.loot;
-    var h = simpleHash(sid);
-    var chosen = null;
-    if (theme.preferred && !usedItems[theme.preferred]) {
-      chosen = theme.preferred;
+    var chosen = pickRandomItemFromPool(sid + ':' + (o.seed || 'modpack'), availableItemIds, usedItems, o.rng);
+    var spec = makeSpec(sid, chosen, theme, liveDimension || null);
+    if (catalog) catalog[sid] = spec;
+    return spec;
+  }
+
+  function rerollStructureSpecProduct(catalog, structureId, availableItemIds, liveDimension, rngFn) {
+    var sid = String(structureId || '');
+    if (!sid) return null;
+    var usedItems = {};
+    if (catalog) {
+      Object.keys(catalog).forEach(function (k) {
+        if (k !== sid && catalog[k] && catalog[k].itemId) usedItems[catalog[k].itemId] = k;
+      });
     }
-    if (!chosen) {
-      for (var i = 0; i < catPool.length; i++) {
-        var cand = catPool[(h + i) % catPool.length];
-        if (!usedItems[cand]) { chosen = cand; break; }
-      }
-    }
-    if (!chosen && availableItemIds && availableItemIds.length) {
-      for (var j = 0; j < availableItemIds.length; j++) {
-        var fb = String(availableItemIds[(h + j) % availableItemIds.length]);
-        if (isEligibleResourceItem(fb) && !usedItems[fb]) { chosen = fb; break; }
-      }
-    }
-    if (!chosen) chosen = catPool[h % catPool.length] || 'minecraft:iron_ingot';
+    var theme = detectStructureTheme(sid);
+    var chosen = pickRandomItemFromPool(sid + ':reroll:' + Math.random(), availableItemIds, usedItems, rngFn || Math.random);
     var spec = makeSpec(sid, chosen, theme, liveDimension || null);
     if (catalog) catalog[sid] = spec;
     return spec;
@@ -1102,9 +1169,13 @@ global.LHStructureProduction = (function () {
   return {
     CATEGORY_POOLS: CATEGORY_POOLS,
     CATEGORY_META: CATEGORY_META,
+    MODPACK_RANDOM_ITEM_POOL: MODPACK_RANDOM_ITEM_POOL,
     STRUCTURE_RARITIES: STRUCTURE_RARITIES,
     STRUCTURE_DIMENSIONS: STRUCTURE_DIMENSIONS,
     isEligibleResourceItem: isEligibleResourceItem,
+    setGlobalItemPool: setGlobalItemPool,
+    getGlobalItemPool: getGlobalItemPool,
+    pickRandomItemFromPool: pickRandomItemFromPool,
     formatStructureName: formatStructureName,
     normalizeDimension: normalizeDimension,
     detectStructureDimension: detectStructureDimension,
@@ -1112,6 +1183,7 @@ global.LHStructureProduction = (function () {
     detectStructureTheme: detectStructureTheme,
     buildStructureCatalog: buildStructureCatalog,
     resolveStructureSpec: resolveStructureSpec,
+    rerollStructureSpecProduct: rerollStructureSpecProduct,
     groupCatalogByDimension: groupCatalogByDimension,
     filterCatalog: filterCatalog
   };
@@ -2306,9 +2378,11 @@ global.LHOpenTTD = (function () {
 
   var PROGRESSIVE_TAX_BRACKETS = [
     { upTo: 200, rate: 0.05, label: '5% (Стартовая)' },
-    { upTo: 600, rate: 0.12, label: '12% (Средняя)' },
-    { upTo: 1500, rate: 0.22, label: '22% (Высокая)' },
-    { upTo: 1e12, rate: 0.35, label: '35% (Корпоративная)' }
+    { upTo: 600, rate: 0.15, label: '15% (Малый бизнес)' },
+    { upTo: 1500, rate: 0.30, label: '30% (Средний)' },
+    { upTo: 3500, rate: 0.50, label: '50% (Крупный)' },
+    { upTo: 7000, rate: 0.72, label: '72% (Корпоративный)' },
+    { upTo: 1e12, rate: 0.90, label: '90% (Сверхприбыль)' }
   ];
 
   var FUEL_EQUIVALENTS = {
@@ -3077,6 +3151,69 @@ global.LHOpenTTD = (function () {
     return { ok: true, building: b, variant: v };
   }
 
+  var RANDOM_PRODUCT_BUILDING_TYPES = {
+    mine_shaft: true,
+    oil_rig: true,
+    refinery: true,
+    sawmill: true,
+    quarry: true,
+    agro_complex: true,
+    factory: true
+  };
+
+  function collectUsedBuildingProducts(state) {
+    var used = {};
+    Object.keys((state && state.buildings) || {}).forEach(function (bk) {
+      var b = state.buildings[bk];
+      if (!b) return;
+      var p = b.productItem || b.customProduct;
+      if (p) used[p] = bk;
+    });
+    return used;
+  }
+
+  function setBuildingCustomProduct(state, cid, sx, sz, itemIdOrRandom, dimension, availableItemIds, rngFn) {
+    ensureDiplomacyState(state);
+    var b = getSectorBuilding(state, sx, sz, dimension);
+    if (!b || (cid && b.owner !== cid)) return { ok: false, reason: 'not_found' };
+    var chosen = null;
+    if (!itemIdOrRandom || String(itemIdOrRandom).toLowerCase() === 'random') {
+      if (global.LHStructureProduction && typeof global.LHStructureProduction.pickRandomItemFromPool === 'function') {
+        var used = collectUsedBuildingProducts(state);
+        chosen = global.LHStructureProduction.pickRandomItemFromPool(
+          (b.structureId || b.type) + ':' + b.id + ':' + (b.cyclesDone || 0) + ':' + Math.random(),
+          availableItemIds || null,
+          used,
+          rngFn || Math.random
+        );
+      }
+      if (!chosen) chosen = 'longhaul:machine_parts';
+    } else {
+      chosen = String(itemIdOrRandom);
+      if (global.LHStructureProduction && !global.LHStructureProduction.isEligibleResourceItem(chosen)) {
+        return { ok: false, reason: 'ineligible_item' };
+      }
+    }
+    b.customProduct = chosen;
+    if (b.type === 'structure_facility') b.productItem = chosen;
+    b.variant = 'custom';
+    b.variantName = 'Выпуск: ' + chosen;
+    return { ok: true, building: b, productItem: chosen };
+  }
+
+  function setBuildingPlayerValuation(state, cid, sx, sz, customPrice, dimension) {
+    ensureDiplomacyState(state);
+    var b = getSectorBuilding(state, sx, sz, dimension);
+    if (!b || (cid && b.owner !== cid)) return { ok: false, reason: 'not_found' };
+    var p = Number(customPrice);
+    if (isNaN(p) || p <= 0) {
+      delete b.playerValuation;
+      return { ok: true, cleared: true, building: b, playerValuation: null };
+    }
+    b.playerValuation = Math.max(10, Math.min(10000000, Math.round(p)));
+    return { ok: true, cleared: false, building: b, playerValuation: b.playerValuation };
+  }
+
   function buildCompanyBuilding(state, cid, sx, sz, bType, wx, wy, wz, options) {
     ensureDiplomacyState(state);
     var opts = options || {};
@@ -3100,7 +3237,27 @@ global.LHOpenTTD = (function () {
     var resolvedY = (dim !== 'minecraft:overworld')
       ? Math.round(Number(wy || 70))
       : (env === 'normal' ? Math.max(63, Math.round(Number(wy || 70))) : preferredBuildingY(env, wy));
-    var resolvedVariant = resolveBuildingVariant(bType, opts.biomeId || null, opts.variant || null, dim, sx, sz);
+    var resolvedVariant = opts.variant ? resolveBuildingVariant(bType, opts.biomeId || null, opts.variant, dim, sx, sz) : null;
+    var chosenProduct = null;
+    var variantName = resolvedVariant ? resolvedVariant.name : null;
+    if (opts.fixedProduct) {
+      chosenProduct = String(opts.fixedProduct);
+      variantName = 'Выпуск: ' + chosenProduct;
+    } else if (resolvedVariant) {
+      chosenProduct = resolvedVariant.product;
+    } else if (RANDOM_PRODUCT_BUILDING_TYPES[bType] && global.LHStructureProduction && typeof global.LHStructureProduction.pickRandomItemFromPool === 'function') {
+      var usedP = collectUsedBuildingProducts(state);
+      var seedStr = bType + ':' + k + ':' + (state.nextBuildingSeq || 1);
+      chosenProduct = global.LHStructureProduction.pickRandomItemFromPool(seedStr, opts.availableItemIds || null, usedP, opts.rng || null);
+      variantName = 'Мод-продукт: ' + chosenProduct;
+    } else {
+      var fallbackV = resolveBuildingVariant(bType, opts.biomeId || null, null, dim, sx, sz);
+      if (fallbackV) {
+        resolvedVariant = fallbackV;
+        chosenProduct = fallbackV.product;
+        variantName = fallbackV.name;
+      }
+    }
     var bldg = {
       id: 'b' + (state.nextBuildingSeq++),
       type: bType,
@@ -3108,9 +3265,9 @@ global.LHOpenTTD = (function () {
       envType: env,
       dimension: dim,
       biomeId: opts.biomeId ? String(opts.biomeId) : null,
-      variant: resolvedVariant ? resolvedVariant.id : null,
-      variantName: resolvedVariant ? resolvedVariant.name : null,
-      customProduct: resolvedVariant ? resolvedVariant.product : null,
+      variant: resolvedVariant ? resolvedVariant.id : (chosenProduct ? 'mod_random' : null),
+      variantName: variantName,
+      customProduct: chosenProduct,
       owner: cid,
       sx: sx,
       sz: sz,
@@ -3501,8 +3658,12 @@ global.LHOpenTTD = (function () {
     for (var i = 0; i < bldgs.length; i++) {
       var b = bldgs[i];
       var sp = BUILDING_CATALOG[b.type] || {};
-      var baseCost = (b.type === 'structure_facility' && b.rarityRank) ? (360 * (1 + (b.rarityRank - 1) * 0.35)) : Number(sp.cost || 320);
-      var upgInvested = (Number(b.level || 1) >= 2 ? 420 : 0) + (Number(b.level || 1) >= 3 ? 820 : 0);
+      var baseCost = (b.playerValuation && Number(b.playerValuation) > 0)
+        ? Number(b.playerValuation)
+        : ((b.type === 'structure_facility' && b.rarityRank) ? (360 * (1 + (b.rarityRank - 1) * 0.35)) : Number(sp.cost || 320));
+      var upgInvested = (b.playerValuation && Number(b.playerValuation) > 0)
+        ? 0
+        : ((Number(b.level || 1) >= 2 ? 420 : 0) + (Number(b.level || 1) >= 3 ? 820 : 0));
       bldgValue += Math.round((baseCost + upgInvested) * (Number(b.integrityPct || 100) / 100));
       bldgValue += Math.round(Number(b.cashBuffer || 0));
       Object.keys(b.stockBuffer || {}).forEach(function (iidB) {
@@ -3956,7 +4117,7 @@ global.LHOpenTTD = (function () {
     var auditPenaltyTax = (comp.taxAuditPenaltyCycles > 0) ? Math.round(preAdjust * Number(comp.taxAuditPenaltyRate || 0.35)) : 0;
     var cb = getComebackStatus(state, cid);
     var comebackDiscount = cb.active ? Math.round(preAdjust * cb.taxDiscount) : 0;
-    var evasionDiscount = (comp.taxEvasionDiscount > 0) ? Math.round((preAdjust - comebackDiscount) * Math.min(0.85, Number(comp.taxEvasionDiscount))) : 0;
+    var evasionDiscount = (comp.taxEvasionDiscount > 0) ? Math.round((preAdjust - comebackDiscount) * Math.min(0.90, Number(comp.taxEvasionDiscount))) : 0;
     var total = Math.max(0, preAdjust + auditPenaltyTax - comebackDiscount - evasionDiscount);
 
     return {
@@ -4087,25 +4248,36 @@ global.LHOpenTTD = (function () {
     var exp = computeCompanyExpenses(state, cid);
     var m = String(method || 'bribe').toLowerCase();
     if (m === 'forged_docs') m = 'forge_docs';
-    if (m !== 'bribe' && m !== 'forge_docs') return { ok: false, reason: 'bad_method' };
-    var bribeCost = m === 'bribe' ? Math.max(40, Math.round(exp.total * 0.15)) : 20;
+    if (m !== 'bribe' && m !== 'forge_docs' && m !== 'offshore' && m !== 'shell_split') {
+      return { ok: false, reason: 'bad_method' };
+    }
+    var bribeCost = m === 'bribe'
+      ? Math.max(40, Math.round(exp.total * 0.12))
+      : (m === 'offshore' ? Math.max(80, Math.round(exp.total * 0.10)) : (m === 'shell_split' ? 35 : 20));
     if (comp.cash < bribeCost) return { ok: false, reason: 'no_cash', cost: bribeCost, cash: comp.cash };
     comp.cash -= bribeCost;
 
     var rng = rngFn || Math.random;
-    var baseChance = m === 'bribe' ? 0.65 : 0.45;
-    if ((comp.taxAuditPenaltyCycles || 0) > 0) baseChance -= 0.15;
-    var monoPenalty = exp.antiMonopolyTax > 0 ? 0.15 : 0;
-    var chance = Math.max(0.15, Math.min(0.85, baseChance - monoPenalty));
+    var baseChance = m === 'bribe' ? 0.68 : (m === 'offshore' ? 0.62 : (m === 'shell_split' ? 0.52 : 0.48));
+    // Loophole bonus: warehouses & trade exchanges make revenue hiding easier
+    var bldgs = listCompanyBuildings(state, cid);
+    var hideBonus = 0;
+    for (var bi = 0; bi < bldgs.length; bi++) {
+      if (bldgs[bi].type === 'trade_exchange' || bldgs[bi].type === 'warehouse') hideBonus += 0.04;
+    }
+    baseChance += Math.min(0.16, hideBonus);
+    if ((comp.taxAuditPenaltyCycles || 0) > 0) baseChance -= 0.12;
+    var monoPenalty = exp.antiMonopolyTax > 0 ? 0.12 : 0;
+    var chance = Math.max(0.20, Math.min(0.90, baseChance - monoPenalty));
 
     if (rng() < chance) {
-      comp.taxEvasionDiscount = m === 'bribe' ? 0.70 : 0.55;
-      var debtForgiven = Math.round(Number(comp.unpaidUpkeep || 0) * 0.30);
+      comp.taxEvasionDiscount = m === 'offshore' ? 0.85 : (m === 'shell_split' ? 0.80 : (m === 'bribe' ? 0.72 : 0.60));
+      var debtForgiven = Math.round(Number(comp.unpaidUpkeep || 0) * (m === 'offshore' ? 0.45 : 0.30));
       comp.unpaidUpkeep = Math.max(0, Number(comp.unpaidUpkeep || 0) - debtForgiven);
       return { ok: true, succeeded: true, method: m, cost: bribeCost, discountPct: Math.round(comp.taxEvasionDiscount * 100), debtForgiven: debtForgiven };
     }
     // Audit failure: fine added to debt + extra penalty tax for 3 cycles
-    var fine = Math.max(120, Math.round(exp.total * 0.40));
+    var fine = Math.max(120, Math.round(exp.total * 0.35));
     comp.unpaidUpkeep = Number(comp.unpaidUpkeep || 0) + fine;
     comp.taxAuditPenaltyCycles = 3;
     comp.taxAuditPenaltyRate = 0.35;
@@ -4473,6 +4645,9 @@ global.LHOpenTTD = (function () {
   }
 
   function estimateItemUnitPrice(itemId) {
+    if (global.LHEconomyEngine && typeof global.LHEconomyEngine.getLiveCachedPrice === 'function') {
+      return global.LHEconomyEngine.getLiveCachedPrice(itemId);
+    }
     if (global.LHEconomyEngine && typeof global.LHEconomyEngine.inferFallbackBasePrice === 'function') {
       return global.LHEconomyEngine.inferFallbackBasePrice(itemId);
     }
@@ -6277,7 +6452,9 @@ global.LHOpenTTD = (function () {
       }
     }
     var sp = BUILDING_CATALOG[b.type] || {};
-    var defaultStart = Math.max(200, Math.round((Number(sp.cost || 400) * Number(b.level || 1)) * 0.75));
+    var defaultStart = (b.playerValuation && Number(b.playerValuation) > 0)
+      ? Math.max(100, Math.round(Number(b.playerValuation)))
+      : Math.max(200, Math.round((Number(sp.cost || 400) * Number(b.level || 1)) * 0.75));
     var minPrice = Math.max(100, Math.round(Number(startPrice || defaultStart)));
     var dur = Math.max(400, Math.round(Number(durationTicks || 3600)));
     var tick = Math.round(Number(nowTick || 0));
@@ -6489,6 +6666,8 @@ global.LHOpenTTD = (function () {
     getEndgameBuyoutStatus: getEndgameBuyoutStatus,
     resolveBuildingVariant: resolveBuildingVariant,
     setBuildingVariant: setBuildingVariant,
+    setBuildingCustomProduct: setBuildingCustomProduct,
+    setBuildingPlayerValuation: setBuildingPlayerValuation,
     getCompanyEnvType: getCompanyEnvType,
     setCompanyEnvType: setCompanyEnvType,
     preferredBuildingY: preferredBuildingY,
@@ -6939,11 +7118,16 @@ global.LHEconomyEngine = (function () {
     return Math.max(1, Math.round(p));
   }
 
+  var _cachedRecipeEdges = [];
+  var _lastActiveEconState = null;
+
   function createInitialEconomyState() {
     return {
       items: {},
       adminOverrides: {},
+      playerPrices: {},
       recipePrices: {},
+      pureRecipePrices: {},
       listings: [],
       pickupOrders: [],
       nextListingSeq: 1,
@@ -6957,13 +7141,226 @@ global.LHEconomyEngine = (function () {
     if (!st) return createInitialEconomyState();
     if (!st.items) st.items = {};
     if (!st.adminOverrides) st.adminOverrides = {};
+    if (!st.playerPrices) st.playerPrices = {};
     if (!st.recipePrices) st.recipePrices = {};
+    if (!st.pureRecipePrices) st.pureRecipePrices = {};
     if (!st.listings) st.listings = [];
     if (!st.pickupOrders) st.pickupOrders = [];
     if (!st.nextListingSeq) st.nextListingSeq = 1;
     if (!st.nextPickupSeq) st.nextPickupSeq = 1;
     if (typeof st.totalCrashes !== 'number') st.totalCrashes = 0;
+    _lastActiveEconState = st;
     return st;
+  }
+
+  function solveGraphWithAdminPins(st, edges, purePrices) {
+    ensureEconomyState(st);
+    var prices = {};
+    Object.keys(purePrices || {}).forEach(function (k) {
+      prices[k] = Number(purePrices[k]);
+    });
+
+    // Collect hard admin pins (never overwritten by propagation or each other)
+    var pins = {};
+    var pinList = [];
+    Object.keys(st.adminOverrides || {}).forEach(function (aid) {
+      var ov = st.adminOverrides[aid];
+      if (ov && ov.locked && Number(ov.price) > 0) {
+        var pVal = Math.max(1, Math.round(Number(ov.price)));
+        pins[aid] = pVal;
+        prices[aid] = pVal;
+        pinList.push(aid);
+      }
+    });
+
+    if (pinList.length === 0 || !edges || !edges.length) {
+      st.recipePrices = prices;
+      return { prices: prices, affectedItems: [] };
+    }
+
+    // Build bidirectional recipe adjacency
+    var edgesByOut = {};
+    var edgesByIng = {};
+    var adj = {};
+    function linkAdj(a, b) {
+      if (!a || !b || a === b) return;
+      if (!adj[a]) adj[a] = [];
+      if (adj[a].indexOf(b) === -1) adj[a].push(b);
+    }
+
+    for (var i = 0; i < edges.length; i++) {
+      var e = edges[i];
+      if (!e || !e.outId || !e.ingredients || !e.ingredients.length) continue;
+      if (!edgesByOut[e.outId]) edgesByOut[e.outId] = [];
+      edgesByOut[e.outId].push(e);
+      if (!prices[e.outId]) prices[e.outId] = inferFallbackBasePrice(e.outId);
+      for (var j = 0; j < e.ingredients.length; j++) {
+        var ing = e.ingredients[j];
+        if (!ing || !ing.id) continue;
+        if (!edgesByIng[ing.id]) edgesByIng[ing.id] = [];
+        edgesByIng[ing.id].push(e);
+        if (!prices[ing.id]) prices[ing.id] = inferFallbackBasePrice(ing.id);
+        linkAdj(e.outId, ing.id);
+        linkAdj(ing.id, e.outId);
+        for (var k = 0; k < e.ingredients.length; k++) {
+          if (k !== j && e.ingredients[k] && e.ingredients[k].id) {
+            linkAdj(ing.id, e.ingredients[k].id);
+          }
+        }
+      }
+    }
+
+    // Multi-source BFS from ALL admin pins simultaneously so distance is symmetric and order-independent
+    var distPin = {};
+    var queue = [];
+    for (var pIdx = 0; pIdx < pinList.length; pIdx++) {
+      var pid = pinList[pIdx];
+      distPin[pid] = 0;
+      queue.push(pid);
+    }
+    var qHead = 0;
+    var activeNodes = [];
+    while (qHead < queue.length) {
+      var cur = queue[qHead++];
+      var curD = distPin[cur];
+      if (curD >= 8) continue;
+      var nbrs = adj[cur] || [];
+      for (var ni = 0; ni < nbrs.length; ni++) {
+        var nb = nbrs[ni];
+        if (distPin[nb] === undefined) {
+          distPin[nb] = curD + 1;
+          queue.push(nb);
+          if (!pins[nb]) activeNodes.push(nb);
+        }
+      }
+    }
+
+    if (activeNodes.length === 0) {
+      st.recipePrices = prices;
+      return { prices: prices, affectedItems: [] };
+    }
+
+    // Baseline pure prices snapshot (fallback for unknown nodes)
+    var baseSnap = {};
+    Object.keys(prices).forEach(function (k) {
+      baseSnap[k] = Math.max(1, Number(purePrices[k] || prices[k] || inferFallbackBasePrice(k)));
+    });
+
+    // Iterative conflict-free log-linear harmonic relaxation with Dirichlet boundary pins
+    var MAX_ITERS = 12;
+    for (var iter = 0; iter < MAX_ITERS; iter++) {
+      var nextVals = {};
+      for (var ai = 0; ai < activeNodes.length; ai++) {
+        var u = activeNodes[ai];
+        if (pins[u]) continue;
+        var logSum = 0;
+        var wSum = 0;
+        var uBase = baseSnap[u] || 10;
+
+        // 1. Upward pull: u is output of recipes
+        var outEdges = edgesByOut[u] || [];
+        for (var oe = 0; oe < outEdges.length; oe++) {
+          var er = outEdges[oe];
+          var outC = Math.max(1, Number(er.outCount || 1));
+          var ingCost = 0;
+          var minIngD = 99;
+          for (var ii = 0; ii < er.ingredients.length; ii++) {
+            var ig = er.ingredients[ii];
+            if (!ig || !ig.id) continue;
+            var cnt = Math.max(1, Number(ig.count || 1));
+            ingCost += (prices[ig.id] || baseSnap[ig.id] || 10) * cnt;
+            if (distPin[ig.id] !== undefined && distPin[ig.id] < minIngD) minIngD = distPin[ig.id];
+          }
+          if (ingCost > 0 && minIngD < 99) {
+            var candUp = Math.max(1, Math.min(500000, (ingCost / outC) * 1.12));
+            var wUp = 1.0 / (1.0 + minIngD * 0.5);
+            logSum += wUp * Math.log(candUp);
+            wSum += wUp;
+          }
+        }
+
+        // 2. Downward & parallel pull: u is ingredient in recipes
+        var inEdges = edgesByIng[u] || [];
+        for (var ie = 0; ie < inEdges.length; ie++) {
+          var er2 = inEdges[ie];
+          var outId = er2.outId;
+          var outC2 = Math.max(1, Number(er2.outCount || 1));
+          var outD = distPin[outId];
+          var uCount = 1;
+          var lockedIngCost = 0;
+          var freeBaseSum = 0;
+          var bestSibDist = 99;
+          var sibRatioLogSum = 0;
+          var sibRatioW = 0;
+
+          for (var jj = 0; jj < er2.ingredients.length; jj++) {
+            var ig2 = er2.ingredients[jj];
+            if (!ig2 || !ig2.id) continue;
+            var cnt2 = Math.max(1, Number(ig2.count || 1));
+            if (ig2.id === u) uCount += (cnt2 - 1);
+            if (pins[ig2.id]) {
+              lockedIngCost += pins[ig2.id] * cnt2;
+            } else {
+              freeBaseSum += (baseSnap[ig2.id] || 10) * cnt2;
+            }
+            if (ig2.id !== u && distPin[ig2.id] !== undefined && distPin[ig2.id] <= distPin[u]) {
+              var sRatio = Math.max(0.25, Math.min(4.0, (prices[ig2.id] || baseSnap[ig2.id]) / Math.max(1, baseSnap[ig2.id])));
+              var sw = 1.0 / (1.0 + distPin[ig2.id] * 0.7);
+              sibRatioLogSum += sw * Math.log(sRatio);
+              sibRatioW += sw;
+              if (distPin[ig2.id] < bestSibDist) bestSibDist = distPin[ig2.id];
+            }
+          }
+
+          // Downward propagation from output price (especially strong when output is pinned or closer to a pin)
+          if (outD !== undefined && outD <= distPin[u]) {
+            var targetIngBudget = Math.max(1, ((prices[outId] || baseSnap[outId]) * outC2) / 1.12);
+            var freeBudget = Math.max(1, targetIngBudget - lockedIngCost);
+            var share = Math.max(0.05, ((uBase * uCount) / Math.max(1, freeBaseSum)));
+            var candDown = Math.max(1, Math.min(500000, (freeBudget * share) / Math.max(1, uCount)));
+            var wDown = (pins[outId] ? 1.15 : 0.75) / (1.0 + outD * 0.55);
+            logSum += wDown * Math.log(candDown);
+            wSum += wDown;
+          }
+
+          // Parallel propagation between sibling ingredients in the same recipe (when output is not strictly pinned against it)
+          if (sibRatioW > 0 && !pins[outId]) {
+            var avgSibRatio = Math.exp(sibRatioLogSum / sibRatioW);
+            var candPar = Math.max(1, Math.min(500000, uBase * Math.pow(avgSibRatio, 0.65)));
+            var wPar = 0.45 / (1.0 + bestSibDist * 0.65);
+            logSum += wPar * Math.log(candPar);
+            wSum += wPar;
+          }
+        }
+
+        // Mild anchor toward pure base for nodes far away from any pin
+        var anchorW = Math.min(0.45, 0.06 * (distPin[u] || 1));
+        logSum += anchorW * Math.log(uBase);
+        wSum += anchorW;
+
+        if (wSum > 0) {
+          nextVals[u] = Math.max(1, Math.min(500000, Math.round(Math.exp(logSum / wSum))));
+        }
+      }
+      Object.keys(nextVals).forEach(function (uk) {
+        prices[uk] = nextVals[uk];
+      });
+    }
+
+    // Enforce exact admin pin values (zero conflict guarantee)
+    for (var pk = 0; pk < pinList.length; pk++) {
+      prices[pinList[pk]] = pins[pinList[pk]];
+    }
+
+    var affectedItems = [];
+    for (var ai2 = 0; ai2 < activeNodes.length; ai2++) {
+      var nId = activeNodes[ai2];
+      if (prices[nId] !== baseSnap[nId]) {
+        affectedItems.push({ id: nId, oldPrice: baseSnap[nId], newPrice: prices[nId] });
+      }
+    }
+    st.recipePrices = prices;
+    return { prices: prices, affectedItems: affectedItems };
   }
 
   function propagateRecipePrices(st, recipeEdges, maxPasses) {
@@ -6973,11 +7370,18 @@ global.LHEconomyEngine = (function () {
     Object.keys(BASE_COMMODITY_CATALOG).forEach(function (cid) {
       prices[cid] = computeRarityScorePrice(BASE_COMMODITY_CATALOG[cid]);
     });
-    Object.keys(st.recipePrices || {}).forEach(function (k) {
-      if (Number(st.recipePrices[k]) > 0 && !prices[k]) prices[k] = Number(st.recipePrices[k]);
+    Object.keys(st.pureRecipePrices || {}).forEach(function (k) {
+      if (Number(st.pureRecipePrices[k]) > 0 && !prices[k]) prices[k] = Number(st.pureRecipePrices[k]);
     });
 
-    var edges = (recipeEdges && typeof recipeEdges !== 'string' && typeof recipeEdges.length === 'number') ? recipeEdges : [];
+    var edges = (recipeEdges && typeof recipeEdges !== 'string' && typeof recipeEdges.length === 'number')
+      ? recipeEdges
+      : (_cachedRecipeEdges.length ? _cachedRecipeEdges : (st._recipeEdges || []));
+    if (recipeEdges && typeof recipeEdges.length === 'number' && recipeEdges.length > 0) {
+      _cachedRecipeEdges = recipeEdges;
+      if (recipeEdges.length <= 400) st._recipeEdges = recipeEdges;
+    }
+
     for (var pass = 0; pass < passes; pass++) {
       var changed = false;
       for (var i = 0; i < edges.length; i++) {
@@ -6998,10 +7402,8 @@ global.LHEconomyEngine = (function () {
           ? computeRarityScorePrice(BASE_COMMODITY_CATALOG[e.outId])
           : 1;
         var nextP = Math.max(floorP, craftUnit);
-        // Prevent runaway self-cycle inflation
         if (nextP > 250000) nextP = 250000;
         if (!prices[e.outId] || Math.abs(prices[e.outId] - nextP) >= 1) {
-          // Take min across alternative cheaper recipes once known, or update upward from raw floor
           if (!prices[e.outId] || nextP < prices[e.outId] || pass === 0) {
             prices[e.outId] = nextP;
             changed = true;
@@ -7010,8 +7412,21 @@ global.LHEconomyEngine = (function () {
       }
       if (!changed) break;
     }
-    st.recipePrices = prices;
-    return prices;
+    st.pureRecipePrices = prices;
+    var solved = solveGraphWithAdminPins(st, edges, prices);
+    st._lastAffectedCount = solved.affectedItems.length;
+    return st.recipePrices;
+  }
+
+  function recalculateWithPins(st) {
+    ensureEconomyState(st);
+    var edges = _cachedRecipeEdges.length ? _cachedRecipeEdges : (st._recipeEdges || []);
+    if (!Object.keys(st.pureRecipePrices || {}).length && edges.length > 0) {
+      return propagateRecipePrices(st, edges, 4);
+    }
+    var solved = solveGraphWithAdminPins(st, edges, st.pureRecipePrices || st.recipePrices || {});
+    st._lastAffectedCount = solved.affectedItems.length;
+    return solved;
   }
 
   function getCommodityState(st, itemId) {
@@ -7032,14 +7447,40 @@ global.LHEconomyEngine = (function () {
   function getBasePrice(st, itemId) {
     ensureEconomyState(st);
     var id = String(itemId || '');
+    var ov = st.adminOverrides && st.adminOverrides[id];
+    if (ov && ov.locked && Number(ov.price) > 0) return Number(ov.price);
     if (st.recipePrices && st.recipePrices[id] > 0) return Number(st.recipePrices[id]);
+    if (st.playerPrices && st.playerPrices[id] && Number(st.playerPrices[id].price) > 0) {
+      return Number(st.playerPrices[id].price);
+    }
     return inferFallbackBasePrice(id);
+  }
+
+  function getLiveCachedPrice(itemId) {
+    if (_lastActiveEconState) {
+      var id = String(itemId || '');
+      var ov = _lastActiveEconState.adminOverrides && _lastActiveEconState.adminOverrides[id];
+      if (ov && ov.locked && Number(ov.price) > 0) return Math.round(Number(ov.price));
+      if (_lastActiveEconState.recipePrices && _lastActiveEconState.recipePrices[id] > 0) {
+        return Math.round(Number(_lastActiveEconState.recipePrices[id]));
+      }
+      if (_lastActiveEconState.playerPrices && _lastActiveEconState.playerPrices[id] && Number(_lastActiveEconState.playerPrices[id].price) > 0) {
+        return Math.round(Number(_lastActiveEconState.playerPrices[id].price));
+      }
+    }
+    return inferFallbackBasePrice(itemId);
   }
 
   function getMarketQuote(st, itemId) {
     ensureEconomyState(st);
     var id = String(itemId || '');
-    var basePrice = getBasePrice(st, id);
+    var recipeBase = (st.recipePrices && st.recipePrices[id] > 0)
+      ? Number(st.recipePrices[id])
+      : inferFallbackBasePrice(id);
+    var playerEntry = st.playerPrices && st.playerPrices[id];
+    var basePrice = (playerEntry && Number(playerEntry.price) > 0)
+      ? Math.max(1, Math.round(Number(playerEntry.price)))
+      : recipeBase;
     var ov = st.adminOverrides && st.adminOverrides[id];
     var cs = getCommodityState(st, id);
 
@@ -7048,11 +7489,13 @@ global.LHEconomyEngine = (function () {
         itemId: id,
         kind: inferCommodityKind(id),
         basePrice: basePrice,
+        recipeBasePrice: recipeBase,
         price: Math.max(1, Math.round(Number(ov.price))),
         multiplier: Number((Number(ov.price) / Math.max(1, basePrice)).toFixed(2)),
         crashed: false,
         crashTicks: 0,
         adminLocked: true,
+        playerPriced: false,
         supply: cs.supply,
         demand: cs.demand
       };
@@ -7074,11 +7517,14 @@ global.LHEconomyEngine = (function () {
       itemId: id,
       kind: inferCommodityKind(id),
       basePrice: basePrice,
+      recipeBasePrice: recipeBase,
       price: price,
       multiplier: Number((price / Math.max(1, basePrice)).toFixed(2)),
       crashed: crashed,
       crashTicks: Number(cs.crashTicks || 0),
       adminLocked: false,
+      playerPriced: !!(playerEntry && Number(playerEntry.price) > 0),
+      playerPriceBy: playerEntry ? playerEntry.by : null,
       supply: Number(cs.supply || 0),
       demand: Number(cs.demand || 0)
     };
@@ -7133,7 +7579,10 @@ global.LHEconomyEngine = (function () {
     var id = String(itemId || '');
     var p = Math.max(1, Math.round(Number(price || 1)));
     st.adminOverrides[id] = { price: p, locked: true, minPrice: 0, maxPrice: 0 };
-    return getMarketQuote(st, id);
+    var solved = recalculateWithPins(st);
+    var q = getMarketQuote(st, id);
+    q.propagatedCount = (solved && solved.affectedItems) ? solved.affectedItems.length : 0;
+    return q;
   }
 
   function setAdminBounds(st, itemId, minPrice, maxPrice) {
@@ -7147,8 +7596,34 @@ global.LHEconomyEngine = (function () {
 
   function clearAdminPrice(st, itemId) {
     ensureEconomyState(st);
-    delete st.adminOverrides[String(itemId || '')];
-    return getMarketQuote(st, itemId);
+    var id = String(itemId || '');
+    delete st.adminOverrides[id];
+    var solved = recalculateWithPins(st);
+    var q = getMarketQuote(st, id);
+    q.propagatedCount = (solved && solved.affectedItems) ? solved.affectedItems.length : 0;
+    return q;
+  }
+
+  function setPlayerItemPrice(st, itemId, price, actorName, nowTick) {
+    ensureEconomyState(st);
+    var id = String(itemId || '');
+    if (!id || id === 'minecraft:air') return { ok: false, reason: 'bad_item' };
+    var ov = st.adminOverrides && st.adminOverrides[id];
+    if (ov && ov.locked) return { ok: false, reason: 'admin_locked', quote: getMarketQuote(st, id) };
+    var p = Math.max(1, Math.min(1000000, Math.round(Number(price || 1))));
+    st.playerPrices[id] = {
+      price: p,
+      by: String(actorName || 'player'),
+      updatedTick: Number(nowTick || 0)
+    };
+    return { ok: true, quote: getMarketQuote(st, id) };
+  }
+
+  function clearPlayerItemPrice(st, itemId) {
+    ensureEconomyState(st);
+    var id = String(itemId || '');
+    delete st.playerPrices[id];
+    return { ok: true, quote: getMarketQuote(st, id) };
   }
 
   function forceCrash(st, itemId, ticks) {
@@ -7373,6 +7848,8 @@ global.LHEconomyEngine = (function () {
     createInitialEconomyState: createInitialEconomyState,
     ensureEconomyState: ensureEconomyState,
     propagateRecipePrices: propagateRecipePrices,
+    recalculateWithPins: recalculateWithPins,
+    getLiveCachedPrice: getLiveCachedPrice,
     getCommodityState: getCommodityState,
     getBasePrice: getBasePrice,
     getMarketQuote: getMarketQuote,
@@ -7381,6 +7858,8 @@ global.LHEconomyEngine = (function () {
     setAdminPrice: setAdminPrice,
     setAdminBounds: setAdminBounds,
     clearAdminPrice: clearAdminPrice,
+    setPlayerItemPrice: setPlayerItemPrice,
+    clearPlayerItemPrice: clearPlayerItemPrice,
     forceCrash: forceCrash,
     createFacilityListing: createFacilityListing,
     buyFacilityListing: buyFacilityListing,
