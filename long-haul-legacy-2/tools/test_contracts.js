@@ -429,9 +429,9 @@ test('OpenTTD buildings (2-way fork), territory violations, diplomacy, and suppl
   const path = require('path');
   const O = sandbox.global.LHOpenTTD;
   assert(O && O.BUILDING_CATALOG, 'BUILDING_CATALOG present');
-  assert.equal(Object.keys(O.BUILDING_CATALOG).length, 7, '7 building types across 4 categories');
+  assert(Object.keys(O.BUILDING_CATALOG).length >= 14, '14 building types across 5 categories');
   const cats = new Set(Object.values(O.BUILDING_CATALOG).map(b => b.category));
-  assert(cats.has('extraction') && cats.has('logistics') && cats.has('production') && cats.has('security'), 'all 4 building categories present');
+  assert(cats.has('extraction') && cats.has('logistics') && cats.has('production') && cats.has('security') && cats.has('energy') && cats.has('structure'), 'all building categories present');
 
   const st = O.createInitialState();
   O.ensureBots(st);
@@ -868,6 +868,121 @@ test('4-env companies, >=4 sector HQ spacing, TradeLogistics (1.04..24 m/s), Hag
   assert(P2P.setCurrencyOffer(p2pSess, 'u2', 50).ok);
   assert.equal(P2P.setConfirmed(p2pSess, 'u1', true).bothConfirmed, false);
   assert.equal(P2P.setConfirmed(p2pSess, 'u2', true).bothConfirmed, true);
+});
+
+test('Structure production (6 Diablo rarities, 4 dims), archetypes/traits, required inputs, auctions, coalitions, upkeep, bot saturation & raids, routes & subsidies', () => {
+  const O = sandbox.global.LHOpenTTD;
+  const SP = sandbox.global.LHStructureProduction;
+  const TL = sandbox.global.LHTradeLogistics;
+  assert(SP && SP.STRUCTURE_RARITIES && Object.keys(SP.STRUCTURE_RARITIES).length === 6, '6 Diablo rarities defined');
+  assert(O.BOT_ARCHETYPES && Object.keys(O.BOT_ARCHETYPES).length === 8, '8 bot archetypes defined');
+  assert(O.COMPANY_TRAITS && Object.keys(O.COMPANY_TRAITS).length === 10, '10 company traits defined');
+
+  const st = O.createInitialState();
+  const c1 = O.companyCreate(st, 'u1', 'alpha', 'Alpha', 1024, 1024).company;
+  const c2 = O.companyCreate(st, 'u2', 'beta', 'Beta', -1024, -1024).company;
+  c1.cash = 100000;
+  c2.cash = 100000;
+
+  // 1. Structure catalog & non-destructive world-structure conversion across dimensions
+  const cat = O.syncStructureCatalog(st, ['minecraft:ancient_city', 'minecraft:bastion_remnant', 'minecraft:end_city'], null, {
+    'minecraft:ancient_city': 'minecraft:overworld',
+    'minecraft:bastion_remnant': 'minecraft:the_nether',
+    'minecraft:end_city': 'minecraft:the_end'
+  });
+  assert.equal(cat['minecraft:ancient_city'].dimension, 'minecraft:overworld');
+  assert.equal(cat['minecraft:bastion_remnant'].dimension, 'minecraft:the_nether');
+  assert.equal(cat['minecraft:end_city'].dimension, 'minecraft:the_end');
+  assert(cat['minecraft:end_city'].rarityRank >= 4, 'end_city has high Diablo rarity');
+  assert.notEqual(cat['minecraft:ancient_city'].itemId, cat['minecraft:bastion_remnant'].itemId, '1-to-1 unique item mapping');
+
+  assert(O.claimOrCaptureSector(st, 'alpha', 4, 5, false).ok);
+  O.recordSectorStructures(st, 4, 5, ['minecraft:ancient_city'], 'minecraft:overworld');
+  const conv = O.convertStructureToFacility(st, 'alpha', 4, 5, 'minecraft:ancient_city', 1024, 70, 1280);
+  assert(conv.ok && conv.building.preserveWorldStructure === true && conv.building.type === 'structure_facility');
+
+  // 2. Power plant adjacency synergy (+20%..+50%)
+  assert(O.claimOrCaptureSector(st, 'alpha', 5, 5, false).ok);
+  assert(O.buildCompanyBuilding(st, 'alpha', 5, 5, 'power_plant', 1280, 70, 1280).ok);
+  const adjMult = O.getPowerPlantAdjacencyMultiplier(st, 'alpha', 4, 5, 'minecraft:overworld');
+  assert(adjMult >= 1.20, 'adjacent power plant boosts production: ' + adjMult);
+
+  // 3. Required inputs pause facility when depleted, resume when supplied, and fill outputContainerQueue
+  assert(O.claimOrCaptureSector(st, 'alpha', 4, 6, false).ok);
+  const mineRes = O.buildCompanyBuilding(st, 'alpha', 4, 6, 'mine_shaft', 1024, 70, 1536, { emptyInputs: true });
+  assert(mineRes.ok);
+  O.tickCompanyBuildings(st);
+  assert.equal(mineRes.building.pausedReason, 'missing_inputs', 'building pauses without required input items');
+  assert.equal(mineRes.building.cyclesDone, 0);
+  assert(O.supplyBuildingInputs(st, 'alpha', 4, 6, { 'minecraft:oak_planks': 8, 'minecraft:coal': 4 }).ok);
+  O.tickCompanyBuildings(st);
+  assert.equal(mineRes.building.pausedReason, null, 'resumes once inputs supplied');
+  assert.equal(mineRes.building.cyclesDone === 1 && Object.keys(mineRes.building.outputContainerQueue).length > 0, true, 'queues items for physical output barrel');
+
+  // 4. Ongoing expenses (facility, upgrade, land tax, security, anti-monopoly) & Valuation breakdown
+  O.upgradeCompanyBuilding(st, 'alpha', 4, 6, O.BUILDING_CATALOG.mine_shaft.tier1Fork[0].id);
+  const exp = O.computeCompanyExpenses(st, 'alpha');
+  assert(exp.facilityUpkeep > 0 && exp.upgradeUpkeep > 0 && exp.landTax > 0 && exp.total > 0, 'all ongoing expense lines computed');
+  const valBr = O.getCompanyValuationBreakdown(st, 'alpha');
+  assert(valBr.facilitiesValue > 0 && valBr.productionPotentialValue > 0 && valBr.territoryValue > 0 && valBr.totalValuation > valBr.cash);
+
+  // 5. Anti-monopoly coalition bonuses & aggressive threat ranking
+  for (let gx = 6; gx <= 12; gx++) O.claimOrCaptureSector(st, 'alpha', gx, 5, false);
+  const mono = O.getMonopolyMetrics(st);
+  assert(mono.some(m => m.cid === 'alpha' && m.antiMonopolyTaxRate > 0), 'monopolist incurs anti-monopoly tax');
+  const joinCo = O.joinAntiMonopolyCoalition(st, 'beta', 'alpha');
+  assert(joinCo.ok && joinCo.membersCount === 1);
+  const cMod = O.getCoalitionModifiers(st, 'beta', 'alpha');
+  assert(cMod.isCoalitionAttack && cMod.captureCostMult < 1.0 && cMod.raidPowerBonus >= 1);
+
+  // 6. Facility auction mini-game (create -> bid -> anti-snipe -> settle)
+  const aucRes = O.createFacilityAuction(st, 'alpha', 4, 6, 500, 1000, 100);
+  assert(aucRes.ok);
+  const bidRes = O.placeAuctionBid(st, aucRes.auction.id, 'beta', 600, 950);
+  assert(bidRes.ok && aucRes.auction.endsAtTick >= 1250, 'anti-snipe extends auction end tick');
+  const settled = O.tickAuctions(st, 1300);
+  assert(settled.length === 1 && settled[0].sold && settled[0].buyerCid === 'beta');
+  assert.equal(O.getSectorBuilding(st, 4, 6).owner, 'beta', 'auction transfers facility ownership');
+
+  // 7. Upkeep-aware periodic supply contracts + breach penalty
+  const scTimed = O.createTimedSupplyContract(st, 'beta', 'alpha', 'minecraft:iron_ingot', 16, 2, 1000, null, 150, 100, { sx: 4, sz: 6, useUpkeepPricing: true });
+  assert(scTimed.ok && scTimed.contract.upkeepIncluded > 0);
+  const missEv = O.tickSupplyContracts(st, 1200);
+  assert(missEv.length === 1 && missEv[0].type === 'penalty' && missEv[0].penalty === 150, 'breach penalty charged on missed deadline');
+
+  // 8. 1/3 chapters bot saturation, every-2nd-chapter bot spawn, upgrade orders, and hostile mob raids
+  const stSat = O.createInitialState();
+  const chSpawn = O.onChapterCompletedBotSpawn(stSat, 20, 4, () => 0.25);
+  assert(chSpawn.spawned.length >= 5, 'dynamic bot companies spawn every 2nd chapter');
+  const capAtThird = O.maxBotClaimsAllowed(stSat, 4, 20);
+  assert.equal(capAtThird, (9 * 9 - 9), 'by 1/3 chapters (~20/61), bots can fill all non-spawn open sectors on map');
+  O.refreshBotOrders(stSat, () => 0.5);
+  assert(stSat.marketOrders.some(o => o.purpose === 'facility_upgrade'), 'bots post buy orders for facility upgrade items');
+  const raidRes = O.triggerBotMobRaid(stSat, 'bot_ironrail', 'bot_greencart', -7, -2, 100, { cost: 120 });
+  assert(raidRes.ok && raidRes.raid.mobCount >= 5);
+  assert(O.resolveBotMobRaid(stSat, raidRes.raid.id, 'defended').ok);
+
+  // 9. Automated inter-structure routes (coal/oil/customs costs) & strengthened subsidies
+  assert(O.claimOrCaptureSector(st, 'beta', 4, 7, false).ok);
+  const dstB = O.buildCompanyBuilding(st, 'beta', 4, 7, 'factory', 1024, 70, 1792);
+  assert(dstB.ok);
+  st.buildings['4,6'].stockBuffer['minecraft:iron_ingot'] = 16;
+  const logAuto = TL.createState();
+  st.subsidy = { companyId: 'beta', item: 'minecraft:iron_ingot', sx: 4, sz: 6 };
+  const subM = TL.getSubsidyModifiers(st, 'beta', 4, 6);
+  assert(subM.active && subM.deliveryFeeMult < 1.0 && subM.routeFuelDiscount < 1.0 && subM.productionYieldMult > 1.0);
+  const rCreate = TL.createAutomatedRoute(logAuto, st, 'beta', 4, 6, 4, 7, 'minecraft:iron_ingot', 8, { nowTick: 0 });
+  assert(rCreate.ok && rCreate.costProfile.subsidized === true);
+  const rTick = TL.tickAutomatedRoutes(logAuto, st, 2500);
+  assert(rTick.length === 1 && rTick[0].ok && st.buildings['4,7'].inputBuffer['minecraft:iron_ingot'] >= 8);
+
+  // 10. Wide early HQ spacing in 26_hard_features_and_territory.js & non-destructive container preservation in 27_openttd_companies.js
+  const path = require('path');
+  const ROOT = path.resolve(__dirname, '..');
+  const s26 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/26_hard_features_and_territory.js'), 'utf8');
+  const s27 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/27_openttd_companies.js'), 'utf8');
+  assert(s26.includes('minPlayerDist') && s26.includes('minAnyDist'), 'lhFirstJoinRandomSpawn enforces wide early company HQ spacing');
+  assert(s27.includes('preserveWorldStructure') && s27.includes('lhEnsureBarrelAt') && s27.includes('lhSyncBuildingPhysicalContainers'), '27_openttd_companies preserves world structures and barrels');
 });
 
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');

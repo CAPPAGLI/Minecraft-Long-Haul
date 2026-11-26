@@ -663,6 +663,410 @@ global.LHHardFeatureCatalog = [
   { id: 'doomed_final_protocol', name: 'Протокол Судного Дня', icon: '💀', color: 'dark_red', category: 'late', summary: 'Ночные монстры получают Регенерацию, а добыча вдали от спауна замедляется.' }
 ];
 
+global.LHStructureProduction = (function () {
+  var CATEGORY_POOLS = {
+    wood: [
+      'minecraft:oak_log', 'minecraft:spruce_log', 'minecraft:birch_log', 'minecraft:jungle_log',
+      'minecraft:acacia_log', 'minecraft:dark_oak_log', 'minecraft:mangrove_log', 'minecraft:cherry_log',
+      'minecraft:bamboo_block', 'minecraft:stripped_oak_log', 'minecraft:stripped_spruce_log',
+      'minecraft:oak_planks', 'minecraft:spruce_planks', 'minecraft:dark_oak_planks'
+    ],
+    mining: [
+      'minecraft:raw_iron', 'minecraft:raw_copper', 'minecraft:raw_gold', 'minecraft:coal',
+      'minecraft:redstone', 'minecraft:lapis_lazuli', 'minecraft:emerald', 'minecraft:diamond',
+      'minecraft:amethyst_shard', 'minecraft:iron_ingot', 'minecraft:copper_ingot', 'minecraft:gold_ingot',
+      'create:raw_zinc', 'create:zinc_ingot', 'create:andesite_alloy', 'create:brass_ingot',
+      'minecraft:deepslate', 'minecraft:tuff', 'minecraft:calcite', 'minecraft:dripstone_block',
+      'minecraft:basalt', 'minecraft:obsidian', 'minecraft:crying_obsidian'
+    ],
+    agro: [
+      'minecraft:wheat', 'minecraft:honeycomb', 'minecraft:honey_bottle', 'minecraft:apple',
+      'minecraft:sweet_berries', 'minecraft:pumpkin', 'minecraft:melon_slice', 'minecraft:sugar_cane',
+      'minecraft:cocoa_beans', 'minecraft:brown_mushroom', 'minecraft:red_mushroom',
+      'minecraft:leather', 'minecraft:white_wool', 'minecraft:feather', 'minecraft:egg',
+      'minecraft:bread', 'minecraft:cake', 'minecraft:golden_carrot', 'minecraft:rabbit_hide'
+    ],
+    marine: [
+      'minecraft:prismarine_shard', 'minecraft:prismarine_crystals', 'minecraft:kelp',
+      'minecraft:sea_lantern', 'minecraft:sponge', 'minecraft:nautilus_shell', 'minecraft:heart_of_the_sea',
+      'minecraft:cod', 'minecraft:salmon', 'minecraft:tropical_fish', 'minecraft:pufferfish',
+      'minecraft:ink_sac', 'minecraft:glow_ink_sac', 'minecraft:turtle_scute', 'longhaul:marine_reagent'
+    ],
+    magic: [
+      'minecraft:ender_pearl', 'minecraft:blaze_powder', 'minecraft:glowstone_dust',
+      'minecraft:phantom_membrane', 'minecraft:experience_bottle', 'minecraft:echo_shard',
+      'minecraft:sculk_catalyst', 'minecraft:sculk_sensor', 'minecraft:slime_ball',
+      'minecraft:fermented_spider_eye', 'minecraft:gunpowder', 'minecraft:bone',
+      'minecraft:string', 'minecraft:spider_eye', 'minecraft:ghast_tear', 'minecraft:nether_star'
+    ],
+    industry: [
+      'create:iron_sheet', 'create:golden_sheet', 'create:copper_sheet', 'create:brass_sheet',
+      'create:cogwheel', 'create:large_cogwheel', 'create:shaft', 'create:belt_connector',
+      'create:precision_mechanism', 'create:electron_tube', 'create:sturdy_sheet',
+      'longhaul:machine_parts', 'longhaul:ore_concentrate', 'longhaul:technical_oil',
+      'longhaul:technical_glass', 'longhaul:refractory_mix', 'longhaul:treated_timber'
+    ],
+    nether: [
+      'minecraft:quartz', 'minecraft:netherite_scrap', 'minecraft:ancient_debris', 'minecraft:blaze_rod',
+      'minecraft:magma_cream', 'minecraft:nether_wart', 'minecraft:crimson_stem', 'minecraft:warped_stem',
+      'minecraft:blackstone', 'minecraft:gilded_blackstone', 'minecraft:soul_sand',
+      'minecraft:shroomlight', 'minecraft:wither_skeleton_skull', 'minecraft:gold_block'
+    ],
+    end: [
+      'minecraft:chorus_fruit', 'minecraft:popped_chorus_fruit', 'minecraft:shulker_shell',
+      'minecraft:end_stone', 'minecraft:purpur_block', 'minecraft:end_rod',
+      'minecraft:dragon_breath', 'minecraft:elytra', 'minecraft:ender_eye'
+    ],
+    loot: [
+      'minecraft:gold_nugget', 'minecraft:iron_nugget', 'minecraft:copper_block', 'minecraft:iron_block',
+      'minecraft:emerald_block', 'minecraft:lapis_block', 'minecraft:redstone_block', 'minecraft:coal_block',
+      'minecraft:clay_ball', 'minecraft:brick', 'minecraft:flint', 'minecraft:paper',
+      'minecraft:book', 'minecraft:compass', 'minecraft:clock', 'minecraft:spyglass',
+      'minecraft:candle', 'minecraft:lantern', 'minecraft:bell', 'minecraft:chain',
+      'minecraft:name_tag', 'minecraft:saddle', 'minecraft:totem_of_undying'
+    ]
+  };
+
+  var CATEGORY_META = {
+    wood: { label: 'Лесной промысел', icon: '🪓', cost: 280, baseIncome: 38, baseQty: 6, bonusItem: 'minecraft:charcoal', inputItems: { 'minecraft:iron_axe': 1, 'minecraft:coal': 1 } },
+    mining: { label: 'Горная выработка', icon: '⛏', cost: 340, baseIncome: 46, baseQty: 5, bonusItem: 'minecraft:coal', inputItems: { 'minecraft:oak_planks': 2, 'minecraft:coal': 1 } },
+    agro: { label: 'Аграрная фактория', icon: '🌾', cost: 260, baseIncome: 36, baseQty: 7, bonusItem: 'minecraft:bread', inputItems: { 'minecraft:bone_meal': 2 } },
+    marine: { label: 'Морской промысел', icon: '🌊', cost: 380, baseIncome: 52, baseQty: 4, bonusItem: 'minecraft:kelp', inputItems: { 'minecraft:oak_planks': 2, 'minecraft:iron_ingot': 1 } },
+    magic: { label: 'Арканный узел', icon: '🔮', cost: 480, baseIncome: 68, baseQty: 3, bonusItem: 'minecraft:lapis_lazuli', inputItems: { 'minecraft:redstone': 2, 'minecraft:coal': 1 } },
+    industry: { label: 'Индустриальный хаб', icon: '⚙', cost: 460, baseIncome: 64, baseQty: 4, bonusItem: 'create:andesite_alloy', inputItems: { 'minecraft:iron_ingot': 2, 'minecraft:coal': 2 } },
+    nether: { label: 'Адский комплекс', icon: '🔥', cost: 540, baseIncome: 84, baseQty: 4, bonusItem: 'minecraft:quartz', inputItems: { 'minecraft:coal': 3, 'minecraft:iron_ingot': 1 } },
+    end: { label: 'Аномалия Края', icon: '🌌', cost: 600, baseIncome: 96, baseQty: 3, bonusItem: 'minecraft:ender_pearl', inputItems: { 'minecraft:blaze_powder': 1, 'minecraft:redstone': 2 } },
+    loot: { label: 'Реликтовый хаб', icon: '🏺', cost: 440, baseIncome: 60, baseQty: 4, bonusItem: 'minecraft:gold_nugget', inputItems: { 'minecraft:coal': 2, 'minecraft:iron_ingot': 1 } }
+  };
+
+  var STRUCTURE_RARITIES = {
+    common: { id: 'common', name: 'Обычная', colorCode: '§f', color: 'white', rank: 1, incomeMult: 1.00, qtyMult: 1.00, costMult: 1.00 },
+    magic: { id: 'magic', name: 'Магическая', colorCode: '§9', color: 'blue', rank: 2, incomeMult: 1.30, qtyMult: 1.15, costMult: 1.15 },
+    rare: { id: 'rare', name: 'Редкая', colorCode: '§e', color: 'yellow', rank: 3, incomeMult: 1.65, qtyMult: 1.30, costMult: 1.35 },
+    epic: { id: 'epic', name: 'Эпическая', colorCode: '§5', color: 'dark_purple', rank: 4, incomeMult: 2.10, qtyMult: 1.50, costMult: 1.60 },
+    legendary: { id: 'legendary', name: 'Легендарная', colorCode: '§6', color: 'gold', rank: 5, incomeMult: 2.75, qtyMult: 1.75, costMult: 2.00 },
+    mythic: { id: 'mythic', name: 'Мифическая', colorCode: '§c', color: 'red', rank: 6, incomeMult: 3.60, qtyMult: 2.00, costMult: 2.50 }
+  };
+
+  var RARITY_ORDER = ['common', 'magic', 'rare', 'epic', 'legendary', 'mythic'];
+
+  var STRUCTURE_DIMENSIONS = {
+    'minecraft:overworld': { id: 'minecraft:overworld', key: 'overworld', name: 'Верхний мир', icon: '🌿', colorCode: '§a', incomeMult: 1.00, minRarity: 'common' },
+    'minecraft:the_nether': { id: 'minecraft:the_nether', key: 'nether', name: 'Нижний мир', icon: '🔥', colorCode: '§c', incomeMult: 1.35, minRarity: 'rare' },
+    'minecraft:the_end': { id: 'minecraft:the_end', key: 'end', name: 'Край', icon: '🌌', colorCode: '§d', incomeMult: 1.75, minRarity: 'epic' },
+    other: { id: 'other', key: 'other', name: 'Иное измерение', icon: '🌀', colorCode: '§b', incomeMult: 1.50, minRarity: 'rare' }
+  };
+
+  function normalizeDimension(dim) {
+    if (!dim) return 'minecraft:overworld';
+    var s = String(dim).toLowerCase().trim();
+    if (s === 'overworld' || s === 'minecraft:overworld') return 'minecraft:overworld';
+    if (s === 'nether' || s === 'the_nether' || s === 'minecraft:the_nether') return 'minecraft:the_nether';
+    if (s === 'end' || s === 'the_end' || s === 'minecraft:the_end') return 'minecraft:the_end';
+    if (s === 'other') return 'other';
+    return s;
+  }
+
+  function detectStructureDimension(structureId, liveDimension) {
+    if (liveDimension) {
+      var nd = normalizeDimension(liveDimension);
+      if (STRUCTURE_DIMENSIONS[nd]) return nd;
+      return 'other';
+    }
+    var s = String(structureId || '').toLowerCase();
+    if (/the_nether|:nether|nether_|_nether|bastion|fortress|piglin|crimson|warped|incendium|betternether|soul_black_smith|burning_arena/.test(s)) {
+      return 'minecraft:the_nether';
+    }
+    if (/the_end|end_city|end_ship|_end\b|:end_|ender_guardian|betterend|nullscape|chorus|shulker/.test(s)) {
+      return 'minecraft:the_end';
+    }
+    if (/^(aether|ad_astra|twilightforest|blue_skies|deeperdarker):/.test(s)) {
+      return 'other';
+    }
+    return 'minecraft:overworld';
+  }
+
+  function detectStructureRarity(structureId, theme, dimension) {
+    var s = String(structureId || '').toLowerCase();
+    var rarity = 'common';
+    if (/cataclysm:(burning_arena|sunken_city|ancient_factory|cursed_pyramid)|dungeons_arise:(heavenly_conqueror|shiraz_palace|foundry)|ignis|leviathan|ender_guardian/.test(s)) {
+      rarity = 'mythic';
+    } else if (/ancient_city|cataclysm:|end_ship|stronghold|dungeons_arise:(aviary|mechanical_nest|thornborn_towers)|monstrosity|harbinger/.test(s)) {
+      rarity = 'legendary';
+    } else if (/ocean_monument|monument_ocean|mansion|bastion|end_city|citadel|monastery|wizard_tower|palace|catacomb|deep_dark|sculk|bastille/.test(s)) {
+      rarity = 'epic';
+    } else if (/fortress|lighthouse|pyramid|temple|outpost|shipwreck|swamp_hut|witch|observatory|bakery|tavern|sky_village|apothecary|pillager|bandit/.test(s)) {
+      rarity = 'rare';
+    } else if (/sawmill|mineshaft|beekeeper|windmill|forge|smithy|dock|harbor|port|rail|station|foundry|quarry|trail_ruins/.test(s)) {
+      rarity = 'magic';
+    } else if (theme && theme.tier >= 3) {
+      rarity = 'epic';
+    } else if (theme && theme.tier === 2) {
+      rarity = 'rare';
+    } else if (simpleHash(s) % 5 === 0) {
+      rarity = 'magic';
+    }
+    var dSpec = STRUCTURE_DIMENSIONS[dimension] || STRUCTURE_DIMENSIONS['minecraft:overworld'];
+    var minIdx = RARITY_ORDER.indexOf(dSpec.minRarity || 'common');
+    var curIdx = RARITY_ORDER.indexOf(rarity);
+    if (curIdx < minIdx) rarity = RARITY_ORDER[minIdx];
+    return rarity;
+  }
+
+  function isEligibleResourceItem(itemId) {
+    if (!itemId) return false;
+    var s = String(itemId).toLowerCase();
+    if (!s || s === 'minecraft:air' || s === 'minecraft:void_air' || s === 'minecraft:cave_air') return false;
+    var bannedSubstrings = [
+      'spawn_egg', 'command_block', 'structure_block', 'structure_void', 'jigsaw',
+      'debug_stick', 'barrier', 'light_block', 'minecraft:light', 'bedrock',
+      'enchanted_book', 'potion', 'tipped_arrow', 'written_book', 'filled_map',
+      'bundle', 'spawner', 'monster_spawner', 'petrified_oak_slab', 'knowledge_book',
+      'infested_', 'budding_amethyst', 'reinforced_deepslate', 'frogspawn', 'farmland',
+      'dirt_path', 'player_head', 'creative_', 'operator_', 'unfinished_'
+    ];
+    for (var i = 0; i < bannedSubstrings.length; i++) {
+      if (s.indexOf(bannedSubstrings[i]) !== -1) return false;
+    }
+    return s.indexOf(':') !== -1;
+  }
+
+  function simpleHash(str) {
+    var h = 2166136261;
+    var s = String(str || '');
+    for (var i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = (h * 16777619) >>> 0;
+    }
+    return h >>> 0;
+  }
+
+  function formatStructureName(structureId) {
+    var raw = String(structureId || 'structure');
+    var colon = raw.indexOf(':');
+    var slug = colon >= 0 ? raw.slice(colon + 1) : raw;
+    var slash = slug.lastIndexOf('/');
+    if (slash >= 0) slug = slug.slice(slash + 1);
+    var parts = slug.split('_');
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i].length > 0) parts[i] = parts[i].charAt(0).toUpperCase() + parts[i].slice(1);
+    }
+    return parts.join(' ');
+  }
+
+  function detectStructureTheme(structureId) {
+    var s = String(structureId || '').toLowerCase();
+    if (/sawmill|lumber|logging|timber|woodcutter/.test(s)) return { category: 'wood', preferred: 'minecraft:oak_log', tier: 1 };
+    if (/beekeeper|apiary|honey|windmill|farm|barn|bakery|orchard|pasture|greenhouse|tavern|winery|village/.test(s)) {
+      if (/village_taiga|snowy/.test(s)) return { category: 'wood', tier: 1 };
+      if (/village_desert|savanna/.test(s)) return { category: 'agro', tier: 1 };
+      return { category: 'agro', tier: 1 };
+    }
+    if (/end_city|end_ship|_end\b|ender|chorus|shulker|betterend/.test(s)) return { category: 'end', tier: 3 };
+    if (/fortress|bastion|nether|piglin|crimson|warped|burning_arena|soul_black_smith/.test(s)) return { category: 'nether', tier: 3 };
+    if (/ocean|shipwreck|lighthouse|sunken|monument|harbor|dock|coral|kelp|pirate|raft|port/.test(s)) return { category: 'marine', tier: 2 };
+    if (/mineshaft|quarry|excavation|crypt|catacomb|tomb|dungeon|ancient_city|stronghold|foundry|forge|smithy|drill/.test(s)) return { category: 'mining', tier: 2 };
+    if (/wizard|witch|swamp_hut|apothecary|monastery|temple|pyramid|shrine|library|observatory|altar|arcane|mage|portal|tower|citadel|aviary|sanctum/.test(s)) return { category: 'magic', tier: 2 };
+    if (/factory|workshop|station|rail|depot|bunker|camp|outpost|fort|castle|mansion|palace|bastille|pillager/.test(s)) return { category: 'industry', tier: 2 };
+    return { category: 'loot', tier: 1 };
+  }
+
+  function makeSpec(structureId, itemId, theme, liveDimension) {
+    var meta = CATEGORY_META[theme.category] || CATEGORY_META.loot;
+    var tier = theme.tier || 1;
+    var dimension = detectStructureDimension(structureId, liveDimension);
+    var dSpec = STRUCTURE_DIMENSIONS[dimension] || STRUCTURE_DIMENSIONS['minecraft:overworld'];
+    var rarity = detectStructureRarity(structureId, theme, dimension);
+    var rSpec = STRUCTURE_RARITIES[rarity] || STRUCTURE_RARITIES.common;
+    var qty = Math.max(1, Math.round(Math.max(1, meta.baseQty - (tier - 1)) * rSpec.qtyMult));
+    var income = Math.round(meta.baseIncome * (1 + (tier - 1) * 0.25) * rSpec.incomeMult * dSpec.incomeMult);
+    var cost = Math.round(meta.cost * (1 + (tier - 1) * 0.18) * rSpec.costMult);
+    var reqInputs = {};
+    var inpBase = meta.inputItems || { 'minecraft:coal': 1 };
+    Object.keys(inpBase).forEach(function (ik) {
+      reqInputs[ik] = Math.max(1, Math.round(inpBase[ik] * (1 + (rSpec.rank >= 4 ? 1 : 0))));
+    });
+    return {
+      structureId: String(structureId),
+      displayName: formatStructureName(structureId),
+      category: theme.category,
+      categoryLabel: meta.label,
+      icon: meta.icon,
+      tier: tier,
+      dimension: dimension,
+      dimensionKey: dSpec.key,
+      dimensionName: dSpec.name,
+      dimensionIcon: dSpec.icon,
+      dimensionColor: dSpec.colorCode,
+      rarity: rarity,
+      rarityName: rSpec.name,
+      rarityColor: rSpec.colorCode,
+      rarityRank: rSpec.rank,
+      itemId: String(itemId),
+      baseQty: qty,
+      baseIncome: income,
+      cost: cost,
+      upkeepCost: Math.max(10, Math.round(14 * rSpec.costMult * dSpec.incomeMult)),
+      inputItems: reqInputs,
+      bonusItem: meta.bonusItem
+    };
+  }
+
+  function buildStructureCatalog(structureIds, availableItemIds, existingCatalog, structureDimMap) {
+    var catalog = {};
+    var usedItems = {};
+    var dimMap = structureDimMap || {};
+    var sortedIds = (structureIds || []).map(String).filter(function (s) { return s.length > 0; });
+    sortedIds.sort();
+
+    if (existingCatalog && typeof existingCatalog === 'object') {
+      Object.keys(existingCatalog).sort().forEach(function (sid) {
+        var prev = existingCatalog[sid];
+        if (prev && prev.itemId && !usedItems[prev.itemId]) {
+          var themePrev = detectStructureTheme(sid);
+          var prevDim = dimMap[sid] || prev.dimension || null;
+          catalog[sid] = makeSpec(sid, prev.itemId, themePrev, prevDim);
+          usedItems[prev.itemId] = sid;
+        }
+      });
+    }
+
+    var fallbackPool = [];
+    if (availableItemIds && availableItemIds.length) {
+      for (var fi = 0; fi < availableItemIds.length; fi++) {
+        var cand = String(availableItemIds[fi]);
+        if (isEligibleResourceItem(cand)) fallbackPool.push(cand);
+      }
+      fallbackPool.sort();
+    }
+    var allCuratedPool = [];
+    Object.keys(CATEGORY_POOLS).forEach(function (ck) {
+      CATEGORY_POOLS[ck].forEach(function (it) {
+        if (allCuratedPool.indexOf(it) === -1) allCuratedPool.push(it);
+      });
+    });
+
+    for (var i = 0; i < sortedIds.length; i++) {
+      var sid = sortedIds[i];
+      if (catalog[sid]) continue;
+      var theme = detectStructureTheme(sid);
+      var chosen = null;
+      if (theme.preferred && !usedItems[theme.preferred]) chosen = theme.preferred;
+      if (!chosen) {
+        var catPool = CATEGORY_POOLS[theme.category] || CATEGORY_POOLS.loot;
+        var h = simpleHash(sid);
+        for (var p = 0; p < catPool.length; p++) {
+          var cItem = catPool[(h + p) % catPool.length];
+          if (!usedItems[cItem]) { chosen = cItem; break; }
+        }
+      }
+      if (!chosen) {
+        var h2 = simpleHash(sid + ':cur');
+        for (var q = 0; q < allCuratedPool.length; q++) {
+          var aItem = allCuratedPool[(h2 + q) % allCuratedPool.length];
+          if (!usedItems[aItem]) { chosen = aItem; break; }
+        }
+      }
+      if (!chosen && fallbackPool.length > 0) {
+        var h3 = simpleHash(sid + ':fb');
+        for (var f = 0; f < fallbackPool.length; f++) {
+          var fItem = fallbackPool[(h3 + f) % fallbackPool.length];
+          if (!usedItems[fItem]) { chosen = fItem; break; }
+        }
+      }
+      if (!chosen) chosen = 'minecraft:paper';
+      usedItems[chosen] = sid;
+      catalog[sid] = makeSpec(sid, chosen, theme, dimMap[sid] || null);
+    }
+    return catalog;
+  }
+
+  function resolveStructureSpec(catalog, structureId, availableItemIds, liveDimension) {
+    var sid = String(structureId || '');
+    if (!sid) return null;
+    if (catalog && catalog[sid]) {
+      if (liveDimension && catalog[sid].dimension !== detectStructureDimension(sid, liveDimension)) {
+        return makeSpec(sid, catalog[sid].itemId, detectStructureTheme(sid), liveDimension);
+      }
+      return catalog[sid];
+    }
+    var usedItems = {};
+    if (catalog) {
+      Object.keys(catalog).forEach(function (k) {
+        if (catalog[k] && catalog[k].itemId) usedItems[catalog[k].itemId] = k;
+      });
+    }
+    var theme = detectStructureTheme(sid);
+    var catPool = CATEGORY_POOLS[theme.category] || CATEGORY_POOLS.loot;
+    var h = simpleHash(sid);
+    var chosen = null;
+    for (var i = 0; i < catPool.length; i++) {
+      var cand = catPool[(h + i) % catPool.length];
+      if (!usedItems[cand]) { chosen = cand; break; }
+    }
+    if (!chosen && availableItemIds && availableItemIds.length) {
+      for (var j = 0; j < availableItemIds.length; j++) {
+        var fb = String(availableItemIds[(h + j) % availableItemIds.length]);
+        if (isEligibleResourceItem(fb) && !usedItems[fb]) { chosen = fb; break; }
+      }
+    }
+    if (!chosen) chosen = catPool[h % catPool.length] || 'minecraft:iron_ingot';
+    var spec = makeSpec(sid, chosen, theme, liveDimension || null);
+    if (catalog) catalog[sid] = spec;
+    return spec;
+  }
+
+  function groupCatalogByDimension(catalog) {
+    var out = { overworld: [], nether: [], end: [], other: [] };
+    if (!catalog) return out;
+    Object.keys(catalog).sort().forEach(function (sid) {
+      var sp = catalog[sid];
+      var dk = (sp && sp.dimensionKey && out[sp.dimensionKey]) ? sp.dimensionKey : 'overworld';
+      out[dk].push(sp);
+    });
+    Object.keys(out).forEach(function (dk) {
+      out[dk].sort(function (a, b) {
+        return (b.rarityRank || 1) - (a.rarityRank || 1) || String(a.structureId).localeCompare(String(b.structureId));
+      });
+    });
+    return out;
+  }
+
+  function filterCatalog(catalog, dimensionFilter, rarityFilter) {
+    var out = [];
+    if (!catalog) return out;
+    var normDim = dimensionFilter ? normalizeDimension(dimensionFilter) : null;
+    Object.keys(catalog).sort().forEach(function (sid) {
+      var sp = catalog[sid];
+      if (!sp) return;
+      if (normDim && sp.dimension !== normDim && sp.dimensionKey !== dimensionFilter) return;
+      if (rarityFilter && sp.rarity !== rarityFilter) return;
+      out.push(sp);
+    });
+    out.sort(function (a, b) {
+      return (b.rarityRank || 1) - (a.rarityRank || 1) || String(a.structureId).localeCompare(String(b.structureId));
+    });
+    return out;
+  }
+
+  return {
+    CATEGORY_POOLS: CATEGORY_POOLS,
+    CATEGORY_META: CATEGORY_META,
+    STRUCTURE_RARITIES: STRUCTURE_RARITIES,
+    STRUCTURE_DIMENSIONS: STRUCTURE_DIMENSIONS,
+    isEligibleResourceItem: isEligibleResourceItem,
+    formatStructureName: formatStructureName,
+    normalizeDimension: normalizeDimension,
+    detectStructureDimension: detectStructureDimension,
+    detectStructureRarity: detectStructureRarity,
+    detectStructureTheme: detectStructureTheme,
+    buildStructureCatalog: buildStructureCatalog,
+    resolveStructureSpec: resolveStructureSpec,
+    groupCatalogByDimension: groupCatalogByDimension,
+    filterCatalog: filterCatalog
+  };
+})();
+
 global.LHOpenTTD = (function () {
   var SECTOR_SIZE = 256; // 16x16 chunks per sector, centered at (sx*256, sz*256)
   var BASE_CLAIM_COST = 250;
@@ -765,10 +1169,287 @@ global.LHOpenTTD = (function () {
     }
   };
 
+  var BOT_ARCHETYPES = {
+    mining_syndicate: {
+      id: 'mining_syndicate',
+      name: 'Горнопромышленный синдикат',
+      icon: '⛏',
+      tag: 'MINE',
+      colorCode: '§6',
+      transportSpec: 'underground',
+      resourceSpec: 'mining',
+      envType: 'underground',
+      preferredBuildings: ['mine_shaft', 'quarry', 'refinery'],
+      buyFocus: ['minecraft:oak_planks', 'minecraft:coal', 'minecraft:iron_ingot', 'minecraft:redstone'],
+      sellFocus: ['minecraft:raw_iron', 'minecraft:raw_gold', 'longhaul:ore_concentrate']
+    },
+    agro_holding: {
+      id: 'agro_holding',
+      name: 'Аграрно-пищевой холдинг',
+      icon: '🌾',
+      tag: 'AGRO',
+      colorCode: '§a',
+      transportSpec: 'road',
+      resourceSpec: 'agro',
+      envType: 'normal',
+      preferredBuildings: ['agro_complex', 'sawmill', 'warehouse'],
+      buyFocus: ['minecraft:bone_meal', 'minecraft:iron_ingot', 'minecraft:oak_log'],
+      sellFocus: ['minecraft:bread', 'minecraft:wheat', 'longhaul:field_rations']
+    },
+    aero_logistics: {
+      id: 'aero_logistics',
+      name: 'Воздушная грузовая лига',
+      icon: '✈',
+      tag: 'AERO',
+      colorCode: '§b',
+      transportSpec: 'air',
+      resourceSpec: 'energy',
+      envType: 'air',
+      preferredBuildings: ['airport', 'power_plant', 'trade_exchange'],
+      buyFocus: ['longhaul:technical_oil', 'minecraft:coal', 'minecraft:copper_ingot'],
+      sellFocus: ['create:brass_ingot', 'create:precision_mechanism', 'longhaul:technical_glass']
+    },
+    marine_cartel: {
+      id: 'marine_cartel',
+      name: 'Морской торговый картель',
+      icon: '🚢',
+      tag: 'SEA',
+      colorCode: '§9',
+      transportSpec: 'sea',
+      resourceSpec: 'forestry',
+      envType: 'sea',
+      preferredBuildings: ['oil_rig', 'sawmill', 'warehouse'],
+      buyFocus: ['longhaul:treated_timber', 'minecraft:iron_ingot', 'minecraft:coal'],
+      sellFocus: ['longhaul:marine_reagent', 'longhaul:technical_oil', 'minecraft:oak_log']
+    },
+    industrial_foundry: {
+      id: 'industrial_foundry',
+      name: 'Металлургический комбинат',
+      icon: '🏭',
+      tag: 'IND',
+      colorCode: '§e',
+      transportSpec: 'rail',
+      resourceSpec: 'mining',
+      envType: 'normal',
+      preferredBuildings: ['factory', 'refinery', 'power_plant'],
+      buyFocus: ['minecraft:iron_ingot', 'minecraft:coal', 'minecraft:redstone', 'minecraft:gold_ingot'],
+      sellFocus: ['create:iron_sheet', 'longhaul:machine_parts', 'create:andesite_alloy']
+    },
+    petrochemical_trust: {
+      id: 'petrochemical_trust',
+      name: 'Нефтехимический трест',
+      icon: '⚗',
+      tag: 'CHEM',
+      colorCode: '§5',
+      transportSpec: 'rail',
+      resourceSpec: 'energy',
+      envType: 'normal',
+      preferredBuildings: ['chemical_plant', 'oil_rig', 'power_plant'],
+      buyFocus: ['minecraft:coal', 'minecraft:redstone', 'longhaul:technical_oil'],
+      sellFocus: ['longhaul:technical_oil', 'longhaul:refractory_mix', 'minecraft:blaze_powder']
+    },
+    security_pmc: {
+      id: 'security_pmc',
+      name: 'ЧВК и охранный холдинг',
+      icon: '🛡',
+      tag: 'PMC',
+      colorCode: '§c',
+      transportSpec: 'road',
+      resourceSpec: 'mining',
+      envType: 'normal',
+      preferredBuildings: ['patrol_post', 'trade_exchange', 'factory'],
+      buyFocus: ['minecraft:iron_ingot', 'minecraft:coal', 'minecraft:gold_ingot'],
+      sellFocus: ['minecraft:arrow', 'minecraft:emerald', 'create:iron_sheet']
+    },
+    frontier_monopoly: {
+      id: 'frontier_monopoly',
+      name: 'Пограничная монополия',
+      icon: '🏛',
+      tag: 'FRNT',
+      colorCode: '§d',
+      transportSpec: 'air',
+      resourceSpec: 'forestry',
+      envType: 'air',
+      preferredBuildings: ['trade_exchange', 'warehouse', 'airport'],
+      buyFocus: ['minecraft:diamond', 'minecraft:emerald', 'minecraft:coal'],
+      sellFocus: ['minecraft:gold_ingot', 'create:brass_ingot', 'longhaul:technical_glass']
+    }
+  };
+
+  var COMPANY_TRAITS = {
+    aggressive_expander: {
+      id: 'aggressive_expander',
+      name: 'Экспансионист',
+      icon: '🚩',
+      colorCode: '§c',
+      claimCostMult: 0.80,
+      botExpandThreshold: 420,
+      startingRelBonus: -15,
+      aggressionWeight: 25,
+      summary: '-20% стоимость захвата секторов, агрессивное расширение и рейды, -15 старт. репутации.'
+    },
+    trade_magnate: {
+      id: 'trade_magnate',
+      name: 'Торговый магнат',
+      icon: '💰',
+      colorCode: '§6',
+      incomeMult: 1.15,
+      botCashBonus: 350,
+      valuationMult: 1.10,
+      summary: '+15% денежного дохода построек, +10% оценки компании и +350 Cr резерва боту.'
+    },
+    industrial_titan: {
+      id: 'industrial_titan',
+      name: 'Промышленный титан',
+      icon: '🏭',
+      colorCode: '§e',
+      incomeMult: 1.15,
+      yieldMult: 1.25,
+      summary: '+25% объёма выпуска продукции и +15% дохода Cr от предприятий.'
+    },
+    fortress_builder: {
+      id: 'fortress_builder',
+      name: 'Бастионный архитектор',
+      icon: '🛡',
+      colorCode: '§7',
+      startingStrengthBonus: 1,
+      fortifyCostMult: 0.75,
+      securityUpkeepMult: 0.80,
+      summary: '+1 к укреплению новых секторов, -25% цены фортификации и -20% расходов на охрану.'
+    },
+    frugal_logistics: {
+      id: 'frugal_logistics',
+      name: 'Бережливый логист',
+      icon: '📦',
+      colorCode: '§a',
+      buildCostMult: 0.85,
+      upkeepMult: 0.85,
+      summary: '-15% стоимость строительства и содержания всех производств.'
+    },
+    diplomat_guild: {
+      id: 'diplomat_guild',
+      name: 'Гильдия дипломатов',
+      icon: '🤝',
+      colorCode: '§b',
+      diplomacyCostMult: 0.70,
+      startingRelBonus: 15,
+      summary: '-30% стоимость лицензий/мирного выкупа и +15 стартовых отношений.'
+    },
+    energy_baron: {
+      id: 'energy_baron',
+      name: 'Энергобарон',
+      icon: '⚡',
+      colorCode: '§e',
+      extraAdjacencyPct: 0.15,
+      incomeMult: 1.08,
+      summary: '+15% доп. бонус от энергоподстанций и +8% выручки.'
+    },
+    structure_prospector: {
+      id: 'structure_prospector',
+      name: 'Охотник за руинами',
+      icon: '🏛',
+      colorCode: '§d',
+      structureCostMult: 0.75,
+      structureYieldMult: 1.30,
+      summary: '-25% цены освоения мировых структур и +30% их добычи.'
+    },
+    ruthless_raider: {
+      id: 'ruthless_raider',
+      name: 'Беспощадный рейдер',
+      icon: '⚔',
+      colorCode: '§4',
+      captureCostMult: 0.75,
+      startingRelBonus: -20,
+      aggressionWeight: 35,
+      summary: '-25% стоимость силового захвата секторов и частые рейды.'
+    },
+    steady_financier: {
+      id: 'steady_financier',
+      name: 'Стабильный финансист',
+      icon: '🏦',
+      colorCode: '§2',
+      botCashBonus: 250,
+      valuationMult: 1.08,
+      landTaxMult: 0.80,
+      summary: '+250 Cr резерва боту, -20% земельного налога и +8% к оценке.'
+    }
+  };
+
+  function rollCompanyTraits(count, rngFn) {
+    var rng = rngFn || Math.random;
+    var allIds = Object.keys(COMPANY_TRAITS);
+    var desired = Math.max(1, Math.min(3, Math.floor(Number(count || 2))));
+    var picked = [];
+    var pool = allIds.slice();
+    while (picked.length < desired && pool.length > 0) {
+      var idx = Math.floor(rng() * pool.length) % pool.length;
+      picked.push(pool.splice(idx, 1)[0]);
+    }
+    return picked;
+  }
+
+  function getCompanyTraitModifiers(comp) {
+    var mods = {
+      claimCostMult: 1.0,
+      captureCostMult: 1.0,
+      buildCostMult: 1.0,
+      structureCostMult: 1.0,
+      fortifyCostMult: 1.0,
+      diplomacyCostMult: 1.0,
+      upkeepMult: 1.0,
+      landTaxMult: 1.0,
+      securityUpkeepMult: 1.0,
+      incomeMult: 1.0,
+      yieldMult: 1.0,
+      structureYieldMult: 1.0,
+      extraAdjacencyPct: 0,
+      startingStrengthBonus: 0,
+      startingRelBonus: 0,
+      aggressionWeight: 0,
+      valuationMult: 1.0,
+      botExpandThreshold: 600,
+      botCashBonus: 0
+    };
+    if (!comp || !comp.traits || !comp.traits.length) return mods;
+    for (var i = 0; i < comp.traits.length; i++) {
+      var tr = COMPANY_TRAITS[comp.traits[i]];
+      if (!tr) continue;
+      if (tr.claimCostMult) mods.claimCostMult *= Number(tr.claimCostMult);
+      if (tr.captureCostMult) mods.captureCostMult *= Number(tr.captureCostMult);
+      if (tr.buildCostMult) mods.buildCostMult *= Number(tr.buildCostMult);
+      if (tr.structureCostMult) mods.structureCostMult *= Number(tr.structureCostMult);
+      if (tr.fortifyCostMult) mods.fortifyCostMult *= Number(tr.fortifyCostMult);
+      if (tr.diplomacyCostMult) mods.diplomacyCostMult *= Number(tr.diplomacyCostMult);
+      if (tr.upkeepMult) mods.upkeepMult *= Number(tr.upkeepMult);
+      if (tr.landTaxMult) mods.landTaxMult *= Number(tr.landTaxMult);
+      if (tr.securityUpkeepMult) mods.securityUpkeepMult *= Number(tr.securityUpkeepMult);
+      if (tr.incomeMult) mods.incomeMult *= Number(tr.incomeMult);
+      if (tr.yieldMult) mods.yieldMult *= Number(tr.yieldMult);
+      if (tr.structureYieldMult) mods.structureYieldMult *= Number(tr.structureYieldMult);
+      if (tr.extraAdjacencyPct) mods.extraAdjacencyPct += Number(tr.extraAdjacencyPct);
+      if (tr.startingStrengthBonus) mods.startingStrengthBonus += Number(tr.startingStrengthBonus);
+      if (tr.startingRelBonus) mods.startingRelBonus += Number(tr.startingRelBonus);
+      if (tr.aggressionWeight) mods.aggressionWeight += Number(tr.aggressionWeight);
+      if (tr.valuationMult) mods.valuationMult *= Number(tr.valuationMult);
+      if (tr.botExpandThreshold) mods.botExpandThreshold = Math.min(mods.botExpandThreshold, Number(tr.botExpandThreshold));
+      if (tr.botCashBonus) mods.botCashBonus += Number(tr.botCashBonus);
+    }
+    return mods;
+  }
+
+  function formatCompanyTraits(comp) {
+    if (!comp || !comp.traits || !comp.traits.length) return 'нет';
+    return comp.traits.map(function (tid) {
+      var tr = COMPANY_TRAITS[tid];
+      return tr ? (tr.colorCode + tr.icon + ' ' + tr.name + '§f') : tid;
+    }).join(', ');
+  }
+
   var DEFAULT_BOT_COMPANIES = [
     {
       id: 'bot_ironrail',
       name: 'Подземный Синдикат',
+      archetype: 'mining_syndicate',
       color: 'gold',
       colorCode: '§6',
       tag: 'DEEP',
@@ -783,6 +1464,7 @@ global.LHOpenTTD = (function () {
     {
       id: 'bot_greencart',
       name: 'Зелёный Обоз',
+      archetype: 'agro_holding',
       color: 'green',
       colorCode: '§a',
       tag: 'AGRO',
@@ -797,6 +1479,7 @@ global.LHOpenTTD = (function () {
     {
       id: 'bot_skyport',
       name: 'Небесный Альянс',
+      archetype: 'aero_logistics',
       color: 'aqua',
       colorCode: '§b',
       tag: 'AERO',
@@ -811,6 +1494,7 @@ global.LHOpenTTD = (function () {
     {
       id: 'bot_seawolf',
       name: 'Морской Конвой',
+      archetype: 'marine_cartel',
       color: 'blue',
       colorCode: '§9',
       tag: 'SEA',
@@ -889,6 +1573,10 @@ global.LHOpenTTD = (function () {
       baseIncome: 38,
       baseProduct: 'minecraft:raw_iron',
       baseQty: 6,
+      upkeepCost: 14,
+      upgradeUpkeepPerLevel: 16,
+      inputItems: { 'minecraft:oak_planks': 2, 'minecraft:coal': 1 },
+      upgradeItems: { 'minecraft:iron_ingot': 4, 'minecraft:redstone': 2 },
       summary: 'Добывает руды в захваченном секторе и приносит стабильный доход.',
       tier1Fork: [
         {
@@ -946,6 +1634,10 @@ global.LHOpenTTD = (function () {
       baseIncome: 48,
       baseProduct: 'longhaul:technical_oil',
       baseQty: 2,
+      upkeepCost: 18,
+      upgradeUpkeepPerLevel: 20,
+      inputItems: { 'minecraft:coal': 2, 'minecraft:iron_ingot': 1 },
+      upgradeItems: { 'minecraft:copper_ingot': 4, 'minecraft:redstone': 4 },
       summary: 'Качает нефтепродукты и техническое масло в секторе компании.',
       tier1Fork: [
         {
@@ -1003,6 +1695,10 @@ global.LHOpenTTD = (function () {
       baseIncome: 34,
       baseProduct: 'create:iron_sheet',
       baseQty: 4,
+      upkeepCost: 12,
+      upgradeUpkeepPerLevel: 14,
+      inputItems: { 'minecraft:oak_log': 2, 'minecraft:iron_ingot': 1 },
+      upgradeItems: { 'minecraft:iron_ingot': 4, 'minecraft:oak_planks': 6 },
       summary: 'Ускоряет оборот грузов, снижает экспансию (-10% захват/склад) и хранит сырьё.',
       tier1Fork: [
         {
@@ -1060,6 +1756,10 @@ global.LHOpenTTD = (function () {
       baseIncome: 68,
       baseProduct: 'create:brass_ingot',
       baseQty: 3,
+      upkeepCost: 26,
+      upgradeUpkeepPerLevel: 24,
+      inputItems: { 'longhaul:technical_oil': 1, 'minecraft:coal': 2 },
+      upgradeItems: { 'minecraft:copper_ingot': 6, 'minecraft:gold_ingot': 2 },
       summary: 'Магистральный воздушный узел компании: высокая выручка и дальний экспорт.',
       tier1Fork: [
         {
@@ -1117,6 +1817,10 @@ global.LHOpenTTD = (function () {
       baseIncome: 58,
       baseProduct: 'create:iron_sheet',
       baseQty: 8,
+      upkeepCost: 22,
+      upgradeUpkeepPerLevel: 20,
+      inputItems: { 'minecraft:raw_iron': 3, 'minecraft:coal': 2 },
+      upgradeItems: { 'minecraft:iron_ingot': 6, 'minecraft:redstone': 4 },
       summary: 'Штампует промышленные комплектующие, пластины и детали механизмов.',
       tier1Fork: [
         {
@@ -1174,6 +1878,10 @@ global.LHOpenTTD = (function () {
       baseIncome: 64,
       baseProduct: 'longhaul:ore_concentrate',
       baseQty: 2,
+      upkeepCost: 24,
+      upgradeUpkeepPerLevel: 22,
+      inputItems: { 'minecraft:raw_iron': 2, 'minecraft:coal': 3 },
+      upgradeItems: { 'minecraft:gold_ingot': 3, 'minecraft:redstone': 6 },
       summary: 'Обогащает руду и синтезирует химические реагенты и концентраты.',
       tier1Fork: [
         {
@@ -1232,6 +1940,11 @@ global.LHOpenTTD = (function () {
       baseProduct: 'minecraft:arrow',
       baseQty: 4,
       baseRadius: 256,
+      upkeepCost: 20,
+      securityCost: 18,
+      upgradeUpkeepPerLevel: 18,
+      inputItems: { 'minecraft:iron_ingot': 1, 'minecraft:coal': 1 },
+      upgradeItems: { 'minecraft:iron_ingot': 4, 'minecraft:gold_ingot': 2 },
       summary: 'Охраняет границы в радиусе 256 м: шлёт тревоги о вторжении, добыче, убийстве мобов и сборе ресурсов; на 3-м ур. спавнит охранников.',
       tier1Fork: [
         {
@@ -1287,6 +2000,182 @@ global.LHOpenTTD = (function () {
           summary: 'Радиус 480 м и спавн 3 элитных поборников-охранников рядом с нарушителем. Блокирует Автономный гарнизон.'
         }
       ]
+    },
+    sawmill: {
+      id: 'sawmill',
+      category: 'extraction',
+      categoryName: 'Добыча',
+      name: 'Лесопилка',
+      icon: 'minecraft:iron_axe',
+      mapSym: 'L',
+      cost: 280,
+      baseIncome: 34,
+      baseProduct: 'minecraft:oak_log',
+      baseQty: 8,
+      upkeepCost: 11,
+      upgradeUpkeepPerLevel: 12,
+      inputItems: { 'minecraft:iron_ingot': 1 },
+      upgradeItems: { 'minecraft:iron_ingot': 4, 'minecraft:oak_log': 8 },
+      summary: 'Заготавливает древесину, древесный уголь и пропитанный брус.',
+      tier1Fork: [
+        { id: 'kiln_drying', name: 'Сушильная камера', icon: 'minecraft:charcoal', cost: 340, incomeMult: 1.60, yieldMult: 1.35, bonusProduct: 'minecraft:charcoal', bonusQty: 8, summary: '+60% дохода и +8 древесного угля/цикл. Блокирует Строевой цех.' },
+        { id: 'timber_mill', name: 'Строевой цех', icon: 'longhaul:treated_timber', cost: 360, incomeMult: 1.40, yieldMult: 1.90, bonusProduct: 'longhaul:treated_timber', bonusQty: 2, summary: '×1.90 бревна и +2 обработанного бруса/цикл. Блокирует Сушильную камеру.' }
+      ],
+      tier2Fork: [
+        { id: 'forestry_harvester', name: 'Механический харвестер', icon: 'create:mechanical_saw', cost: 680, incomeMult: 1.55, yieldMult: 1.75, summary: '+75% заготовки леса и +55% прибыли. Блокирует Бумажный комбинат.' },
+        { id: 'pulp_mill', name: 'Бумажный комбинат', icon: 'minecraft:paper', cost: 660, incomeMult: 1.85, yieldMult: 1.35, summary: '+85% прибыли с переработки целлюлозы. Блокирует Механический харвестер.' }
+      ]
+    },
+    quarry: {
+      id: 'quarry',
+      category: 'extraction',
+      categoryName: 'Добыча',
+      name: 'Каменоломня',
+      icon: 'minecraft:stone_bricks',
+      mapSym: 'Q',
+      cost: 340,
+      baseIncome: 40,
+      baseProduct: 'minecraft:deepslate',
+      baseQty: 10,
+      upkeepCost: 14,
+      upgradeUpkeepPerLevel: 15,
+      inputItems: { 'minecraft:coal': 2, 'minecraft:oak_planks': 2 },
+      upgradeItems: { 'minecraft:iron_ingot': 4, 'minecraft:copper_ingot': 4 },
+      summary: 'Добывает строительный камень, андезит, сланец и огнеупорные смеси.',
+      tier1Fork: [
+        { id: 'andesite_vein', name: 'Андезитовый пласт', icon: 'create:andesite_alloy', cost: 400, incomeMult: 1.55, yieldMult: 1.65, bonusProduct: 'create:andesite_alloy', bonusQty: 4, summary: '+65% камня и +4 андезитового сплава/цикл. Блокирует Огнеупорный карьер.' },
+        { id: 'refractory_kiln', name: 'Огнеупорный карьер', icon: 'longhaul:refractory_mix', cost: 420, incomeMult: 1.75, yieldMult: 1.35, bonusProduct: 'longhaul:refractory_mix', bonusQty: 2, summary: '+75% дохода и +2 огнеупорной смеси/цикл. Блокирует Андезитовый пласт.' }
+      ],
+      tier2Fork: [
+        { id: 'diamond_wire_saw', name: 'Алмазная канатная пила', icon: 'minecraft:diamond', cost: 740, incomeMult: 1.70, yieldMult: 1.55, summary: '+70% дохода и +55% блоков. Блокирует Гравитационную дробилку.' },
+        { id: 'gravity_crusher', name: 'Гравитационная дробилка', icon: 'create:crushing_wheel', cost: 720, incomeMult: 1.45, yieldMult: 1.95, summary: '+95% объёма породы и щебня. Блокирует Алмазную канатную пилу.' }
+      ]
+    },
+    agro_complex: {
+      id: 'agro_complex',
+      category: 'production',
+      categoryName: 'Производство',
+      name: 'Агрокомплекс',
+      icon: 'minecraft:wheat',
+      mapSym: 'G',
+      cost: 300,
+      baseIncome: 36,
+      baseProduct: 'minecraft:bread',
+      baseQty: 8,
+      upkeepCost: 11,
+      upgradeUpkeepPerLevel: 12,
+      inputItems: { 'minecraft:bone_meal': 2, 'minecraft:coal': 1 },
+      upgradeItems: { 'minecraft:iron_ingot': 3, 'minecraft:gold_ingot': 1 },
+      summary: 'Выращивает продовольствие, пайки и техническое сырьё.',
+      tier1Fork: [
+        { id: 'hydroponics', name: 'Гидропоника', icon: 'minecraft:golden_carrot', cost: 380, incomeMult: 1.70, yieldMult: 1.45, bonusProduct: 'minecraft:golden_carrot', bonusQty: 4, summary: '+70% выручки и +4 золотые моркови/цикл. Блокирует Пайковый конвейер.' },
+        { id: 'ration_cannery', name: 'Пайковый конвейер', icon: 'longhaul:field_rations', cost: 400, incomeMult: 1.45, yieldMult: 1.90, bonusProduct: 'longhaul:field_rations', bonusQty: 2, summary: '×1.90 объёма и +2 полевых пайка/цикл. Блокирует Гидропонику.' }
+      ],
+      tier2Fork: [
+        { id: 'bio_greenhouse', name: 'Био-оранжерея', icon: 'minecraft:honey_bottle', cost: 700, incomeMult: 1.65, yieldMult: 1.60, summary: '+65% прибыли и +60% урожая. Блокирует Зерновой элеватор.' },
+        { id: 'grain_elevator', name: 'Зерновой элеватор', icon: 'create:millstone', cost: 680, incomeMult: 1.40, yieldMult: 2.00, summary: '×2.0 объёма продовольствия. Блокирует Био-оранжерею.' }
+      ]
+    },
+    chemical_plant: {
+      id: 'chemical_plant',
+      category: 'production',
+      categoryName: 'Производство',
+      name: 'Химкомбинат',
+      icon: 'minecraft:brewing_stand',
+      mapSym: 'C',
+      cost: 520,
+      baseIncome: 66,
+      baseProduct: 'longhaul:marine_reagent',
+      baseQty: 2,
+      upkeepCost: 24,
+      upgradeUpkeepPerLevel: 22,
+      inputItems: { 'minecraft:coal': 2, 'minecraft:redstone': 2 },
+      upgradeItems: { 'minecraft:gold_ingot': 3, 'minecraft:diamond': 1 },
+      summary: 'Производит химреагенты, порох, полимеры и реагенты очистки.',
+      tier1Fork: [
+        { id: 'acid_synthesis', name: 'Кислотный синтез', icon: 'minecraft:blaze_powder', cost: 500, incomeMult: 1.75, yieldMult: 1.40, bonusProduct: 'minecraft:gunpowder', bonusQty: 6, summary: '+75% прибыли и +6 пороха/цикл. Блокирует Полимерный цех.' },
+        { id: 'polymer_reactor', name: 'Полимерный цех', icon: 'longhaul:technical_glass', cost: 480, incomeMult: 1.45, yieldMult: 1.85, bonusProduct: 'longhaul:technical_glass', bonusQty: 2, summary: '+85% реагентов и +2 тех. стекла/цикл. Блокирует Кислотный синтез.' }
+      ],
+      tier2Fork: [
+        { id: 'electrolysis_array', name: 'Электролизный блок', icon: 'minecraft:redstone_block', cost: 900, incomeMult: 1.80, yieldMult: 1.50, summary: '+80% выручки и +50% выхода. Блокирует Катализ высокого давления.' },
+        { id: 'high_pressure_catalysis', name: 'Катализ высокого давления', icon: 'minecraft:ghast_tear', cost: 880, incomeMult: 1.50, yieldMult: 1.95, summary: '+95% товарного выпуска химикатов. Блокирует Электролизный блок.' }
+      ]
+    },
+    power_plant: {
+      id: 'power_plant',
+      category: 'energy',
+      categoryName: 'Энергетика',
+      name: 'Энергоподстанция',
+      icon: 'minecraft:lightning_rod',
+      mapSym: 'E',
+      cost: 460,
+      baseIncome: 44,
+      baseProduct: 'minecraft:redstone',
+      baseQty: 6,
+      upkeepCost: 18,
+      upgradeUpkeepPerLevel: 18,
+      inputItems: { 'minecraft:coal': 3 },
+      upgradeItems: { 'minecraft:copper_ingot': 6, 'minecraft:redstone': 6 },
+      summary: 'Питает соседние сектора компании: +20% (Ур.1), +35% (Ур.2) и +50% (Ур.3) к выработке всех построек рядом.',
+      tier1Fork: [
+        { id: 'steam_turbine', name: 'Паровая турбина', icon: 'create:steam_engine', cost: 480, incomeMult: 1.55, yieldMult: 1.45, adjacencyBonus: 0.35, bonusProduct: 'minecraft:copper_ingot', bonusQty: 4, summary: 'Усиливает соседние предприятия до +35% и даёт +4 меди/цикл. Блокирует Высоковольтную ЛЭП.' },
+        { id: 'hv_grid', name: 'Высоковольтная ЛЭП', icon: 'minecraft:copper_block', cost: 460, incomeMult: 1.40, yieldMult: 1.65, adjacencyBonus: 0.35, bonusProduct: 'minecraft:redstone', bonusQty: 6, summary: 'Усиливает соседние предприятия до +35% и +6 редстоуна/цикл. Блокирует Паровую турбину.' }
+      ],
+      tier2Fork: [
+        { id: 'fusion_substation', name: 'Термоядерный узел', icon: 'minecraft:nether_star', cost: 920, incomeMult: 1.80, yieldMult: 1.55, adjacencyBonus: 0.50, summary: 'Бонус соседних секторов до +50% и +80% собственной прибыли. Блокирует Каскадный трансформатор.' },
+        { id: 'cascade_transformer', name: 'Каскадный трансформатор', icon: 'minecraft:amethyst_shard', cost: 880, incomeMult: 1.55, yieldMult: 1.85, adjacencyBonus: 0.50, summary: 'Бонус соседних секторов до +50% и +85% ресурсов. Блокирует Термоядерный узел.' }
+      ]
+    },
+    trade_exchange: {
+      id: 'trade_exchange',
+      category: 'logistics',
+      categoryName: 'Логистика',
+      name: 'Торговый терминал',
+      icon: 'minecraft:emerald',
+      mapSym: 'T',
+      cost: 440,
+      baseIncome: 62,
+      baseProduct: 'minecraft:emerald',
+      baseQty: 2,
+      upkeepCost: 16,
+      upgradeUpkeepPerLevel: 16,
+      inputItems: { 'minecraft:paper': 2, 'minecraft:gold_nugget': 2 },
+      upgradeItems: { 'minecraft:emerald': 2, 'minecraft:gold_ingot': 3 },
+      summary: 'Приносит брокерскую комиссию и изумрудную валюту с каждого цикла.',
+      tier1Fork: [
+        { id: 'commodity_desk', name: 'Товарная биржа', icon: 'minecraft:gold_ingot', cost: 440, incomeMult: 1.75, yieldMult: 1.35, bonusProduct: 'minecraft:gold_ingot', bonusQty: 2, summary: '+75% прибыли и +2 золота/цикл. Блокирует Таможенный брокер.' },
+        { id: 'customs_broker', name: 'Таможенный брокер', icon: 'minecraft:compass', cost: 420, incomeMult: 1.45, yieldMult: 1.80, bonusProduct: 'minecraft:emerald', bonusQty: 2, summary: '+80% валюты и +2 изумруда/цикл. Блокирует Товарную биржу.' }
+      ],
+      tier2Fork: [
+        { id: 'clearing_house', name: 'Клиринговый дом', icon: 'minecraft:emerald_block', cost: 840, incomeMult: 1.85, yieldMult: 1.45, summary: '+85% прибыли с оборота. Блокирует Фьючерсный центр.' },
+        { id: 'futures_desk', name: 'Фьючерсный центр', icon: 'minecraft:clock', cost: 800, incomeMult: 1.55, yieldMult: 1.90, summary: '+90% выпуска активов. Блокирует Клиринговый дом.' }
+      ]
+    },
+    structure_facility: {
+      id: 'structure_facility',
+      category: 'structure',
+      categoryName: 'Мировая структура',
+      name: 'Освоенная структура',
+      icon: 'minecraft:lodestone',
+      mapSym: 'S',
+      cost: 360,
+      baseIncome: 52,
+      baseProduct: 'minecraft:iron_ingot',
+      baseQty: 4,
+      upkeepCost: 16,
+      upgradeUpkeepPerLevel: 18,
+      requiresWorldStructure: true,
+      inputItems: { 'minecraft:coal': 1 },
+      upgradeItems: { 'minecraft:iron_ingot': 4, 'minecraft:emerald': 2 },
+      summary: 'Перепрофилирует существующую в секторе мировую структуру в уникальное производство (1 вид структуры = 1 уникальный ресурс).',
+      tier1Fork: [
+        { id: 'high_value_refine', name: 'Глубокая переработка', icon: 'minecraft:emerald', cost: 440, incomeMult: 1.75, yieldMult: 1.35, summary: '+75% дохода Cr и бонусный побочный ресурс структуры. Блокирует Интенсивный промысел.' },
+        { id: 'mass_extraction', name: 'Интенсивный промысел', icon: 'create:mechanical_drill', cost: 420, incomeMult: 1.35, yieldMult: 2.00, summary: '×2.0 выпуска уникального ресурса структуры. Блокирует Глубокую переработку.' }
+      ],
+      tier2Fork: [
+        { id: 'monopoly_brand', name: 'Монопольный бренд', icon: 'minecraft:nether_star', cost: 840, incomeMult: 1.80, yieldMult: 1.45, summary: '+80% выручки и +45% уникального товара. Блокирует Сетевой хаб.' },
+        { id: 'automated_network', name: 'Сетевой хаб структуры', icon: 'create:brass_funnel', cost: 800, incomeMult: 1.45, yieldMult: 1.95, summary: '+95% товарного выпуска структуры. Блокирует Монопольный бренд.' }
+      ]
     }
   };
 
@@ -1296,8 +2185,17 @@ global.LHOpenTTD = (function () {
     if (!state.playerRelations) state.playerRelations = {};
     if (!state.supplyContracts) state.supplyContracts = [];
     if (!state.sectorOffers) state.sectorOffers = [];
+    if (!state.sectorStructures) state.sectorStructures = {};
+    if (!state.structureCatalog) state.structureCatalog = {};
+    if (!state.auctions) state.auctions = [];
+    if (!state.activeMobRaids) state.activeMobRaids = [];
+    if (!state.coalitions) state.coalitions = {};
     if (!(state.nextBuildingSeq > 0)) state.nextBuildingSeq = 1;
     if (!(state.nextSupplySeq > 0)) state.nextSupplySeq = 1;
+    if (!(state.nextAuctionSeq > 0)) state.nextAuctionSeq = 1;
+    if (!(state.nextMobRaidSeq > 0)) state.nextMobRaidSeq = 1;
+    if (!(state.botChapterSpawnsDone >= 0)) state.botChapterSpawnsDone = 0;
+    if (!(state.completedChapters >= 0)) state.completedChapters = 0;
     return state;
   }
 
@@ -1474,7 +2372,8 @@ global.LHOpenTTD = (function () {
     if (map[buyerCid]) return { ok: false, reason: 'already_owned' };
     var base = k === 'mining' ? 240 : 120;
     var mult = rel.score < 0 ? (1.0 + Math.abs(rel.score) / 100.0) : Math.max(0.70, 1.0 - rel.score / 250.0);
-    var cost = Math.round(base * mult);
+    var tMods = getCompanyTraitModifiers(buyer);
+    var cost = Math.round(base * mult * tMods.diplomacyCostMult);
     if (buyer.cash < cost) return { ok: false, reason: 'no_cash', cost: cost, cash: buyer.cash };
     buyer.cash -= cost;
     owner.cash += cost;
@@ -1571,10 +2470,10 @@ global.LHOpenTTD = (function () {
     };
   }
 
-  function diplomaticBuySector(state, buyerCid, sx, sz) {
+  function diplomaticBuySector(state, buyerCid, sx, sz, dimension) {
     ensureDiplomacyState(state);
     var buyer = state.companies && state.companies[buyerCid];
-    var info = resolveSectorOwner(state, sx, sz);
+    var info = resolveSectorOwner(state, sx, sz, dimension);
     if (!buyer || info.kind !== 'claimed' || !info.owner || info.owner === buyerCid) {
       return { ok: false, reason: 'not_owned_by_other' };
     }
@@ -1584,13 +2483,14 @@ global.LHOpenTTD = (function () {
     var rel = getRelation(state, buyerCid, seller.id);
     if (rel.score <= -30) return { ok: false, reason: 'hostile', score: rel.score };
     var mult = rel.alliance ? 0.75 : (rel.score >= 20 ? 0.85 : 1.0);
-    var bldg = getSectorBuilding(state, sx, sz);
+    var tMods = getCompanyTraitModifiers(buyer);
+    var bldg = getSectorBuilding(state, sx, sz, dimension);
     var bldgVal = bldg ? (BUILDING_CATALOG[bldg.type] ? BUILDING_CATALOG[bldg.type].cost * bldg.level * 0.6 : 200) : 0;
-    var price = Math.round((220 * info.strength + bldgVal) * mult);
+    var price = Math.round((220 * info.strength + bldgVal) * mult * tMods.diplomacyCostMult);
     if (buyer.cash < price) return { ok: false, reason: 'no_cash', cost: price, cash: buyer.cash };
     buyer.cash -= price;
     seller.cash += price;
-    var k = sectorKey(sx, sz);
+    var k = sectorKey(sx, sz, dimension);
     state.claims[k].owner = buyerCid;
     state.claims[k].isHq = false;
     if (bldg) bldg.owner = buyerCid;
@@ -1599,9 +2499,9 @@ global.LHOpenTTD = (function () {
     return { ok: true, price: price, sellerName: seller.name, newScore: rel.score };
   }
 
-  function offerSectorSale(state, sellerCid, buyerCid, sx, sz, price) {
+  function offerSectorSale(state, sellerCid, buyerCid, sx, sz, price, dimension) {
     ensureDiplomacyState(state);
-    var k = sectorKey(sx, sz);
+    var k = sectorKey(sx, sz, dimension);
     var cl = state.claims[k];
     if (!cl || cl.owner !== sellerCid) return { ok: false, reason: 'not_owned' };
     if (cl.isHq && countClaims(state, sellerCid) <= 1) return { ok: false, reason: 'last_hq' };
@@ -1613,6 +2513,7 @@ global.LHOpenTTD = (function () {
       buyerCid: buyerCid,
       sx: sx,
       sz: sz,
+      dimension: global.LHStructureProduction ? global.LHStructureProduction.normalizeDimension(dimension) : 'minecraft:overworld',
       price: pr,
       status: 'open'
     };
@@ -1632,7 +2533,7 @@ global.LHOpenTTD = (function () {
     if (!offer || offer.buyerCid !== buyerCid) return { ok: false, reason: 'not_found' };
     var buyer = state.companies[buyerCid];
     var seller = state.companies[offer.sellerCid];
-    var k = sectorKey(offer.sx, offer.sz);
+    var k = sectorKey(offer.sx, offer.sz, offer.dimension);
     var cl = state.claims[k];
     if (!buyer || !seller || !cl || cl.owner !== offer.sellerCid) return { ok: false, reason: 'invalid_state' };
     if (buyer.cash < offer.price) return { ok: false, reason: 'no_cash', cost: offer.price };
@@ -1640,16 +2541,16 @@ global.LHOpenTTD = (function () {
     seller.cash += offer.price;
     cl.owner = buyerCid;
     cl.isHq = false;
-    var bldg = getSectorBuilding(state, offer.sx, offer.sz);
+    var bldg = getSectorBuilding(state, offer.sx, offer.sz, offer.dimension);
     if (bldg) bldg.owner = buyerCid;
     offer.status = 'completed';
     adjustRelation(state, buyerCid, seller.id, 6, 'Сделка по сектору');
     return { ok: true, offer: offer };
   }
 
-  function getSectorBuilding(state, sx, sz) {
+  function getSectorBuilding(state, sx, sz, dimension) {
     ensureDiplomacyState(state);
-    return state.buildings[sectorKey(sx, sz)] || null;
+    return state.buildings[sectorKey(sx, sz, dimension)] || null;
   }
 
   function listCompanyBuildings(state, cid) {
@@ -1711,27 +2612,120 @@ global.LHOpenTTD = (function () {
     return { x: hx, y: hy, z: hz, sx: Number(comp.hqSx || 0), sz: Number(comp.hqSz || 0), envType: env };
   }
 
-  function buildCompanyBuilding(state, cid, sx, sz, bType, wx, wy, wz) {
+  function syncStructureCatalog(state, structureIds, availableItemIds, structureDimMap) {
     ensureDiplomacyState(state);
+    if (!global.LHStructureProduction) return {};
+    state.structureCatalog = global.LHStructureProduction.buildStructureCatalog(
+      structureIds || [],
+      availableItemIds || null,
+      state.structureCatalog || {},
+      structureDimMap || null
+    );
+    return state.structureCatalog;
+  }
+
+  function recordSectorStructures(state, sx, sz, structureIds, dimension) {
+    ensureDiplomacyState(state);
+    var dim = global.LHStructureProduction ? global.LHStructureProduction.normalizeDimension(dimension) : 'minecraft:overworld';
+    var k = sectorKey(sx, sz, dim);
+    var prev = state.sectorStructures[k] || [];
+    var added = [];
+    for (var i = 0; i < (structureIds || []).length; i++) {
+      var sid = String(structureIds[i] || '');
+      if (!sid) continue;
+      if (prev.indexOf(sid) === -1) {
+        prev.push(sid);
+        added.push(sid);
+      }
+      if (global.LHStructureProduction && !state.structureCatalog[sid]) {
+        global.LHStructureProduction.resolveStructureSpec(state.structureCatalog, sid, null, dim);
+      }
+    }
+    if (prev.length > 0) state.sectorStructures[k] = prev;
+    return added;
+  }
+
+  function getSectorStructures(state, sx, sz, dimension) {
+    ensureDiplomacyState(state);
+    var dim = global.LHStructureProduction ? global.LHStructureProduction.normalizeDimension(dimension) : 'minecraft:overworld';
+    var k = sectorKey(sx, sz, dim);
+    var list = state.sectorStructures[k] || [];
+    var out = [];
+    for (var i = 0; i < list.length; i++) {
+      var sid = list[i];
+      var sp = state.structureCatalog[sid] || (global.LHStructureProduction ? global.LHStructureProduction.resolveStructureSpec(state.structureCatalog, sid, null, dim) : null);
+      if (sp) out.push(sp);
+    }
+    out.sort(function (a, b) {
+      return (b.rarityRank || 1) - (a.rarityRank || 1);
+    });
+    return out;
+  }
+
+  function getBuildingRequiredInputs(b) {
+    if (!b) return {};
+    if (b.inputItems && typeof b.inputItems === 'object') return b.inputItems;
+    var spec = BUILDING_CATALOG[b.type];
+    return (spec && spec.inputItems) ? spec.inputItems : {};
+  }
+
+  function supplyBuildingInputs(state, cid, sx, sz, itemsMap, dimension) {
+    ensureDiplomacyState(state);
+    var b = getSectorBuilding(state, sx, sz, dimension);
+    if (!b || (cid && b.owner !== cid)) return { ok: false, reason: 'not_found' };
+    if (!b.inputBuffer) b.inputBuffer = {};
+    var added = 0;
+    Object.keys(itemsMap || {}).forEach(function (iid) {
+      var q = Math.max(0, Math.round(Number(itemsMap[iid] || 0)));
+      if (q > 0) {
+        b.inputBuffer[iid] = Number(b.inputBuffer[iid] || 0) + q;
+        added += q;
+      }
+    });
+    if (added > 0 && b.pausedReason === 'missing_inputs') {
+      b.pausedReason = null;
+    }
+    return { ok: true, added: added, inputBuffer: b.inputBuffer };
+  }
+
+  function seedStarterInputs(b, reqInputs, cycles) {
+    if (!b.inputBuffer) b.inputBuffer = {};
+    var c = Math.max(0, Math.round(Number(cycles || 2)));
+    if (c <= 0) return;
+    Object.keys(reqInputs || {}).forEach(function (iid) {
+      b.inputBuffer[iid] = Number(b.inputBuffer[iid] || 0) + Math.max(1, Math.round(Number(reqInputs[iid] || 1))) * c;
+    });
+  }
+
+  function buildCompanyBuilding(state, cid, sx, sz, bType, wx, wy, wz, options) {
+    ensureDiplomacyState(state);
+    var opts = options || {};
     var comp = state.companies && state.companies[cid];
     if (!comp) return { ok: false, reason: 'no_company' };
     var spec = BUILDING_CATALOG[bType];
     if (!spec) return { ok: false, reason: 'bad_type' };
-    var k = sectorKey(sx, sz);
+    if (spec.requiresWorldStructure) {
+      return { ok: false, reason: 'requires_world_structure' };
+    }
+    var dim = global.LHStructureProduction ? global.LHStructureProduction.normalizeDimension(opts.dimension || 'minecraft:overworld') : 'minecraft:overworld';
+    var k = sectorKey(sx, sz, dim);
     var cl = state.claims[k];
     if (!cl || cl.owner !== cid) return { ok: false, reason: 'not_your_sector' };
     if (state.buildings[k]) return { ok: false, reason: 'already_built', existing: state.buildings[k] };
-    if (comp.cash < spec.cost) return { ok: false, reason: 'no_cash', cost: spec.cost, cash: comp.cash };
-    comp.cash -= spec.cost;
+    var tMods = getCompanyTraitModifiers(comp);
+    var cost = Math.max(50, Math.round(spec.cost * tMods.buildCostMult));
+    if (comp.cash < cost) return { ok: false, reason: 'no_cash', cost: cost, cash: comp.cash };
+    comp.cash -= cost;
     var env = getCompanyEnvType(comp);
-    var resolvedY = env === 'normal'
-      ? Math.max(63, Math.round(Number(wy || 70)))
-      : preferredBuildingY(env, wy);
+    var resolvedY = (dim !== 'minecraft:overworld')
+      ? Math.round(Number(wy || 70))
+      : (env === 'normal' ? Math.max(63, Math.round(Number(wy || 70))) : preferredBuildingY(env, wy));
     var bldg = {
       id: 'b' + (state.nextBuildingSeq++),
       type: bType,
       category: spec.category,
       envType: env,
+      dimension: dim,
       owner: cid,
       sx: sx,
       sz: sz,
@@ -1744,6 +2738,7 @@ global.LHOpenTTD = (function () {
       intactBlocks: 20,
       integrityPct: 100,
       operational: true,
+      pausedReason: null,
       level: 1,
       branch1: null,
       locked1: null,
@@ -1751,15 +2746,111 @@ global.LHOpenTTD = (function () {
       locked2: null,
       cashBuffer: 0,
       stockBuffer: {},
+      inputBuffer: {},
+      outputContainerQueue: {},
       cyclesDone: 0
     };
+    if (!opts.emptyInputs) {
+      seedStarterInputs(bldg, spec.inputItems || {}, 2);
+    }
     state.buildings[k] = bldg;
-    return { ok: true, building: bldg, spec: spec, cost: spec.cost };
+    return { ok: true, building: bldg, spec: spec, cost: cost };
   }
 
-  function damageBuildingIntegrity(state, sx, sz, blockDelta, isCoreBroken) {
+  function convertStructureToFacility(state, cid, sx, sz, structureId, wx, wy, wz, options) {
     ensureDiplomacyState(state);
-    var b = getSectorBuilding(state, sx, sz);
+    var opts = options || {};
+    var comp = state.companies && state.companies[cid];
+    if (!comp) return { ok: false, reason: 'no_company' };
+    var dim = global.LHStructureProduction ? global.LHStructureProduction.normalizeDimension(opts.dimension || 'minecraft:overworld') : 'minecraft:overworld';
+    var k = sectorKey(sx, sz, dim);
+    var cl = state.claims[k];
+    if (!cl || cl.owner !== cid) return { ok: false, reason: 'not_your_sector', key: k };
+    if (state.buildings[k]) return { ok: false, reason: 'already_built', existing: state.buildings[k] };
+
+    var discovered = state.sectorStructures[k] || [];
+    var chosenSid = structureId ? String(structureId) : (discovered.length ? discovered[0] : '');
+    if (!chosenSid) return { ok: false, reason: 'no_structure_in_sector' };
+    if (!opts.skipDiscoveryCheck && discovered.indexOf(chosenSid) === -1) {
+      return { ok: false, reason: 'structure_not_in_sector', structureId: chosenSid };
+    }
+    var sSpec = (state.structureCatalog && state.structureCatalog[chosenSid]) ||
+      (global.LHStructureProduction ? global.LHStructureProduction.resolveStructureSpec(state.structureCatalog, chosenSid, opts.availableItemIds || null, dim) : null);
+    if (!sSpec) return { ok: false, reason: 'unknown_structure' };
+
+    var baseSpec = BUILDING_CATALOG.structure_facility;
+    var tMods = getCompanyTraitModifiers(comp);
+    var cost = Math.max(50, Math.round(Number(sSpec.cost || baseSpec.cost || 360) * tMods.buildCostMult * tMods.structureCostMult));
+    if (comp.cash < cost) return { ok: false, reason: 'no_cash', cost: cost, cash: comp.cash };
+    comp.cash -= cost;
+
+    var env = getCompanyEnvType(comp);
+    var resolvedY = (dim !== 'minecraft:overworld')
+      ? Math.round(Number(wy || 70))
+      : (env === 'normal' ? Math.max(63, Math.round(Number(wy || 70))) : preferredBuildingY(env, wy));
+
+    var reqInputs = sSpec.inputItems || baseSpec.inputItems || { 'minecraft:coal': 1 };
+    var bldg = {
+      id: 'b' + (state.nextBuildingSeq++),
+      type: 'structure_facility',
+      category: 'structure',
+      envType: env,
+      dimension: sSpec.dimension || dim,
+      owner: cid,
+      sx: sx,
+      sz: sz,
+      key: k,
+      x: Math.round(Number(wx || sx * SECTOR_SIZE)),
+      y: resolvedY,
+      z: Math.round(Number(wz || sz * SECTOR_SIZE)),
+      halfSpan: 2,
+      maxBlocks: 16,
+      intactBlocks: 16,
+      integrityPct: 100,
+      operational: true,
+      pausedReason: null,
+      preserveWorldStructure: true,
+      structureId: sSpec.structureId,
+      structureName: sSpec.displayName,
+      structureCategory: sSpec.category,
+      structureCategoryLabel: sSpec.categoryLabel,
+      structureIcon: sSpec.icon,
+      structureRarity: sSpec.rarity || 'common',
+      structureRarityName: sSpec.rarityName || 'Обычная',
+      structureRarityColor: sSpec.rarityColor || '§f',
+      structureRarityRank: sSpec.rarityRank || 1,
+      rarity: sSpec.rarity || 'common',
+      rarityName: sSpec.rarityName || 'Обычная',
+      rarityColor: sSpec.rarityColor || '§f',
+      rarityRank: sSpec.rarityRank || 1,
+      structureDimensionName: sSpec.dimensionName || 'Верхний мир',
+      productItem: sSpec.itemId,
+      bonusProduct: sSpec.bonusItem,
+      baseIncome: sSpec.baseIncome,
+      baseQty: sSpec.baseQty,
+      upkeepCost: sSpec.upkeepCost || baseSpec.upkeepCost || 16,
+      inputItems: reqInputs,
+      level: 1,
+      branch1: null,
+      locked1: null,
+      branch2: null,
+      locked2: null,
+      cashBuffer: 0,
+      stockBuffer: {},
+      inputBuffer: {},
+      outputContainerQueue: {},
+      cyclesDone: 0
+    };
+    if (!opts.emptyInputs) {
+      seedStarterInputs(bldg, reqInputs, 2);
+    }
+    state.buildings[k] = bldg;
+    return { ok: true, building: bldg, spec: baseSpec, structureSpec: sSpec, cost: cost };
+  }
+
+  function damageBuildingIntegrity(state, sx, sz, blockDelta, isCoreBroken, dimension) {
+    ensureDiplomacyState(state);
+    var b = getSectorBuilding(state, sx, sz, dimension);
     if (!b) return { ok: false, reason: 'no_building' };
     var maxB = Math.max(1, Number(b.maxBlocks || 20));
     var cur = typeof b.intactBlocks === 'number' ? b.intactBlocks : maxB;
@@ -1771,7 +2862,7 @@ global.LHOpenTTD = (function () {
     b.operational = b.integrityPct >= 35 && !isCoreBroken;
     var destroyed = b.integrityPct <= 0 || !!isCoreBroken;
     if (destroyed) {
-      delete state.buildings[sectorKey(sx, sz)];
+      delete state.buildings[sectorKey(sx, sz, dimension)];
     }
     return {
       ok: true,
@@ -1785,10 +2876,10 @@ global.LHOpenTTD = (function () {
     };
   }
 
-  function repairBuildingIntegrity(state, cid, sx, sz) {
+  function repairBuildingIntegrity(state, cid, sx, sz, dimension) {
     ensureDiplomacyState(state);
     var comp = state.companies && state.companies[cid];
-    var b = getSectorBuilding(state, sx, sz);
+    var b = getSectorBuilding(state, sx, sz, dimension);
     if (!comp || !b || b.owner !== cid) return { ok: false, reason: 'not_found' };
     var maxB = Math.max(1, Number(b.maxBlocks || 20));
     var cur = typeof b.intactBlocks === 'number' ? b.intactBlocks : maxB;
@@ -1803,10 +2894,10 @@ global.LHOpenTTD = (function () {
     return { ok: true, cost: cost, integrityPct: 100, building: b };
   }
 
-  function upgradeCompanyBuilding(state, cid, sx, sz, choiceId) {
+  function upgradeCompanyBuilding(state, cid, sx, sz, choiceId, dimension) {
     ensureDiplomacyState(state);
     var comp = state.companies && state.companies[cid];
-    var b = getSectorBuilding(state, sx, sz);
+    var b = getSectorBuilding(state, sx, sz, dimension);
     if (!comp || !b || b.owner !== cid) return { ok: false, reason: 'not_found' };
     var spec = BUILDING_CATALOG[b.type];
     if (!spec) return { ok: false, reason: 'bad_type' };
@@ -1844,10 +2935,45 @@ global.LHOpenTTD = (function () {
     return { ok: false, reason: 'max_level' };
   }
 
-  function getBuildingYieldProfile(b) {
+  function getPowerPlantAdjacencyMultiplier(state, ownerCid, sx, sz, dimension) {
+    ensureDiplomacyState(state);
+    if (!ownerCid) return 1.0;
+    var dim = global.LHStructureProduction ? global.LHStructureProduction.normalizeDimension(dimension) : 'minecraft:overworld';
+    var bestBonus = 0;
+    var dirs = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]];
+    for (var i = 0; i < dirs.length; i++) {
+      var nb = getSectorBuilding(state, sx + dirs[i][0], sz + dirs[i][1], dim);
+      if (!nb || nb.owner !== ownerCid || nb.type !== 'power_plant' || nb.operational === false) continue;
+      var lvl = Number(nb.level || 1);
+      var bonus = lvl >= 3 ? 0.50 : (lvl === 2 ? 0.35 : 0.20);
+      if (bonus > bestBonus) bestBonus = bonus;
+    }
+    var comp = state.companies && state.companies[ownerCid];
+    if (bestBonus > 0 && comp) {
+      var tMods = getCompanyTraitModifiers(comp);
+      bestBonus += tMods.extraAdjacencyPct;
+    }
+    return 1.0 + bestBonus;
+  }
+
+  function isCompanySubsidized(state, cid, sx, sz) {
+    if (!state || !state.subsidy) return false;
+    if (state.subsidy.companyId && state.subsidy.companyId === cid) return true;
+    if (typeof state.subsidy.sx === 'number' && typeof state.subsidy.sz === 'number' &&
+        state.subsidy.sx === sx && state.subsidy.sz === sz) return true;
+    return false;
+  }
+
+  function getBuildingYieldProfile(b, adjMultOrOpts, compOrNull) {
     var spec = BUILDING_CATALOG[b.type];
-    if (!spec) return { income: 0, items: {} };
-    var incMult = 1.0, yMult = 1.0;
+    if (!spec) return { income: 0, items: {}, adjacencyMult: 1.0, subsidyMult: 1.0 };
+    var adjMult = (typeof adjMultOrOpts === 'number') ? Math.max(1.0, adjMultOrOpts) : 1.0;
+    var subsidyMult = (adjMultOrOpts && typeof adjMultOrOpts === 'object' && adjMultOrOpts.subsidyMult) ? Number(adjMultOrOpts.subsidyMult) : 1.0;
+    if (adjMultOrOpts && typeof adjMultOrOpts === 'object' && adjMultOrOpts.adjMult) adjMult = Math.max(1.0, Number(adjMultOrOpts.adjMult));
+    var tMods = compOrNull ? getCompanyTraitModifiers(compOrNull) : getCompanyTraitModifiers(null);
+
+    var incMult = adjMult * subsidyMult * tMods.incomeMult;
+    var yMult = adjMult * subsidyMult * tMods.yieldMult * (b.type === 'structure_facility' ? tMods.structureYieldMult : 1.0);
     var items = {};
     var f1 = null, f2 = null;
     if (b.branch1 && spec.tier1Fork) {
@@ -1862,12 +2988,19 @@ global.LHOpenTTD = (function () {
     }
     if (f1) { incMult *= f1.incomeMult; yMult *= f1.yieldMult; }
     if (f2) { incMult *= f2.incomeMult; yMult *= f2.yieldMult; }
-    var income = Math.round(spec.baseIncome * incMult);
-    items[spec.baseProduct] = Math.max(1, Math.round(spec.baseQty * yMult));
+
+    var baseInc = (b.type === 'structure_facility' && b.baseIncome) ? Number(b.baseIncome) : Number(spec.baseIncome || 40);
+    var baseProd = (b.type === 'structure_facility' && b.productItem) ? String(b.productItem) : String(spec.baseProduct);
+    var baseQ = (b.type === 'structure_facility' && b.baseQty) ? Number(b.baseQty) : Number(spec.baseQty || 2);
+
+    var income = Math.round(baseInc * incMult);
+    items[baseProd] = Math.max(1, Math.round(baseQ * yMult));
     if (f1 && f1.bonusProduct) {
-      items[f1.bonusProduct] = (items[f1.bonusProduct] || 0) + Math.max(1, Math.round((f1.bonusQty || 1) * (f2 ? f2.yieldMult : 1.0)));
+      items[f1.bonusProduct] = (items[f1.bonusProduct] || 0) + Math.max(1, Math.round((f1.bonusQty || 1) * (f2 ? f2.yieldMult : 1.0) * adjMult * subsidyMult));
+    } else if (b.type === 'structure_facility' && f1 && b.bonusProduct) {
+      items[b.bonusProduct] = (items[b.bonusProduct] || 0) + Math.max(1, Math.round(2 * (f2 ? f2.yieldMult : 1.0) * adjMult * subsidyMult));
     }
-    return { income: income, items: items };
+    return { income: income, items: items, adjacencyMult: adjMult, subsidyMult: subsidyMult };
   }
 
   function getPatrolProfile(b) {
@@ -1908,6 +3041,7 @@ global.LHOpenTTD = (function () {
       owner: b.owner,
       sx: b.sx,
       sz: b.sz,
+      dimension: b.dimension || 'minecraft:overworld',
       x: Number(b.x || b.sx * SECTOR_SIZE),
       y: Number(b.y || 64),
       z: Number(b.z || b.sz * SECTOR_SIZE),
@@ -1921,14 +3055,16 @@ global.LHOpenTTD = (function () {
     };
   }
 
-  function findPatrolPostsCovering(state, ownerCid, wx, wz) {
+  function findPatrolPostsCovering(state, ownerCid, wx, wz, dimension) {
     ensureDiplomacyState(state);
+    var dim = dimension ? (global.LHStructureProduction ? global.LHStructureProduction.normalizeDimension(dimension) : dimension) : null;
     var out = [];
     var keys = Object.keys(state.buildings || {});
     for (var i = 0; i < keys.length; i++) {
       var b = state.buildings[keys[i]];
       if (!b || b.type !== 'patrol_post' || b.operational === false) continue;
       if (ownerCid && b.owner !== ownerCid) continue;
+      if (dim && (b.dimension || 'minecraft:overworld') !== dim) continue;
       var prof = getPatrolProfile(b);
       if (!prof) continue;
       var dx = Number(wx) - prof.x;
@@ -1946,36 +3082,278 @@ global.LHOpenTTD = (function () {
     return out;
   }
 
-  function tickCompanyBuildings(state) {
+  function getMonopolyMetrics(state) {
     ensureDiplomacyState(state);
+    var claimKeys = Object.keys(state.claims || {});
+    var totalClaims = Math.max(1, claimKeys.length);
+    var byCid = {};
+    for (var i = 0; i < claimKeys.length; i++) {
+      var cl = state.claims[claimKeys[i]];
+      if (cl && cl.owner) byCid[cl.owner] = (byCid[cl.owner] || 0) + 1;
+    }
+    var list = [];
+    var cids = Object.keys(state.companies || {});
+    for (var j = 0; j < cids.length; j++) {
+      var c = state.companies[cids[j]];
+      if (!c) continue;
+      var claims = byCid[c.id] || 0;
+      var share = claims / totalClaims;
+      var tMods = getCompanyTraitModifiers(c);
+      var raidScore = Number((c.stats && c.stats.raidsLaunched) || 0) * 12 + Number((c.stats && c.stats.hostileCaptures) || 0) * 15;
+      var aggr = Math.min(100, tMods.aggressionWeight + raidScore + (claims > 8 ? Math.round((share - 0.15) * 80) : 0));
+      var threat = Math.round(share * 100 + aggr * 0.5);
+      var isMonop = (claims >= 5 && share >= 0.22) || (claims >= 4 && aggr >= 35);
+      list.push({
+        cid: c.id,
+        name: c.name,
+        isBot: !!c.isBot,
+        claims: claims,
+        territoryShare: Math.round(share * 1000) / 1000,
+        aggressionScore: Math.max(0, aggr),
+        monopolyThreat: Math.max(0, threat),
+        isMonopolyTarget: isMonop,
+        antiMonopolyTaxRate: share > 0.35 ? 0.45 : (share > 0.22 ? 0.25 : 0)
+      });
+    }
+    list.sort(function (a, b) { return b.monopolyThreat - a.monopolyThreat; });
+    return list;
+  }
+
+  function joinAntiMonopolyCoalition(state, cid, targetCid) {
+    ensureDiplomacyState(state);
+    var c = state.companies && state.companies[cid];
+    var tgt = state.companies && state.companies[targetCid];
+    if (!c || !tgt || cid === targetCid) return { ok: false, reason: 'bad_company' };
+    if (!state.coalitions[targetCid]) state.coalitions[targetCid] = { targetCid: targetCid, members: [], formedAt: state.botCycle || 0 };
+    var co = state.coalitions[targetCid];
+    if (co.members.indexOf(cid) === -1) co.members.push(cid);
+    adjustRelation(state, cid, targetCid, -15, 'Вступление в антимонопольную коалицию против ' + tgt.name);
+    for (var i = 0; i < co.members.length; i++) {
+      if (co.members[i] !== cid) {
+        adjustRelation(state, cid, co.members[i], 10, 'Союзник по антимонопольному пакту');
+      }
+    }
+    return { ok: true, coalition: co, membersCount: co.members.length };
+  }
+
+  function leaveAntiMonopolyCoalition(state, cid, targetCid) {
+    ensureDiplomacyState(state);
+    if (!targetCid) {
+      Object.keys(state.coalitions || {}).forEach(function (tk) {
+        var co = state.coalitions[tk];
+        if (co && Array.isArray(co.members)) {
+          co.members = co.members.filter(function (m) { return m !== cid; });
+        }
+      });
+      return { ok: true };
+    }
+    var co2 = state.coalitions[targetCid];
+    if (!co2) return { ok: false, reason: 'not_found' };
+    co2.members = (co2.members || []).filter(function (m) { return m !== cid; });
+    return { ok: true };
+  }
+
+  function getCoalitionModifiers(state, attackerCid, targetCid) {
+    ensureDiplomacyState(state);
+    var co = state.coalitions && state.coalitions[targetCid];
+    var inCoalition = !!(co && co.members && co.members.indexOf(attackerCid) !== -1);
+    var revCo = state.coalitions && state.coalitions[attackerCid];
+    var targetInRev = !!(revCo && revCo.members && revCo.members.indexOf(targetCid) !== -1);
+    return {
+      isCoalitionAttack: inCoalition,
+      captureCostMult: inCoalition ? 0.70 : 1.0,
+      raidPowerBonus: inCoalition ? 1 : 0,
+      bountyReward: inCoalition ? 100 : 0,
+      captureBounty: inCoalition ? 100 : 0,
+      defenderStrengthBonus: targetInRev ? 1 : 0,
+      defenseBonus: targetInRev ? 1 : 0
+    };
+  }
+
+  function computeCompanyExpenses(state, cid) {
+    ensureDiplomacyState(state);
+    var comp = state.companies && state.companies[cid];
+    if (!comp) return { facilityUpkeep: 0, upgradeUpkeep: 0, landTax: 0, securityUpkeep: 0, antiMonopolyTax: 0, total: 0 };
+    var tMods = getCompanyTraitModifiers(comp);
+    var bldgs = listCompanyBuildings(state, cid);
+    var facilityUpkeep = 0;
+    var upgradeUpkeep = 0;
+    var securityUpkeep = 0;
+    for (var i = 0; i < bldgs.length; i++) {
+      var b = bldgs[i];
+      var sp = BUILDING_CATALOG[b.type] || {};
+      var baseUp = Number(b.upkeepCost || sp.upkeepCost || 12);
+      facilityUpkeep += Math.round(baseUp * tMods.upkeepMult);
+      var extraLvls = Math.max(0, Number(b.level || 1) - 1);
+      upgradeUpkeep += Math.round(extraLvls * Number(sp.upgradeUpkeepPerLevel || 15) * tMods.upkeepMult);
+      if (b.type === 'patrol_post') {
+        securityUpkeep += Math.round((Number(sp.securityCost || 16) * Number(b.level || 1)) * tMods.securityUpkeepMult);
+      }
+    }
+    var claims = 0;
+    var fortCosts = 0;
+    var cKeys = Object.keys(state.claims || {});
+    for (var j = 0; j < cKeys.length; j++) {
+      var cl = state.claims[cKeys[j]];
+      if (cl && cl.owner === cid) {
+        claims++;
+        var str = Math.max(1, Number(cl.strength || 1));
+        if (str > 1) fortCosts += (str - 1) * 10;
+      }
+    }
+    securityUpkeep += Math.round(fortCosts * tMods.securityUpkeepMult);
+    var rawLandTax = Math.round(claims * 12 * tMods.landTaxMult);
+    var totalAllClaims = Math.max(1, cKeys.length);
+    var share = claims / totalAllClaims;
+    var antiMonopolyTax = 0;
+    if (claims >= 5 && share > 0.22) {
+      var rate = share > 0.35 ? 0.45 : 0.25;
+      antiMonopolyTax = Math.round((rawLandTax + facilityUpkeep) * rate);
+    }
+    var total = facilityUpkeep + upgradeUpkeep + rawLandTax + securityUpkeep + antiMonopolyTax;
+    return {
+      facilityUpkeep: facilityUpkeep,
+      upgradeUpkeep: upgradeUpkeep,
+      landTax: rawLandTax,
+      securityUpkeep: securityUpkeep,
+      antiMonopolyTax: antiMonopolyTax,
+      total: total
+    };
+  }
+
+  function tickCompanyUpkeep(state) {
+    ensureDiplomacyState(state);
+    var summary = {};
+    var cids = Object.keys(state.companies || {});
+    for (var i = 0; i < cids.length; i++) {
+      var cid = cids[i];
+      var comp = state.companies[cid];
+      if (!comp) continue;
+      var exp = computeCompanyExpenses(state, cid);
+      comp.lastExpenses = exp;
+      var paid = Math.min(Math.max(0, Number(comp.cash || 0)), exp.total);
+      comp.cash = Math.max(0, Number(comp.cash || 0) - paid);
+      var shortfall = exp.total - paid;
+      if (shortfall > 0) {
+        comp.unpaidUpkeep = Number(comp.unpaidUpkeep || 0) + shortfall;
+        // Prolonged insolvency decays fortification strength on non-HQ sectors
+        if (comp.unpaidUpkeep >= 150) {
+          var cKeys = Object.keys(state.claims || {});
+          for (var k = 0; k < cKeys.length; k++) {
+            var cl = state.claims[cKeys[k]];
+            if (cl && cl.owner === cid && !cl.isHq && (cl.strength || 1) > 1) {
+              cl.strength -= 1;
+              break;
+            }
+          }
+        }
+      } else {
+        comp.unpaidUpkeep = Math.max(0, Number(comp.unpaidUpkeep || 0) - Math.min(Number(comp.unpaidUpkeep || 0), 50));
+      }
+      var cycleIncome = Number(comp._cycleGrossIncome || 0);
+      var net = cycleIncome - paid;
+      comp._cycleGrossIncome = 0;
+      if (!Array.isArray(comp.incomeHistory)) comp.incomeHistory = [];
+      comp.incomeHistory.push(net);
+      if (comp.incomeHistory.length > 24) comp.incomeHistory.shift();
+      summary[cid] = { expenses: exp, paid: paid, shortfall: shortfall, net: net };
+    }
+    return summary;
+  }
+
+  function consumeBuildingInputs(state, comp, b, strictInputs) {
+    var req = getBuildingRequiredInputs(b);
+    var reqKeys = Object.keys(req || {});
+    if (!reqKeys.length) return { ok: true };
+    if (!b.inputBuffer) b.inputBuffer = {};
+    if (!comp.stockBuffer) comp.stockBuffer = {};
+
+    // Verify availability across b.inputBuffer + comp.stockBuffer
+    for (var i = 0; i < reqKeys.length; i++) {
+      var iid = reqKeys[i];
+      var need = Math.max(1, Math.round(Number(req[iid] || 1)));
+      var haveB = Number(b.inputBuffer[iid] || 0);
+      var haveC = Number(comp.stockBuffer[iid] || 0);
+      if (haveB + haveC < need) {
+        if (strictInputs !== false) {
+          return { ok: false, missingItem: iid, need: need, have: haveB + haveC };
+        }
+      }
+    }
+    // Deduct from b.inputBuffer first, then comp.stockBuffer
+    for (var j = 0; j < reqKeys.length; j++) {
+      var iid2 = reqKeys[j];
+      var rem = Math.max(1, Math.round(Number(req[iid2] || 1)));
+      var takeB = Math.min(rem, Number(b.inputBuffer[iid2] || 0));
+      if (takeB > 0) {
+        b.inputBuffer[iid2] -= takeB;
+        rem -= takeB;
+      }
+      if (rem > 0) {
+        var takeC = Math.min(rem, Number(comp.stockBuffer[iid2] || 0));
+        if (takeC > 0) {
+          comp.stockBuffer[iid2] -= takeC;
+          rem -= takeC;
+        }
+      }
+    }
+    return { ok: true };
+  }
+
+  function tickCompanyBuildings(state, opts) {
+    ensureDiplomacyState(state);
+    var o = opts || {};
     var keys = Object.keys(state.buildings);
     var producedCount = 0;
     for (var i = 0; i < keys.length; i++) {
       var b = state.buildings[keys[i]];
       if (!b || !state.companies[b.owner] || b.operational === false) continue;
-      var prof = getBuildingYieldProfile(b);
+      var comp = state.companies[b.owner];
+      if ((comp.unpaidUpkeep || 0) >= 250 && b.type !== 'power_plant') {
+        b.pausedReason = 'unpaid_upkeep';
+        continue;
+      }
+      var inpRes = consumeBuildingInputs(state, comp, b, o.strictInputs !== false);
+      if (!inpRes.ok) {
+        b.pausedReason = 'missing_inputs';
+        b.missingItem = inpRes.missingItem;
+        continue;
+      }
+      b.pausedReason = null;
+      b.missingItem = null;
+      var dim = b.dimension || 'minecraft:overworld';
+      var adjMult = getPowerPlantAdjacencyMultiplier(state, b.owner, b.sx, b.sz, dim);
+      var subMult = isCompanySubsidized(state, b.owner, b.sx, b.sz) ? 1.35 : 1.0;
+      var prof = getBuildingYieldProfile(b, { adjMult: adjMult, subsidyMult: subMult }, comp);
       var capCash = prof.income * 8;
       if ((b.cashBuffer || 0) < capCash) {
         b.cashBuffer = Math.min(capCash, (b.cashBuffer || 0) + prof.income);
       }
+      comp._cycleGrossIncome = Number(comp._cycleGrossIncome || 0) + prof.income;
       if (!b.stockBuffer) b.stockBuffer = {};
+      if (!b.outputContainerQueue) b.outputContainerQueue = {};
       Object.keys(prof.items).forEach(function (iid) {
         var cur = Number(b.stockBuffer[iid] || 0);
         var capItem = prof.items[iid] * 6;
         if (cur < capItem) {
-          b.stockBuffer[iid] = Math.min(capItem, cur + prof.items[iid]);
+          var addQ = Math.min(capItem - cur, prof.items[iid]);
+          b.stockBuffer[iid] = cur + addQ;
+          b.outputContainerQueue[iid] = Number(b.outputContainerQueue[iid] || 0) + addQ;
         }
       });
       b.cyclesDone = (b.cyclesDone || 0) + 1;
       producedCount++;
     }
+    if (o.chargeUpkeep) {
+      tickCompanyUpkeep(state);
+    }
     return producedCount;
   }
 
-  function collectBuildingOutput(state, cid, sx, sz) {
+  function collectBuildingOutput(state, cid, sx, sz, dimension) {
     ensureDiplomacyState(state);
     var comp = state.companies && state.companies[cid];
-    var b = getSectorBuilding(state, sx, sz);
+    var b = getSectorBuilding(state, sx, sz, dimension);
     if (!comp || !b || b.owner !== cid) return { ok: false, reason: 'not_found' };
     var cash = Math.round(Number(b.cashBuffer || 0));
     var items = {};
@@ -1988,17 +3366,75 @@ global.LHOpenTTD = (function () {
     comp.stats.deliveries = (comp.stats.deliveries || 0) + 1;
     b.cashBuffer = 0;
     b.stockBuffer = {};
+    b.outputContainerQueue = {};
     return { ok: true, cash: cash, items: items };
   }
 
-  function createSupplyContract(state, initiatorCid, partnerCid, item, qty, price, batches) {
+  function estimateItemUnitPrice(itemId) {
+    if (global.LHEconomyEngine && typeof global.LHEconomyEngine.inferFallbackBasePrice === 'function') {
+      return global.LHEconomyEngine.inferFallbackBasePrice(itemId);
+    }
+    var s = String(itemId || '').toLowerCase();
+    if (s.indexOf('diamond') !== -1 || s.indexOf('nether_star') !== -1 || s.indexOf('ancient_debris') !== -1) return 140;
+    if (s.indexOf('emerald') !== -1 || s.indexOf('precision') !== -1 || s.indexOf('oil') !== -1) return 65;
+    if (s.indexOf('gold') !== -1 || s.indexOf('brass') !== -1 || s.indexOf('concentrate') !== -1) return 32;
+    if (s.indexOf('iron') !== -1 || s.indexOf('redstone') !== -1 || s.indexOf('copper') !== -1) return 14;
+    if (s.indexOf('coal') !== -1 || s.indexOf('charcoal') !== -1) return 6;
+    return 8;
+  }
+
+  function calculateUpkeepAwareContractPrice(state, supplierCid, sx, sz, itemId, qtyPerPeriod, dimension) {
+    ensureDiplomacyState(state);
+    var q = Math.max(1, Math.round(Number(qtyPerPeriod || 16)));
+    var unitMarket = estimateItemUnitPrice(itemId);
+    var b = (typeof sx === 'number' && typeof sz === 'number') ? getSectorBuilding(state, sx, sz, dimension) : null;
+    var comp = supplierCid ? state.companies[supplierCid] : null;
+    var inputCostPerCycle = 0;
+    var upkeepShare = 18;
+    if (b) {
+      var sp = BUILDING_CATALOG[b.type] || {};
+      var req = getBuildingRequiredInputs(b);
+      Object.keys(req).forEach(function (rk) {
+        inputCostPerCycle += estimateItemUnitPrice(rk) * Number(req[rk] || 1);
+      });
+      upkeepShare = Number(b.upkeepCost || sp.upkeepCost || 16) + Math.max(0, Number(b.level || 1) - 1) * Number(sp.upgradeUpkeepPerLevel || 15) + 12;
+    } else if (comp) {
+      var exp = computeCompanyExpenses(state, supplierCid);
+      var bCount = Math.max(1, listCompanyBuildings(state, supplierCid).length);
+      upkeepShare = Math.round(exp.total / bCount);
+    }
+    var baseGoodsCost = unitMarket * q;
+    var upkeepAllowance = Math.round((upkeepShare + inputCostPerCycle) * Math.max(1, q / 8));
+    var margin = Math.round((baseGoodsCost + upkeepAllowance) * 0.22);
+    var totalPrice = Math.max(25, baseGoodsCost + upkeepAllowance + margin);
+    return {
+      qty: q,
+      baseGoodsCost: baseGoodsCost,
+      inputCostPerCycle: inputCostPerCycle,
+      upkeepShare: upkeepShare,
+      upkeepAllowance: upkeepAllowance,
+      margin: margin,
+      totalPrice: totalPrice,
+      unitPrice: Math.round((totalPrice / q) * 10) / 10,
+      recommendedPenalty: Math.max(20, Math.round(totalPrice * 0.45))
+    };
+  }
+
+  function createSupplyContract(state, initiatorCid, partnerCid, item, qty, price, batches, opts) {
     ensureDiplomacyState(state);
     if (!state.companies[initiatorCid] || !state.companies[partnerCid] || initiatorCid === partnerCid) {
       return { ok: false, reason: 'bad_company' };
     }
+    var o = opts || {};
     var q = Math.max(1, Math.round(Number(qty || 16)));
-    var p = Math.max(10, Math.round(Number(price || 100)));
-    var b = Math.max(1, Math.min(12, Math.round(Number(batches || 3))));
+    var pCalc = (!price || o.useUpkeepPricing)
+      ? calculateUpkeepAwareContractPrice(state, initiatorCid, o.sx, o.sz, item, q, o.dimension)
+      : null;
+    var p = Math.max(10, Math.round(Number(price || (pCalc ? pCalc.totalPrice : 100))));
+    var b = Math.max(1, Math.min(24, Math.round(Number(batches || 3))));
+    var periodTicks = Math.max(600, Math.round(Number(o.periodTicks || 6000)));
+    var nowTick = Math.max(0, Math.round(Number(o.nowTick || 0)));
+    var penaltyPerMiss = Math.max(0, Math.round(Number(o.penaltyPerMiss !== undefined ? o.penaltyPerMiss : Math.round(p * 0.40))));
     var c = {
       id: 'sc' + (state.nextSupplySeq++),
       supplierCid: initiatorCid,
@@ -2006,11 +3442,82 @@ global.LHOpenTTD = (function () {
       item: String(item || 'minecraft:iron_ingot'),
       qty: q,
       price: p,
+      upkeepIncluded: pCalc ? pCalc.upkeepAllowance : Math.round(p * 0.20),
       remainingBatches: b,
+      totalPeriods: b,
+      periodsDone: 0,
+      periodsMissed: 0,
+      periodTicks: periodTicks,
+      nextDueTick: o.timed ? (nowTick + periodTicks) : null,
+      penaltyPerMiss: penaltyPerMiss,
+      timed: !!o.timed,
+      autoFromSector: (typeof o.sx === 'number' && typeof o.sz === 'number') ? { sx: o.sx, sz: o.sz, dimension: o.dimension || 'minecraft:overworld' } : null,
       status: 'open'
     };
     state.supplyContracts.push(c);
-    return { ok: true, contract: c };
+    return { ok: true, contract: c, pricing: pCalc };
+  }
+
+  function createTimedSupplyContract(state, supplierCid, buyerCid, itemId, qtyPerPeriod, totalPeriods, periodTicks, pricePerPeriod, penaltyPerMiss, nowTick, opts) {
+    var o = opts || {};
+    o.timed = true;
+    o.periodTicks = periodTicks || 6000;
+    o.penaltyPerMiss = penaltyPerMiss;
+    o.nowTick = nowTick || 0;
+    return createSupplyContract(state, supplierCid, buyerCid, itemId, qtyPerPeriod, pricePerPeriod, totalPeriods, o);
+  }
+
+  function tickSupplyContracts(state, nowTick) {
+    ensureDiplomacyState(state);
+    var tick = Math.round(Number(nowTick || 0));
+    var events = [];
+    for (var i = 0; i < state.supplyContracts.length; i++) {
+      var c = state.supplyContracts[i];
+      if (!c || c.status !== 'open' || !c.timed || c.nextDueTick === null) continue;
+      if (tick < c.nextDueTick) continue;
+      var sup = state.companies[c.supplierCid];
+      var buy = state.companies[c.buyerCid];
+      if (!sup || !buy) { c.status = 'cancelled'; continue; }
+      // Check if supplier auto-linked facility or stockBuffer has enough items to auto-fulfill
+      var delivered = false;
+      if (c.autoFromSector) {
+        var b = getSectorBuilding(state, c.autoFromSector.sx, c.autoFromSector.sz, c.autoFromSector.dimension);
+        if (b && b.owner === c.supplierCid && b.stockBuffer && Number(b.stockBuffer[c.item] || 0) >= c.qty && buy.cash >= c.price) {
+          b.stockBuffer[c.item] -= c.qty;
+          delivered = true;
+        }
+      }
+      if (!delivered && sup.stockBuffer && Number(sup.stockBuffer[c.item] || 0) >= c.qty && buy.cash >= c.price) {
+        sup.stockBuffer[c.item] -= c.qty;
+        delivered = true;
+      }
+      if (delivered) {
+        buy.cash -= c.price;
+        sup.cash += c.price;
+        sup.stats.tradeVolume = (sup.stats.tradeVolume || 0) + c.price;
+        buy.stats.tradeVolume = (buy.stats.tradeVolume || 0) + c.price;
+        sup.stats.contractsDone = (sup.stats.contractsDone || 0) + 1;
+        c.periodsDone = (c.periodsDone || 0) + 1;
+        c.remainingBatches -= 1;
+        c.nextDueTick = tick + c.periodTicks;
+        if (c.remainingBatches <= 0) c.status = 'completed';
+        adjustRelation(state, c.supplierCid, c.buyerCid, 6, 'Вовремя выполнен период контракта ' + c.id);
+        events.push({ type: 'fulfilled', contractId: c.id, supplierCid: c.supplierCid, buyerCid: c.buyerCid, payout: c.price });
+      } else {
+        // Missed deadline -> charge неустойка (penaltyPerMiss)
+        var pen = Math.min(Math.max(0, Number(sup.cash || 0)), Number(c.penaltyPerMiss || 0));
+        sup.cash = Math.max(0, Number(sup.cash || 0) - pen);
+        buy.cash += pen;
+        c.periodsMissed = (c.periodsMissed || 0) + 1;
+        c.nextDueTick = tick + c.periodTicks;
+        adjustRelation(state, c.supplierCid, c.buyerCid, -12, 'Срыв срока поставки по контракту ' + c.id);
+        if (c.periodsMissed >= 2 || c.remainingBatches <= 0) {
+          c.status = 'defaulted';
+        }
+        events.push({ type: 'penalty', contractId: c.id, supplierCid: c.supplierCid, buyerCid: c.buyerCid, penalty: pen, status: c.status });
+      }
+    }
+    return events;
   }
 
   function refreshBotSupplyContracts(state) {
@@ -2018,11 +3525,14 @@ global.LHOpenTTD = (function () {
     var kept = (state.supplyContracts || []).filter(function (c) {
       return c.status === 'open' && !c.isBot && c.remainingBatches > 0;
     });
-    for (var i = 0; i < DEFAULT_BOT_COMPANIES.length; i++) {
-      var bot = DEFAULT_BOT_COMPANIES[i];
+    var cids = Object.keys(state.companies || {});
+    for (var i = 0; i < cids.length; i++) {
+      var bot = state.companies[cids[i]];
+      if (!bot || !bot.isBot) continue;
       var tpl = BOT_ORDER_TEMPLATES[bot.id];
-      if (!tpl || !tpl.buy || !tpl.buy.length) continue;
-      var bo = tpl.buy[0];
+      var arch = BOT_ARCHETYPES[bot.archetype] || null;
+      var bo = (tpl && tpl.buy && tpl.buy.length) ? tpl.buy[0] : (arch && arch.buyFocus && arch.buyFocus.length ? { item: arch.buyFocus[0], qty: 16, price: 110 } : null);
+      if (!bo) continue;
       kept.push({
         id: 'sc' + (state.nextSupplySeq++),
         supplierCid: 'any',
@@ -2031,6 +3541,7 @@ global.LHOpenTTD = (function () {
         item: bo.item,
         qty: bo.qty * 2,
         price: Math.round(bo.price * 2.15),
+        penaltyPerMiss: Math.round(bo.price * 0.65),
         remainingBatches: 3,
         status: 'open'
       });
@@ -2039,7 +3550,7 @@ global.LHOpenTTD = (function () {
     return kept.length;
   }
 
-  function fulfillSupplyContract(state, actorCid, contractId) {
+  function fulfillSupplyContract(state, actorCid, contractId, nowTick) {
     ensureDiplomacyState(state);
     var c = null;
     for (var i = 0; i < state.supplyContracts.length; i++) {
@@ -2059,7 +3570,12 @@ global.LHOpenTTD = (function () {
     actor.cash += c.price;
     actor.stats.tradeVolume = (actor.stats.tradeVolume || 0) + c.price;
     buyer.stats.tradeVolume = (buyer.stats.tradeVolume || 0) + c.price;
+    actor.stats.contractsDone = (actor.stats.contractsDone || 0) + 1;
+    c.periodsDone = (c.periodsDone || 0) + 1;
     c.remainingBatches -= 1;
+    if (c.timed && c.periodTicks && typeof nowTick === 'number') {
+      c.nextDueTick = nowTick + c.periodTicks;
+    }
     if (c.remainingBatches <= 0) c.status = 'completed';
     var newScore = adjustRelation(state, actorCid, buyer.id, 8, 'Поставка по контракту ' + c.id);
     return { ok: true, contract: c, payout: c.price, buyerName: buyer.name, newScore: newScore };
@@ -2078,8 +3594,10 @@ global.LHOpenTTD = (function () {
     };
   }
 
-  function sectorKey(sx, sz) {
-    return sx + ',' + sz;
+  function sectorKey(sx, sz, dimension) {
+    var dim = dimension ? (global.LHStructureProduction ? global.LHStructureProduction.normalizeDimension(dimension) : String(dimension)) : 'minecraft:overworld';
+    if (!dim || dim === 'minecraft:overworld' || dim === 'overworld') return sx + ',' + sz;
+    return dim + '|' + sx + ',' + sz;
   }
 
   function sanitizeId(raw) {
@@ -2094,13 +3612,23 @@ global.LHOpenTTD = (function () {
       pacts: {},
       buildings: {},
       relations: {},
+      playerRelations: {},
       supplyContracts: [],
       sectorOffers: [],
+      sectorStructures: {},
+      structureCatalog: {},
+      auctions: [],
+      activeMobRaids: [],
+      coalitions: {},
       marketOrders: [],
       tradeOffers: [],
       nextOrderSeq: 1,
       nextBuildingSeq: 1,
       nextSupplySeq: 1,
+      nextAuctionSeq: 1,
+      nextMobRaidSeq: 1,
+      botChapterSpawnsDone: 0,
+      completedChapters: 0,
       subsidy: null,
       botCycle: 0
     };
@@ -2113,7 +3641,7 @@ global.LHOpenTTD = (function () {
     return Math.max(Math.abs(Number(sx || 0)), Math.abs(Number(sz || 0))) <= 1;
   }
 
-  function ensureBots(state) {
+  function ensureBots(state, rngFn) {
     if (!state.companies) state.companies = {};
     if (!state.claims) state.claims = {};
     if (!state.pacts) state.pacts = {};
@@ -2132,10 +3660,15 @@ global.LHOpenTTD = (function () {
 
     for (var i = 0; i < DEFAULT_BOT_COMPANIES.length; i++) {
       var b = DEFAULT_BOT_COMPANIES[i];
+      var arch = BOT_ARCHETYPES[b.archetype] || BOT_ARCHETYPES.mining_syndicate;
       if (!state.companies[b.id]) {
-        state.companies[b.id] = {
+        var traits = rollCompanyTraits(2, rngFn);
+        var bComp = {
           id: b.id,
           name: b.name,
+          archetype: arch.id,
+          archetypeName: arch.name,
+          traits: traits,
           color: b.color,
           colorCode: b.colorCode,
           tag: b.tag,
@@ -2151,13 +3684,24 @@ global.LHOpenTTD = (function () {
           hqX: b.hqSx * SECTOR_SIZE,
           hqY: typeof b.hqY === 'number' ? b.hqY : preferredBuildingY(b.envType || 'normal', 70),
           hqZ: b.hqSz * SECTOR_SIZE,
-          stats: { deliveries: 0, tradeVolume: 0, blocksMined: 0, sectorsCaptured: 1, contractsDone: 0, routesDone: 0 }
+          stockBuffer: {},
+          incomeHistory: [],
+          physicalStockEstimate: 0,
+          stats: { deliveries: 0, tradeVolume: 0, blocksMined: 0, sectorsCaptured: 1, contractsDone: 0, routesDone: 0, raidsLaunched: 0, hostileCaptures: 0 }
         };
+        var bMods = getCompanyTraitModifiers(bComp);
+        bComp.cash += bMods.botCashBonus;
+        state.companies[b.id] = bComp;
       } else {
-        state.companies[b.id].hqSx = b.hqSx;
-        state.companies[b.id].hqSz = b.hqSz;
-        if (!state.companies[b.id].envType) state.companies[b.id].envType = b.envType || 'normal';
-        if (typeof state.companies[b.id].hqY !== 'number') state.companies[b.id].hqY = typeof b.hqY === 'number' ? b.hqY : preferredBuildingY(state.companies[b.id].envType, 70);
+        var existingB = state.companies[b.id];
+        existingB.hqSx = b.hqSx;
+        existingB.hqSz = b.hqSz;
+        if (!existingB.envType) existingB.envType = b.envType || 'normal';
+        if (!existingB.archetype) { existingB.archetype = arch.id; existingB.archetypeName = arch.name; }
+        if (!existingB.traits || !existingB.traits.length) existingB.traits = rollCompanyTraits(2, rngFn);
+        if (!existingB.stockBuffer) existingB.stockBuffer = {};
+        if (!existingB.incomeHistory) existingB.incomeHistory = [];
+        if (typeof existingB.hqY !== 'number') existingB.hqY = typeof b.hqY === 'number' ? b.hqY : preferredBuildingY(existingB.envType, 70);
       }
       var k = sectorKey(b.hqSx, b.hqSz);
       if (!state.claims[k]) {
@@ -2194,35 +3738,106 @@ global.LHOpenTTD = (function () {
     return true;
   }
 
-  function countClaims(state, cid) {
+  function countClaims(state, cid, dimension) {
     var cnt = 0;
+    var normDim = dimension ? (global.LHStructureProduction ? global.LHStructureProduction.normalizeDimension(dimension) : dimension) : null;
     var keys = Object.keys(state.claims || {});
     for (var i = 0; i < keys.length; i++) {
-      if (state.claims[keys[i]] && state.claims[keys[i]].owner === cid) cnt++;
+      var cl = state.claims[keys[i]];
+      if (!cl || cl.owner !== cid) continue;
+      if (normDim && (cl.dimension || 'minecraft:overworld') !== normDim) continue;
+      cnt++;
     }
     return cnt;
   }
 
-  function computeValuation(state, cid) {
+  function getCompanyValuationBreakdown(state, cid) {
     var c = state.companies && state.companies[cid];
-    if (!c) return 0;
-    var claims = countClaims(state, cid);
+    if (!c) {
+      return {
+        cash: 0, inventoryValue: 0, facilitiesValue: 0, productionPotentialValue: 0,
+        territoryValue: 0, activityValue: 0, avgHourlyIncome: 0, totalValuation: 0
+      };
+    }
+    var cash = Math.max(0, Math.round(Number(c.cash || 0)));
+    var tMods = getCompanyTraitModifiers(c);
+
+    var invVal = Math.max(0, Math.round(Number(c.physicalStockEstimate || 0)));
+    Object.keys(c.stockBuffer || {}).forEach(function (iid) {
+      invVal += estimateItemUnitPrice(iid) * Math.max(0, Number(c.stockBuffer[iid] || 0));
+    });
+
     var bldgs = listCompanyBuildings(state, cid);
     var bldgValue = 0;
+    var hourlyNet = 0;
+    var cyclesPerHour = 20;
     for (var i = 0; i < bldgs.length; i++) {
-      var sp = BUILDING_CATALOG[bldgs[i].type];
-      bldgValue += (sp ? sp.cost : 300) * Number(bldgs[i].level || 1);
+      var b = bldgs[i];
+      var sp = BUILDING_CATALOG[b.type] || {};
+      var baseCost = (b.type === 'structure_facility' && b.rarityRank) ? (360 * (1 + (b.rarityRank - 1) * 0.35)) : Number(sp.cost || 320);
+      var upgInvested = (Number(b.level || 1) >= 2 ? 420 : 0) + (Number(b.level || 1) >= 3 ? 820 : 0);
+      bldgValue += Math.round((baseCost + upgInvested) * (Number(b.integrityPct || 100) / 100));
+      bldgValue += Math.round(Number(b.cashBuffer || 0));
+      Object.keys(b.stockBuffer || {}).forEach(function (iidB) {
+        invVal += estimateItemUnitPrice(iidB) * Math.max(0, Number(b.stockBuffer[iidB] || 0));
+      });
+      Object.keys(b.inputBuffer || {}).forEach(function (iidIn) {
+        invVal += estimateItemUnitPrice(iidIn) * Math.max(0, Number(b.inputBuffer[iidIn] || 0));
+      });
+      if (b.operational !== false) {
+        var adjM = getPowerPlantAdjacencyMultiplier(state, cid, b.sx, b.sz, b.dimension || 'minecraft:overworld');
+        var subM = isCompanySubsidized(state, cid, b.sx, b.sz) ? 1.35 : 1.0;
+        var yp = getBuildingYieldProfile(b, { adjMult: adjM, subsidyMult: subM }, c);
+        var itemYieldWorth = 0;
+        Object.keys(yp.items || {}).forEach(function (yi) {
+          itemYieldWorth += estimateItemUnitPrice(yi) * Number(yp.items[yi] || 0);
+        });
+        var upkeepC = Number(b.upkeepCost || sp.upkeepCost || 14) + Math.max(0, Number(b.level || 1) - 1) * Number(sp.upgradeUpkeepPerLevel || 15);
+        hourlyNet += Math.max(0, (yp.income + itemYieldWorth - upkeepC) * cyclesPerHour);
+      }
     }
+    var productionPotentialValue = Math.round(hourlyNet * 1.6);
+
+    var territoryValue = 0;
+    var claimKeys = Object.keys(state.claims || {});
+    for (var k = 0; k < claimKeys.length; k++) {
+      var cl = state.claims[claimKeys[k]];
+      if (!cl || cl.owner !== cid) continue;
+      var dimB = cl.dimension === 'minecraft:the_end' ? 1.50 : (cl.dimension === 'minecraft:the_nether' ? 1.30 : 1.0);
+      territoryValue += Math.round((300 + Math.max(0, Number(cl.strength || 1) - 1) * 140) * dimB);
+    }
+
+    var avgHourlyIncome = Math.round(hourlyNet);
+    if (Array.isArray(c.incomeHistory) && c.incomeHistory.length > 0) {
+      var sumH = 0;
+      for (var h = 0; h < c.incomeHistory.length; h++) sumH += Number(c.incomeHistory[h] || 0);
+      avgHourlyIncome = Math.round((sumH / c.incomeHistory.length) * cyclesPerHour);
+    }
+
     var s = c.stats || {};
-    return Math.round(
-      Number(c.cash || 0) +
-      claims * 300 +
-      bldgValue +
+    var activityValue = Math.round(
       Number(s.deliveries || 0) * 45 +
       Number(s.tradeVolume || 0) * 0.5 +
       Number(s.contractsDone || 0) * 200 +
       Number(s.routesDone || 0) * 250
     );
+
+    var rawTotal = cash + invVal + bldgValue + productionPotentialValue + territoryValue + Math.max(0, Math.round(avgHourlyIncome * 0.5)) + activityValue;
+    var totalValuation = Math.max(0, Math.round(rawTotal * tMods.valuationMult));
+    return {
+      cash: cash,
+      inventoryValue: Math.round(invVal),
+      facilitiesValue: Math.round(bldgValue),
+      productionPotentialValue: productionPotentialValue,
+      territoryValue: territoryValue,
+      activityValue: activityValue,
+      avgHourlyIncome: avgHourlyIncome,
+      totalValuation: totalValuation
+    };
+  }
+
+  function computeValuation(state, cid) {
+    return getCompanyValuationBreakdown(state, cid).totalValuation;
   }
 
   function collectCompanyAnchors(state) {
@@ -2235,23 +3850,25 @@ global.LHOpenTTD = (function () {
     var claimKeys = Object.keys(state.claims || {});
     for (var j = 0; j < claimKeys.length; j++) {
       var cl = state.claims[claimKeys[j]];
-      if (cl && state.companies[cl.owner]) {
+      if (cl && state.companies[cl.owner] && (!cl.dimension || cl.dimension === 'minecraft:overworld')) {
         anchors.push({ cid: cl.owner, sx: cl.sx, sz: cl.sz, weight: 1.0 });
       }
     }
     return anchors;
   }
 
-  function resolveSectorOwner(state, sx, sz) {
-    var key = sectorKey(sx, sz);
-    if (isSpawnProtectedSector(sx, sz)) {
-      return { sx: sx, sz: sz, key: key, owner: null, kind: 'unclaimed', strength: 0, isHq: false, claim: null };
+  function resolveSectorOwner(state, sx, sz, dimension) {
+    var dim = global.LHStructureProduction ? global.LHStructureProduction.normalizeDimension(dimension) : 'minecraft:overworld';
+    var key = sectorKey(sx, sz, dim);
+    if (dim === 'minecraft:overworld' && isSpawnProtectedSector(sx, sz)) {
+      return { sx: sx, sz: sz, dimension: dim, key: key, owner: null, kind: 'unclaimed', strength: 0, isHq: false, claim: null };
     }
     var cl = state.claims && state.claims[key];
     if (cl && state.companies && state.companies[cl.owner]) {
       return {
         sx: sx,
         sz: sz,
+        dimension: dim,
         key: key,
         owner: cl.owner,
         kind: 'claimed',
@@ -2260,9 +3877,12 @@ global.LHOpenTTD = (function () {
         claim: cl
       };
     }
+    if (dim !== 'minecraft:overworld') {
+      return { sx: sx, sz: sz, dimension: dim, key: key, owner: null, kind: 'unclaimed', strength: 0, isHq: false, claim: null };
+    }
     var anchors = collectCompanyAnchors(state);
     if (!anchors.length) {
-      return { sx: sx, sz: sz, key: key, owner: null, kind: 'unclaimed', strength: 0, isHq: false, claim: null };
+      return { sx: sx, sz: sz, dimension: dim, key: key, owner: null, kind: 'unclaimed', strength: 0, isHq: false, claim: null };
     }
     var bestCid = null;
     var bestDist = 1e18;
@@ -2279,6 +3899,7 @@ global.LHOpenTTD = (function () {
     return {
       sx: sx,
       sz: sz,
+      dimension: dim,
       key: key,
       owner: bestCid,
       kind: 'voronoi',
@@ -2288,23 +3909,25 @@ global.LHOpenTTD = (function () {
     };
   }
 
-  function isAdjacentOwned(state, cid, sx, sz) {
+  function isAdjacentOwned(state, cid, sx, sz, dimension) {
     var dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
     for (var i = 0; i < dirs.length; i++) {
-      var k = sectorKey(sx + dirs[i][0], sz + dirs[i][1]);
+      var k = sectorKey(sx + dirs[i][0], sz + dirs[i][1], dimension);
       var cl = state.claims && state.claims[k];
       if (cl && cl.owner === cid) return true;
     }
     return false;
   }
 
-  function minOwnedSectorDistance(state, cid, sx, sz) {
+  function minOwnedSectorDistance(state, cid, sx, sz, dimension) {
+    var normDim = global.LHStructureProduction ? global.LHStructureProduction.normalizeDimension(dimension) : 'minecraft:overworld';
     var best = 999999;
     var owned = 0;
     var keys = Object.keys(state.claims || {});
     for (var i = 0; i < keys.length; i++) {
       var cl = state.claims[keys[i]];
       if (!cl || cl.owner !== cid) continue;
+      if ((cl.dimension || 'minecraft:overworld') !== normDim) continue;
       owned++;
       var md = Math.abs(sx - cl.sx) + Math.abs(sz - cl.sz);
       if (md < best) best = md;
@@ -2313,24 +3936,39 @@ global.LHOpenTTD = (function () {
     return best;
   }
 
-  function computeClaimCost(state, cid, sx, sz) {
+  function computeClaimCost(state, cid, sx, sz, dimension) {
     var c = state.companies && state.companies[cid];
     if (!c) return { ok: false, reason: 'no_company', cost: BASE_CLAIM_COST };
-    if (isSpawnProtectedSector(sx, sz)) {
+    var dim = global.LHStructureProduction ? global.LHStructureProduction.normalizeDimension(dimension) : 'minecraft:overworld';
+    if (dim === 'minecraft:overworld' && isSpawnProtectedSector(sx, sz)) {
       return { ok: false, reason: 'spawn_protected', cost: 0, adjacent: false, sectorDist: 0, exclaveMult: 1.0 };
     }
-    var ownerInfo = resolveSectorOwner(state, sx, sz);
+    var ownerInfo = resolveSectorOwner(state, sx, sz, dim);
     var tSpec = c.transportSpec ? TRANSPORT_SPECS[c.transportSpec] : null;
     var disc = tSpec ? Number(tSpec.claimDiscount || 0) : 0;
     var owned = countClaims(state, cid);
-    var sectorDist = minOwnedSectorDistance(state, cid, sx, sz);
+    var sectorDist = dim === 'minecraft:overworld' ? minOwnedSectorDistance(state, cid, sx, sz, dim) : 1;
     var adjacent = sectorDist <= 1;
     var adjDiscount = (owned > 0 && adjacent) ? 0.20 : 0.0;
     var specMult = Math.max(0.40, 1.0 - disc - adjDiscount);
+    var tMods = getCompanyTraitModifiers(c);
+    var dimMult = dim === 'minecraft:the_nether' ? 1.35 : (dim === 'minecraft:the_end' ? 1.75 : (dim !== 'minecraft:overworld' ? 1.50 : 1.0));
+    var bldgs = listCompanyBuildings(state, cid);
+    var warehouseCount = 0;
+    for (var bi = 0; bi < bldgs.length; bi++) {
+      if (bldgs[bi].type === 'warehouse') warehouseCount++;
+    }
+    if (warehouseCount > 0) {
+      specMult = Math.max(0.35, specMult * Math.max(0.75, 1.0 - Math.min(0.25, warehouseCount * 0.10)));
+    }
     var exclaveMult = adjacent ? 1.0 : (1.0 + 1.5 * (sectorDist - 1) + 0.5 * (sectorDist - 1) * (sectorDist - 1));
 
     if (ownerInfo.kind === 'claimed') {
       if (ownerInfo.owner === cid) return { ok: false, reason: 'already_yours', cost: 0, adjacent: true, sectorDist: 0, exclaveMult: 1.0 };
+      if (hasPact(state, cid, ownerInfo.owner)) {
+        return { ok: false, reason: 'pact_protected', targetOwner: ownerInfo.owner, cost: 0 };
+      }
+      var coalMod = getCoalitionModifiers(state, cid, ownerInfo.owner);
       var baseTakeover = ownerInfo.isHq ? 750 : (240 * ownerInfo.strength);
       var nonAdjSiege = adjacent ? 1.0 : 1.75;
       return {
@@ -2341,7 +3979,8 @@ global.LHOpenTTD = (function () {
         adjacent: adjacent,
         sectorDist: sectorDist,
         exclaveMult: exclaveMult * nonAdjSiege,
-        cost: Math.round(baseTakeover * specMult * exclaveMult * nonAdjSiege)
+        coalitionAttack: coalMod.isCoalitionAttack,
+        cost: Math.round(baseTakeover * specMult * exclaveMult * nonAdjSiege * dimMult * tMods.claimCostMult * tMods.captureCostMult * coalMod.captureCostMult)
       };
     }
     return {
@@ -2352,7 +3991,7 @@ global.LHOpenTTD = (function () {
       adjacent: adjacent,
       sectorDist: sectorDist,
       exclaveMult: exclaveMult,
-      cost: Math.round(BASE_CLAIM_COST * specMult * exclaveMult)
+      cost: Math.round(BASE_CLAIM_COST * specMult * exclaveMult * dimMult * tMods.claimCostMult)
     };
   }
 
@@ -2362,6 +4001,18 @@ global.LHOpenTTD = (function () {
     for (var i = 0; i < cids.length; i++) {
       var c = state.companies[cids[i]];
       if (!c) continue;
+      var d = Math.max(Math.abs(Number(c.hqSx || 0) - sx), Math.abs(Number(c.hqSz || 0) - sz));
+      if (d < best) best = d;
+    }
+    return best;
+  }
+
+  function minPlayerHqDistance(state, sx, sz) {
+    var best = 999999;
+    var cids = Object.keys(state.companies || {});
+    for (var i = 0; i < cids.length; i++) {
+      var c = state.companies[cids[i]];
+      if (!c || c.isBot) continue;
       var d = Math.max(Math.abs(Number(c.hqSx || 0) - sx), Math.abs(Number(c.hqSz || 0) - sz));
       if (d < best) best = d;
     }
@@ -2385,19 +4036,29 @@ global.LHOpenTTD = (function () {
     var colorCode = PLAYER_COLORS[playerCount % PLAYER_COLORS.length];
     var sc = sectorCoords(hqX || 0, hqZ || 0);
     if (isSpawnProtectedSector(sc.sx, sc.sz) || state.claims[sc.key]) {
+      // Wide HQ spacing fallback so player bases don't cluster right next to each other
       var ringCandidates = [
         [0, 5], [5, 0], [-5, 0], [0, -5],
         [4, 4], [-4, 4], [4, -4], [-4, -4],
+        [0, -10], [10, 0], [-10, 0], [0, 10],
+        [9, 9], [-9, 9], [9, -9], [-9, -9],
         [0, 3], [3, 0], [-3, 0], [0, -3],
         [0, 2], [2, 2], [-2, 2], [2, -2], [-2, -2]
       ];
       var bestCand = null;
+      var bestPlayerDist = -1;
       for (var ri = 0; ri < ringCandidates.length; ri++) {
-        var rKey = sectorKey(ringCandidates[ri][0], ringCandidates[ri][1]);
+        var rx = ringCandidates[ri][0], rz = ringCandidates[ri][1];
+        var rKey = sectorKey(rx, rz);
         if (!state.claims[rKey]) {
-          if (!bestCand) bestCand = { sx: ringCandidates[ri][0], sz: ringCandidates[ri][1], key: rKey };
-          if (minCompanyHqDistance(state, ringCandidates[ri][0], ringCandidates[ri][1]) >= 4) {
-            sc = { sx: ringCandidates[ri][0], sz: ringCandidates[ri][1], key: rKey };
+          var pDist = minPlayerHqDistance(state, rx, rz);
+          var cDist = minCompanyHqDistance(state, rx, rz);
+          if (pDist > bestPlayerDist) {
+            bestPlayerDist = pDist;
+            bestCand = { sx: rx, sz: rz, key: rKey };
+          }
+          if (pDist >= 8 && cDist >= 3) {
+            sc = { sx: rx, sz: rz, key: rKey };
             bestCand = sc;
             break;
           }
@@ -2408,9 +4069,11 @@ global.LHOpenTTD = (function () {
     var reqEnv = (opts && (opts.envType || opts.environment)) ? (opts.envType || opts.environment) : 'normal';
     var envType = COMPANY_ENV_TYPES[reqEnv] ? reqEnv : 'normal';
     var hqY = (opts && typeof opts.hqY === 'number') ? Math.round(opts.hqY) : preferredBuildingY(envType, 70);
+    var traits = (opts && Array.isArray(opts.traits) && opts.traits.length) ? opts.traits : rollCompanyTraits(1);
     var comp = {
       id: cid,
       name: String(displayName || cid).slice(0, 32),
+      traits: traits,
       color: 'blue',
       colorCode: colorCode,
       tag: cid.toUpperCase().slice(0, 4),
@@ -2426,7 +4089,10 @@ global.LHOpenTTD = (function () {
       hqX: Math.round(Number(hqX || sc.sx * SECTOR_SIZE)),
       hqY: hqY,
       hqZ: Math.round(Number(hqZ || sc.sz * SECTOR_SIZE)),
-      stats: { deliveries: 0, tradeVolume: 0, blocksMined: 0, sectorsCaptured: 0, contractsDone: 0, routesDone: 0 }
+      stockBuffer: {},
+      incomeHistory: [],
+      physicalStockEstimate: 0,
+      stats: { deliveries: 0, tradeVolume: 0, blocksMined: 0, sectorsCaptured: 0, contractsDone: 0, routesDone: 0, raidsLaunched: 0, hostileCaptures: 0 }
     };
     state.companies[cid] = comp;
     state.playerCompany[playerUuid] = cid;
@@ -2434,7 +4100,7 @@ global.LHOpenTTD = (function () {
     // Claim HQ sector if not already claimed by a bot/player HQ
     var cur = state.claims[sc.key];
     if (!cur) {
-      state.claims[sc.key] = { sx: sc.sx, sz: sc.sz, owner: cid, strength: 2, isHq: true };
+      state.claims[sc.key] = { sx: sc.sx, sz: sc.sz, dimension: 'minecraft:overworld', owner: cid, strength: 2, isHq: true };
       comp.stats.sectorsCaptured = 1;
     }
     syncPlayerReputationToCompany(state, playerUuid, cid);
@@ -2491,7 +4157,8 @@ global.LHOpenTTD = (function () {
   function claimOrCaptureSector(state, cid, sx, sz, allowCapture, opts) {
     var comp = state.companies[cid];
     if (!comp) return { ok: false, reason: 'no_company' };
-    var info = computeClaimCost(state, cid, sx, sz);
+    var dim = (opts && opts.dimension) ? (global.LHStructureProduction ? global.LHStructureProduction.normalizeDimension(opts.dimension) : opts.dimension) : 'minecraft:overworld';
+    var info = computeClaimCost(state, cid, sx, sz, dim);
     if (!info.ok) return info;
     if (opts && opts.remote && !info.adjacent) {
       return { ok: false, reason: 'not_adjacent_remote', sectorDist: info.sectorDist, cost: info.cost };
@@ -2506,25 +4173,34 @@ global.LHOpenTTD = (function () {
     if (info.mode === 'capture' && info.targetOwner && state.companies[info.targetOwner]) {
       // Pay 50% compensation into rival company's balance in hostile buyout
       state.companies[info.targetOwner].cash += Math.round(finalCost * 0.5);
+      comp.stats.hostileCaptures = (comp.stats.hostileCaptures || 0) + 1;
+      adjustRelation(state, cid, info.targetOwner, -20, 'Силовой захват сектора (' + sx + ',' + sz + ')');
+      var coalMod = getCoalitionModifiers(state, cid, info.targetOwner);
+      if (coalMod.isCoalitionAttack && coalMod.captureBounty > 0) {
+        comp.cash += coalMod.captureBounty;
+      }
     }
-    var k = sectorKey(sx, sz);
-    state.claims[k] = { sx: sx, sz: sz, owner: cid, strength: 1, isHq: false };
+    var k = sectorKey(sx, sz, dim);
+    state.claims[k] = { sx: sx, sz: sz, dimension: dim, owner: cid, strength: 1, isHq: false };
     comp.stats.sectorsCaptured = (comp.stats.sectorsCaptured || 0) + 1;
     return {
       ok: true,
       mode: info.mode,
       cost: finalCost,
       key: k,
+      dimension: dim,
       previousOwner: info.targetOwner,
       adjacent: info.adjacent,
-      sectorDist: info.sectorDist
+      sectorDist: info.sectorDist,
+      coalitionAttack: !!info.coalitionAttack
     };
   }
 
-  function weakenOrCaptureSector(state, attackerCid, sx, sz, powerLevels, cashCost) {
+  function weakenOrCaptureSector(state, attackerCid, sx, sz, powerLevels, cashCost, dimension) {
     var comp = state.companies[attackerCid];
     if (!comp) return { ok: false, reason: 'no_company' };
-    var k = sectorKey(sx, sz);
+    var dim = global.LHStructureProduction ? global.LHStructureProduction.normalizeDimension(dimension) : 'minecraft:overworld';
+    var k = sectorKey(sx, sz, dim);
     var cl = state.claims[k];
     if (!cl || !state.companies[cl.owner]) return { ok: false, reason: 'not_claimed' };
     if (cl.owner === attackerCid) return { ok: false, reason: 'already_yours' };
@@ -2533,22 +4209,26 @@ global.LHOpenTTD = (function () {
 
     comp.cash -= cost;
     var prevOwner = cl.owner;
-    var dmg = Math.max(1, Math.round(Number(powerLevels || 1)));
+    var coalMod = getCoalitionModifiers(state, attackerCid, prevOwner);
+    var dmg = Math.max(1, Math.round(Number(powerLevels || 1)) + Number(coalMod.raidPowerBonus || 0) - Number(coalMod.defenseBonus || 0));
     var rem = Number(cl.strength || 1) - dmg;
     if (rem <= 0) {
-      state.claims[k] = { sx: sx, sz: sz, owner: attackerCid, strength: 1, isHq: false };
+      state.claims[k] = { sx: sx, sz: sz, dimension: dim, owner: attackerCid, strength: 1, isHq: false };
       comp.stats.sectorsCaptured = (comp.stats.sectorsCaptured || 0) + 1;
-      return { ok: true, captured: true, previousOwner: prevOwner, newStrength: 1, cost: cost };
+      comp.stats.hostileCaptures = (comp.stats.hostileCaptures || 0) + 1;
+      if (coalMod.isCoalitionAttack && coalMod.captureBounty > 0) comp.cash += coalMod.captureBounty;
+      adjustRelation(state, attackerCid, prevOwner, -18, 'Рейдерский захват сектора (' + sx + ',' + sz + ')');
+      return { ok: true, captured: true, previousOwner: prevOwner, newStrength: 1, cost: cost, coalitionAttack: coalMod.isCoalitionAttack };
     }
     cl.strength = rem;
-    return { ok: true, captured: false, previousOwner: prevOwner, newStrength: rem, cost: cost };
+    return { ok: true, captured: false, previousOwner: prevOwner, newStrength: rem, cost: cost, coalitionAttack: coalMod.isCoalitionAttack };
   }
 
-  function transferSector(state, fromCid, toCid, sx, sz) {
+  function transferSector(state, fromCid, toCid, sx, sz, dimension) {
     var fromComp = state.companies[fromCid];
     var toComp = state.companies[toCid];
     if (!fromComp || !toComp || fromCid === toCid) return { ok: false, reason: 'bad_company' };
-    var k = sectorKey(sx, sz);
+    var k = sectorKey(sx, sz, dimension);
     var cl = state.claims[k];
     if (!cl || cl.owner !== fromCid) return { ok: false, reason: 'not_owned' };
     if (cl.isHq && countClaims(state, fromCid) <= 1) return { ok: false, reason: 'last_hq' };
@@ -2559,14 +4239,14 @@ global.LHOpenTTD = (function () {
     return { ok: true, key: k, from: fromCid, to: toCid };
   }
 
-  function antitrustSeize(state, attackerCid, sx, sz) {
+  function antitrustSeize(state, attackerCid, sx, sz, dimension) {
     var comp = state.companies[attackerCid];
     if (!comp) return { ok: false, reason: 'no_company' };
-    var k = sectorKey(sx, sz);
+    var k = sectorKey(sx, sz, dimension);
     var cl = state.claims[k];
     if (!cl || !state.companies[cl.owner]) return { ok: false, reason: 'not_claimed' };
     if (cl.owner === attackerCid) return { ok: false, reason: 'already_yours' };
-    if (!isAdjacentOwned(state, attackerCid, sx, sz)) return { ok: false, reason: 'not_adjacent' };
+    if (!isAdjacentOwned(state, attackerCid, sx, sz, dimension)) return { ok: false, reason: 'not_adjacent' };
     if ((cl.strength || 1) > 1) return { ok: false, reason: 'fortified', strength: cl.strength };
     var target = state.companies[cl.owner];
     var myVal = computeValuation(state, attackerCid);
@@ -2574,13 +4254,13 @@ global.LHOpenTTD = (function () {
     if (target.cash >= 100 && myVal < rivalVal * 1.8) {
       return { ok: false, reason: 'antitrust_not_eligible', myVal: myVal, rivalVal: rivalVal, rivalCash: target.cash };
     }
-    return claimOrCaptureSector(state, attackerCid, sx, sz, true, { discountFactor: 0.55 });
+    return claimOrCaptureSector(state, attackerCid, sx, sz, true, { discountFactor: 0.55, dimension: dimension });
   }
 
-  function fortifySector(state, cid, sx, sz) {
+  function fortifySector(state, cid, sx, sz, dimension) {
     var comp = state.companies[cid];
     if (!comp) return { ok: false, reason: 'no_company' };
-    var k = sectorKey(sx, sz);
+    var k = sectorKey(sx, sz, dimension);
     var cl = state.claims[k];
     if (!cl || cl.owner !== cid) return { ok: false, reason: 'not_owned' };
     if ((cl.strength || 1) >= 4) return { ok: false, reason: 'max_strength' };
@@ -2624,10 +4304,28 @@ global.LHOpenTTD = (function () {
     return cnt;
   }
 
-  function maxBotClaimsAllowed(state) {
-    // Bots hold 1 HQ each, and any extra claimed sectors across all bots combined
-    // cannot exceed the sum of sectors claimed by all players.
-    return countActiveBots(state) + countPlayerClaimsTotal(state);
+  function countOverworldAvailableSectors(maxSectorAbs) {
+    var limit = Math.max(2, Math.floor(Number(maxSectorAbs || 5)));
+    var side = limit * 2 + 1;
+    return Math.max(1, side * side - 9); // excluding 3x3 spawn sanctuary
+  }
+
+  function maxBotClaimsAllowed(state, maxSectorAbs, completedChapters) {
+    ensureDiplomacyState(state);
+    var activeBots = countActiveBots(state);
+    var playerClaims = countPlayerClaimsTotal(state);
+    var chDone = Math.max(0, Number(completedChapters !== undefined ? completedChapters : (state.completedChapters || 0)));
+    var legacyCap = activeBots + playerClaims;
+    if (chDone <= 0 && playerClaims <= 0) {
+      return legacyCap;
+    }
+    // By 1/3 of campaign chapters (~20 of 61), bots should saturate all open non-player sectors inside the active map!
+    var oneThirdChapters = 20;
+    var progress = Math.min(1.0, chDone / oneThirdChapters);
+    var totalOpen = countOverworldAvailableSectors(maxSectorAbs || 5);
+    var nonPlayerOpen = Math.max(activeBots, totalOpen - playerClaims);
+    var scaledCap = Math.round(activeBots + (nonPlayerOpen - activeBots) * progress);
+    return Math.max(legacyCap, Math.min(nonPlayerOpen, scaledCap));
   }
 
   var DYNAMIC_BOT_NAMES = [
@@ -2637,8 +4335,8 @@ global.LHOpenTTD = (function () {
     'ДонХимПром', 'АмурМост', 'НеваЭнерджи', 'МагаданПорт', 'СахалинГаз'
   ];
 
-  function spawnDynamicBotCompany(state, maxSectorAbs, rngFn) {
-    ensureBots(state);
+  function spawnDynamicBotCompany(state, maxSectorAbs, rngFn, opts) {
+    ensureBots(state, rngFn);
     var rng = rngFn || Math.random;
     var limit = Math.max(3, Math.floor(Number(maxSectorAbs || 3)));
     if (!state.nextBotSeq) state.nextBotSeq = 1;
@@ -2650,7 +4348,6 @@ global.LHOpenTTD = (function () {
       bid = 'bot_dyn_' + seq;
     }
 
-    // Pick an unclaimed sector well-spaced from existing HQs
     var minRing = Math.max(4, Math.floor(limit * 0.40));
     var hqSx = null;
     var hqSz = null;
@@ -2682,37 +4379,49 @@ global.LHOpenTTD = (function () {
     }
     if (hqSx === null) return { ok: false, reason: 'no_free_sector' };
 
-    var tKeys = Object.keys(TRANSPORT_SPECS);
-    var rKeys = Object.keys(RESOURCE_SPECS);
-    var chosenTSpec = tKeys[seq % tKeys.length];
-    var chosenEnv = TRANSPORT_SPECS[chosenTSpec].envType || 'normal';
+    var archKeys = Object.keys(BOT_ARCHETYPES);
+    var archId = (opts && opts.archetype && BOT_ARCHETYPES[opts.archetype]) ? opts.archetype : archKeys[(seq - 1) % archKeys.length];
+    var arch = BOT_ARCHETYPES[archId];
+    var chosenTSpec = arch.transportSpec || 'rail';
+    var chosenRSpec = arch.resourceSpec || 'ore';
+    var chosenEnv = arch.envType || (TRANSPORT_SPECS[chosenTSpec] ? TRANSPORT_SPECS[chosenTSpec].envType : 'normal');
+    var traits = rollCompanyTraits(2, rng);
     var nameBase = DYNAMIC_BOT_NAMES[(seq - 1) % DYNAMIC_BOT_NAMES.length];
     var displayName = seq > DYNAMIC_BOT_NAMES.length ? (nameBase + ' #' + seq) : nameBase;
     var colorCode = PLAYER_COLORS[(seq + 2) % PLAYER_COLORS.length];
     var bot = {
       id: bid,
       name: displayName,
+      archetype: arch.id,
+      archetypeName: arch.name,
+      traits: traits,
       color: 'aqua',
       colorCode: colorCode,
       tag: ('B' + seq).slice(0, 4),
       isBot: true,
       owner: 'AI',
       members: [],
-      cash: 1100 + Math.min(2000, seq * 120),
+      cash: 1200 + Math.min(2500, seq * 140),
       transportSpec: chosenTSpec,
-      resourceSpec: rKeys[seq % rKeys.length],
+      resourceSpec: chosenRSpec,
       envType: chosenEnv,
       hqSx: hqSx,
       hqSz: hqSz,
       hqX: hqSx * SECTOR_SIZE,
       hqY: preferredBuildingY(chosenEnv, 70),
       hqZ: hqSz * SECTOR_SIZE,
-      stats: { deliveries: 0, tradeVolume: 0, blocksMined: 0, sectorsCaptured: 1, contractsDone: 0, routesDone: 0 }
+      stockBuffer: {},
+      incomeHistory: [],
+      physicalStockEstimate: 0,
+      stats: { deliveries: 0, tradeVolume: 0, blocksMined: 0, sectorsCaptured: 1, contractsDone: 0, routesDone: 0, raidsLaunched: 0, hostileCaptures: 0 }
     };
+    var bMods = getCompanyTraitModifiers(bot);
+    bot.cash += bMods.botCashBonus;
     state.companies[bid] = bot;
     state.claims[sectorKey(hqSx, hqSz)] = {
       sx: hqSx,
       sz: hqSz,
+      dimension: 'minecraft:overworld',
       owner: bid,
       strength: 2,
       isHq: true
@@ -2720,8 +4429,136 @@ global.LHOpenTTD = (function () {
     return { ok: true, bot: bot, sx: hqSx, sz: hqSz };
   }
 
+  function onChapterCompletedBotSpawn(state, completedChaptersCount, maxSectorAbs, rngFn) {
+    ensureDiplomacyState(state);
+    var chCount = Math.max(0, Math.round(Number(completedChaptersCount || 0)));
+    state.completedChapters = Math.max(Number(state.completedChapters || 0), chCount);
+    var targetSpawns = Math.floor(state.completedChapters / 2);
+    var spawned = [];
+    while ((state.botChapterSpawnsDone || 0) < targetSpawns) {
+      var res = spawnDynamicBotCompany(state, maxSectorAbs || 10, rngFn);
+      state.botChapterSpawnsDone = (state.botChapterSpawnsDone || 0) + 1;
+      if (res.ok) spawned.push(res.bot);
+      else break;
+    }
+    return { ok: true, completedChapters: state.completedChapters, targetSpawns: targetSpawns, spawned: spawned };
+  }
+
+  function applyBotCatchupBalancing(state) {
+    ensureDiplomacyState(state);
+    var playerVals = [];
+    var botIds = [];
+    Object.keys(state.companies || {}).forEach(function (cid) {
+      var c = state.companies[cid];
+      if (!c) return;
+      if (c.isBot) botIds.push(cid);
+      else playerVals.push(computeValuation(state, cid));
+    });
+    if (!playerVals.length || !botIds.length) return { adjusted: 0, topPlayerValuation: 0 };
+    var topPlayerVal = Math.max.apply(null, playerVals);
+    var avgPlayerVal = Math.round(playerVals.reduce(function (a, b) { return a + b; }, 0) / playerVals.length);
+    var benchmark = Math.round(topPlayerVal * 0.65 + avgPlayerVal * 0.35);
+    var adjusted = 0;
+    for (var i = 0; i < botIds.length; i++) {
+      var bot = state.companies[botIds[i]];
+      var bVal = computeValuation(state, bot.id);
+      if (bVal < benchmark * 0.60 && benchmark > 3000) {
+        var gap = Math.round((benchmark * 0.60 - bVal) * 0.08);
+        var grant = Math.max(40, Math.min(600, gap));
+        bot.cash += grant;
+        bot.catchupBoost = Math.min(1.80, Math.max(1.15, benchmark / Math.max(800, bVal)));
+        adjusted++;
+      } else {
+        bot.catchupBoost = 1.0;
+      }
+    }
+    return { adjusted: adjusted, topPlayerValuation: topPlayerVal, benchmark: benchmark };
+  }
+
+  function triggerBotMobRaid(state, botCid, targetCid, sx, sz, nowTick, opts) {
+    ensureDiplomacyState(state);
+    var bot = state.companies[botCid];
+    var target = state.companies[targetCid];
+    if (!bot || !target || botCid === targetCid) return { ok: false, reason: 'bad_company' };
+    if (hasPact(state, botCid, targetCid) || isAllied(state, botCid, targetCid)) {
+      return { ok: false, reason: 'allied_or_pact' };
+    }
+    var o = opts || {};
+    var raidCost = Math.max(120, Math.round(Number(o.cost || 240)));
+    if (bot.cash < raidCost) return { ok: false, reason: 'no_cash', cost: raidCost };
+    bot.cash -= raidCost;
+    bot.stats.raidsLaunched = (bot.stats.raidsLaunched || 0) + 1;
+    var cl = state.claims[sectorKey(sx, sz, o.dimension)];
+    var strength = Math.max(1, Math.min(5, Math.round(Number(o.strength || (1 + Math.floor((state.completedChapters || 0) / 10))))));
+    var mobRoster = strength >= 3
+      ? ['minecraft:pillager', 'minecraft:vindicator', 'minecraft:ravager']
+      : ['minecraft:pillager', 'minecraft:vindicator', 'minecraft:zombie'];
+    var raid = {
+      id: 'raid_' + (state.nextMobRaidSeq++),
+      attackerCid: botCid,
+      attackerName: bot.name,
+      targetCid: targetCid,
+      targetName: target.name,
+      sx: sx,
+      sz: sz,
+      dimension: o.dimension || 'minecraft:overworld',
+      x: sx * SECTOR_SIZE,
+      z: sz * SECTOR_SIZE,
+      strength: strength,
+      mobCount: 3 + strength * 2,
+      mobRoster: mobRoster,
+      spawnedInWorld: false,
+      startedTick: Number(nowTick || 0),
+      expiresTick: Number(nowTick || 0) + 6000,
+      status: 'active',
+      targetStrengthBefore: cl ? Number(cl.strength || 1) : 1
+    };
+    state.activeMobRaids.push(raid);
+    adjustRelation(state, botCid, targetCid, -15, 'Агрессивный моб-рейд на сектор (' + sx + ',' + sz + ')');
+    return { ok: true, raid: raid };
+  }
+
+  function resolveBotMobRaid(state, raidId, outcome) {
+    ensureDiplomacyState(state);
+    for (var i = 0; i < state.activeMobRaids.length; i++) {
+      var r = state.activeMobRaids[i];
+      if (!r || r.id !== raidId || r.status !== 'active') continue;
+      if (outcome === 'defended') {
+        r.status = 'defended';
+        var defender = state.companies[r.targetCid];
+        if (defender) defender.cash += 120 * r.strength;
+        return { ok: true, status: 'defended', raid: r };
+      }
+      r.status = 'breached';
+      var bldg = getSectorBuilding(state, r.sx, r.sz, r.dimension);
+      if (bldg) damageBuildingIntegrity(state, r.sx, r.sz, 25 * r.strength, r.dimension);
+      var k = sectorKey(r.sx, r.sz, r.dimension);
+      var cl = state.claims[k];
+      if (cl && cl.owner === r.targetCid) {
+        if ((cl.strength || 1) > 1) cl.strength -= 1;
+        else weakenOrCaptureSector(state, r.attackerCid, r.sx, r.sz, 1, 0, r.dimension);
+      }
+      return { ok: true, status: 'breached', raid: r };
+    }
+    return { ok: false, reason: 'not_found' };
+  }
+
+  function tickBotMobRaids(state, nowTick) {
+    ensureDiplomacyState(state);
+    var tick = Number(nowTick || 0);
+    var resolved = [];
+    for (var i = 0; i < state.activeMobRaids.length; i++) {
+      var r = state.activeMobRaids[i];
+      if (!r || r.status !== 'active') continue;
+      if (tick >= r.expiresTick) {
+        resolved.push(resolveBotMobRaid(state, r.id, 'breached'));
+      }
+    }
+    return resolved;
+  }
+
   function botExpandStep(state, maxSectorAbs, rngFn) {
-    ensureBots(state);
+    ensureBots(state, rngFn);
     state.botCycle = (state.botCycle || 0) + 1;
     var rng = rngFn || Math.random;
     var limit = Math.max(1, Math.floor(Number(maxSectorAbs || 1)));
@@ -2730,26 +4567,95 @@ global.LHOpenTTD = (function () {
       return state.companies[cid] && state.companies[cid].isBot;
     });
 
+    applyBotCatchupBalancing(state);
+    var allowedCap = maxBotClaimsAllowed(state, limit, state.completedChapters || 0);
+    var highPace = allowedCap > (countActiveBots(state) + countPlayerClaimsTotal(state));
+
     for (var i = 0; i < allBotIds.length; i++) {
       var bot = state.companies[allBotIds[i]];
       if (!bot) continue;
+      var tMods = getCompanyTraitModifiers(bot);
+      var arch = BOT_ARCHETYPES[bot.archetype] || BOT_ARCHETYPES.mining_syndicate;
       var ownedCount = countClaims(state, bot.id);
-      var income = 70 + ownedCount * 28;
+      var catchup = Number(bot.catchupBoost || 1.0);
+      var income = Math.round((75 + ownedCount * 28) * tMods.incomeMult * catchup);
       bot.cash += income;
       bot.stats.deliveries += 1;
 
-      if (countBotClaimsTotal(state) >= maxBotClaimsAllowed(state)) {
+      // Bots try to construct/upgrade facilities on owned sectors when wealthy
+      var botBldgs = listCompanyBuildings(state, bot.id);
+      if (bot.cash >= 620 && botBldgs.length < Math.max(1, Math.min(4, Math.floor(ownedCount / 2) + 1))) {
+        var bClaimKeys = Object.keys(state.claims || {});
+        for (var bc = 0; bc < bClaimKeys.length; bc++) {
+          var bcl = state.claims[bClaimKeys[bc]];
+          if (!bcl || bcl.owner !== bot.id || bcl.isHq) continue;
+          if (!getSectorBuilding(state, bcl.sx, bcl.sz, bcl.dimension)) {
+            var bType = (arch.preferredBuildings && arch.preferredBuildings.length)
+              ? arch.preferredBuildings[botBldgs.length % arch.preferredBuildings.length]
+              : 'mine_shaft';
+            var bRes = buildCompanyBuilding(state, bot.id, bType, bcl.sx, bcl.sz, null, bcl.dimension);
+            if (bRes.ok) {
+              events.push({ type: 'bot_build', botId: bot.id, botName: bot.name, buildingType: bType, sx: bcl.sx, sz: bcl.sz });
+              break;
+            }
+          }
+        }
+      } else if (botBldgs.length > 0 && bot.cash >= 900) {
+        for (var ub = 0; ub < botBldgs.length; ub++) {
+          var tgtB = botBldgs[ub];
+          if ((tgtB.level || 1) < 3) {
+            var uRes = upgradeCompanyBuilding(state, bot.id, tgtB.sx, tgtB.sz, tgtB.dimension);
+            if (uRes.ok) {
+              events.push({ type: 'bot_upgrade', botId: bot.id, botName: bot.name, buildingType: tgtB.type, level: uRes.level, sx: tgtB.sx, sz: tgtB.sz });
+              break;
+            }
+          }
+        }
+      }
+
+      // Aggressive bots may launch hostile mob raids against neighboring rivals/monopolists
+      var raidThreshold = 0.08 * tMods.botAggressionMult * (arch.raidBias || 1.0);
+      if (bot.cash >= 700 && (state.activeMobRaids || []).length < 4 && rng() < raidThreshold) {
+        var monoList = getMonopolyMetrics(state);
+        var monoTargetIds = {};
+        for (var mi = 0; mi < monoList.length; mi++) {
+          if (monoList[mi].isMonopolyTarget) monoTargetIds[monoList[mi].cid] = true;
+        }
+        var targetSector = null;
+        var claimKeysR = Object.keys(state.claims || {});
+        for (var rk = 0; rk < claimKeysR.length; rk++) {
+          var rcl = state.claims[claimKeysR[rk]];
+          if (!rcl || rcl.owner === bot.id || rcl.isHq) continue;
+          if (hasPact(state, bot.id, rcl.owner) || isAllied(state, bot.id, rcl.owner)) continue;
+          if (isAdjacentOwned(state, bot.id, rcl.sx, rcl.sz, rcl.dimension) || monoTargetIds[rcl.owner]) {
+            targetSector = rcl;
+            break;
+          }
+        }
+        if (targetSector) {
+          var raidRes = triggerBotMobRaid(state, bot.id, targetSector.owner, targetSector.sx, targetSector.sz, state.botCycle * 1000, { dimension: targetSector.dimension });
+          if (raidRes.ok) {
+            events.push({ type: 'bot_mob_raid', botId: bot.id, botName: bot.name, targetCid: targetSector.owner, sx: targetSector.sx, sz: targetSector.sz, raidId: raidRes.raid.id });
+          }
+        }
+      }
+
+      if (countBotClaimsTotal(state) >= allowedCap) {
         continue;
       }
 
-      if (bot.cash >= 650) {
-        // Pick an unclaimed sector adjacent to an owned sector within active worldborder, never inside the 3x3 spawn ring
+      var claimsThisTick = highPace ? 2 : 1;
+      for (var step = 0; step < claimsThisTick; step++) {
+        if (countBotClaimsTotal(state) >= allowedCap) break;
+        if (bot.cash < (highPace ? 320 : 650)) break;
+
         var candidates = [];
         var claimKeys = Object.keys(state.claims);
         var dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
         for (var k = 0; k < claimKeys.length; k++) {
           var cl = state.claims[claimKeys[k]];
           if (!cl || cl.owner !== bot.id) continue;
+          if (cl.dimension && cl.dimension !== 'minecraft:overworld') continue;
           for (var d = 0; d < dirs.length; d++) {
             var nsx = cl.sx + dirs[d][0];
             var nsz = cl.sz + dirs[d][1];
@@ -2761,64 +4667,264 @@ global.LHOpenTTD = (function () {
             }
           }
         }
+        // Fallback: if all adjacent sectors are taken but open sectors remain inside map, pick a frontier unclaimed sector
+        if (candidates.length === 0 && highPace) {
+          for (var fx = -limit; fx <= limit && candidates.length < 16; fx++) {
+            for (var fz = -limit; fz <= limit && candidates.length < 16; fz++) {
+              if (isSpawnProtectedSector(fx, fz)) continue;
+              if (!state.claims[sectorKey(fx, fz)]) candidates.push({ sx: fx, sz: fz });
+            }
+          }
+        }
         if (candidates.length > 0) {
           var pick = candidates[Math.floor(rng() * candidates.length)];
           var res = claimOrCaptureSector(state, bot.id, pick.sx, pick.sz, false);
           if (res.ok) {
-            events.push({ botId: bot.id, botName: bot.name, sx: pick.sx, sz: pick.sz, cost: res.cost });
+            events.push({ type: 'bot_claim', botId: bot.id, botName: bot.name, sx: pick.sx, sz: pick.sz, cost: res.cost });
           }
         }
       }
     }
     tickCompanyBuildings(state);
+    tickCompanyUpkeep(state);
     return events;
   }
 
   function refreshBotOrders(state, rngFn) {
-    ensureBots(state);
+    ensureBots(state, rngFn);
     var rng = rngFn || Math.random;
-    // Keep player-created market orders, replace stale bot orders
     var kept = (state.marketOrders || []).filter(function (o) { return !o.isBot; });
-    for (var i = 0; i < DEFAULT_BOT_COMPANIES.length; i++) {
-      var bid = DEFAULT_BOT_COMPANIES[i].id;
-      var bot = state.companies[bid];
-      var tpl = BOT_ORDER_TEMPLATES[bid];
-      if (!bot || !tpl) continue;
+    var allBots = Object.keys(state.companies || {}).filter(function (cid) {
+      return state.companies[cid] && state.companies[cid].isBot;
+    });
 
-      for (var b = 0; b < tpl.buy.length; b++) {
-        var bo = tpl.buy[b];
-        var bFactor = 0.90 + rng() * 0.25;
+    for (var i = 0; i < allBots.length; i++) {
+      var bid = allBots[i];
+      var bot = state.companies[bid];
+      if (!bot) continue;
+      var tpl = BOT_ORDER_TEMPLATES[bid];
+      if (tpl) {
+        for (var b = 0; b < tpl.buy.length; b++) {
+          var bo = tpl.buy[b];
+          var bFactor = 0.90 + rng() * 0.25;
+          kept.push({
+            id: 'm' + (state.nextOrderSeq++),
+            companyId: bid,
+            isBot: true,
+            side: 'buy',
+            item: bo.item,
+            qty: bo.qty,
+            price: Math.round(bo.price * bFactor),
+            remainingBatches: 4
+          });
+        }
+        for (var s = 0; s < tpl.sell.length; s++) {
+          var so = tpl.sell[s];
+          var sFactor = 0.90 + rng() * 0.25;
+          kept.push({
+            id: 'm' + (state.nextOrderSeq++),
+            companyId: bid,
+            isBot: true,
+            side: 'sell',
+            item: so.item,
+            qty: so.qty,
+            price: Math.round(so.price * sFactor),
+            remainingBatches: 4
+          });
+        }
+      }
+
+      // Dynamic + default bots actively buy upgrade/input items needed for their facilities!
+      var bldgs = listCompanyBuildings(state, bid);
+      var upgradeNeeded = {};
+      for (var bi = 0; bi < bldgs.length; bi++) {
+        var bldg = bldgs[bi];
+        var sp = BUILDING_CATALOG[bldg.type] || {};
+        var upItems = sp.upgradeItems || { 'minecraft:iron_block': 4, 'minecraft:redstone_block': 2 };
+        if ((bldg.level || 1) < 3) {
+          Object.keys(upItems).forEach(function (uk) {
+            upgradeNeeded[uk] = (upgradeNeeded[uk] || 0) + Number(upItems[uk] || 2);
+          });
+        }
+        var reqIn = getBuildingRequiredInputs(bldg);
+        Object.keys(reqIn).forEach(function (ik) {
+          upgradeNeeded[ik] = (upgradeNeeded[ik] || 0) + Number(reqIn[ik] || 2) * 2;
+        });
+      }
+      if (Object.keys(upgradeNeeded).length === 0) {
+        upgradeNeeded['minecraft:iron_block'] = 4;
+        upgradeNeeded['minecraft:redstone'] = 16;
+      }
+      var addedUpgradeOrders = 0;
+      Object.keys(upgradeNeeded).forEach(function (itemId) {
+        if (addedUpgradeOrders >= 3) return;
+        var qty = Math.max(2, Math.min(32, Math.round(upgradeNeeded[itemId])));
+        var unitP = estimateItemUnitPrice(itemId);
         kept.push({
           id: 'm' + (state.nextOrderSeq++),
           companyId: bid,
           isBot: true,
+          purpose: 'facility_upgrade',
           side: 'buy',
-          item: bo.item,
-          qty: bo.qty,
-          price: Math.round(bo.price * bFactor),
-          remainingBatches: 4
+          item: itemId,
+          qty: qty,
+          price: Math.max(30, Math.round(unitP * qty * (1.12 + rng() * 0.15))),
+          remainingBatches: 3
         });
-      }
-      for (var s = 0; s < tpl.sell.length; s++) {
-        var so = tpl.sell[s];
-        var sFactor = 0.90 + rng() * 0.25;
-        kept.push({
-          id: 'm' + (state.nextOrderSeq++),
-          companyId: bid,
-          isBot: true,
-          side: 'sell',
-          item: so.item,
-          qty: so.qty,
-          price: Math.round(so.price * sFactor),
-          remainingBatches: 4
-        });
-      }
+        addedUpgradeOrders++;
+      });
     }
     state.marketOrders = kept;
     return kept.length;
   }
 
-  function renderAsciiMap(state, centerSx, centerSz, radius) {
+  // ---- Production Facility Auction Mini-Game ----
+  function createFacilityAuction(state, sellerCid, sx, sz, startPrice, durationTicks, nowTick, opts) {
+    ensureDiplomacyState(state);
+    var o = opts || {};
+    var dim = o.dimension ? (global.LHStructureProduction ? global.LHStructureProduction.normalizeDimension(o.dimension) : o.dimension) : 'minecraft:overworld';
+    var b = getSectorBuilding(state, sx, sz, dim);
+    if (!b || b.owner !== sellerCid) return { ok: false, reason: 'not_owned_building' };
+    for (var i = 0; i < state.auctions.length; i++) {
+      var ex = state.auctions[i];
+      if (ex && ex.status === 'open' && ex.sx === sx && ex.sz === sz && (ex.dimension || 'minecraft:overworld') === dim) {
+        return { ok: false, reason: 'already_on_auction', auction: ex };
+      }
+    }
+    var sp = BUILDING_CATALOG[b.type] || {};
+    var defaultStart = Math.max(200, Math.round((Number(sp.cost || 400) * Number(b.level || 1)) * 0.75));
+    var minPrice = Math.max(100, Math.round(Number(startPrice || defaultStart)));
+    var dur = Math.max(400, Math.round(Number(durationTicks || 3600)));
+    var tick = Math.round(Number(nowTick || 0));
+    var auc = {
+      id: 'auc_' + (state.nextAuctionSeq++),
+      sellerCid: sellerCid,
+      sx: sx,
+      sz: sz,
+      dimension: dim,
+      buildingKey: b.key || sectorKey(sx, sz, dim),
+      buildingType: b.type,
+      buildingName: b.structureName || sp.name || b.type,
+      buildingLevel: b.level || 1,
+      rarityLabel: b.rarityLabel || null,
+      startPrice: minPrice,
+      currentBid: 0,
+      minIncrement: Math.max(25, Math.round(minPrice * 0.10)),
+      highestBidderCid: null,
+      bidHistory: [],
+      createdTick: tick,
+      endsAtTick: tick + dur,
+      buyoutPrice: o.buyoutPrice ? Math.max(minPrice * 2, Math.round(Number(o.buyoutPrice))) : null,
+      status: 'open'
+    };
+    state.auctions.push(auc);
+    return { ok: true, auction: auc };
+  }
+
+  function placeAuctionBid(state, auctionId, bidderCid, bidAmount, nowTick) {
+    ensureDiplomacyState(state);
+    var bidder = state.companies[bidderCid];
+    if (!bidder) return { ok: false, reason: 'no_company' };
+    var auc = null;
+    for (var i = 0; i < state.auctions.length; i++) {
+      if (state.auctions[i] && state.auctions[i].id === auctionId) { auc = state.auctions[i]; break; }
+    }
+    if (!auc || auc.status !== 'open') return { ok: false, reason: 'auction_closed' };
+    if (auc.sellerCid === bidderCid) return { ok: false, reason: 'cannot_bid_own' };
+    var amt = Math.round(Number(bidAmount || 0));
+    var minReq = auc.highestBidderCid ? (auc.currentBid + auc.minIncrement) : auc.startPrice;
+    if (amt < minReq) return { ok: false, reason: 'bid_too_low', minRequired: minReq };
+    if (bidder.cash < amt) return { ok: false, reason: 'no_cash', required: amt, cash: bidder.cash };
+
+    // Escrow bid: refund previous highest bidder, reserve new bidder's cash
+    if (auc.highestBidderCid && state.companies[auc.highestBidderCid]) {
+      state.companies[auc.highestBidderCid].cash += auc.currentBid;
+    }
+    bidder.cash -= amt;
+    auc.currentBid = amt;
+    auc.highestBidderCid = bidderCid;
+    var tick = Math.round(Number(nowTick || 0));
+    if (auc.endsAtTick - tick < 300) {
+      auc.endsAtTick = tick + 300; // anti-snipe extension
+    }
+    auc.bidHistory.push({ bidderCid: bidderCid, amount: amt, tick: tick });
+    if (auc.buyoutPrice && amt >= auc.buyoutPrice) {
+      return settleAuction(state, auctionId);
+    }
+    return { ok: true, auction: auc, currentBid: amt, highestBidderCid: bidderCid };
+  }
+
+  function settleAuction(state, auctionId) {
+    ensureDiplomacyState(state);
+    var auc = null;
+    for (var i = 0; i < state.auctions.length; i++) {
+      if (state.auctions[i] && state.auctions[i].id === auctionId) { auc = state.auctions[i]; break; }
+    }
+    if (!auc || auc.status !== 'open') return { ok: false, reason: 'auction_closed' };
+
+    var b = getSectorBuilding(state, auc.sx, auc.sz, auc.dimension);
+    if (!auc.highestBidderCid || !state.companies[auc.highestBidderCid] || !b) {
+      if (auc.highestBidderCid && state.companies[auc.highestBidderCid]) {
+        state.companies[auc.highestBidderCid].cash += auc.currentBid;
+      }
+      auc.status = 'unsold';
+      return { ok: true, sold: false, reason: b ? 'no_bids' : 'building_missing', auction: auc };
+    }
+
+    var seller = state.companies[auc.sellerCid];
+    var buyer = state.companies[auc.highestBidderCid];
+    var fee = Math.round(auc.currentBid * 0.05);
+    var payout = Math.max(0, auc.currentBid - fee);
+    if (seller) {
+      seller.cash += payout;
+      seller.stats.tradeVolume = (seller.stats.tradeVolume || 0) + auc.currentBid;
+    }
+    buyer.stats.tradeVolume = (buyer.stats.tradeVolume || 0) + auc.currentBid;
+    b.owner = buyer.id;
+    // Transfer sector claim ownership unless it's the seller's HQ sector with no other claims
+    var cl = state.claims[sectorKey(auc.sx, auc.sz, auc.dimension)];
+    if (cl && cl.owner === auc.sellerCid && !cl.isHq) {
+      cl.owner = buyer.id;
+    }
+    auc.status = 'sold';
+    auc.finalPrice = auc.currentBid;
+    auc.fee = fee;
+    auc.payout = payout;
+    adjustRelation(state, auc.sellerCid, buyer.id, 8, 'Успешный аукцион предприятия ' + auc.buildingName);
+    return { ok: true, sold: true, buyerCid: buyer.id, sellerCid: auc.sellerCid, finalPrice: auc.currentBid, payout: payout, fee: fee, auction: auc };
+  }
+
+  function cancelFacilityAuction(state, auctionId, requesterCid) {
+    ensureDiplomacyState(state);
+    for (var i = 0; i < state.auctions.length; i++) {
+      var auc = state.auctions[i];
+      if (!auc || auc.id !== auctionId) continue;
+      if (auc.status !== 'open') return { ok: false, reason: 'auction_closed' };
+      if (requesterCid && auc.sellerCid !== requesterCid) return { ok: false, reason: 'not_seller' };
+      if (auc.highestBidderCid && state.companies[auc.highestBidderCid]) {
+        state.companies[auc.highestBidderCid].cash += auc.currentBid;
+      }
+      auc.status = 'cancelled';
+      return { ok: true, auction: auc };
+    }
+    return { ok: false, reason: 'not_found' };
+  }
+
+  function tickAuctions(state, nowTick) {
+    ensureDiplomacyState(state);
+    var tick = Math.round(Number(nowTick || 0));
+    var settled = [];
+    for (var i = 0; i < state.auctions.length; i++) {
+      var auc = state.auctions[i];
+      if (!auc || auc.status !== 'open') continue;
+      if (tick >= auc.endsAtTick) {
+        settled.push(settleAuction(state, auc.id));
+      }
+    }
+    return settled;
+  }
+
+  function renderAsciiMap(state, centerSx, centerSz, radius, dimension) {
     var r = radius > 0 ? radius : 3;
     var rows = [];
     for (var dz = -r; dz <= r; dz++) {
@@ -2826,7 +4932,7 @@ global.LHOpenTTD = (function () {
       for (var dx = -r; dx <= r; dx++) {
         var sx = centerSx + dx;
         var sz = centerSz + dz;
-        var info = resolveSectorOwner(state, sx, sz);
+        var info = resolveSectorOwner(state, sx, sz, dimension);
         var comp = info.owner ? state.companies[info.owner] : null;
         var cc = comp ? (comp.colorCode || '§7') : '§8';
         var sym = (dx === 0 && dz === 0) ? '◆' : (info.kind === 'claimed' ? '█' : '▒');
@@ -2845,6 +4951,8 @@ global.LHOpenTTD = (function () {
     COMPANY_ENV_TYPES: COMPANY_ENV_TYPES,
     TRANSPORT_SPECS: TRANSPORT_SPECS,
     RESOURCE_SPECS: RESOURCE_SPECS,
+    BOT_ARCHETYPES: BOT_ARCHETYPES,
+    COMPANY_TRAITS: COMPANY_TRAITS,
     DEFAULT_BOT_COMPANIES: DEFAULT_BOT_COMPANIES,
     BOT_ORDER_TEMPLATES: BOT_ORDER_TEMPLATES,
     BUILDING_CATALOG: BUILDING_CATALOG,
@@ -2852,6 +4960,9 @@ global.LHOpenTTD = (function () {
     setCompanyEnvType: setCompanyEnvType,
     preferredBuildingY: preferredBuildingY,
     getCompanyTerminalCoords: getCompanyTerminalCoords,
+    rollCompanyTraits: rollCompanyTraits,
+    getCompanyTraitModifiers: getCompanyTraitModifiers,
+    formatCompanyTraits: formatCompanyTraits,
     minCompanyHqDistance: minCompanyHqDistance,
     sectorCoords: sectorCoords,
     sectorKey: sectorKey,
@@ -2864,8 +4975,12 @@ global.LHOpenTTD = (function () {
     countClaims: countClaims,
     countPlayerClaimsTotal: countPlayerClaimsTotal,
     countBotClaimsTotal: countBotClaimsTotal,
+    countActiveBots: countActiveBots,
     maxBotClaimsAllowed: maxBotClaimsAllowed,
     spawnDynamicBotCompany: spawnDynamicBotCompany,
+    onChapterCompletedBotSpawn: onChapterCompletedBotSpawn,
+    applyBotCatchupBalancing: applyBotCatchupBalancing,
+    getCompanyValuationBreakdown: getCompanyValuationBreakdown,
     computeValuation: computeValuation,
     resolveSectorOwner: resolveSectorOwner,
     isSpawnProtectedSector: isSpawnProtectedSector,
@@ -2883,6 +4998,14 @@ global.LHOpenTTD = (function () {
     fortifySector: fortifySector,
     botExpandStep: botExpandStep,
     refreshBotOrders: refreshBotOrders,
+    triggerBotMobRaid: triggerBotMobRaid,
+    resolveBotMobRaid: resolveBotMobRaid,
+    tickBotMobRaids: tickBotMobRaids,
+    createFacilityAuction: createFacilityAuction,
+    placeAuctionBid: placeAuctionBid,
+    settleAuction: settleAuction,
+    cancelFacilityAuction: cancelFacilityAuction,
+    tickAuctions: tickAuctions,
     renderAsciiMap: renderAsciiMap,
     getRelation: getRelation,
     getPlayerRelation: getPlayerRelation,
@@ -2904,16 +5027,33 @@ global.LHOpenTTD = (function () {
     acceptSectorOffer: acceptSectorOffer,
     getSectorBuilding: getSectorBuilding,
     listCompanyBuildings: listCompanyBuildings,
+    syncStructureCatalog: syncStructureCatalog,
+    recordSectorStructures: recordSectorStructures,
+    getSectorStructures: getSectorStructures,
+    convertStructureToFacility: convertStructureToFacility,
     buildCompanyBuilding: buildCompanyBuilding,
     upgradeCompanyBuilding: upgradeCompanyBuilding,
     damageBuildingIntegrity: damageBuildingIntegrity,
     repairBuildingIntegrity: repairBuildingIntegrity,
+    getBuildingRequiredInputs: getBuildingRequiredInputs,
+    supplyBuildingInputs: supplyBuildingInputs,
+    getPowerPlantAdjacencyMultiplier: getPowerPlantAdjacencyMultiplier,
+    isCompanySubsidized: isCompanySubsidized,
     getBuildingYieldProfile: getBuildingYieldProfile,
     getPatrolProfile: getPatrolProfile,
     findPatrolPostsCovering: findPatrolPostsCovering,
     tickCompanyBuildings: tickCompanyBuildings,
     collectBuildingOutput: collectBuildingOutput,
+    getMonopolyMetrics: getMonopolyMetrics,
+    joinAntiMonopolyCoalition: joinAntiMonopolyCoalition,
+    leaveAntiMonopolyCoalition: leaveAntiMonopolyCoalition,
+    getCoalitionModifiers: getCoalitionModifiers,
+    computeCompanyExpenses: computeCompanyExpenses,
+    tickCompanyUpkeep: tickCompanyUpkeep,
+    calculateUpkeepAwareContractPrice: calculateUpkeepAwareContractPrice,
     createSupplyContract: createSupplyContract,
+    createTimedSupplyContract: createTimedSupplyContract,
+    tickSupplyContracts: tickSupplyContracts,
     refreshBotSupplyContracts: refreshBotSupplyContracts,
     fulfillSupplyContract: fulfillSupplyContract
   };
@@ -3701,10 +5841,12 @@ global.LHTradeLogistics = (function () {
     return {
       passes: {},
       deliveries: [],
+      automatedRoutes: [],
       haggles: {},
       p2pSessions: {},
       nextPassSeq: 1,
       nextDeliverySeq: 1,
+      nextRouteSeq: 1,
       nextHaggleSeq: 1,
       nextP2pSeq: 1
     };
@@ -3714,13 +5856,213 @@ global.LHTradeLogistics = (function () {
     if (!st || typeof st !== 'object') st = createState();
     if (!st.passes) st.passes = {};
     if (!Array.isArray(st.deliveries)) st.deliveries = [];
+    if (!Array.isArray(st.automatedRoutes)) st.automatedRoutes = [];
     if (!st.haggles) st.haggles = {};
     if (!st.p2pSessions) st.p2pSessions = {};
     if (!st.nextPassSeq) st.nextPassSeq = 1;
     if (!st.nextDeliverySeq) st.nextDeliverySeq = 1;
+    if (!st.nextRouteSeq) st.nextRouteSeq = 1;
     if (!st.nextHaggleSeq) st.nextHaggleSeq = 1;
     if (!st.nextP2pSeq) st.nextP2pSeq = 1;
     return st;
+  }
+
+  function getSubsidyModifiers(ottdState, cid, sx, sz) {
+    var active = (global.LHOpenTTD && global.LHOpenTTD.isCompanySubsidized && ottdState)
+      ? global.LHOpenTTD.isCompanySubsidized(ottdState, cid, sx, sz)
+      : false;
+    return {
+      active: active,
+      productionYieldMult: active ? 1.35 : 1.0,
+      productionSpeedMult: active ? 1.25 : 1.0,
+      deliveryFeeMult: active ? 0.60 : 1.0, // -40% delivery cost
+      routeFuelDiscount: active ? 0.50 : 1.0, // -50% automated route fuel/customs cost
+      travelCooldownMult: active ? 0.50 : 1.0,
+      freeExpressTravel: active
+    };
+  }
+
+  function computeAutomatedRouteCost(ottdState, cid, srcBuilding, dstBuilding, qtyPerRun) {
+    var q = Math.max(1, Math.round(Number(qtyPerRun || 8)));
+    var dist = computeDistance(srcBuilding.sx * 256, srcBuilding.sz * 256, dstBuilding.sx * 256, dstBuilding.sz * 256);
+    var srcDim = srcBuilding.dimension || 'minecraft:overworld';
+    var dstDim = dstBuilding.dimension || 'minecraft:overworld';
+    var crossDim = srcDim !== dstDim;
+    var sectorsSpan = Math.max(1, Math.round(dist / 256));
+    var subSrc = getSubsidyModifiers(ottdState, cid, srcBuilding.sx, srcBuilding.sz);
+    var subDst = getSubsidyModifiers(ottdState, cid, dstBuilding.sx, dstBuilding.sz);
+    var fuelDisc = (subSrc.active || subDst.active) ? 0.50 : 1.0;
+
+    // Sample foreign sectors along route for customs tax
+    var foreignSectors = 0;
+    if (!crossDim && ottdState && global.LHOpenTTD) {
+      var steps = Math.min(12, Math.max(1, sectorsSpan));
+      for (var s = 1; s < steps; s++) {
+        var t = s / steps;
+        var msx = Math.round(srcBuilding.sx + (dstBuilding.sx - srcBuilding.sx) * t);
+        var msz = Math.round(srcBuilding.sz + (dstBuilding.sz - srcBuilding.sz) * t);
+        var own = global.LHOpenTTD.resolveSectorOwner(ottdState, msx, msz, srcDim);
+        if (own && own.kind === 'claimed' && own.owner && own.owner !== cid && !global.LHOpenTTD.isAllied(ottdState, cid, own.owner)) {
+          foreignSectors++;
+        }
+      }
+    }
+
+    var coalCost = Math.max(1, Math.round((1 + sectorsSpan * 0.4 + q * 0.08) * fuelDisc));
+    var oilCost = crossDim ? Math.max(2, Math.round(4 * fuelDisc)) : Math.max(0, Math.round(sectorsSpan * 0.35 * fuelDisc));
+    var customsTax = Math.round((foreignSectors * 14 + (crossDim ? 36 : 0)) * fuelDisc);
+    var cashFuelFee = Math.max(4, Math.round((8 + sectorsSpan * 3.5 + q * 0.5) * fuelDisc));
+    return {
+      distance: dist,
+      sectorsSpan: sectorsSpan,
+      crossDim: crossDim,
+      foreignSectors: foreignSectors,
+      subsidized: (subSrc.active || subDst.active),
+      coalItem: 'minecraft:coal',
+      coalQty: coalCost,
+      oilItem: 'gtceu:oil_bucket',
+      oilQty: oilCost,
+      customsTax: customsTax,
+      cashFuelFee: cashFuelFee,
+      totalCashCost: customsTax + cashFuelFee
+    };
+  }
+
+  function createAutomatedRoute(lState, ottdState, cid, srcSx, srcSz, dstSx, dstSz, itemId, qtyPerRun, opts) {
+    ensureState(lState);
+    if (!ottdState || !global.LHOpenTTD) return { ok: false, reason: 'no_ottd' };
+    var o = opts || {};
+    var srcDim = o.srcDim || 'minecraft:overworld';
+    var dstDim = o.dstDim || 'minecraft:overworld';
+    var srcB = global.LHOpenTTD.getSectorBuilding(ottdState, srcSx, srcSz, srcDim);
+    var dstB = global.LHOpenTTD.getSectorBuilding(ottdState, dstSx, dstSz, dstDim);
+    if (!srcB || !dstB) return { ok: false, reason: 'missing_building' };
+    if (srcB.owner !== cid || dstB.owner !== cid) return { ok: false, reason: 'not_owned' };
+    if (srcB.id === dstB.id) return { ok: false, reason: 'same_building' };
+    var q = Math.max(1, Math.min(64, Math.round(Number(qtyPerRun || 8))));
+    var costInfo = computeAutomatedRouteCost(ottdState, cid, srcB, dstB, q);
+    var route = {
+      id: 'R' + (lState.nextRouteSeq++),
+      companyId: cid,
+      srcKey: srcB.key || global.LHOpenTTD.sectorKey(srcSx, srcSz, srcDim),
+      dstKey: dstB.key || global.LHOpenTTD.sectorKey(dstSx, dstSz, dstDim),
+      srcSx: srcSx,
+      srcSz: srcSz,
+      srcDim: srcDim,
+      dstSx: dstSx,
+      dstSz: dstSz,
+      dstDim: dstDim,
+      itemId: String(itemId || 'auto'),
+      qtyPerRun: q,
+      periodTicks: Math.max(600, Math.round(Number(o.periodTicks || 2400))),
+      nextRunTick: Number(o.nowTick || 0) + Math.max(600, Math.round(Number(o.periodTicks || 2400))),
+      enabled: true,
+      mode: o.mode || 'to_input', // 'to_input' | 'to_stock'
+      costProfile: costInfo,
+      totalTransferred: 0,
+      totalRuns: 0,
+      lastStatus: 'ready'
+    };
+    lState.automatedRoutes.push(route);
+    return { ok: true, route: route, costProfile: costInfo };
+  }
+
+  function toggleAutomatedRoute(lState, routeId, cid) {
+    ensureState(lState);
+    for (var i = 0; i < lState.automatedRoutes.length; i++) {
+      var r = lState.automatedRoutes[i];
+      if (r && r.id === routeId && (!cid || r.companyId === cid)) {
+        r.enabled = !r.enabled;
+        return { ok: true, enabled: r.enabled, route: r };
+      }
+    }
+    return { ok: false, reason: 'not_found' };
+  }
+
+  function deleteAutomatedRoute(lState, routeId, cid) {
+    ensureState(lState);
+    var before = lState.automatedRoutes.length;
+    lState.automatedRoutes = lState.automatedRoutes.filter(function (r) {
+      return !(r && r.id === routeId && (!cid || r.companyId === cid));
+    });
+    return { ok: lState.automatedRoutes.length < before };
+  }
+
+  function tickAutomatedRoutes(lState, ottdState, nowTick) {
+    ensureState(lState);
+    if (!ottdState || !global.LHOpenTTD) return [];
+    var tick = Number(nowTick || 0);
+    var events = [];
+    for (var i = 0; i < lState.automatedRoutes.length; i++) {
+      var r = lState.automatedRoutes[i];
+      if (!r || !r.enabled) continue;
+      if (tick < Number(r.nextRunTick || 0)) continue;
+      r.nextRunTick = tick + Number(r.periodTicks || 2400);
+
+      var comp = ottdState.companies && ottdState.companies[r.companyId];
+      var srcB = global.LHOpenTTD.getSectorBuilding(ottdState, r.srcSx, r.srcSz, r.srcDim);
+      var dstB = global.LHOpenTTD.getSectorBuilding(ottdState, r.dstSx, r.dstSz, r.dstDim);
+      if (!comp || !srcB || !dstB) { r.lastStatus = 'missing_endpoint'; continue; }
+
+      var costP = computeAutomatedRouteCost(ottdState, r.companyId, srcB, dstB, r.qtyPerRun);
+      r.costProfile = costP;
+      // Coal/oil can be drawn from company stockBuffer OR paid as cash fuel equivalent
+      var coalAvail = Number((comp.stockBuffer && comp.stockBuffer[costP.coalItem]) || 0);
+      var coalFromStock = Math.min(coalAvail, costP.coalQty);
+      var missingCoal = costP.coalQty - coalFromStock;
+      var cashNeeded = costP.totalCashCost + missingCoal * 4 + costP.oilQty * 10;
+
+      if (comp.cash < cashNeeded) {
+        r.lastStatus = 'no_cash_for_fuel';
+        events.push({ routeId: r.id, ok: false, reason: 'no_cash', cashNeeded: cashNeeded });
+        continue;
+      }
+
+      // Resolve item to transfer
+      var chosenItem = r.itemId;
+      if (chosenItem === 'auto') {
+        var reqIn = global.LHOpenTTD.getBuildingRequiredInputs(dstB);
+        var reqKeys = Object.keys(reqIn);
+        for (var rk = 0; rk < reqKeys.length; rk++) {
+          if (srcB.stockBuffer && Number(srcB.stockBuffer[reqKeys[rk]] || 0) > 0) {
+            chosenItem = reqKeys[rk];
+            break;
+          }
+        }
+        if (chosenItem === 'auto' && srcB.stockBuffer) {
+          var sKeys = Object.keys(srcB.stockBuffer);
+          for (var sk = 0; sk < sKeys.length; sk++) {
+            if (Number(srcB.stockBuffer[sKeys[sk]] || 0) > 0) { chosenItem = sKeys[sk]; break; }
+          }
+        }
+      }
+
+      var avail = (srcB.stockBuffer && chosenItem !== 'auto') ? Number(srcB.stockBuffer[chosenItem] || 0) : 0;
+      if (avail <= 0) {
+        r.lastStatus = 'waiting_cargo';
+        continue;
+      }
+      var moveQty = Math.min(avail, r.qtyPerRun);
+      comp.cash -= cashNeeded;
+      if (coalFromStock > 0 && comp.stockBuffer) comp.stockBuffer[costP.coalItem] -= coalFromStock;
+
+      srcB.stockBuffer[chosenItem] -= moveQty;
+      if (srcB.stockBuffer[chosenItem] <= 0) delete srcB.stockBuffer[chosenItem];
+      if (r.mode === 'to_input') {
+        if (!dstB.inputBuffer) dstB.inputBuffer = {};
+        dstB.inputBuffer[chosenItem] = (dstB.inputBuffer[chosenItem] || 0) + moveQty;
+        if (dstB.status === 'missing_inputs') dstB.status = 'active';
+      } else {
+        if (!dstB.stockBuffer) dstB.stockBuffer = {};
+        dstB.stockBuffer[chosenItem] = (dstB.stockBuffer[chosenItem] || 0) + moveQty;
+      }
+      r.totalTransferred = (r.totalTransferred || 0) + moveQty;
+      r.totalRuns = (r.totalRuns || 0) + 1;
+      r.lastStatus = 'ok';
+      comp.stats.routesDone = (comp.stats.routesDone || 0) + 1;
+      events.push({ routeId: r.id, ok: true, itemId: chosenItem, qty: moveQty, cashCost: cashNeeded, coalUsed: coalFromStock });
+    }
+    return events;
   }
 
   function clampSpeed(bps) {
@@ -3902,7 +6244,8 @@ global.LHTradeLogistics = (function () {
     var dist = computeDistance(bTerm.x, bTerm.z, sTerm.x, sTerm.z);
     var vol = computeCargoVolume(qty, stackSize);
     var spd = clampSpeed(speedBps);
-    var fee = computeDeliveryFee(dist, vol, spd);
+    var subMod = getSubsidyModifiers(ottdState, buyerCid, buyer.hqSx, buyer.hqSz);
+    var fee = Math.max(5, Math.round(computeDeliveryFee(dist, vol, spd) * subMod.deliveryFeeMult));
     var total = Math.max(1, Math.round(Number(itemCost || 0))) + fee;
     if (buyer.cash < total) return { ok: false, reason: 'no_cash', cost: total, fee: fee, cash: buyer.cash };
 
@@ -4105,7 +6448,13 @@ global.LHTradeLogistics = (function () {
     chargeHoldDailyFees: chargeHoldDailyFees,
     createSellOrderSelfDelivery: createSellOrderSelfDelivery,
     createSellOrderDelegated: createSellOrderDelegated,
-    tickDeliveries: tickDeliveries
+    tickDeliveries: tickDeliveries,
+    getSubsidyModifiers: getSubsidyModifiers,
+    computeAutomatedRouteCost: computeAutomatedRouteCost,
+    createAutomatedRoute: createAutomatedRoute,
+    toggleAutomatedRoute: toggleAutomatedRoute,
+    deleteAutomatedRoute: deleteAutomatedRoute,
+    tickAutomatedRoutes: tickAutomatedRoutes
   };
 })();
 

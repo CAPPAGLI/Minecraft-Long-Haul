@@ -628,7 +628,7 @@ function lhGuiRenderLogistics(gui, server, player) {
     if (d < nearestD) { nearestD = d; nearest = sid; }
   });
   var dests = ['farm', 'mine', 'port', 'badlands', 'smelter', 'wetland', 'machine', 'continental_hub'];
-  dests.slice(0, 8).forEach(function (dst, i) {
+  dests.slice(0, 4).forEach(function (dst, i) {
     if (!nearest || dst === nearest) return;
     lhGuiSlot(gui, i, 4, 'minecraft:chest_minecart', '§bНакладная: ' + nearest + ' → ' + dst, [
       '§7Оформить перевозку от ближайшего узла (' + nearest + ')',
@@ -637,6 +637,53 @@ function lhGuiRenderLogistics(gui, server, player) {
       lhGuiDeferAction(server, pl, function (p2) { lhCargoIssue(server, p2, nearest, dst); }, 'logistics');
     });
   });
+
+  // Automated Inter-Structure Exchange Routes (cols 4..8 on row 4)
+  if (typeof lhOttdRead === 'function' && typeof lhLogisticsRead === 'function' && global.LHTradeLogistics) {
+    var stL = lhOttdRead(server);
+    var logL = lhLogisticsRead(server);
+    var myCompL = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, player) : null;
+    var subMod = myCompL ? global.LHTradeLogistics.getSubsidyModifiers(stL, myCompL.id, myCompL.hqSx, myCompL.hqSz) : { active: false };
+    var autoList = myCompL ? (logL.automatedRoutes || []).filter(function (r) { return r.companyId === myCompL.id; }) : [];
+    lhGuiSlot(gui, 4, 4, 'minecraft:hopper', '§a⚙ Создать авто-маршрут', [
+      '§7Соединяет ваши первые 2 предприятия для авто-перевозки.',
+      '§7Учитывает уголь, нефть и таможенную пошлину.',
+      subMod.active ? '§e★ Субсидия активна: −50% топливо и пошлины!' : '§7Команда: /lh route create <sx1> <sz1> <sx2> <sz2> <кол>',
+      '§e▶ ЛКМ: запустить маршрут между объектами'
+    ], function (pl) {
+      if (!myCompL) { lhMsg(pl, 'Сначала создайте компанию.'); return; }
+      var blds = global.LHOpenTTD.listCompanyBuildings(stL, myCompL.id);
+      if (blds.length < 2) { lhMsg(pl, 'Нужно минимум 2 построенных объекта компании.'); return; }
+      var res = global.LHTradeLogistics.createAutomatedRoute(logL, stL, myCompL.id, blds[0].sx, blds[0].sz, blds[1].sx, blds[1].sz, 'auto', 8, {
+        srcDim: blds[0].dimension, dstDim: blds[1].dimension, nowTick: typeof LHOTTDTick === 'number' ? LHOTTDTick : 0
+      });
+      if (res.ok) {
+        lhLogisticsSave(server);
+        lhMsg(pl, '§a[Авто-маршрут ' + res.route.id + '] Соединён (' + blds[0].sx + ',' + blds[0].sz + ') -> (' + blds[1].sx + ',' + blds[1].sz + ')!');
+      } else {
+        lhMsg(pl, '§cОшибка маршрута: ' + res.reason);
+      }
+      lhOpenGui(server, pl, 'logistics');
+    });
+    autoList.slice(0, 4).forEach(function (ar, aIdx) {
+      var cp = ar.costProfile || {};
+      lhGuiSlot(gui, 5 + aIdx, 4, ar.enabled ? 'minecraft:lime_dye' : 'minecraft:gray_dye',
+        (ar.enabled ? '§a[ВКЛ] ' : '§c[ПАУЗА] ') + 'Маршрут ' + ar.id, [
+          '§f(' + ar.srcSx + ',' + ar.srcSz + ') → (' + ar.dstSx + ',' + ar.dstSz + ')',
+          '§fГруз: §e' + ar.qtyPerRun + '× ' + ar.itemId + ' §7(перевезено: ' + (ar.totalTransferred || 0) + ')',
+          '§fРасход: §7' + (cp.coalQty || 1) + ' угля, ' + (cp.oilQty || 0) + ' нефти, §6' + (cp.totalCashCost || 10) + ' Cr (таможня ' + (cp.customsTax || 0) + ')',
+          '§eЛКМ: вкл/выкл | ПКМ: удалить'
+        ], function (pl) {
+          global.LHTradeLogistics.toggleAutomatedRoute(logL, ar.id, myCompL ? myCompL.id : null);
+          lhLogisticsSave(server);
+          lhOpenGui(server, pl, 'logistics');
+        }, function (pl) {
+          global.LHTradeLogistics.deleteAutomatedRoute(logL, ar.id, myCompL ? myCompL.id : null);
+          lhLogisticsSave(server);
+          lhOpenGui(server, pl, 'logistics');
+        });
+    });
+  }
 }
 
 function lhGuiRenderRecovery(gui, server, player) {
@@ -692,11 +739,18 @@ function lhGuiRenderOpenTTD(gui, server, player) {
   var myComp = lhGetPlayerCompany(server, player);
 
   if (myComp) {
+    var vBr = global.LHOpenTTD.getCompanyValuationBreakdown ? global.LHOpenTTD.getCompanyValuationBreakdown(st, myComp.id) : { totalValuation: global.LHOpenTTD.computeValuation(st, myComp.id), cash: myComp.cash, inventoryValue: 0, facilitiesValue: 0, productionPotentialValue: 0, territoryValue: 0, avgHourlyIncome: 0 };
+    var expBr = global.LHOpenTTD.computeCompanyExpenses ? global.LHOpenTTD.computeCompanyExpenses(st, myComp.id) : { total: 0, facilityUpkeep: 0, upgradeUpkeep: 0, landTax: 0, securityUpkeep: 0, antiMonopolyTax: 0 };
+    var trText = global.LHOpenTTD.formatCompanyTraits ? global.LHOpenTTD.formatCompanyTraits(myComp) : '-';
+    var isSub = global.LHOpenTTD.isCompanySubsidized && global.LHOpenTTD.isCompanySubsidized(st, myComp.id, myComp.hqSx, myComp.hqSz);
     lhGuiSlot(gui, 1, 0, 'minecraft:emerald_block', myComp.colorCode + myComp.name + ' §7[' + myComp.id + ']', [
-      '§fНаличные: §e' + myComp.cash + ' Cr',
-      '§fОценка: §a' + global.LHOpenTTD.computeValuation(st, myComp.id) + ' Cr',
-      '§fСекторов: §b' + global.LHOpenTTD.countClaims(st, myComp.id),
-      '§fСреда: §d' + (myComp.envType || 'normal') + ' §7| Спец.: §f' + (myComp.transportSpec || 'нет') + ' / ' + (myComp.resourceSpec || 'нет')
+      '§fНаличные: §e' + myComp.cash + ' Cr §7| Капитал: §a' + vBr.totalValuation + ' Cr',
+      '§7Запасы: §f' + vBr.inventoryValue + ' §7| Объекты: §f' + vBr.facilitiesValue + ' §7| Потенциал: §f' + vBr.productionPotentialValue,
+      '§7Земля: §f' + vBr.territoryValue + ' §7| Ср.доход/ч: §a' + vBr.avgHourlyIncome + ' Cr',
+      '§cРасходы/цикл: §f' + expBr.total + ' Cr §7(объекты ' + expBr.facilityUpkeep + ', апгр ' + expBr.upgradeUpkeep + ', земля ' + expBr.landTax + ', охрана ' + expBr.securityUpkeep + (expBr.antiMonopolyTax > 0 ? (', §cантимоноп ' + expBr.antiMonopolyTax) : '') + ')',
+      '§dЧерты: §f' + trText,
+      '§fСреда: §d' + (myComp.envType || 'normal') + ' §7| Спец.: §f' + (myComp.transportSpec || 'нет') + ' / ' + (myComp.resourceSpec || 'нет'),
+      isSub ? '§e★ СУБСИДИЯ: +35% выпуск, −40% доставка, −50% топливо!' : '§7Команда: /lh valuation'
     ]);
     lhGuiSlot(gui, 3, 0, 'minecraft:oak_door', '§cПокинуть компанию', ['§7Выйти из текущей компании OpenTTD'], function (pl) {
       global.LHOpenTTD.companyLeave(st, lhId(pl));
@@ -992,11 +1046,10 @@ function lhGuiRenderTerritory(gui, server, player) {
 function lhGuiRenderBuildings(gui, server, player) {
   var st = lhOttdRead(server);
   var myComp = lhGetPlayerCompany(server, player);
+  var dim = (player.level && player.level.dimension) ? String(player.level.dimension) : 'minecraft:overworld';
   var sc = global.LHOpenTTD.sectorCoords(player.x, player.z);
-  var curBldg = global.LHOpenTTD.getSectorBuilding(st, sc.sx, sc.sz);
+  var curBldg = global.LHOpenTTD.getSectorBuilding(st, sc.sx, sc.sz, dim);
 
-  // Row 0: Build catalog across 3 categories (Extraction, Logistics, Production)
-  var bKeys = Object.keys(global.LHOpenTTD.BUILDING_CATALOG || {});
   var bIcons = {
     mine_shaft: 'minecraft:iron_pickaxe',
     oil_rig: 'minecraft:bucket',
@@ -1004,46 +1057,97 @@ function lhGuiRenderBuildings(gui, server, player) {
     airport: 'minecraft:elytra',
     factory: 'minecraft:blast_furnace',
     refinery: 'minecraft:brewing_stand',
-    patrol_post: 'minecraft:iron_sword'
+    patrol_post: 'minecraft:iron_sword',
+    power_plant: 'minecraft:redstone_block',
+    deep_quarry: 'minecraft:diamond_pickaxe',
+    sawmill: 'minecraft:iron_axe',
+    greenhouse: 'minecraft:wheat',
+    chemical_plant: 'minecraft:cauldron',
+    rail_depot: 'minecraft:powered_rail',
+    structure_facility: 'minecraft:lodestone'
   };
-  bKeys.forEach(function (bt, idx) {
+
+  // Rows 0..1 (cols 0..8 row 0, 0..3 row 1): all buildable facilities
+  var bKeys = Object.keys(global.LHOpenTTD.BUILDING_CATALOG || {}).filter(function (bt) {
+    return !global.LHOpenTTD.BUILDING_CATALOG[bt].requiresWorldStructure;
+  });
+  bKeys.slice(0, 13).forEach(function (bt, idx) {
+    var gx = idx % 9;
+    var gy = Math.floor(idx / 9);
     var spec = global.LHOpenTTD.BUILDING_CATALOG[bt];
+    var reqIn = spec.inputItems ? Object.keys(spec.inputItems).map(function (k) { return spec.inputItems[k] + '×' + k.replace('minecraft:', ''); }).join(', ') : 'нет';
     var lore = [
       '§7Категория: §e' + spec.categoryName,
-      '§fСтоимость: §6' + spec.cost + ' Cr',
+      '§fСтоимость: §6' + spec.cost + ' Cr §7| Содержание: §c' + (spec.upkeepCost || 12) + ' Cr',
+      '§fСырьё/цикл: §b' + reqIn,
       spec.baseRadius
         ? ('§fРадиус охраны: §b' + spec.baseRadius + ' м §7(на 3 ур. спавнит стражу)')
         : ('§fДоход за цикл: §a' + spec.baseIncome + ' Cr §7+ ' + (spec.baseQty || 0) + '× ' + (spec.baseProduct || '')),
       '§e▶ ЛКМ: построить в секторе (' + sc.sx + ', ' + sc.sz + ')'
     ];
-    lhGuiSlot(gui, idx, 0, bIcons[bt] || 'minecraft:anvil', spec.icon + ' §6' + spec.name, lore, function (pl) {
+    lhGuiSlot(gui, gx, gy, bIcons[bt] || 'minecraft:anvil', spec.icon + ' §6' + spec.name, lore, function (pl) {
       if (typeof lhBuildFacilityCmd === 'function') lhBuildFacilityCmd(server, pl, bt, sc.sx, sc.sz, false);
       lhOpenGui(server, pl, 'buildings');
     });
   });
 
-  lhGuiSlot(gui, 8, 0, 'minecraft:emerald', '§a💰 Собрать всю прибыль', [
+  // Row 1 cols 6..8: Convert World Structure, Supply Inputs, Collect All
+  var sectorStructs = (typeof lhScanNearbyStructuresForSector === 'function')
+    ? lhScanNearbyStructuresForSector(server, player, st)
+    : (global.LHOpenTTD.getSectorStructures ? global.LHOpenTTD.getSectorStructures(st, sc.sx, sc.sz, dim) : []);
+  var topStruct = sectorStructs.length > 0 ? sectorStructs[0] : null;
+  lhGuiSlot(gui, 6, 1, 'minecraft:lodestone', '§d🏛 Освоить структуру мира', [
+    topStruct ? (topStruct.rarityColor + '[' + topStruct.rarityName + '] §f' + topStruct.displayName) : '§7Нет найденных структур в этом секторе',
+    topStruct ? ('§fДобыча: §e' + topStruct.itemId + ' §7(' + topStruct.cost + ' Cr)') : '§7Встаньте в сектор со структурой (крепость/храм/город)',
+    '§7Структура сохраняется нетронутой!',
+    '§e▶ ЛКМ: освоить структуру (/lh structure convert)'
+  ], function (pl) {
+    if (typeof lhConvertStructureCmd === 'function') lhConvertStructureCmd(server, pl, topStruct ? topStruct.structureId : null, sc.sx, sc.sz, false);
+    lhOpenGui(server, pl, 'buildings');
+  });
+
+  lhGuiSlot(gui, 7, 1, 'minecraft:coal', '§b⛽ Загрузить сырьё в объект', [
+    '§7Передаёт требуемое сырьё из вашего инвентаря',
+    '§7в текущий объект (или положите в бочку сырья).',
+    '§e▶ ЛКМ: загрузить 2 цикла сырья (/lh building supply)'
+  ], function (pl) {
+    lhGuiDeferAction(server, pl, function (p2) {
+      if (typeof lhSupplyBuildingCmd === 'function') lhSupplyBuildingCmd(server, p2, sc.sx, sc.sz, false);
+    }, 'buildings');
+  });
+
+  lhGuiSlot(gui, 8, 1, 'minecraft:emerald', '§a💰 Собрать всю прибыль', [
     '§7Забрать накопленные Cr и ресурсы со всех зданий компании.'
   ], function (pl) {
     if (typeof lhCollectFacilityCmd === 'function') lhCollectFacilityCmd(server, pl, false);
     lhOpenGui(server, pl, 'buildings');
   });
 
-  // Row 2: Active building in current sector + 2-way Upgrade Fork (Tier 1 & Tier 2)
+  // Row 2: Active building in current sector + 2-way Upgrade Fork (Tier 1 & Tier 2) + Auction button
   if (curBldg && myComp && curBldg.owner === myComp.id) {
-    var bSpec = global.LHOpenTTD.BUILDING_CATALOG[curBldg.type];
+    var bSpec = global.LHOpenTTD.BUILDING_CATALOG[curBldg.type] || {};
     var intPct = typeof curBldg.integrityPct === 'number' ? curBldg.integrityPct : 100;
-    lhGuiSlot(gui, 0, 2, bIcons[curBldg.type] || 'minecraft:anvil', '§aЗдание здесь: ' + bSpec.name, [
+    var reqMap = global.LHOpenTTD.getBuildingRequiredInputs ? global.LHOpenTTD.getBuildingRequiredInputs(curBldg) : {};
+    var reqStr = Object.keys(reqMap).map(function (rk) {
+      var haveIn = (curBldg.inputBuffer && curBldg.inputBuffer[rk]) || 0;
+      return rk.replace('minecraft:', '') + ' ' + haveIn + '/' + reqMap[rk];
+    }).join(', ') || 'нет';
+    var adjM = global.LHOpenTTD.getPowerPlantAdjacencyMultiplier ? global.LHOpenTTD.getPowerPlantAdjacencyMultiplier(st, myComp.id, sc.sx, sc.sz, dim) : 1.0;
+
+    lhGuiSlot(gui, 0, 2, bIcons[curBldg.type] || 'minecraft:anvil',
+      (curBldg.rarityColor || '§a') + (curBldg.structureName || bSpec.name || curBldg.type), [
       '§fСектор: §e(' + sc.sx + ', ' + sc.sz + ') §7| Уровень: §b' + curBldg.level + '/3',
-      '§fКоординаты: §7' + curBldg.x + ', ' + curBldg.y + ', ' + curBldg.z,
-      '§fПрочность: ' + (intPct >= 75 ? '§a' : (intPct >= 35 ? '§e' : '§c')) + intPct + '% ' + (curBldg.operational === false ? '§c[НЕ РАБОТАЕТ]' : '§7(перестройка свободная)'),
+      '§fБочка выхода: §7' + curBldg.x + ', ' + curBldg.y + ', ' + curBldg.z + ' §7| Сырья: §b' + (curBldg.x + 1) + ', ' + curBldg.y + ', ' + curBldg.z,
+      '§fСтатус: ' + (curBldg.pausedReason === 'missing_inputs' ? '§cПАУЗА (нет сырья!)' : (curBldg.operational === false ? '§c[НЕ РАБОТАЕТ]' : '§aРаботает')) +
+        ' §7| Прочность: ' + (intPct >= 75 ? '§a' : (intPct >= 35 ? '§e' : '§c')) + intPct + '%',
+      '§fСырьё в буфере: §b' + reqStr + (adjM > 1.0 ? (' §e| Энергосеть ×' + Math.round(adjM * 100) / 100) : ''),
       '§fНакоплено: §e' + (curBldg.cashBuffer || 0) + ' Cr',
       curBldg.branch1 ? ('§aT1 ветка: ' + curBldg.branch1) : '§7T1: выберите 1 из 2 веток справа →',
       curBldg.branch2 ? ('§aT2 ветка: ' + curBldg.branch2) : (curBldg.level === 2 ? '§7T2: выберите 1 из 2 веток справа →' : '§7T2: откроется после T1'),
       intPct < 100 ? '§e▶ ЛКМ: восстановить физическое здание (/lh building repair)' : '§7Выставить товар на витрину: /lh shop sell hand <кол-во> <цена>'
     ], function (pl) {
       if (intPct < 100) {
-        var rep = global.LHOpenTTD.repairBuildingIntegrity(st, myComp.id, sc.sx, sc.sz);
+        var rep = global.LHOpenTTD.repairBuildingIntegrity(st, myComp.id, sc.sx, sc.sz, dim);
         if (rep.ok) {
           lhOttdSave(server);
           if (typeof lhPlacePhysicalBuildingBlocks === 'function') lhPlacePhysicalBuildingBlocks(server, rep.building);
@@ -1055,7 +1159,6 @@ function lhGuiRenderBuildings(gui, server, player) {
       }
     });
 
-    // Tier 1 Fork (2 mutually exclusive options)
     (bSpec.tier1Fork || []).forEach(function (opt, oi) {
       var chosen = curBldg.branch1 === opt.id;
       var locked = curBldg.branch1 && curBldg.branch1 !== opt.id;
@@ -1070,7 +1173,6 @@ function lhGuiRenderBuildings(gui, server, player) {
         });
     });
 
-    // Tier 2 Fork (2 mutually exclusive options)
     (bSpec.tier2Fork || []).forEach(function (opt, oi) {
       var chosen = curBldg.branch2 === opt.id;
       var locked = (curBldg.branch2 && curBldg.branch2 !== opt.id) || curBldg.level < 2;
@@ -1084,19 +1186,70 @@ function lhGuiRenderBuildings(gui, server, player) {
           lhOpenGui(server, pl, 'buildings');
         });
     });
+
+    lhGuiSlot(gui, 8, 2, 'minecraft:gold_ingot', '§6🔨 Выставить на аукцион', [
+      '§7Запускает торги за этот объект среди игроков и компаний.',
+      '§fДлительность: §e3 минуты §7(анти-снайп +15с)',
+      '§e▶ ЛКМ: выставить с авто-стартовой ценой (/lh auction create)'
+    ], function (pl) {
+      var tickNow = typeof LHOTTDTick === 'number' ? LHOTTDTick : 0;
+      var aRes = global.LHOpenTTD.createFacilityAuction(st, myComp.id, sc.sx, sc.sz, 0, 3600, tickNow, { dimension: dim });
+      if (aRes.ok) {
+        lhOttdSave(server);
+        lhMsg(pl, '§a[Аукцион ' + aRes.auction.id + '] Объект «' + aRes.auction.buildingName + '» выставлен от ' + aRes.auction.startPrice + ' Cr!');
+      } else {
+        lhMsg(pl, '§cОшибка аукциона: ' + aRes.reason);
+      }
+      lhOpenGui(server, pl, 'buildings');
+    });
   } else {
     lhGuiSlot(gui, 4, 2, 'minecraft:barrier', '§7В секторе (' + sc.sx + ', ' + sc.sz + ') нет вашего здания', [
       '§7Захватите сектор на карте и нажмите на постройку в верхнем ряду.'
     ]);
   }
 
+  // Row 3: Active Facility Auctions (Mini-game bidding!)
+  var openAucs = (st.auctions || []).filter(function (a) { return a && a.status === 'open'; });
+  if (openAucs.length === 0) {
+    lhGuiSlot(gui, 0, 3, 'minecraft:bell', '§7Аукционов предприятий пока нет', [
+      '§7Вы можете выставить свой объект на аукцион справа в ряду выше.'
+    ]);
+  } else {
+    openAucs.slice(0, 9).forEach(function (a, ai) {
+      var nextBid = a.highestBidderCid ? (a.currentBid + a.minIncrement) : a.startPrice;
+      var isMine = myComp && a.sellerCid === myComp.id;
+      lhGuiSlot(gui, ai, 3, 'minecraft:gold_block', '§6Аукцион ' + a.id + ': §f' + a.buildingName, [
+        '§fПродавец: §7' + a.sellerCid + ' §7| Сектор (' + a.sx + ',' + a.sz + ') Ур.' + a.buildingLevel,
+        '§fТекущая ставка: ' + (a.highestBidderCid ? ('§a' + a.currentBid + ' Cr (' + a.highestBidderCid + ')') : ('§eстарт ' + a.startPrice + ' Cr')),
+        '§fСлед. ставка: §6' + nextBid + ' Cr',
+        isMine ? '§cПКМ: отменить свой аукцион' : '§e▶ ЛКМ: сделать ставку ' + nextBid + ' Cr'
+      ], function (pl) {
+        if (!myComp || isMine) return;
+        var tickNow = typeof LHOTTDTick === 'number' ? LHOTTDTick : 0;
+        var br = global.LHOpenTTD.placeAuctionBid(st, a.id, myComp.id, nextBid, tickNow);
+        if (br.ok) {
+          lhOttdSave(server);
+          lhMsg(pl, br.sold ? ('§a[Аукцион выигран!] Вы купили объект за ' + br.finalPrice + ' Cr!') : ('§a[Ставка ' + nextBid + ' Cr] Вы лидируете в торгах!'));
+        } else {
+          lhMsg(pl, '§cСтавка отклонена: ' + br.reason);
+        }
+        lhOpenGui(server, pl, 'buildings');
+      }, function (pl) {
+        if (!isMine) return;
+        var cr = global.LHOpenTTD.cancelFacilityAuction(st, a.id, myComp.id);
+        if (cr.ok) { lhOttdSave(server); lhMsg(pl, '§eАукцион отменён.'); }
+        lhOpenGui(server, pl, 'buildings');
+      });
+    });
+  }
+
   // Row 4: List of owned buildings
   if (myComp) {
     var owned = global.LHOpenTTD.listCompanyBuildings(st, myComp.id);
     owned.slice(0, 9).forEach(function (b, bi) {
-      var sp = global.LHOpenTTD.BUILDING_CATALOG[b.type];
-      lhGuiSlot(gui, bi, 4, bIcons[b.type] || 'minecraft:chest', (sp ? sp.name : b.type) + ' §7(' + b.sx + ',' + b.sz + ')', [
-        '§fУровень: §b' + b.level + '/3',
+      var sp = global.LHOpenTTD.BUILDING_CATALOG[b.type] || {};
+      lhGuiSlot(gui, bi, 4, bIcons[b.type] || 'minecraft:chest', (b.rarityColor || '') + (b.structureName || sp.name || b.type) + ' §7(' + b.sx + ',' + b.sz + ')', [
+        '§fУровень: §b' + b.level + '/3 §7| Статус: ' + (b.pausedReason === 'missing_inputs' ? '§cНет сырья' : '§aАктивен'),
         '§fНакоплено: §e' + (b.cashBuffer || 0) + ' Cr',
         '§7Ветки: ' + (b.branch1 || '-') + ' / ' + (b.branch2 || '-')
       ]);
@@ -1155,6 +1308,36 @@ function lhGuiRenderDiplomacy(gui, server, player) {
       });
   });
 
+  // Row 0 cols 0..2: Anti-Monopoly Coalitions against monopolists & aggressive companies
+  if (global.LHOpenTTD.getMonopolyMetrics) {
+    var monoList = global.LHOpenTTD.getMonopolyMetrics(st).filter(function (m) { return m.cid !== myComp.id; });
+    monoList.slice(0, 3).forEach(function (m, mi) {
+      var co = st.coalitions && st.coalitions[m.cid];
+      var joined = !!(co && co.members && co.members.indexOf(myComp.id) !== -1);
+      lhGuiSlot(gui, mi, 0, joined ? 'minecraft:red_banner' : 'minecraft:shield',
+        (joined ? '§a✔ Коалиция против: ' : (m.isMonopolyTarget ? '§c⚠ Монополист: ' : '§eКоалиция против: ')) + m.name, [
+          '§fДоля карты: §e' + Math.round(m.territoryShare * 100) + '% §7| Угроза: §c' + m.monopolyThreat,
+          '§fНалог монополиста: §c' + Math.round(m.antiMonopolyTaxRate * 100) + '%',
+          '§7Бонус коалиции: §a−30% цена захвата, +1 сила рейда, +100 Cr',
+          joined ? '§eПКМ: выйти из коалиции' : '§e▶ ЛКМ: вступить в коалицию (/lh coalition join ' + m.cid + ')'
+        ], function (pl) {
+          if (!joined) {
+            global.LHOpenTTD.joinAntiMonopolyCoalition(st, myComp.id, m.cid);
+            lhOttdSave(server);
+            lhMsg(pl, '§a[Коалиция] Вы вступили в пакт против «' + m.name + '»!');
+          }
+          lhOpenGui(server, pl, 'diplomacy');
+        }, function (pl) {
+          if (joined) {
+            global.LHOpenTTD.leaveAntiMonopolyCoalition(st, myComp.id, m.cid);
+            lhOttdSave(server);
+            lhMsg(pl, '§eВы вышли из коалиции против «' + m.name + '».');
+          }
+          lhOpenGui(server, pl, 'diplomacy');
+        });
+    });
+  }
+
   // Peaceful buyout button for current sector
   var curSec = global.LHOpenTTD.resolveSectorOwner(st, sc.sx, sc.sz);
   lhGuiSlot(gui, 4, 0, 'minecraft:gold_block', '§6Мирный выкуп сектора (' + sc.sx + ', ' + sc.sz + ')', [
@@ -1165,6 +1348,18 @@ function lhGuiRenderDiplomacy(gui, server, player) {
     if (typeof lhDiplomacyAction === 'function') lhDiplomacyAction(server, pl, 'buysector', curSec.owner || '', { sx: sc.sx, sz: sc.sz }, false);
     lhOpenGui(server, pl, 'diplomacy');
   });
+
+  // Row 0 cols 6..8: Active Bot Hostile Mob Raids
+  var activeRaids = (st.activeMobRaids || []).filter(function (r) { return r && r.status === 'active'; });
+  if (activeRaids.length > 0) {
+    activeRaids.slice(0, 3).forEach(function (ar, ari) {
+      lhGuiSlot(gui, 6 + ari, 0, 'minecraft:iron_sword', '§c⚔ Бот-рейд ' + ar.id, [
+        '§fАгрессор: §c' + (ar.attackerName || ar.attackerCid),
+        '§fЦель: §e' + (ar.targetName || ar.targetCid) + ' @ (' + ar.sx + ',' + ar.sz + ')',
+        '§fОтряд: §c' + (ar.mobCount || 4) + ' мобов §7(сила ' + ar.strength + ')'
+      ]);
+    });
+  }
 
   // Row 3: Border Trade Visit passes (/lh trade visit <cid>)
   others.slice(0, 9).forEach(function (otherId, idx) {
@@ -1180,13 +1375,14 @@ function lhGuiRenderDiplomacy(gui, server, player) {
     });
   });
 
-  // Row 4: Supply Contracts
+  // Row 4: Periodic Supply Contracts (with upkeep-aware pricing & breach penalty)
   var openSupply = (st.supplyContracts || []).filter(function (s) { return s.status === 'open'; });
   openSupply.slice(0, 9).forEach(function (sup, si) {
     lhGuiSlot(gui, si, 4, sup.item || 'minecraft:chest', '§eПоставка ' + sup.id + ' (' + sup.buyerCid + ')', [
       '§fТребуется: §b' + sup.qty + '× ' + sup.item,
-      '§fНаграда: §a' + sup.price + ' Cr (+8 отношений, ост. ' + sup.remainingBatches + ')',
-      '§e▶ ЛКМ: выполнить контракт из инвентаря'
+      '§fЦена (с содержанием): §a' + sup.price + ' Cr §7(содерж. +' + (sup.upkeepIncluded || 0) + ')',
+      '§fПериодов ост.: §e' + sup.remainingBatches + (sup.timed ? (' §7| Штраф срыва: §c' + (sup.penaltyPerMiss || 0) + ' Cr') : ''),
+      '§e▶ ЛКМ: выполнить поставку из инвентаря'
     ], function (pl) {
       lhGuiDeferAction(server, pl, function (p2) {
         if (server && server.commands && typeof p2.createCommandSourceStack === 'function') {

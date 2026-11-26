@@ -569,25 +569,33 @@ function lhFirstJoinRandomSpawn(server, player) {
   }
 
   var chosen = null;
-  var maxAttempts = safeHalf < 560 ? 3 : 16;
+  var existingPlayerHqs = 0;
+  if (ottdSt && ottdSt.companies) {
+    Object.keys(ottdSt.companies).forEach(function (cid) {
+      if (ottdSt.companies[cid] && !ottdSt.companies[cid].isBot) existingPlayerHqs++;
+    });
+  }
+  var maxAttempts = safeHalf < 560 ? 6 : 36;
   for (var attempt = 0; attempt < maxAttempts; attempt++) {
     var wx = 0, wz = 0;
     if (safeHalf < 560) {
-      if (attempt % 2 === 0) {
-        wx = -270 - Math.floor(Math.random() * Math.min(24, Math.max(8, safeHalf - 270)));
-        wz = Math.floor((Math.random() * 2 - 1) * Math.min(48, safeHalf - 16));
-      } else {
-        wz = -270 - Math.floor(Math.random() * Math.min(24, Math.max(8, safeHalf - 270)));
-        wx = Math.floor((Math.random() * 2 - 1) * Math.min(48, safeHalf - 16));
-      }
+      var qIdx = (existingPlayerHqs + attempt) % 4;
+      var qSigns = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+      var q = qSigns[qIdx];
+      var edgeDist = Math.min(safeHalf - 16, 270 + Math.floor(Math.random() * 48));
+      wx = q[0] !== 0 ? q[0] * edgeDist : Math.floor((Math.random() * 2 - 1) * Math.min(96, safeHalf - 16));
+      wz = q[1] !== 0 ? q[1] * edgeDist : Math.floor((Math.random() * 2 - 1) * Math.min(96, safeHalf - 16));
     } else {
-      // Spread new companies widely across the expanded starting territory (min 1500m from origin, max 75% of safeHalf)
-      var minSpan = Math.min(safeHalf - 128, 1280);
-      var maxSpan = Math.min(safeHalf, Math.max(minSpan + 512, Math.floor(safeHalf * 0.70)));
-      var ang = Math.random() * 6.2831853;
-      var rad = minSpan + Math.random() * (maxSpan - minSpan);
-      wx = Math.round(Math.cos(ang) * rad);
-      wz = Math.round(Math.sin(ang) * rad);
+      // Wide early company HQ spacing so player bases start far apart and logistics routes matter
+      var minSpan = safeHalf >= 2560
+        ? Math.min(safeHalf - 256, Math.max(2560, Math.floor(safeHalf * 0.25)))
+        : Math.min(safeHalf - 128, 1280);
+      var maxSpan = Math.min(safeHalf - 128, Math.max(minSpan + 768, Math.floor(safeHalf * 0.78)));
+      // Bias each joining player toward a distinct angular sector for maximal early separation
+      var baseAngle = ((existingPlayerHqs * 2.399963) + (attempt * 0.45) + (Math.random() * 0.55)) % 6.2831853;
+      var rad = minSpan + Math.random() * Math.max(128, maxSpan - minSpan);
+      wx = Math.round(Math.cos(baseAngle) * rad);
+      wz = Math.round(Math.sin(baseAngle) * rad);
     }
     wx = Math.max(-safeHalf, Math.min(safeHalf, wx));
     wz = Math.max(-safeHalf, Math.min(safeHalf, wz));
@@ -599,9 +607,22 @@ function lhFirstJoinRandomSpawn(server, player) {
     if (ottdSt && global.LHOpenTTD) {
       var ownerInfo = global.LHOpenTTD.resolveSectorOwner(ottdSt, cSc.sx, cSc.sz);
       if (ownerInfo.kind === 'claimed') continue;
-      if (safeHalf >= 1200 && global.LHOpenTTD.minCompanyHqDistance &&
-          global.LHOpenTTD.minCompanyHqDistance(ottdSt, cSc.sx, cSc.sz) < 4) {
-        continue;
+      if (safeHalf >= 1200 && attempt < maxAttempts - 6) {
+        var minAnyDist = safeHalf >= 3000 ? 10 : 6;
+        if (global.LHOpenTTD.minCompanyHqDistance &&
+            global.LHOpenTTD.minCompanyHqDistance(ottdSt, cSc.sx, cSc.sz) < minAnyDist) {
+          continue;
+        }
+        // Keep player HQs even farther apart (>= 14 sectors = 3584+ blocks when map allows)
+        var tooCloseToPlayer = false;
+        var minPlayerDist = safeHalf >= 3500 ? 14 : 8;
+        Object.keys(ottdSt.companies || {}).forEach(function (ocid) {
+          var oc = ottdSt.companies[ocid];
+          if (!oc || oc.isBot) return;
+          var pd = Math.max(Math.abs(Number(oc.hqSx || 0) - cSc.sx), Math.abs(Number(oc.hqSz || 0) - cSc.sz));
+          if (pd < minPlayerDist) tooCloseToPlayer = true;
+        });
+        if (tooCloseToPlayer) continue;
       }
     }
     if (envType === 'air') {
@@ -625,10 +646,12 @@ function lhFirstJoinRandomSpawn(server, player) {
     }
   }
   if (!chosen) {
-    var fWx = Math.max(-safeHalf, Math.min(safeHalf, safeHalf >= 1200 ? -1536 : -272));
-    var fWz = safeHalf >= 1200 ? 1024 : 0;
+    var fbDirs = [[-3072, 2048], [3072, -2048], [2048, 3072], [-2048, -3072], [-3840, -1024], [3840, 1024]];
+    var fbPair = fbDirs[existingPlayerHqs % fbDirs.length];
+    var fWx = Math.max(-safeHalf, Math.min(safeHalf, safeHalf >= 1200 ? fbPair[0] : (existingPlayerHqs % 2 === 0 ? -272 : 272)));
+    var fWz = Math.max(-safeHalf, Math.min(safeHalf, safeHalf >= 1200 ? fbPair[1] : (existingPlayerHqs % 2 === 0 ? 0 : 128)));
     var fY = envType === 'air' ? 286 : (envType === 'underground' ? -44 : (envType === 'sea' ? 64 : lhFindSafeRespawnY(ow, fWx, fWz, true)));
-    var fSc = global.LHOpenTTD ? global.LHOpenTTD.sectorCoords(fWx, fWz) : { sx: -6, sz: 4 };
+    var fSc = global.LHOpenTTD ? global.LHOpenTTD.sectorCoords(fWx, fWz) : { sx: Math.floor(fWx / 256), sz: Math.floor(fWz / 256) };
     chosen = { x: fWx, y: fY, z: fWz, sx: fSc.sx, sz: fSc.sz };
   }
   chosen.x = Math.max(-safeHalf, Math.min(safeHalf, chosen.x));
