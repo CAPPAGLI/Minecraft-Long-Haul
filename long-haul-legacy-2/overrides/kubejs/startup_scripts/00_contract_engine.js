@@ -2176,6 +2176,81 @@ global.LHOpenTTD = (function () {
         { id: 'cascade_transformer', name: 'Каскадный трансформатор', icon: 'minecraft:amethyst_shard', cost: 880, incomeMult: 1.55, yieldMult: 1.85, adjacencyBonus: 0.50, summary: 'Бонус соседних секторов до +50% и +85% ресурсов. Блокирует Термоядерный узел.' }
       ]
     },
+    road_depot: {
+      id: 'road_depot',
+      category: 'logistics',
+      categoryName: 'Логистика',
+      name: 'Автостанция и дорога',
+      icon: 'automobility:automobile',
+      mapSym: 'R',
+      cost: 220,
+      baseIncome: 26,
+      baseProduct: 'minecraft:cobblestone',
+      baseQty: 8,
+      upkeepCost: 8,
+      upgradeUpkeepPerLevel: 10,
+      inputItems: { 'minecraft:coal': 1 },
+      upgradeItems: { 'minecraft:iron_ingot': 3, 'minecraft:cobblestone': 8 },
+      summary: 'Пристраивает автодорожную развязку к сектору и соседним заводам: открывает автоконвои (Automobility, 10.5 м/с).',
+      tier1Fork: [
+        { id: 'asphalt_highway', name: 'Скоростная магистраль', icon: 'automobility:dash_panel', cost: 280, incomeMult: 1.50, yieldMult: 1.40, bonusProduct: 'minecraft:iron_nugget', bonusQty: 6, summary: '+50% дохода и +25% скорости дорожных конвоев. Блокирует Грузовую эстакаду.' },
+        { id: 'freight_yard', name: 'Грузовая эстакада', icon: 'create:chute', cost: 300, incomeMult: 1.35, yieldMult: 1.80, bonusProduct: 'create:iron_sheet', bonusQty: 3, summary: '+80% выпуска и +3 жел. пластины/цикл. Блокирует Скоростную магистраль.' }
+      ],
+      tier2Fork: [
+        { id: 'toll_plaza', name: 'Платный автобан', icon: 'minecraft:gold_ingot', cost: 540, incomeMult: 1.80, yieldMult: 1.30, summary: '+80% транзитной выручки с автопотока. Блокирует Логистический хаб.' },
+        { id: 'auto_dispatch', name: 'Диспетчерский парк', icon: 'minecraft:compass', cost: 520, incomeMult: 1.45, yieldMult: 1.85, summary: '+85% пропускной способности дорог. Блокирует Платный автобан.' }
+      ]
+    },
+    rail_depot: {
+      id: 'rail_depot',
+      category: 'logistics',
+      categoryName: 'Логистика',
+      name: 'Ж/Д депо и пути',
+      icon: 'create:track',
+      mapSym: 'J',
+      cost: 360,
+      baseIncome: 46,
+      baseProduct: 'create:track',
+      baseQty: 4,
+      upkeepCost: 15,
+      upgradeUpkeepPerLevel: 16,
+      inputItems: { 'minecraft:coal': 2, 'minecraft:iron_ingot': 1 },
+      upgradeItems: { 'create:track': 6, 'minecraft:iron_ingot': 4 },
+      summary: 'Подключает сектор и соседние заводы к Ж/Д магистралям Create: открывает тяжёлые поезда (16.0 м/с, 64 груза).',
+      tier1Fork: [
+        { id: 'steam_locomotive', name: 'Паровозное депо', icon: 'create:steam_engine', cost: 420, incomeMult: 1.65, yieldMult: 1.40, bonusProduct: 'create:track', bonusQty: 4, summary: '+65% дохода и +4 рельсы/цикл. Блокирует Сортировочную горку.' },
+        { id: 'marshalling_yard', name: 'Сортировочная горка', icon: 'minecraft:powered_rail', cost: 400, incomeMult: 1.35, yieldMult: 1.90, bonusProduct: 'minecraft:iron_ingot', bonusQty: 4, summary: '+90% объёма и +4 железа/цикл. Блокирует Паровозное депо.' }
+      ],
+      tier2Fork: [
+        { id: 'maglev_corridor', name: 'Экспресс-магистраль', icon: 'minecraft:redstone_block', cost: 780, incomeMult: 1.80, yieldMult: 1.45, summary: '+80% дохода от Ж/Д экспрессов. Блокирует Грузовой терминал.' },
+        { id: 'freight_terminal', name: 'Тяжёлый грузовой терминал', icon: 'create:brass_funnel', cost: 740, incomeMult: 1.45, yieldMult: 1.95, summary: '+95% грузовместимости узла. Блокирует Экспресс-магистраль.' }
+      ]
+    },
+    port: {
+      id: 'port',
+      category: 'logistics',
+      categoryName: 'Логистика',
+      name: 'Грузовой порт',
+      icon: 'smallships:oak_cog',
+      mapSym: 'P',
+      cost: 340,
+      baseIncome: 44,
+      baseProduct: 'minecraft:oak_boat',
+      baseQty: 1,
+      upkeepCost: 14,
+      upgradeUpkeepPerLevel: 15,
+      inputItems: { 'minecraft:oak_planks': 2, 'minecraft:coal': 1 },
+      upgradeItems: { 'minecraft:oak_planks': 8, 'minecraft:iron_ingot': 4 },
+      summary: 'Пристраивает причал к сектору и соседним заводам: открывает водные конвои (Small Ships / лодки, 12.0 м/с, 48 груза).',
+      tier1Fork: [
+        { id: 'deep_harbor', name: 'Глубоководный причал', icon: 'minecraft:prismarine_shard', cost: 400, incomeMult: 1.65, yieldMult: 1.40, bonusProduct: 'minecraft:cod', bonusQty: 6, summary: '+65% прибыли от морских рейсов. Блокирует Верфь.' },
+        { id: 'shipyard_dock', name: 'Судостроительная верфь', icon: 'minecraft:oak_chest_boat', cost: 390, incomeMult: 1.40, yieldMult: 1.85, bonusProduct: 'minecraft:oak_planks', bonusQty: 10, summary: '+85% судовых материалов и досок. Блокирует Глубоководный причал.' }
+      ],
+      tier2Fork: [
+        { id: 'free_port', name: 'Порто-франко', icon: 'minecraft:emerald', cost: 760, incomeMult: 1.85, yieldMult: 1.40, summary: '+85% торговой маржи порта. Блокирует Контейнерный кран.' },
+        { id: 'container_crane', name: 'Контейнерный кран', icon: 'create:gantry_carriage', cost: 720, incomeMult: 1.45, yieldMult: 1.95, summary: '+95% отгрузки баржами. Блокирует Порто-франко.' }
+      ]
+    },
     trade_exchange: {
       id: 'trade_exchange',
       category: 'logistics',
@@ -5153,20 +5228,78 @@ global.LHOpenTTD = (function () {
     return countClaims(state, targetCid) <= 1;
   }
 
-  function companyMerge(state, fromCid, toCid) {
+  var ENDGAME_BUYOUT_CHAPTER_RATIO = 0.8;
+
+  function getEndgameBuyoutStatus(state, completedChapters, totalChapters) {
+    var total = Math.max(1, Math.round(Number(totalChapters || 61)));
+    var done = Math.max(0, Math.round(Number(completedChapters !== undefined ? completedChapters : (state && state.completedChapters ? state.completedChapters : 0))));
+    var required = Math.ceil(total * ENDGAME_BUYOUT_CHAPTER_RATIO);
+    var unlocked = done >= required;
+    var targets = [];
+    if (state && state.companies) {
+      Object.keys(state.companies).forEach(function (cid) {
+        var c = state.companies[cid];
+        if (!c || c.isBot || c.isPirate) return;
+        var val = computeValuation(state, cid);
+        targets.push({
+          cid: cid,
+          name: c.name,
+          valuation: val,
+          buyoutPrice: Math.max(500, Math.round(val * 1.25))
+        });
+      });
+    }
+    return {
+      unlocked: unlocked,
+      completedChapters: done,
+      requiredChapters: required,
+      totalChapters: total,
+      ratio: Math.min(1, done / total),
+      targets: targets,
+      victory: (state && state.endgameVictory) ? state.endgameVictory : null
+    };
+  }
+
+  function companyMerge(state, fromCid, toCid, opts) {
     ensureDiplomacyState(state);
+    var o = opts || {};
     var fromComp = state.companies && state.companies[fromCid];
     var toComp = state.companies && state.companies[toCid];
     if (!fromComp || !toComp || fromCid === toCid) return { ok: false, reason: 'bad_company' };
-    // Never allow full player company absorption/elimination so friends are never kicked out of progression
+    var totalChapters = Math.max(1, Math.round(Number(o.totalChapters || 61)));
+    var completedChapters = Math.max(0, Math.round(Number(o.completedChapters !== undefined ? o.completedChapters : (state.completedChapters || 0))));
+    var requiredChapters = Math.ceil(totalChapters * ENDGAME_BUYOUT_CHAPTER_RATIO);
+    var isEndgameBuyout = false;
+    var buyoutPrice = 0;
+
+    // Early/mid game: protect player companies from hostile absorption;
+    // Endgame (>= 4/5 chapters completed): allow corporate buyout as campaign completion!
     if (!fromComp.isBot) {
-      return {
-        ok: false,
-        reason: 'player_merge_disabled',
-        message: 'Полное поглощение/слияние компаний игроков отключено — купите до 49% акций вместо поглощения.'
-      };
+      if (completedChapters < requiredChapters) {
+        return {
+          ok: false,
+          reason: 'player_merge_disabled',
+          completedChapters: completedChapters,
+          requiredChapters: requiredChapters,
+          totalChapters: totalChapters,
+          message: 'Полное поглощение компаний игроков отключено до эндгейма (' + completedChapters + '/' + requiredChapters + ' глав, нужно 4/5) — до тех пор доступно до 49% акций.'
+        };
+      }
+      isEndgameBuyout = true;
+      buyoutPrice = o.buyoutPrice !== undefined ? Math.max(0, Math.round(Number(o.buyoutPrice))) : Math.max(500, Math.round(computeValuation(state, fromCid) * 1.25));
+      if (toComp.cash < buyoutPrice) {
+        return {
+          ok: false,
+          reason: 'no_cash_for_buyout',
+          cost: buyoutPrice,
+          cash: toComp.cash,
+          completedChapters: completedChapters,
+          requiredChapters: requiredChapters
+        };
+      }
+      toComp.cash -= buyoutPrice;
     }
-    // Only bot companies can be dissolved/merged if needed
+
     Object.keys(state.claims || {}).forEach(function (ck) {
       var cl = state.claims[ck];
       if (cl && cl.owner === fromCid) {
@@ -5179,8 +5312,47 @@ global.LHOpenTTD = (function () {
       if (b && b.owner === fromCid) b.owner = toCid;
     });
     toComp.cash += Math.max(0, Math.round(Number(fromComp.cash || 0)));
+
+    // Transfer player memberships from absorbed company to buyer so players stay in the consolidated empire
+    if (isEndgameBuyout) {
+      if (!state.playerCompany) state.playerCompany = {};
+      if (!Array.isArray(toComp.members)) toComp.members = [];
+      (fromComp.members || []).forEach(function (pid) {
+        if (toComp.members.indexOf(pid) === -1) toComp.members.push(pid);
+        state.playerCompany[pid] = toCid;
+      });
+      Object.keys(state.playerCompany).forEach(function (pid) {
+        if (state.playerCompany[pid] === fromCid) {
+          state.playerCompany[pid] = toCid;
+          if (toComp.members.indexOf(pid) === -1) toComp.members.push(pid);
+        }
+      });
+    }
+
+    var victory = null;
+    if (isEndgameBuyout) {
+      victory = {
+        winnerCid: toCid,
+        winnerName: toComp.name,
+        absorbedCid: fromCid,
+        absorbedName: fromComp.name,
+        buyoutPrice: buyoutPrice,
+        completedChapters: completedChapters,
+        totalChapters: totalChapters,
+        tick: Number(o.nowTick || 0)
+      };
+      state.endgameVictory = victory;
+      toComp.endgameVictory = victory;
+    }
     delete state.companies[fromCid];
-    return { ok: true, merged: fromCid, into: toCid };
+    return {
+      ok: true,
+      merged: fromCid,
+      into: toCid,
+      isEndgameBuyout: isEndgameBuyout,
+      buyoutPrice: buyoutPrice,
+      endgameVictory: victory
+    };
   }
 
   function claimOrCaptureSector(state, cid, sx, sz, allowCapture, opts) {
@@ -6313,6 +6485,8 @@ global.LHOpenTTD = (function () {
     FUEL_EQUIVALENTS: FUEL_EQUIVALENTS,
     PIRATE_SYNDICATE_ID: PIRATE_SYNDICATE_ID,
     MAX_PLAYER_EXTERNAL_SHARES: MAX_PLAYER_EXTERNAL_SHARES,
+    ENDGAME_BUYOUT_CHAPTER_RATIO: ENDGAME_BUYOUT_CHAPTER_RATIO,
+    getEndgameBuyoutStatus: getEndgameBuyoutStatus,
     resolveBuildingVariant: resolveBuildingVariant,
     setBuildingVariant: setBuildingVariant,
     getCompanyEnvType: getCompanyEnvType,
@@ -7223,21 +7397,90 @@ global.LHTradeLogistics = (function () {
   var SPEED_PRESETS = [
     { id: 'slow', bps: 1.04, label: 'Обоз (присед −20%)' },
     { id: 'walk', bps: 4.30, label: 'Пеший курьер' },
-    { id: 'road', bps: 9.00, label: 'Автоконвой' },
-    { id: 'rail', bps: 15.00, label: 'Скоростной поезд' },
+    { id: 'road', bps: 10.50, label: 'Автоконвой' },
+    { id: 'sea', bps: 12.00, label: 'Водный конвой' },
+    { id: 'rail', bps: 16.00, label: 'Скоростной поезд' },
     { id: 'air', bps: 24.00, label: 'Авиа-экспресс (макс. −20%)' }
   ];
+
+  var VEHICLE_FLEET_SPECS = {
+    cart: {
+      id: 'cart',
+      name: 'Гужевой обоз / Вагонетка',
+      speedBps: 4.5,
+      capacity: 16,
+      requiredBuildingTypes: [], // works between any facilities
+      acceptedItems: ['minecraft:chest_minecart', 'minecraft:minecart', 'astikorcarts:supply_cart'],
+      fuelMult: 0.8
+    },
+    road: {
+      id: 'road',
+      name: 'Автоколонна (Automobility)',
+      speedBps: 10.5,
+      capacity: 32,
+      requiredBuildingTypes: ['road_depot', 'warehouse', 'trade_exchange'],
+      acceptedItems: [
+        'automobility:automobile',
+        'automobility:automobile_frame',
+        'automobility:automobile_engine',
+        'automobility:automobile_wheel'
+      ],
+      fuelMult: 1.0
+    },
+    sea: {
+      id: 'sea',
+      name: 'Грузовое судно / Баржа (Small Ships / Лодка)',
+      speedBps: 12.0,
+      capacity: 48,
+      requiredBuildingTypes: ['port'],
+      acceptedItems: [
+        'smallships:oak_cog', 'smallships:spruce_cog', 'smallships:birch_cog',
+        'smallships:oak_galleon', 'smallships:oak_brigg', 'smallships:oak_caravel',
+        'vs_eureka:oak_ship_helm', 'minecraft:oak_chest_boat', 'minecraft:oak_boat',
+        'minecraft:spruce_boat', 'minecraft:birch_boat', 'minecraft:dark_oak_boat',
+        'minecraft:acacia_boat', 'minecraft:jungle_boat', 'minecraft:mangrove_boat',
+        'minecraft:cherry_boat', 'minecraft:bamboo_raft'
+      ],
+      fuelMult: 0.9
+    },
+    rail: {
+      id: 'rail',
+      name: 'Грузовой поезд (Create / Steam \'n\' Rails)',
+      speedBps: 16.0,
+      capacity: 64,
+      requiredBuildingTypes: ['rail_depot'],
+      acceptedItems: [
+        'create:schedule', 'create:track', 'create:train_casing', 'minecraft:chest_minecart'
+      ],
+      fuelMult: 1.15
+    },
+    air: {
+      id: 'air',
+      name: 'Грузовой дирижабль / Самолёт (Immersive Aircraft)',
+      speedBps: 24.0,
+      capacity: 40,
+      requiredBuildingTypes: ['airport'],
+      acceptedItems: [
+        'immersive_aircraft:cargo_airship', 'immersive_aircraft:airship',
+        'immersive_aircraft:biplane', 'immersive_aircraft:gyrodyne',
+        'immersive_aircraft:quadrocopter', 'man_of_many_planes:economy_plane'
+      ],
+      fuelMult: 1.35
+    }
+  };
 
   function createState() {
     return {
       passes: {},
       deliveries: [],
       automatedRoutes: [],
+      convoys: [],
       haggles: {},
       p2pSessions: {},
       nextPassSeq: 1,
       nextDeliverySeq: 1,
       nextRouteSeq: 1,
+      nextConvoySeq: 1,
       nextHaggleSeq: 1,
       nextP2pSeq: 1
     };
@@ -7248,11 +7491,13 @@ global.LHTradeLogistics = (function () {
     if (!st.passes) st.passes = {};
     if (!Array.isArray(st.deliveries)) st.deliveries = [];
     if (!Array.isArray(st.automatedRoutes)) st.automatedRoutes = [];
+    if (!Array.isArray(st.convoys)) st.convoys = [];
     if (!st.haggles) st.haggles = {};
     if (!st.p2pSessions) st.p2pSessions = {};
     if (!st.nextPassSeq) st.nextPassSeq = 1;
     if (!st.nextDeliverySeq) st.nextDeliverySeq = 1;
     if (!st.nextRouteSeq) st.nextRouteSeq = 1;
+    if (!st.nextConvoySeq) st.nextConvoySeq = 1;
     if (!st.nextHaggleSeq) st.nextHaggleSeq = 1;
     if (!st.nextP2pSeq) st.nextP2pSeq = 1;
     return st;
@@ -7268,14 +7513,220 @@ global.LHTradeLogistics = (function () {
       productionSpeedMult: active ? 1.25 : 1.0,
       deliveryFeeMult: active ? 0.60 : 1.0, // -40% delivery cost
       routeFuelDiscount: active ? 0.50 : 1.0, // -50% automated route fuel/customs cost
+      speedBoostMult: active ? 1.30 : 1.0, // +30% convoy speed on subsidized routes
+      zeroRelayToll: active, // subsidized corridors waive foreign relay tolls
+      freeEscort: active, // subsidized corridors provide state escort discount
       travelCooldownMult: active ? 0.50 : 1.0,
       freeExpressTravel: active
     };
   }
 
-  function computeAutomatedRouteCost(ottdState, cid, srcBuilding, dstBuilding, qtyPerRun) {
+  function matchVehicleItem(itemId, preferredType) {
+    var id = String(itemId || '').toLowerCase();
+    if (!id || id === 'minecraft:air') return null;
+    var order = preferredType ? [preferredType] : ['air', 'rail', 'sea', 'road', 'cart'];
+    for (var i = 0; i < order.length; i++) {
+      var vt = order[i];
+      var spec = VEHICLE_FLEET_SPECS[vt];
+      if (!spec) continue;
+      if (spec.acceptedItems.indexOf(id) !== -1) return vt;
+      if (vt === 'sea' && (/^smallships:/.test(id) || /_boat$/.test(id) || /_raft$/.test(id) || /^vs_eureka:.*_ship_helm$/.test(id))) return 'sea';
+      if (vt === 'road' && /^automobility:automobile/.test(id)) return 'road';
+      if (vt === 'air' && (/^immersive_aircraft:/.test(id) || /^man_of_many_planes:/.test(id))) return 'air';
+      if (vt === 'rail' && (/^railways:/.test(id) || id === 'create:track' || id === 'create:schedule' || id === 'create:train_casing')) return 'rail';
+      if (vt === 'cart' && (/^astikorcarts:/.test(id) || /minecart$/.test(id))) return 'cart';
+    }
+    return null;
+  }
+
+  function hasTransportInfrastructure(ottdState, sx, sz, dim, vehicleType) {
+    var spec = VEHICLE_FLEET_SPECS[vehicleType || 'cart'] || VEHICLE_FLEET_SPECS.cart;
+    if (!spec.requiredBuildingTypes || spec.requiredBuildingTypes.length === 0) return { ok: true, hubType: 'any' };
+    if (!ottdState || !ottdState.buildings) return { ok: false, reason: 'no_buildings', required: spec.requiredBuildingTypes };
+    var dNorm = dim || 'minecraft:overworld';
+    var bestHub = null;
+    Object.keys(ottdState.buildings).forEach(function (bk) {
+      var b = ottdState.buildings[bk];
+      if (!b || (b.dimension || 'minecraft:overworld') !== dNorm) return;
+      if (Math.abs(b.sx - sx) <= 1 && Math.abs(b.sz - sz) <= 1) {
+        if (spec.requiredBuildingTypes.indexOf(b.type) !== -1) {
+          bestHub = b;
+        }
+      }
+    });
+    if (bestHub) return { ok: true, hubType: bestHub.type, hubBuilding: bestHub };
+    return {
+      ok: false,
+      reason: 'missing_infrastructure',
+      vehicleType: vehicleType,
+      required: spec.requiredBuildingTypes,
+      sx: sx,
+      sz: sz
+    };
+  }
+
+  function registerCompanyConvoy(lState, ottdState, companyId, vehicleType, consumedItemId, opts) {
+    ensureState(lState);
+    var vt = vehicleType || matchVehicleItem(consumedItemId);
+    var spec = VEHICLE_FLEET_SPECS[vt];
+    if (!spec) return { ok: false, reason: 'invalid_vehicle_type' };
+    if (ottdState && (!ottdState.companies || !ottdState.companies[companyId])) return { ok: false, reason: 'no_company' };
+    var itemNorm = String(consumedItemId || spec.acceptedItems[0]);
+    if (opts && opts.strictItemCheck && matchVehicleItem(itemNorm, vt) !== vt) {
+      return { ok: false, reason: 'incompatible_item', requiredItems: spec.acceptedItems };
+    }
+    var convoy = {
+      id: 'CV' + (lState.nextConvoySeq++),
+      companyId: companyId,
+      vehicleType: vt,
+      name: spec.name,
+      itemId: itemNorm,
+      speedBps: spec.speedBps,
+      capacity: spec.capacity,
+      assignedRouteId: null,
+      status: 'idle',
+      createdAtTick: Number((opts && opts.nowTick) || 0),
+      totalTrips: 0,
+      totalMoved: 0
+    };
+    lState.convoys.push(convoy);
+    return { ok: true, convoy: convoy };
+  }
+
+  function listCompanyConvoys(lState, companyId) {
+    ensureState(lState);
+    return lState.convoys.filter(function (c) { return c && (!companyId || c.companyId === companyId); });
+  }
+
+  function getBuildingRoadSpeedBonus(ottdState, sx, sz, dim) {
+    if (!ottdState || !ottdState.buildings) return 1.0;
+    var bonus = 1.0;
+    Object.keys(ottdState.buildings).forEach(function (bk) {
+      var b = ottdState.buildings[bk];
+      if (!b || (b.dimension || 'minecraft:overworld') !== (dim || 'minecraft:overworld')) return;
+      if (Math.abs(b.sx - sx) <= 1 && Math.abs(b.sz - sz) <= 1) {
+        if (b.type === 'road_depot' && b.branch1 === 'asphalt_highway') bonus = Math.max(bonus, 1.25);
+        if (b.type === 'rail_depot' && b.branch1 === 'steam_locomotive') bonus = Math.max(bonus, 1.15);
+        if (b.type === 'airport' && b.branch2 === 'continental_runway') bonus = Math.max(bonus, 1.20);
+      }
+    });
+    return bonus;
+  }
+
+  function planTransportPath(lState, ottdState, companyId, srcNode, dstNode, vehicleType, opts) {
+    var vt = vehicleType || 'cart';
+    var vSpec = VEHICLE_FLEET_SPECS[vt] || VEHICLE_FLEET_SPECS.cart;
+    var o = opts || {};
+    var srcDim = srcNode.dim || srcNode.dimension || 'minecraft:overworld';
+    var dstDim = dstNode.dim || dstNode.dimension || 'minecraft:overworld';
+
+    // Explicit infrastructure check when required or requested
+    if (o.requireInfra) {
+      var infSrc = hasTransportInfrastructure(ottdState, srcNode.sx, srcNode.sz, srcDim, vt);
+      if (!infSrc.ok) return { ok: false, reason: 'missing_src_infra', required: infSrc.required, sx: srcNode.sx, sz: srcNode.sz };
+      var infDst = hasTransportInfrastructure(ottdState, dstNode.sx, dstNode.sz, dstDim, vt);
+      if (!infDst.ok) return { ok: false, reason: 'missing_dst_infra', required: infDst.required, sx: dstNode.sx, sz: dstNode.sz };
+    }
+
+    var waypoints = Array.isArray(o.waypoints) ? o.waypoints.slice() : [];
+    // Optional auto-relay discovery through intermediate owned or foreign facilities (shortest graph hops)
+    if (waypoints.length === 0 && o.autoRelay && srcDim === dstDim && ottdState && ottdState.buildings) {
+      var candidates = [];
+      Object.keys(ottdState.buildings).forEach(function (bk) {
+        var b = ottdState.buildings[bk];
+        if (!b || (b.dimension || 'minecraft:overworld') !== srcDim) return;
+        if ((b.sx === srcNode.sx && b.sz === srcNode.sz) || (b.sx === dstNode.sx && b.sz === dstNode.sz)) return;
+        if (vt === 'cart' || hasTransportInfrastructure(ottdState, b.sx, b.sz, srcDim, vt).ok) {
+          candidates.push(b);
+        }
+      });
+      // Pick closest single relay node that lies reasonably between src and dst if direct distance > 512
+      var directDist = computeDistance(srcNode.sx * 256, srcNode.sz * 256, dstNode.sx * 256, dstNode.sz * 256);
+      if (directDist >= 512 && candidates.length > 0) {
+        var bestRelay = null, bestScore = 1e12;
+        for (var ci = 0; ci < candidates.length; ci++) {
+          var cb = candidates[ci];
+          var d1 = computeDistance(srcNode.sx * 256, srcNode.sz * 256, cb.sx * 256, cb.sz * 256);
+          var d2 = computeDistance(cb.sx * 256, cb.sz * 256, dstNode.sx * 256, dstNode.sz * 256);
+          var score = d1 + d2 + (cb.owner !== companyId ? 120 : 0);
+          if (score < bestScore) { bestScore = score; bestRelay = cb; }
+        }
+        if (bestRelay) waypoints.push({ sx: bestRelay.sx, sz: bestRelay.sz, dim: srcDim });
+      }
+    }
+
+    var chain = [{ sx: srcNode.sx, sz: srcNode.sz, dim: srcDim, owner: companyId }].concat(waypoints).concat([{ sx: dstNode.sx, sz: dstNode.sz, dim: dstDim, owner: companyId }]);
+    var totalDistanceBlocks = 0;
+    var relayTolls = [];
+    var totalRelayToll = 0;
+    var subSrc = getSubsidyModifiers(ottdState, companyId, srcNode.sx, srcNode.sz);
+    var subDst = getSubsidyModifiers(ottdState, companyId, dstNode.sx, dstNode.sz);
+    var isSubsidized = !!(subSrc.active || subDst.active);
+
+    for (var wi = 0; wi < chain.length; wi++) {
+      var node = chain[wi];
+      if (wi > 0 && wi < chain.length - 1) {
+        var wDim = node.dim || srcDim;
+        node.dim = wDim;
+        if (o.requireInfra) {
+          var infMid = hasTransportInfrastructure(ottdState, node.sx, node.sz, wDim, vt);
+          if (!infMid.ok) return { ok: false, reason: 'missing_waypoint_infra', sx: node.sx, sz: node.sz, required: infMid.required };
+        }
+        var midB = (ottdState && global.LHOpenTTD) ? global.LHOpenTTD.getSectorBuilding(ottdState, node.sx, node.sz, wDim) : null;
+        if (!midB && ottdState && global.LHOpenTTD) {
+          var ownerInfo = global.LHOpenTTD.resolveSectorOwner(ottdState, node.sx, node.sz, wDim);
+          node.owner = ownerInfo && ownerInfo.kind === 'claimed' ? ownerInfo.owner : companyId;
+        } else if (midB) {
+          node.owner = midB.owner;
+          node.buildingName = midB.variantName || midB.structureName || midB.type;
+        }
+        if (node.owner && node.owner !== companyId && ottdState && global.LHOpenTTD) {
+          var rel = global.LHOpenTTD.getRelation(ottdState, companyId, node.owner);
+          if (rel && rel.score <= -60) {
+            return { ok: false, reason: 'relay_embargo', owner: node.owner, sx: node.sx, sz: node.sz };
+          }
+          var isAllied = global.LHOpenTTD.isAllied(ottdState, companyId, node.owner) || global.LHOpenTTD.hasPact(ottdState, companyId, node.owner);
+          var toll = (isAllied || isSubsidized) ? 0 : Math.max(8, Math.round(12 + Number(o.qtyPerRun || 8) * 0.6));
+          if (toll > 0) {
+            relayTolls.push({ owner: node.owner, sx: node.sx, sz: node.sz, toll: toll });
+            totalRelayToll += toll;
+          }
+        }
+      }
+      if (wi > 0) {
+        var prev = chain[wi - 1];
+        var segDist = ((prev.dim || srcDim) !== (node.dim || srcDim))
+          ? 768
+          : computeDistance(prev.sx * 256, prev.sz * 256, node.sx * 256, node.sz * 256);
+        totalDistanceBlocks += segDist;
+      }
+    }
+
+    var infraSpeedMult = getBuildingRoadSpeedBonus(ottdState, srcNode.sx, srcNode.sz, srcDim);
+    var subSpeedMult = isSubsidized ? 1.30 : 1.0;
+    var effectiveSpeedBps = Math.round(vSpec.speedBps * infraSpeedMult * subSpeedMult * 100) / 100;
+    var travelSeconds = Math.round((totalDistanceBlocks / Math.max(1.0, effectiveSpeedBps)) * 10) / 10;
+    var travelTicks = Math.max(40, Math.round((totalDistanceBlocks / Math.max(1.0, effectiveSpeedBps)) * 20));
+
+    return {
+      ok: true,
+      vehicleType: vt,
+      pathNodes: chain,
+      waypointCount: Math.max(0, chain.length - 2),
+      totalDistanceBlocks: totalDistanceBlocks,
+      speedBps: effectiveSpeedBps,
+      travelSeconds: travelSeconds,
+      travelTicks: travelTicks,
+      relayTolls: relayTolls,
+      totalRelayToll: totalRelayToll,
+      subsidized: isSubsidized
+    };
+  }
+
+  function computeAutomatedRouteCost(ottdState, cid, srcBuilding, dstBuilding, qtyPerRun, opts) {
+    var o = opts || {};
     var q = Math.max(1, Math.round(Number(qtyPerRun || 8)));
-    var dist = computeDistance(srcBuilding.sx * 256, srcBuilding.sz * 256, dstBuilding.sx * 256, dstBuilding.sz * 256);
+    var dist = Number(o.totalDistanceBlocks || computeDistance(srcBuilding.sx * 256, srcBuilding.sz * 256, dstBuilding.sx * 256, dstBuilding.sz * 256));
     var srcDim = srcBuilding.dimension || 'minecraft:overworld';
     var dstDim = dstBuilding.dimension || 'minecraft:overworld';
     var crossDim = srcDim !== dstDim;
@@ -7283,6 +7734,8 @@ global.LHTradeLogistics = (function () {
     var subSrc = getSubsidyModifiers(ottdState, cid, srcBuilding.sx, srcBuilding.sz);
     var subDst = getSubsidyModifiers(ottdState, cid, dstBuilding.sx, dstBuilding.sz);
     var fuelDisc = (subSrc.active || subDst.active) ? 0.50 : 1.0;
+    var vSpec = VEHICLE_FLEET_SPECS[o.vehicleType || 'cart'] || VEHICLE_FLEET_SPECS.cart;
+    var fMult = vSpec.fuelMult || 1.0;
 
     // Sample foreign sectors along route for customs tax
     var foreignSectors = 0;
@@ -7299,15 +7752,17 @@ global.LHTradeLogistics = (function () {
       }
     }
 
-    var coalCost = Math.max(1, Math.round((1 + sectorsSpan * 0.4 + q * 0.08) * fuelDisc));
-    var oilCost = crossDim ? Math.max(2, Math.round(4 * fuelDisc)) : Math.max(0, Math.round(sectorsSpan * 0.35 * fuelDisc));
-    var customsTax = Math.round((foreignSectors * 14 + (crossDim ? 36 : 0)) * fuelDisc);
-    var cashFuelFee = Math.max(4, Math.round((8 + sectorsSpan * 3.5 + q * 0.5) * fuelDisc));
+    var relayToll = Math.round(Number(o.totalRelayToll || 0) * fuelDisc);
+    var coalCost = Math.max(1, Math.round((1 + sectorsSpan * 0.4 + q * 0.08) * fMult * fuelDisc));
+    var oilCost = crossDim ? Math.max(2, Math.round(4 * fuelDisc)) : Math.max(0, Math.round(sectorsSpan * 0.35 * fMult * fuelDisc));
+    var customsTax = Math.round((foreignSectors * 14 + (crossDim ? 36 : 0)) * fuelDisc) + relayToll;
+    var cashFuelFee = Math.max(4, Math.round((8 + sectorsSpan * 3.5 + q * 0.5) * fMult * fuelDisc));
     return {
       distance: dist,
       sectorsSpan: sectorsSpan,
       crossDim: crossDim,
       foreignSectors: foreignSectors,
+      relayToll: relayToll,
       subsidized: (subSrc.active || subDst.active),
       coalItem: 'minecraft:coal',
       coalQty: coalCost,
@@ -7330,8 +7785,47 @@ global.LHTradeLogistics = (function () {
     if (!srcB || !dstB) return { ok: false, reason: 'missing_building' };
     if (srcB.owner !== cid || dstB.owner !== cid) return { ok: false, reason: 'not_owned' };
     if (srcB.id === dstB.id) return { ok: false, reason: 'same_building' };
-    var q = Math.max(1, Math.min(64, Math.round(Number(qtyPerRun || 8))));
-    var costInfo = computeAutomatedRouteCost(ottdState, cid, srcB, dstB, q);
+
+    var vt = o.vehicleType || 'cart';
+    var convoyObj = null;
+    if (o.convoyId) {
+      for (var ci = 0; ci < lState.convoys.length; ci++) {
+        if (lState.convoys[ci] && lState.convoys[ci].id === o.convoyId && lState.convoys[ci].companyId === cid) {
+          convoyObj = lState.convoys[ci];
+          vt = convoyObj.vehicleType;
+          break;
+        }
+      }
+      if (!convoyObj) return { ok: false, reason: 'convoy_not_found' };
+    } else if (o.requireConvoy) {
+      for (var cj = 0; cj < lState.convoys.length; cj++) {
+        var cv = lState.convoys[cj];
+        if (cv && cv.companyId === cid && cv.vehicleType === vt && !cv.assignedRouteId) {
+          convoyObj = cv;
+          break;
+        }
+      }
+      if (!convoyObj) return { ok: false, reason: 'missing_convoy', vehicleType: vt };
+    }
+
+    var vSpec = VEHICLE_FLEET_SPECS[vt] || VEHICLE_FLEET_SPECS.cart;
+    var q = Math.max(1, Math.min(vSpec.capacity || 64, Math.round(Number(qtyPerRun || 8))));
+    var pathPlan = planTransportPath(lState, ottdState, cid, { sx: srcSx, sz: srcSz, dim: srcDim }, { sx: dstSx, sz: dstSz, dim: dstDim }, vt, {
+      waypoints: o.waypoints,
+      autoRelay: !!o.autoRelay,
+      requireInfra: !!o.requireInfra,
+      qtyPerRun: q
+    });
+    if (!pathPlan.ok) return pathPlan;
+
+    var costInfo = computeAutomatedRouteCost(ottdState, cid, srcB, dstB, q, {
+      vehicleType: vt,
+      totalDistanceBlocks: pathPlan.totalDistanceBlocks,
+      totalRelayToll: pathPlan.totalRelayToll
+    });
+    var useTransit = !!(o.useTransitTimer || convoyObj);
+    var period = Math.max(600, Math.round(Number(o.periodTicks || (useTransit ? Math.max(400, pathPlan.travelTicks) : 2400))));
+
     var route = {
       id: 'R' + (lState.nextRouteSeq++),
       companyId: cid,
@@ -7343,12 +7837,25 @@ global.LHTradeLogistics = (function () {
       dstSx: dstSx,
       dstSz: dstSz,
       dstDim: dstDim,
+      vehicleType: vt,
+      convoyId: convoyObj ? convoyObj.id : null,
+      pathNodes: pathPlan.pathNodes,
+      relayTolls: pathPlan.relayTolls,
+      totalDistanceBlocks: pathPlan.totalDistanceBlocks,
+      speedBps: pathPlan.speedBps,
+      travelSeconds: pathPlan.travelSeconds,
+      travelTicks: pathPlan.travelTicks,
+      useTransitTimer: useTransit,
+      convoyState: 'idle',
+      transitStartTick: 0,
+      transitEtaTick: 0,
+      inTransitCargo: null,
       itemId: String(itemId || 'auto'),
       qtyPerRun: q,
-      periodTicks: Math.max(600, Math.round(Number(o.periodTicks || 2400))),
-      nextRunTick: Number(o.nowTick || 0) + Math.max(600, Math.round(Number(o.periodTicks || 2400))),
+      periodTicks: period,
+      nextRunTick: useTransit ? Number(o.nowTick || 0) : (Number(o.nowTick || 0) + period),
       enabled: true,
-      escortEnabled: !!o.escortEnabled,
+      escortEnabled: !!(o.escortEnabled || pathPlan.subsidized),
       mode: o.mode || 'to_input', // 'to_input' | 'to_stock'
       costProfile: costInfo,
       totalTransferred: 0,
@@ -7356,8 +7863,34 @@ global.LHTradeLogistics = (function () {
       robbedCount: 0,
       lastStatus: 'ready'
     };
+    if (convoyObj) {
+      convoyObj.assignedRouteId = route.id;
+      convoyObj.status = 'assigned';
+    }
     lState.automatedRoutes.push(route);
-    return { ok: true, route: route, costProfile: costInfo };
+    return { ok: true, route: route, costProfile: costInfo, pathPlan: pathPlan, convoy: convoyObj };
+  }
+
+  function createConvoyRoute(lState, ottdState, cid, srcSx, srcSz, dstSx, dstSz, vehicleType, itemId, qtyPerRun, opts) {
+    var o = Object.assign({}, opts || {}, {
+      vehicleType: vehicleType || 'road',
+      requireInfra: (opts && opts.requireInfra !== undefined) ? opts.requireInfra : true,
+      useTransitTimer: true
+    });
+    return createAutomatedRoute(lState, ottdState, cid, srcSx, srcSz, dstSx, dstSz, itemId, qtyPerRun, o);
+  }
+
+  function dispatchConvoyRoute(lState, ottdState, routeId, nowTick, opts) {
+    ensureState(lState);
+    var route = null;
+    for (var i = 0; i < lState.automatedRoutes.length; i++) {
+      if (lState.automatedRoutes[i] && lState.automatedRoutes[i].id === routeId) { route = lState.automatedRoutes[i]; break; }
+    }
+    if (!route) return { ok: false, reason: 'not_found' };
+    if (route.convoyState === 'in_transit') return { ok: false, reason: 'already_in_transit', etaTick: route.transitEtaTick };
+    route.enabled = true;
+    route.nextRunTick = Number(nowTick || 0);
+    return { ok: true, events: tickAutomatedRoutes(lState, ottdState, Number(nowTick || 0), opts) };
   }
 
   function toggleAutomatedRoute(lState, routeId, cid) {
@@ -7376,9 +7909,47 @@ global.LHTradeLogistics = (function () {
     ensureState(lState);
     var before = lState.automatedRoutes.length;
     lState.automatedRoutes = lState.automatedRoutes.filter(function (r) {
-      return !(r && r.id === routeId && (!cid || r.companyId === cid));
+      if (r && r.id === routeId && (!cid || r.companyId === cid)) {
+        if (r.convoyId) {
+          for (var c = 0; c < lState.convoys.length; c++) {
+            if (lState.convoys[c] && lState.convoys[c].id === r.convoyId) {
+              lState.convoys[c].assignedRouteId = null;
+              lState.convoys[c].status = 'idle';
+            }
+          }
+        }
+        return false;
+      }
+      return true;
     });
     return { ok: lState.automatedRoutes.length < before };
+  }
+
+  function payRelayTollsToOwners(ottdState, route, fuelDisc) {
+    if (!ottdState || !ottdState.companies || !Array.isArray(route.relayTolls)) return 0;
+    var paid = 0;
+    for (var ti = 0; ti < route.relayTolls.length; ti++) {
+      var rt = route.relayTolls[ti];
+      if (!rt || !rt.owner || !(rt.toll > 0)) continue;
+      var tAmt = Math.round(rt.toll * (fuelDisc || 1.0));
+      if (tAmt > 0 && ottdState.companies[rt.owner]) {
+        ottdState.companies[rt.owner].cash += tAmt;
+        paid += tAmt;
+      }
+    }
+    return paid;
+  }
+
+  function deliverCargoToEndpoint(dstB, mode, itemId, qty) {
+    if (!dstB || !(qty > 0)) return;
+    if (mode === 'to_input') {
+      if (!dstB.inputBuffer) dstB.inputBuffer = {};
+      dstB.inputBuffer[itemId] = (dstB.inputBuffer[itemId] || 0) + qty;
+      if (dstB.pausedReason === 'missing_inputs' || dstB.pausedReason === 'missing_fuel') dstB.pausedReason = null;
+    } else {
+      if (!dstB.stockBuffer) dstB.stockBuffer = {};
+      dstB.stockBuffer[itemId] = (dstB.stockBuffer[itemId] || 0) + qty;
+    }
   }
 
   function tickAutomatedRoutes(lState, ottdState, nowTick, opts) {
@@ -7391,18 +7962,74 @@ global.LHTradeLogistics = (function () {
     for (var i = 0; i < lState.automatedRoutes.length; i++) {
       var r = lState.automatedRoutes[i];
       if (!r || !r.enabled) continue;
-      if (tick < Number(r.nextRunTick || 0)) continue;
-      r.nextRunTick = tick + Number(r.periodTicks || 2400);
 
       var comp = ottdState.companies && ottdState.companies[r.companyId];
       var srcB = global.LHOpenTTD.getSectorBuilding(ottdState, r.srcSx, r.srcSz, r.srcDim);
       var dstB = global.LHOpenTTD.getSectorBuilding(ottdState, r.dstSx, r.dstSz, r.dstDim);
       if (!comp || !srcB || !dstB) { r.lastStatus = 'missing_endpoint'; continue; }
 
-      var costP = computeAutomatedRouteCost(ottdState, r.companyId, srcB, dstB, r.qtyPerRun);
+      // Phase 1: Check active in-transit convoy arrival (distance / speed = travel time)
+      if (r.useTransitTimer && r.convoyState === 'in_transit') {
+        if (tick < Number(r.transitEtaTick || 0)) {
+          r.lastStatus = 'in_transit';
+          continue;
+        }
+        var cargo = r.inTransitCargo || {};
+        var delivQty = Number(cargo.qty || 0);
+        if (delivQty > 0 && cargo.itemId) {
+          deliverCargoToEndpoint(dstB, r.mode, cargo.itemId, delivQty);
+        }
+        r.convoyState = 'idle';
+        r.inTransitCargo = null;
+        r.nextRunTick = tick + Math.max(200, Math.round(Number(r.periodTicks || 600) * 0.25));
+        r.totalTransferred = (r.totalTransferred || 0) + delivQty;
+        r.totalRuns = (r.totalRuns || 0) + 1;
+        r.lastStatus = cargo.pirateHit ? 'robbed_by_pirates' : 'arrived';
+        comp.stats.routesDone = (comp.stats.routesDone || 0) + 1;
+        if (r.convoyId) {
+          for (var c1 = 0; c1 < lState.convoys.length; c1++) {
+            if (lState.convoys[c1] && lState.convoys[c1].id === r.convoyId) {
+              lState.convoys[c1].status = 'assigned';
+              lState.convoys[c1].totalTrips = (lState.convoys[c1].totalTrips || 0) + 1;
+              lState.convoys[c1].totalMoved = (lState.convoys[c1].totalMoved || 0) + delivQty;
+            }
+          }
+        }
+        events.push({
+          routeId: r.id,
+          ok: true,
+          arrived: true,
+          itemId: cargo.itemId,
+          qty: delivQty,
+          travelSeconds: r.travelSeconds,
+          pirateHit: cargo.pirateHit || null
+        });
+        continue;
+      }
+
+      if (tick < Number(r.nextRunTick || 0)) continue;
+      if (!r.useTransitTimer) r.nextRunTick = tick + Number(r.periodTicks || 2400);
+
+      var waypointsOnly = (Array.isArray(r.pathNodes) && r.pathNodes.length > 2) ? r.pathNodes.slice(1, r.pathNodes.length - 1) : [];
+      var pathCheck = planTransportPath(lState, ottdState, r.companyId, { sx: r.srcSx, sz: r.srcSz, dim: r.srcDim }, { sx: r.dstSx, sz: r.dstSz, dim: r.dstDim }, r.vehicleType || 'cart', {
+        waypoints: waypointsOnly,
+        qtyPerRun: r.qtyPerRun
+      });
+      if (pathCheck.ok) {
+        r.totalDistanceBlocks = pathCheck.totalDistanceBlocks;
+        r.speedBps = pathCheck.speedBps;
+        r.travelSeconds = pathCheck.travelSeconds;
+        r.travelTicks = pathCheck.travelTicks;
+        r.relayTolls = pathCheck.relayTolls;
+      }
+
+      var costP = computeAutomatedRouteCost(ottdState, r.companyId, srcB, dstB, r.qtyPerRun, {
+        vehicleType: r.vehicleType || 'cart',
+        totalDistanceBlocks: r.totalDistanceBlocks,
+        totalRelayToll: pathCheck.ok ? pathCheck.totalRelayToll : 0
+      });
       r.costProfile = costP;
-      var escortFee = r.escortEnabled ? Math.max(10, Math.round(costP.sectorsSpan * 4)) : 0;
-      // Coal/oil can be drawn from company stockBuffer OR paid as cash fuel equivalent
+      var escortFee = (r.escortEnabled && !costP.subsidized) ? Math.max(10, Math.round(costP.sectorsSpan * 4)) : 0;
       var coalAvail = Number((comp.stockBuffer && comp.stockBuffer[costP.coalItem]) || 0);
       var coalFromStock = Math.min(coalAvail, costP.coalQty);
       var missingCoal = costP.coalQty - coalFromStock;
@@ -7410,6 +8037,7 @@ global.LHTradeLogistics = (function () {
 
       if (comp.cash < cashNeeded) {
         r.lastStatus = 'no_cash_for_fuel';
+        if (r.useTransitTimer) r.nextRunTick = tick + 200;
         events.push({ routeId: r.id, ok: false, reason: 'no_cash', cashNeeded: cashNeeded });
         continue;
       }
@@ -7436,16 +8064,17 @@ global.LHTradeLogistics = (function () {
       var avail = (srcB.stockBuffer && chosenItem !== 'auto') ? Number(srcB.stockBuffer[chosenItem] || 0) : 0;
       if (avail <= 0) {
         r.lastStatus = 'waiting_cargo';
+        if (r.useTransitTimer) r.nextRunTick = tick + 200;
         continue;
       }
       var moveQty = Math.min(avail, r.qtyPerRun);
       comp.cash -= cashNeeded;
       if (coalFromStock > 0 && comp.stockBuffer) comp.stockBuffer[costP.coalItem] -= coalFromStock;
+      payRelayTollsToOwners(ottdState, r, costP.subsidized ? 0.50 : 1.0);
 
       srcB.stockBuffer[chosenItem] -= moveQty;
       if (srcB.stockBuffer[chosenItem] <= 0) delete srcB.stockBuffer[chosenItem];
 
-      // Long-distance / cross-dim caravans risk pirate interception unless escorted or immune
       var pirateHit = null;
       var isLongCaravan = costP.sectorsSpan >= 2 || costP.crossDim;
       if (!o.skipPiracy && isLongCaravan && global.LHOpenTTD.computeCaravanPiracyRisk && global.LHOpenTTD.interceptCaravanByPirates) {
@@ -7457,29 +8086,44 @@ global.LHTradeLogistics = (function () {
         }
       }
 
-      if (moveQty > 0) {
-        if (r.mode === 'to_input') {
-          if (!dstB.inputBuffer) dstB.inputBuffer = {};
-          dstB.inputBuffer[chosenItem] = (dstB.inputBuffer[chosenItem] || 0) + moveQty;
-          if (dstB.pausedReason === 'missing_inputs' || dstB.pausedReason === 'missing_fuel') dstB.pausedReason = null;
-        } else {
-          if (!dstB.stockBuffer) dstB.stockBuffer = {};
-          dstB.stockBuffer[chosenItem] = (dstB.stockBuffer[chosenItem] || 0) + moveQty;
+      if (r.useTransitTimer) {
+        r.convoyState = 'in_transit';
+        r.transitStartTick = tick;
+        r.transitEtaTick = tick + Number(r.travelTicks || 100);
+        r.inTransitCargo = { itemId: chosenItem, qty: moveQty, pirateHit: pirateHit };
+        r.lastStatus = 'in_transit';
+        if (r.convoyId) {
+          for (var c2 = 0; c2 < lState.convoys.length; c2++) {
+            if (lState.convoys[c2] && lState.convoys[c2].id === r.convoyId) lState.convoys[c2].status = 'in_transit';
+          }
         }
+        events.push({
+          routeId: r.id,
+          ok: true,
+          dispatched: true,
+          itemId: chosenItem,
+          qty: moveQty,
+          cashCost: cashNeeded,
+          travelSeconds: r.travelSeconds,
+          etaTick: r.transitEtaTick,
+          pirateHit: pirateHit
+        });
+      } else {
+        deliverCargoToEndpoint(dstB, r.mode, chosenItem, moveQty);
+        r.totalTransferred = (r.totalTransferred || 0) + moveQty;
+        r.totalRuns = (r.totalRuns || 0) + 1;
+        r.lastStatus = pirateHit ? 'robbed_by_pirates' : 'ok';
+        comp.stats.routesDone = (comp.stats.routesDone || 0) + 1;
+        events.push({
+          routeId: r.id,
+          ok: true,
+          itemId: chosenItem,
+          qty: moveQty,
+          cashCost: cashNeeded,
+          coalUsed: coalFromStock,
+          pirateHit: pirateHit
+        });
       }
-      r.totalTransferred = (r.totalTransferred || 0) + moveQty;
-      r.totalRuns = (r.totalRuns || 0) + 1;
-      r.lastStatus = pirateHit ? 'robbed_by_pirates' : 'ok';
-      comp.stats.routesDone = (comp.stats.routesDone || 0) + 1;
-      events.push({
-        routeId: r.id,
-        ok: true,
-        itemId: chosenItem,
-        qty: moveQty,
-        cashCost: cashNeeded,
-        coalUsed: coalFromStock,
-        pirateHit: pirateHit
-      });
     }
     return events;
   }
@@ -7849,6 +8493,7 @@ global.LHTradeLogistics = (function () {
     MAX_DELIVERY_SPEED_BPS: MAX_DELIVERY_SPEED_BPS,
     TICKS_PER_GAME_DAY: TICKS_PER_GAME_DAY,
     SPEED_PRESETS: SPEED_PRESETS,
+    VEHICLE_FLEET_SPECS: VEHICLE_FLEET_SPECS,
     createState: createState,
     ensureState: ensureState,
     clampSpeed: clampSpeed,
@@ -7869,8 +8514,15 @@ global.LHTradeLogistics = (function () {
     createSellOrderDelegated: createSellOrderDelegated,
     tickDeliveries: tickDeliveries,
     getSubsidyModifiers: getSubsidyModifiers,
+    matchVehicleItem: matchVehicleItem,
+    hasTransportInfrastructure: hasTransportInfrastructure,
+    registerCompanyConvoy: registerCompanyConvoy,
+    listCompanyConvoys: listCompanyConvoys,
+    planTransportPath: planTransportPath,
     computeAutomatedRouteCost: computeAutomatedRouteCost,
     createAutomatedRoute: createAutomatedRoute,
+    createConvoyRoute: createConvoyRoute,
+    dispatchConvoyRoute: dispatchConvoyRoute,
     toggleAutomatedRoute: toggleAutomatedRoute,
     deleteAutomatedRoute: deleteAutomatedRoute,
     tickAutomatedRoutes: tickAutomatedRoutes

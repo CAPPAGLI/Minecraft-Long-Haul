@@ -1846,6 +1846,139 @@ function lhSyncMinimapHud(server, player, forceClear) {
 
 var LHLastPlayerSector = {};
 
+function lhGetChapterProgress(server, st) {
+  var total = 61;
+  var done = (st && st.completedChapters) ? Number(st.completedChapters) : 0;
+  try {
+    if (typeof lhTerritoryCounts === 'function') {
+      var info = lhTerritoryCounts(server);
+      total = Number(info.total || 61);
+      done = Math.max(done, Number(info.unlocked || 0));
+    }
+  } catch (eCp) {}
+  return { completed: done, total: total };
+}
+
+function lhEndgameBuyoutCmd(server, player, targetCid) {
+  var st = lhOttdRead(server);
+  var myComp = lhGetPlayerCompany(server, player);
+  if (!myComp) { lhMsg(player, 'Сначала создайте компанию.'); return { ok: false, reason: 'no_company' }; }
+  var prog = lhGetChapterProgress(server, st);
+  var res = global.LHOpenTTD.companyMerge(st, targetCid, myComp.id, {
+    completedChapters: prog.completed,
+    totalChapters: prog.total,
+    nowTick: LHOTTDTick
+  });
+  if (!res.ok) {
+    if (res.reason === 'player_merge_disabled') {
+      lhMsg(player, '§e[Эндгейм-выкуп] Закрыто глав: §c' + res.completedChapters + '/' + res.requiredChapters +
+        ' §7(нужно 4/5 от ' + res.totalChapters + '). Пока выкуп игроков запрещён — можно покупать до 49% акций.');
+    } else if (res.reason === 'no_cash_for_buyout') {
+      lhMsg(player, '§c[Эндгейм-выкуп] Не хватает средств: нужно ' + res.cost + ' Cr (у компании ' + res.cash + ' Cr).');
+    } else {
+      lhMsg(player, '§cВыкуп не удался: ' + res.reason);
+    }
+    return res;
+  }
+  lhOttdSave(server);
+  lhSyncXaeroTerritories(server, player);
+  if (res.endgameVictory) {
+    lhUnlock(player, 'longhaul:openttd/empire');
+    var v = res.endgameVictory;
+    var winTxt = '§6★ [ФИНАЛ ПРОХОЖДЕНИЯ] Компания ' + myComp.colorCode + v.winnerName +
+      ' §6выкупила корпорацию «' + v.absorbedName + '» за §e' + v.buyoutPrice +
+      ' Cr §6(' + v.completedChapters + '/' + v.totalChapters + ' глав закрыто) и объединила экономику мира!';
+    if (typeof lhLogEvent === 'function') lhLogEvent(server, 'chapter', winTxt, { chatMode: 'important' });
+    (server.players || []).forEach(function (pl) { lhMsg(pl, winTxt); });
+  } else {
+    lhMsg(player, '§aПоглощена компания ' + targetCid + '!');
+  }
+  return res;
+}
+
+function lhConsumeOneVehicleItemFromPlayer(player, preferredType) {
+  if (!player || !global.LHTradeLogistics) return null;
+  var hand = player.mainHandItem;
+  if (hand && !hand.empty) {
+    var hId = String(hand.id);
+    var vtH = global.LHTradeLogistics.matchVehicleItem(hId, preferredType);
+    if (vtH && (!preferredType || vtH === preferredType)) {
+      hand.count -= 1;
+      return { itemId: hId, vehicleType: vtH };
+    }
+  }
+  var inv = player.inventory;
+  if (inv && typeof inv.getContainerSize === 'function') {
+    var sz = inv.getContainerSize();
+    for (var i = 0; i < sz; i++) {
+      var st = inv.getItem(i);
+      if (!st || st.empty) continue;
+      var sId = String(st.id);
+      var vtS = global.LHTradeLogistics.matchVehicleItem(sId, preferredType);
+      if (vtS && (!preferredType || vtS === preferredType)) {
+        st.count -= 1;
+        return { itemId: sId, vehicleType: vtS };
+      }
+    }
+  }
+  return null;
+}
+
+function lhCreateConvoyFromHand(server, player, preferredType) {
+  var st = lhOttdRead(server);
+  var logSt = lhLogisticsRead(server);
+  var myComp = lhGetPlayerCompany(server, player);
+  if (!myComp) { lhMsg(player, 'Сначала создайте компанию.'); return { ok: false, reason: 'no_company' }; }
+  var spec = preferredType ? global.LHTradeLogistics.VEHICLE_FLEET_SPECS[preferredType] : null;
+  var taken = lhConsumeOneVehicleItemFromPlayer(player, preferredType);
+  if (!taken) {
+    var hint = spec ? spec.acceptedItems.slice(0, 3).join(', ') : 'automobility:automobile, smallships:oak_cog, minecraft:oak_boat, create:track, immersive_aircraft:airship';
+    lhMsg(player, '§eВозьмите транспортный предмет в руку или инвентарь! Подходит: §f' + hint);
+    return { ok: false, reason: 'no_vehicle_item' };
+  }
+  var res = global.LHTradeLogistics.registerCompanyConvoy(logSt, st, myComp.id, taken.vehicleType, taken.itemId, { nowTick: LHOTTDTick });
+  if (!res.ok) { lhMsg(player, '§cОшибка регистрации конвоя: ' + res.reason); return res; }
+  lhLogisticsSave(server);
+  var c = res.convoy;
+  lhMsg(player, '§a[Конвой ' + c.id + '] Зарегистрирован: §f' + c.name + ' §7(из ' + c.itemId + ') §e| Скорость: ' +
+    c.speedBps + ' м/с | Вместимость: ' + c.capacity + ' шт.');
+  return res;
+}
+
+function lhCreateConvoyRouteCmd(server, player, vehicleType, srcSx, srcSz, dstSx, dstSz, waypoints, qty, opts) {
+  var st = lhOttdRead(server);
+  var logSt = lhLogisticsRead(server);
+  var myComp = lhGetPlayerCompany(server, player);
+  if (!myComp) { lhMsg(player, 'Сначала создайте компанию.'); return { ok: false, reason: 'no_company' }; }
+  var dim = (player.level && player.level.dimension) ? String(player.level.dimension) : 'minecraft:overworld';
+  var res = global.LHTradeLogistics.createConvoyRoute(logSt, st, myComp.id, srcSx, srcSz, dstSx, dstSz, vehicleType, 'auto', qty || 16, {
+    srcDim: (opts && opts.srcDim) || dim,
+    dstDim: (opts && opts.dstDim) || dim,
+    waypoints: waypoints || [],
+    autoRelay: !!(opts && opts.autoRelay),
+    convoyId: opts && opts.convoyId,
+    requireInfra: true,
+    nowTick: LHOTTDTick
+  });
+  if (!res.ok) {
+    if (res.reason === 'missing_src_infra' || res.reason === 'missing_dst_infra' || res.reason === 'missing_waypoint_infra') {
+      lhMsg(player, '§c[Нет инфраструктуры в (' + res.sx + ',' + res.sz + ')] Для транспорта §f' + vehicleType +
+        ' §cнужно построить рядом: §e' + (res.required || []).join(' или '));
+    } else if (res.reason === 'relay_embargo') {
+      lhMsg(player, '§cТранзит через завод компании ' + res.owner + ' в (' + res.sx + ',' + res.sz + ') заблокирован (низкие отношения)!');
+    } else {
+      lhMsg(player, '§cОшибка маршрута конвоя: ' + res.reason);
+    }
+    return res;
+  }
+  lhLogisticsSave(server);
+  var r = res.route;
+  var pathStr = (r.pathNodes || []).map(function (n) { return '(' + n.sx + ',' + n.sz + ')'; }).join(' → ');
+  lhMsg(player, '§a[Маршрут ' + r.id + ' · ' + r.vehicleType + '] Путь: §f' + pathStr +
+    ' §7| Дистанция: §e' + r.totalDistanceBlocks + ' м §7/ §b' + r.speedBps + ' м/с §7= §a' + r.travelSeconds + ' сек.');
+  return res;
+}
+
 function lhDetectBiomeId(player) {
   try {
     if (!player || !player.level || typeof player.blockPosition !== 'function') return null;
@@ -3017,6 +3150,21 @@ ServerEvents.tick(function (event) {
   var st = lhOttdRead(server);
   var logSt = lhLogisticsRead(server);
   if (global.LHTradeLogistics) {
+    if (global.LHTradeLogistics.tickAutomatedRoutes && LHOTTDTick % 1200 !== 0) {
+      var hasTransit = (logSt.automatedRoutes || []).some(function (rt) { return rt && rt.enabled && rt.useTransitTimer; });
+      if (hasTransit) {
+        var rEvFast = global.LHTradeLogistics.tickAutomatedRoutes(logSt, st, LHOTTDTick);
+        if (rEvFast && rEvFast.length > 0) {
+          rEvFast.forEach(function (rev) {
+            if (rev && rev.pirateHit && typeof lhLogEvent === 'function') {
+              lhLogEvent(server, 'raid', 'Корсары ограбили конвой ' + rev.routeId + ': похищено ' + rev.pirateHit.stolenQty + '× ' + rev.pirateHit.stolenItem + '!', { chatMode: 'important' });
+            }
+          });
+          lhLogisticsSave(server);
+          lhOttdSave(server);
+        }
+      }
+    }
     var tickRes = global.LHTradeLogistics.tickDeliveries(logSt, st, LHOTTDTick);
     var arrivedList = (tickRes && tickRes.arrivedBuy) ? tickRes.arrivedBuy : [];
     var changedLog = arrivedList.length > 0 || (tickRes && ((tickRes.dueDelegatedSell && tickRes.dueDelegatedSell.length > 0) || (tickRes.holdEvents && tickRes.holdEvents.length > 0)));
@@ -3367,6 +3515,16 @@ ServerEvents.commandRegistry(function (event) {
     }));
   });
   compCmd.then(envNode);
+  compCmd.then(C.literal('buyout').then(C.argument('target', LHOTTDStringArg.word()).executes(function (ctx) {
+    var tid = global.LHOpenTTD.sanitizeId(LHOTTDStringArg.getString(ctx, 'target'));
+    var r = lhEndgameBuyoutCmd(ctx.source.server, ctx.source.playerOrException, tid);
+    return r && r.ok ? 1 : 0;
+  })));
+  compCmd.then(C.literal('merge').then(C.argument('target', LHOTTDStringArg.word()).executes(function (ctx) {
+    var tid = global.LHOpenTTD.sanitizeId(LHOTTDStringArg.getString(ctx, 'target'));
+    var r = lhEndgameBuyoutCmd(ctx.source.server, ctx.source.playerOrException, tid);
+    return r && r.ok ? 1 : 0;
+  })));
   root.then(compCmd);
 
   var mkt = C.literal('market');
@@ -4044,7 +4202,54 @@ ServerEvents.commandRegistry(function (event) {
     lhMsg(p, '§e[Маршрут ' + rid + '] Охрана каравана: ' + (found.escortEnabled ? '§aВКЛ (−82% риска пиратов)' : '§cВЫКЛ'));
     return 1;
   })));
+  routeCmd.then(C.literal('dispatch').then(C.argument('id', LHOTTDStringArg.word()).executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException, st = lhOttdRead(server), logSt = lhLogisticsRead(server);
+    var dr = global.LHTradeLogistics.dispatchConvoyRoute(logSt, st, LHOTTDStringArg.getString(ctx, 'id'), LHOTTDTick);
+    if (!dr.ok) { lhMsg(p, '§cНе удалось отправить конвой: ' + dr.reason); return 0; }
+    lhLogisticsSave(server);
+    lhOttdSave(server);
+    lhMsg(p, '§a[Конвой] Рейс запущен (время в пути = дистанция / скорость)!');
+    return 1;
+  })));
+  routeCmd.then(C.literal('convoy')
+    .then(C.argument('type', LHOTTDStringArg.word())
+      .then(C.argument('srcSx', LHOTTDStringArg.word())
+        .then(C.argument('srcSz', LHOTTDStringArg.word())
+          .then(C.argument('dstSx', LHOTTDStringArg.word())
+            .then(C.argument('dstSz', LHOTTDStringArg.word())
+              .then(C.argument('qty', LHOTTDStringArg.word()).executes(function (ctx) {
+                var sSx = parseInt(LHOTTDStringArg.getString(ctx, 'srcSx'), 10);
+                var sSz = parseInt(LHOTTDStringArg.getString(ctx, 'srcSz'), 10);
+                var dSx = parseInt(LHOTTDStringArg.getString(ctx, 'dstSx'), 10);
+                var dSz = parseInt(LHOTTDStringArg.getString(ctx, 'dstSz'), 10);
+                var qty = parseInt(LHOTTDStringArg.getString(ctx, 'qty'), 10);
+                var res = lhCreateConvoyRouteCmd(ctx.source.server, ctx.source.playerOrException,
+                  LHOTTDStringArg.getString(ctx, 'type'), sSx, sSz, dSx, dSz, [], isNaN(qty) ? 16 : qty, { autoRelay: true });
+                return res && res.ok ? 1 : 0;
+              }))))))));
   root.then(routeCmd);
+
+  var convoyCmd = C.literal('convoy');
+  convoyCmd.then(C.literal('list').executes(function (ctx) {
+    var server = ctx.source.server, p = ctx.source.playerOrException;
+    var comp = lhGetPlayerCompany(server, p);
+    var logSt = lhLogisticsRead(server);
+    var list = global.LHTradeLogistics.listCompanyConvoys(logSt, comp ? comp.id : null);
+    lhMsg(p, '=== Транспортный парк конвоев (' + list.length + ') ===');
+    list.forEach(function (c) {
+      lhMsg(p, c.id + ' [' + c.vehicleType + '] §f' + c.name + ' §7(' + c.itemId + ') | ' + c.speedBps + ' м/с, груз ' +
+        c.capacity + ' | Маршрут: ' + (c.assignedRouteId || 'свободен') + ' [' + c.status + ']');
+    });
+    return 1;
+  }));
+  convoyCmd.then(C.literal('create').executes(function (ctx) {
+    var r = lhCreateConvoyFromHand(ctx.source.server, ctx.source.playerOrException, null);
+    return r && r.ok ? 1 : 0;
+  }).then(C.argument('type', LHOTTDStringArg.word()).executes(function (ctx) {
+    var r = lhCreateConvoyFromHand(ctx.source.server, ctx.source.playerOrException, LHOTTDStringArg.getString(ctx, 'type'));
+    return r && r.ok ? 1 : 0;
+  })));
+  root.then(convoyCmd);
 
   var strCmd = C.literal('structure');
   strCmd.then(C.literal('scan').executes(function (ctx) {

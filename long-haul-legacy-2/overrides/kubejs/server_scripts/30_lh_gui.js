@@ -732,45 +732,113 @@ function lhGuiRenderLogistics(gui, server, player) {
     });
   });
 
-  // Automated Inter-Structure Exchange Routes (cols 4..8 on row 4)
+  // Row 1 & Row 4 cols 4..8: Convoy Fleet Builder + Multi-hop Infrastructure Routes (distance / speed = time)
   if (typeof lhOttdRead === 'function' && typeof lhLogisticsRead === 'function' && global.LHTradeLogistics) {
     var stL = lhOttdRead(server);
     var logL = lhLogisticsRead(server);
     var myCompL = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, player) : null;
     var subMod = myCompL ? global.LHTradeLogistics.getSubsidyModifiers(stL, myCompL.id, myCompL.hqSx, myCompL.hqSz) : { active: false };
     var autoList = myCompL ? (logL.automatedRoutes || []).filter(function (r) { return r.companyId === myCompL.id; }) : [];
-    lhGuiSlot(gui, 4, 4, 'minecraft:hopper', '§a⚙ Создать авто-маршрут', [
-      '§7Соединяет ваши первые 2 предприятия для авто-перевозки.',
-      '§7Учитывает уголь, нефть и таможенную пошлину.',
-      subMod.active ? '§e★ Субсидия активна: −50% топливо и пошлины!' : '§7Команда: /lh route create <sx1> <sz1> <sx2> <sz2> <кол>',
-      '§e▶ ЛКМ: запустить маршрут между объектами'
+    var myConvoys = myCompL ? global.LHTradeLogistics.listCompanyConvoys(logL, myCompL.id) : [];
+
+    var vTypes = [
+      { id: 'cart', icon: 'minecraft:chest_minecart', label: 'Обоз / Вагонетка', infra: 'Любое здание' },
+      { id: 'road', icon: 'automobility:automobile', label: 'Автоколонна (Automobility)', infra: 'Автостанция / Склад' },
+      { id: 'sea', icon: 'smallships:oak_cog', label: 'Судно / Лодка (Small Ships)', infra: 'Грузовой порт' },
+      { id: 'rail', icon: 'create:track', label: 'Ж/Д состав (Create)', infra: 'Ж/Д депо' },
+      { id: 'air', icon: 'immersive_aircraft:airship', label: 'Самолёт / Дирижабль', infra: 'Аэропорт' }
+    ];
+    var vSpecs = global.LHTradeLogistics.VEHICLE_FLEET_SPECS || {};
+    vTypes.forEach(function (vt, vi) {
+      var sp = vSpecs[vt.id] || { speedBps: 5, capacity: 16, acceptedItems: [] };
+      var cnt = myConvoys.filter(function (c) { return c.vehicleType === vt.id; }).length;
+      lhGuiSlot(gui, vi, 1, vt.icon, '§e🚚 Конвой: ' + vt.label + ' §7(' + cnt + ')', [
+        '§fСкорость: §a' + sp.speedBps + ' м/с §7| Вместимость: §b' + sp.capacity + ' шт.',
+        '§fТребуемая инфра: §e' + vt.infra,
+        '§7Материал из модов: §f' + (sp.acceptedItems || []).slice(0, 2).join(', '),
+        '§e▶ ЛКМ: сдать транспорт из руки и создать конвой'
+      ], function (pl) {
+        lhGuiDeferAction(server, pl, function (p2) {
+          if (typeof lhCreateConvoyFromHand === 'function') lhCreateConvoyFromHand(server, p2, vt.id);
+        }, 'logistics');
+      });
+    });
+
+    var viewL = lhGuiGetMapView(player);
+    var selMode = viewL.convoyType || 'cart';
+    var selVSpec = vSpecs[selMode] || { speedBps: 4.5, capacity: 16 };
+    var allBldgs = Object.keys(stL.buildings || {}).map(function (bk) { return stL.buildings[bk]; }).filter(Boolean);
+    var ownBldgs = myCompL ? allBldgs.filter(function (b) { return b.owner === myCompL.id; }) : [];
+    var relayPool = allBldgs.filter(function (b) {
+      return ownBldgs.length < 2 || (b.key !== ownBldgs[0].key && b.key !== ownBldgs[1].key);
+    });
+    var relayIdx = Math.max(0, Number(viewL.relayIdx || 0));
+    var chosenRelay = (relayPool.length > 0 && relayIdx > 0) ? relayPool[(relayIdx - 1) % relayPool.length] : null;
+
+    lhGuiSlot(gui, 6, 1, 'minecraft:compass', '§b⚙ Транспорт сети: §f' + selMode.toUpperCase(), [
+      '§fСкорость: §a' + selVSpec.speedBps + ' м/с §7(расчёт: путь / скорость = время)',
+      '§e▶ ЛКМ: сменить тип (cart → road → sea → rail → air)'
+    ], function (pl) {
+      var order = ['cart', 'road', 'sea', 'rail', 'air'];
+      var v = lhGuiGetMapView(pl);
+      v.convoyType = order[(order.indexOf(selMode) + 1) % order.length];
+      lhOpenGui(server, pl, 'logistics');
+    });
+
+    lhGuiSlot(gui, 7, 1, 'minecraft:oak_sign', chosenRelay ? ('§6Перевалка: ' + (chosenRelay.variantName || chosenRelay.type)) : '§7Перевалка: прямой путь', [
+      chosenRelay
+        ? ('§fУзел: (' + chosenRelay.sx + ',' + chosenRelay.sz + ') · Владелец: ' +
+          (myCompL && chosenRelay.owner === myCompL.id ? '§aВаш' : ('§e' + chosenRelay.owner + ' (с пошлиной)')))
+        : '§7Маршрут может идти через другие свои или чужие заводы!',
+      '§e▶ ЛКМ: перебрать промежуточный завод (или сброс)'
+    ], function (pl) {
+      var v = lhGuiGetMapView(pl);
+      v.relayIdx = (Number(v.relayIdx || 0) + 1) % (relayPool.length + 1);
+      lhOpenGui(server, pl, 'logistics');
+    });
+
+    lhGuiSlot(gui, 4, 4, 'minecraft:hopper', '§a⚙ Проложить конвой-маршрут (' + selMode + ')', [
+      '§7Соединяет ваши объекты выбранным транспортом.',
+      chosenRelay ? ('§eЧерез перевалку: (' + chosenRelay.sx + ',' + chosenRelay.sz + ') [' + chosenRelay.owner + ']') : '§7Прямое сообщение (или авто-перевалка)',
+      subMod.active ? '§e★ Субсидия: +30% скорость, 0 пошлин перевал., −50% топливо!' : '§7Формула рейса: длина пути / скорость = время',
+      '§e▶ ЛКМ: создать маршрут (проверяет порт/дорогу/депо)'
     ], function (pl) {
       if (!myCompL) { lhMsg(pl, 'Сначала создайте компанию.'); return; }
-      var blds = global.LHOpenTTD.listCompanyBuildings(stL, myCompL.id);
-      if (blds.length < 2) { lhMsg(pl, 'Нужно минимум 2 построенных объекта компании.'); return; }
-      var res = global.LHTradeLogistics.createAutomatedRoute(logL, stL, myCompL.id, blds[0].sx, blds[0].sz, blds[1].sx, blds[1].sz, 'auto', 8, {
-        srcDim: blds[0].dimension, dstDim: blds[1].dimension, nowTick: typeof LHOTTDTick === 'number' ? LHOTTDTick : 0
-      });
-      if (res.ok) {
-        lhLogisticsSave(server);
-        lhMsg(pl, '§a[Авто-маршрут ' + res.route.id + '] Соединён (' + blds[0].sx + ',' + blds[0].sz + ') -> (' + blds[1].sx + ',' + blds[1].sz + ')!');
-      } else {
-        lhMsg(pl, '§cОшибка маршрута: ' + res.reason);
+      if (ownBldgs.length < 2) { lhMsg(pl, 'Нужно минимум 2 построенных объекта компании.'); return; }
+      var wps = chosenRelay ? [{ sx: chosenRelay.sx, sz: chosenRelay.sz, dim: chosenRelay.dimension }] : [];
+      if (typeof lhCreateConvoyRouteCmd === 'function') {
+        lhCreateConvoyRouteCmd(server, pl, selMode, ownBldgs[0].sx, ownBldgs[0].sz, ownBldgs[1].sx, ownBldgs[1].sz, wps, 16, {
+          srcDim: ownBldgs[0].dimension,
+          dstDim: ownBldgs[1].dimension
+        });
       }
       lhOpenGui(server, pl, 'logistics');
     });
+
     autoList.slice(0, 4).forEach(function (ar, aIdx) {
       var cp = ar.costProfile || {};
-      var statusTag = !ar.enabled ? '§c[ПАУЗА] ' : (ar.pausedReason === 'robbed_by_pirates' ? '§6[ОГРАБЛЕН] ' : '§a[ВКЛ] ');
+      var nowT = typeof LHOTTDTick === 'number' ? LHOTTDTick : 0;
+      var pct = (ar.convoyState === 'in_transit' && ar.transitEtaTick > ar.transitStartTick)
+        ? Math.min(99, Math.max(1, Math.round(((nowT - ar.transitStartTick) / (ar.transitEtaTick - ar.transitStartTick)) * 100)))
+        : 0;
+      var statusTag = !ar.enabled ? '§c[ПАУЗА] ' : (ar.convoyState === 'in_transit' ? ('§b[В ПУТИ ' + pct + '%] ') : (ar.lastStatus === 'robbed_by_pirates' ? '§6[ОГРАБЛЕН] ' : '§a[ВКЛ] '));
+      var chainTxt = (ar.pathNodes && ar.pathNodes.length > 0)
+        ? ar.pathNodes.map(function (n) { return '(' + n.sx + ',' + n.sz + ')'; }).join('→')
+        : ('(' + ar.srcSx + ',' + ar.srcSz + ')→(' + ar.dstSx + ',' + ar.dstSz + ')');
       lhGuiSlot(gui, 5 + aIdx, 4, ar.enabled ? (ar.escortEnabled ? 'minecraft:shield' : 'minecraft:lime_dye') : 'minecraft:gray_dye',
-        statusTag + 'Маршрут ' + ar.id, [
-          '§f(' + ar.srcSx + ',' + ar.srcSz + ') → (' + ar.dstSx + ',' + ar.dstSz + ')',
+        statusTag + 'Маршрут ' + ar.id + ' [' + (ar.vehicleType || 'cart') + ']', [
+          '§fПуть: §e' + chainTxt,
+          '§fВремя: §a' + (ar.totalDistanceBlocks || cp.distance || 256) + ' м / ' + (ar.speedBps || 4.5) + ' м/с = §b' + (ar.travelSeconds || 56) + ' с',
           '§fГруз: §e' + ar.qtyPerRun + '× ' + ar.itemId + ' §7(перевезено: ' + (ar.totalTransferred || 0) + ')',
-          '§fОхрана каравана: ' + (ar.escortEnabled ? '§aВКЛ (−82% пиратов)' : '§cВЫКЛ §7(/lh route escort ' + ar.id + ')'),
-          '§fРасход: §7' + (cp.coalQty || 1) + ' угля, ' + (cp.oilQty || 0) + ' нефти, §6' + (cp.totalCashCost || 10) + ' Cr (таможня ' + (cp.customsTax || 0) + ')',
-          '§eЛКМ: вкл/выкл | ПКМ: удалить'
+          '§fОхрана: ' + (ar.escortEnabled ? '§aВКЛ (−82% пиратов)' : '§cВЫКЛ') + ' §7| Пошлины: §6' + (cp.customsTax || 0) + ' Cr',
+          '§eЛКМ: отправить/вкл-выкл | ПКМ: удалить'
         ], function (pl) {
-          global.LHTradeLogistics.toggleAutomatedRoute(logL, ar.id, myCompL ? myCompL.id : null);
+          if (ar.useTransitTimer && ar.convoyState !== 'in_transit' && ar.enabled) {
+            global.LHTradeLogistics.dispatchConvoyRoute(logL, stL, ar.id, typeof LHOTTDTick === 'number' ? LHOTTDTick : 0);
+            lhMsg(pl, '§a[Маршрут ' + ar.id + '] Конвой отправлен!');
+          } else {
+            global.LHTradeLogistics.toggleAutomatedRoute(logL, ar.id, myCompL ? myCompL.id : null);
+          }
           lhLogisticsSave(server);
           lhOpenGui(server, pl, 'logistics');
         }, function (pl) {
@@ -1195,12 +1263,13 @@ function lhGuiRenderTerritory(gui, server, player) {
   });
 }
 
-function lhGuiRenderBuildings(gui, server, player) {
+function lhGuiRenderBuildings(gui, server, player, pageArg) {
   var st = lhOttdRead(server);
   var myComp = lhGetPlayerCompany(server, player);
   var dim = (player.level && player.level.dimension) ? String(player.level.dimension) : 'minecraft:overworld';
   var sc = global.LHOpenTTD.sectorCoords(player.x, player.z);
   var curBldg = global.LHOpenTTD.getSectorBuilding(st, sc.sx, sc.sz, dim);
+  var bPage = Number(pageArg || 0) === 1 ? 1 : 0;
 
   var bIcons = {
     mine_shaft: 'minecraft:iron_pickaxe',
@@ -1211,19 +1280,25 @@ function lhGuiRenderBuildings(gui, server, player) {
     refinery: 'minecraft:brewing_stand',
     patrol_post: 'minecraft:iron_sword',
     power_plant: 'minecraft:redstone_block',
+    quarry: 'minecraft:deepslate',
     deep_quarry: 'minecraft:diamond_pickaxe',
     sawmill: 'minecraft:iron_axe',
+    agro_complex: 'minecraft:wheat',
     greenhouse: 'minecraft:wheat',
     chemical_plant: 'minecraft:cauldron',
-    rail_depot: 'minecraft:powered_rail',
+    road_depot: 'automobility:automobile',
+    rail_depot: 'create:track',
+    port: 'smallships:oak_cog',
+    trade_exchange: 'minecraft:emerald',
     structure_facility: 'minecraft:lodestone'
   };
 
-  // Rows 0..1 (cols 0..8 row 0, 0..3 row 1): all buildable facilities
+  // Rows 0..1 (13 slots per page + page toggle at (4, 1))
   var bKeys = Object.keys(global.LHOpenTTD.BUILDING_CATALOG || {}).filter(function (bt) {
     return !global.LHOpenTTD.BUILDING_CATALOG[bt].requiresWorldStructure;
   });
-  bKeys.slice(0, 13).forEach(function (bt, idx) {
+  var pageSlice = bPage === 0 ? bKeys.slice(0, 12) : bKeys.slice(12, 24);
+  pageSlice.forEach(function (bt, idx) {
     var gx = idx % 9;
     var gy = Math.floor(idx / 9);
     var spec = global.LHOpenTTD.BUILDING_CATALOG[bt];
@@ -1241,8 +1316,16 @@ function lhGuiRenderBuildings(gui, server, player) {
     ];
     lhGuiSlot(gui, gx, gy, bIcons[bt] || 'minecraft:anvil', spec.icon + ' §6' + spec.name, lore, function (pl) {
       if (typeof lhBuildFacilityCmd === 'function') lhBuildFacilityCmd(server, pl, bt, sc.sx, sc.sz, false);
-      lhOpenGui(server, pl, 'buildings');
+      lhOpenGui(server, pl, 'buildings', bPage);
     });
+  });
+
+  lhGuiSlot(gui, 4, 1, 'minecraft:book', '§e📖 Стр. построек: ' + (bPage + 1) + '/2', [
+    '§7Стр. 1: Добыча и производство',
+    '§7Стр. 2: Автостанции, Ж/Д депо, Порты, Энергетика и Торговля',
+    '§e▶ ЛКМ: переключить страницу (' + bKeys.length + ' видов зданий)'
+  ], function (pl) {
+    lhOpenGui(server, pl, 'buildings', bPage === 0 ? 1 : 0);
   });
 
   // Row 1 cols 5..8: Scan Structures, Convert World Structure, Supply Inputs, Collect All
@@ -2035,6 +2118,29 @@ function lhGuiRenderBank(gui, server, player) {
     lhOpenGui(server, pl, 'bank');
   });
 
+  var progB = typeof lhGetChapterProgress === 'function' ? lhGetChapterProgress(server, st) : { completed: 0, total: 61 };
+  var egStat = global.LHOpenTTD.getEndgameBuyoutStatus
+    ? global.LHOpenTTD.getEndgameBuyoutStatus(st, progB.completed, progB.total)
+    : { unlocked: false, completedChapters: 0, requiredChapters: 49, totalChapters: 61, targets: [], victory: null };
+  var egTargets = (egStat.targets || []).filter(function (t) { return t.cid !== myComp.id; });
+  lhGuiSlot(gui, 5, 0, egStat.victory ? 'minecraft:nether_star' : (egStat.unlocked ? 'minecraft:diamond_block' : 'minecraft:iron_bars'),
+    egStat.victory ? ('§6★ ФИНАЛ: ' + egStat.victory.winnerName) : (egStat.unlocked ? '§a★ Эндгейм-выкуп ОТКРЫТ!' : '§e🔒 Эндгейм-выкуп (4/5 глав)'), [
+      '§fЗакрыто глав: §e' + egStat.completedChapters + ' / ' + egStat.requiredChapters + ' §7(из ' + egStat.totalChapters + ')',
+      egStat.victory
+        ? ('§aВыкуплена: ' + egStat.victory.absorbedName + ' за ' + egStat.victory.buyoutPrice + ' Cr!')
+        : (egStat.unlocked
+            ? (egTargets.length > 0 ? ('§aМожно выкупить: ' + egTargets[0].name + ' за ' + egTargets[0].buyoutPrice + ' Cr') : '§7Нет других компаний игроков для выкупа')
+            : '§7После закрытия 4/5 глав выкуп компании игрока завершает прохождение.'),
+      egStat.unlocked && egTargets.length > 0 ? '§e▶ ЛКМ: выкупить ' + egTargets[0].name + ' (завершить игру)' : '§7До порога остаётся ' + Math.max(0, egStat.requiredChapters - egStat.completedChapters) + ' глав'
+    ], function (pl) {
+      if (!egStat.unlocked || egTargets.length === 0) {
+        lhMsg(pl, '§e[Эндгейм-выкуп] Закрыто глав: ' + egStat.completedChapters + '/' + egStat.requiredChapters + ' (нужно 4/5).');
+        return;
+      }
+      if (typeof lhEndgameBuyoutCmd === 'function') lhEndgameBuyoutCmd(server, pl, egTargets[0].cid);
+      lhOpenGui(server, pl, 'bank');
+    });
+
   lhGuiSlot(gui, 6, 0, 'minecraft:paper', '§6Налоги и Содержание', [
     '§fСкобка прогрессии: §b' + (expBr.progressiveBracketLabel || '5%'),
     '§fПрогрессивный налог: §e' + (expBr.progressiveTax || 0) + ' Cr',
@@ -2413,7 +2519,7 @@ function lhRenderGuiTab(gui, server, player, tab, arg) {
   else if (activeTab === 'logistics') lhGuiRenderLogistics(gui, server, player);
   else if (activeTab === 'recovery') lhGuiRenderRecovery(gui, server, player);
   else if (activeTab === 'openttd') lhGuiRenderOpenTTD(gui, server, player);
-  else if (activeTab === 'buildings') lhGuiRenderBuildings(gui, server, player);
+  else if (activeTab === 'buildings') lhGuiRenderBuildings(gui, server, player, arg);
   else if (activeTab === 'diplomacy') lhGuiRenderDiplomacy(gui, server, player);
   else if (activeTab === 'territory') lhGuiRenderTerritory(gui, server, player);
   else if (activeTab === 'market') lhGuiRenderMarket(gui, server, player);

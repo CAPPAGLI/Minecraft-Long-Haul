@@ -1197,4 +1197,118 @@ test('39. Xaero/world borders, unique structure/building variants, tablet GUI co
   assert(d3.maxSectors > d2.maxSectors, 'adding another player company linearly increases bot cap');
 });
 
+test('40. Endgame 4/5 player company buyout victory and multi-hop convoy transport network (infra, modded vehicles, tolls, distance/speed)', () => {
+  const path = require('path');
+  const ROOT = path.resolve(__dirname, '..');
+  const O = sandbox.global.LHOpenTTD;
+  const TL = sandbox.global.LHTradeLogistics;
+
+  // 1. Endgame player company buyout unlocked only at >= 4/5 chapters completed
+  const stEg = O.createInitialState();
+  O.companyCreate(stEg, 'p1', 'alpha', 'Alpha Corp', 1024, 1024);
+  O.companyCreate(stEg, 'p2', 'beta', 'Beta Corp', 3072, 1024);
+  stEg.companies.alpha.cash = 100000;
+  stEg.companies.beta.cash = 500;
+  O.claimOrCaptureSector(stEg, 'beta', 13, 4, false);
+  O.buildCompanyBuilding(stEg, 'beta', 13, 4, 'mine_shaft', 3328, 70, 1024);
+
+  const locked = O.getEndgameBuyoutStatus(stEg, 40, 61);
+  assert.equal(locked.unlocked, false);
+  assert.equal(locked.requiredChapters, 49);
+  const earlyMerge = O.companyMerge(stEg, 'beta', 'alpha', { completedChapters: 40, totalChapters: 61 });
+  assert.equal(earlyMerge.ok, false);
+  assert.equal(earlyMerge.reason, 'player_merge_disabled');
+
+  const unlocked = O.getEndgameBuyoutStatus(stEg, 49, 61);
+  assert.equal(unlocked.unlocked, true);
+  const egWin = O.companyMerge(stEg, 'beta', 'alpha', { completedChapters: 49, totalChapters: 61, nowTick: 5000 });
+  assert(egWin.ok && egWin.isEndgameBuyout && egWin.endgameVictory, '4/5 chapters unlocks endgame player company buyout');
+  assert.equal(stEg.endgameVictory.winnerCid, 'alpha');
+  assert.equal(stEg.companies.beta, undefined);
+  assert.equal(stEg.playerCompany.p2, 'alpha', 'absorbed company players stay in consolidated winner');
+  assert(stEg.companies.alpha.members.includes('p2'));
+
+  // 2. Modded vehicle recognition & fleet convoy creation
+  assert.equal(TL.matchVehicleItem('minecraft:oak_boat'), 'sea');
+  assert.equal(TL.matchVehicleItem('smallships:oak_cog'), 'sea');
+  assert.equal(TL.matchVehicleItem('automobility:automobile'), 'road');
+  assert.equal(TL.matchVehicleItem('immersive_aircraft:cargo_airship'), 'air');
+  assert.equal(TL.matchVehicleItem('create:track'), 'rail');
+
+  const stNet = O.createInitialState();
+  const cA = O.companyCreate(stNet, 'pa', 'netco', 'NetCo', 1024, 1024).company;
+  const cB = O.companyCreate(stNet, 'pb', 'relayco', 'RelayCo', 2048, 1024).company;
+  cA.cash = 25000;
+  cB.cash = 5000;
+  const logNet = TL.createState();
+
+  // Claim chain: NetCo source (4,4)+(5,4), RelayCo foreign port/hub (8,4), NetCo dest (12,4)+(13,4)
+  O.claimOrCaptureSector(stNet, 'netco', 5, 4, false);
+  O.claimOrCaptureSector(stNet, 'netco', 12, 4, false);
+  O.claimOrCaptureSector(stNet, 'netco', 13, 4, false);
+  O.claimOrCaptureSector(stNet, 'netco', 14, 4, false);
+  O.buildCompanyBuilding(stNet, 'netco', 4, 4, 'mine_shaft', 1024, 70, 1024);
+  O.buildCompanyBuilding(stNet, 'netco', 12, 4, 'factory', 3072, 70, 1024);
+  O.buildCompanyBuilding(stNet, 'relayco', 8, 4, 'port', 2048, 70, 1024);
+
+  // Without port near src/dst, sea route is rejected for missing infrastructure
+  const noPort = TL.createConvoyRoute(logNet, stNet, 'netco', 4, 4, 12, 4, 'sea', 'minecraft:raw_iron', 16, { nowTick: 0 });
+  assert.equal(noPort.ok, false);
+  assert(noPort.reason === 'missing_src_infra' || noPort.reason === 'missing_dst_infra');
+
+  // Attach ports in adjacent sectors (5,4) and (13,4) + register boat convoy from item
+  assert(O.buildCompanyBuilding(stNet, 'netco', 5, 4, 'port', 1280, 70, 1024).ok);
+  assert(O.buildCompanyBuilding(stNet, 'netco', 13, 4, 'port', 3328, 70, 1024).ok);
+  const cvSea = TL.registerCompanyConvoy(logNet, stNet, 'netco', 'sea', 'minecraft:oak_boat', { strictItemCheck: true, nowTick: 10 });
+  assert(cvSea.ok && cvSea.convoy.speedBps === 12.0 && cvSea.convoy.capacity === 48);
+
+  // Multi-hop sea route through RelayCo's foreign port at (8,4) -> pays toll & computes distance / speed = time
+  const seaRoute = TL.createConvoyRoute(logNet, stNet, 'netco', 4, 4, 12, 4, 'sea', 'minecraft:raw_iron', 16, {
+    waypoints: [{ sx: 8, sz: 4 }],
+    convoyId: cvSea.convoy.id,
+    nowTick: 100
+  });
+  assert(seaRoute.ok, 'multi-hop sea convoy route created through foreign port');
+  assert.equal(seaRoute.route.totalDistanceBlocks, 2048);
+  assert.equal(seaRoute.route.speedBps, 12.0);
+  assert(Math.abs(seaRoute.route.travelSeconds - (2048 / 12.0)) < 0.2, 'travel time = distance / speed');
+  assert(seaRoute.pathPlan.totalRelayToll > 0, 'foreign relay factory/port charges toll');
+
+  // Dispatch convoy: cargo leaves source immediately, relay owner receives toll, cargo stays in_transit until ETA, then arrives
+  stNet.buildings['4,4'].stockBuffer['minecraft:raw_iron'] = 32;
+  const inputBefore = stNet.buildings['12,4'].inputBuffer['minecraft:raw_iron'] || 0;
+  const relayCashBefore = cB.cash;
+  const disp = TL.dispatchConvoyRoute(logNet, stNet, seaRoute.route.id, 100, { skipPiracy: true });
+  assert(disp.ok && disp.events.length === 1 && disp.events[0].dispatched === true);
+  assert(cB.cash > relayCashBefore, 'foreign relay factory/port owner receives transit toll');
+  assert.equal(seaRoute.route.convoyState, 'in_transit');
+  assert.equal(stNet.buildings['12,4'].inputBuffer['minecraft:raw_iron'] || 0, inputBefore, 'not yet arrived before ETA');
+
+  // Tick mid-transit -> still in_transit
+  TL.tickAutomatedRoutes(logNet, stNet, 100 + Math.floor(seaRoute.route.travelTicks / 2), { skipPiracy: true });
+  assert.equal(seaRoute.route.convoyState, 'in_transit');
+
+  // Tick at ETA -> delivered
+  const arrEv = TL.tickAutomatedRoutes(logNet, stNet, seaRoute.route.transitEtaTick, { skipPiracy: true });
+  assert(arrEv.some(e => e.arrived && e.qty === 16));
+  assert.equal(stNet.buildings['12,4'].inputBuffer['minecraft:raw_iron'], inputBefore + 16);
+  assert.equal(seaRoute.route.convoyState, 'idle');
+
+  // 3. Subsidized corridor boosts convoy speed (+30%) & waives foreign relay tolls
+  stNet.subsidy = { companyId: 'netco', item: 'minecraft:raw_iron', sx: 4, sz: 4 };
+  const subPath = TL.planTransportPath(logNet, stNet, 'netco', { sx: 4, sz: 4 }, { sx: 12, sz: 4 }, 'sea', {
+    waypoints: [{ sx: 8, sz: 4 }],
+    requireInfra: true
+  });
+  assert(subPath.ok && subPath.subsidized === true);
+  assert(subPath.speedBps > 12.0 && subPath.totalRelayToll === 0, 'subsidized route increases speed and waives relay toll');
+
+  // 4. Road & Rail & Air infrastructure catalog & server/GUI integration
+  assert(O.BUILDING_CATALOG.road_depot && O.BUILDING_CATALOG.rail_depot && O.BUILDING_CATALOG.port && O.BUILDING_CATALOG.airport);
+  const s27 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/27_openttd_companies.js'), 'utf8');
+  const s30 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/30_lh_gui.js'), 'utf8');
+  assert(s27.includes('lhEndgameBuyoutCmd') && s27.includes('lhCreateConvoyFromHand') && s27.includes('lhCreateConvoyRouteCmd'));
+  assert(s30.includes('lhEndgameBuyoutCmd') && s30.includes('lhCreateConvoyFromHand') && s30.includes('lhCreateConvoyRouteCmd'));
+});
+
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');
