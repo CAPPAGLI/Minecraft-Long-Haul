@@ -30,6 +30,7 @@ RUNTIME_OUT_DIR = R / '.cache/runtime-out'
 REPLACED_MOD_PREFIXES = (
     'noisium-',
     'walkietalkie-',  # old Modrinth mod; NOT walkietalkies- (CurseForge Realistic Walkie-Talkie)
+    'polymorph-forge-0.49.11',  # requires beta JEI >= 15.57.0.207; replaced by 0.49.10 for JEI 15.56.0.205
 )
 
 

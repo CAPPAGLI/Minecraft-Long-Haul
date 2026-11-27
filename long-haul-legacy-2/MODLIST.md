@@ -87,7 +87,7 @@
 | [Mouse Tweaks](https://modrinth.com/mod/mouse-tweaks) | 1.20.1-2.25.1-forge | Нет: клиентский профиль |
 | [Odyssey Quests](https://modrinth.com/mod/odyssey-quests) | 1.1.13 | Да |
 | [Placebo](https://modrinth.com/mod/placebo) | 8.6.3 | Да |
-| [Polymorph](https://modrinth.com/mod/polymorph) | 0.49.11+1.20.1 | Да |
+| [Polymorph](https://modrinth.com/mod/polymorph) | 0.49.10+1.20.1 | Да |
 | [Puzzles Lib](https://modrinth.com/mod/puzzles-lib) | 8.1.36 | Да |
 | [Resourceful Lib](https://modrinth.com/mod/resourceful-lib) | 2.1.29 | Да |
 | [Rhino](https://modrinth.com/mod/rhino) | 2001.2.3-build.10+forge | Да |
