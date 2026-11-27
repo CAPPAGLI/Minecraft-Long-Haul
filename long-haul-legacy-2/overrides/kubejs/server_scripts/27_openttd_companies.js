@@ -2040,7 +2040,7 @@ function lhRgbFloatTriple(hexColor) {
   return (Math.round(r * 100) / 100) + ' ' + (Math.round(g * 100) / 100) + ' ' + (Math.round(b * 100) / 100);
 }
 
-function lhRenderWorldBorders(server) {
+function lhRenderWorldBorders(server, renderParticles) {
   if (!server || !global.LHOpenTTD) return;
   var st = lhOttdRead(server);
   var plist = server.players || [];
@@ -2083,7 +2083,7 @@ function lhRenderWorldBorders(server) {
     LHLastPlayerSector[pid] = curKey;
 
     var pref = (st.minimapPrefs && st.minimapPrefs[pid]) ? st.minimapPrefs[pid] : { enabled: true, worldBorders: true };
-    if (pref.worldBorders === false) continue;
+    if (renderParticles === false || pref.worldBorders === false) continue;
 
     var half = global.LHOpenTTD.SECTOR_SIZE / 2;
     var minX = sc.sx * global.LHOpenTTD.SECTOR_SIZE - half;
@@ -2098,17 +2098,17 @@ function lhRenderWorldBorders(server) {
       { axis: 'z', coord: maxZ, nsx: sc.sx, nsz: sc.sz + 1 }
     ];
     if (dim === 'minecraft:overworld') {
-      if (Math.abs(px - (-borderHalf)) <= 44) edges.push({ axis: 'x', coord: -borderHalf, worldBorder: true });
-      if (Math.abs(px - borderHalf) <= 44) edges.push({ axis: 'x', coord: borderHalf, worldBorder: true });
-      if (Math.abs(pz - (-borderHalf)) <= 44) edges.push({ axis: 'z', coord: -borderHalf, worldBorder: true });
-      if (Math.abs(pz - borderHalf) <= 44) edges.push({ axis: 'z', coord: borderHalf, worldBorder: true });
+      if (Math.abs(px - (-borderHalf)) <= 30) edges.push({ axis: 'x', coord: -borderHalf, worldBorder: true });
+      if (Math.abs(px - borderHalf) <= 30) edges.push({ axis: 'x', coord: borderHalf, worldBorder: true });
+      if (Math.abs(pz - (-borderHalf)) <= 30) edges.push({ axis: 'z', coord: -borderHalf, worldBorder: true });
+      if (Math.abs(pz - borderHalf) <= 30) edges.push({ axis: 'z', coord: borderHalf, worldBorder: true });
     }
 
     var infoSelf = global.LHOpenTTD.resolveSectorOwner(st, sc.sx, sc.sz, dim);
     for (var ei = 0; ei < edges.length; ei++) {
       var ed = edges[ei];
       var distToEdge = ed.axis === 'x' ? Math.abs(px - ed.coord) : Math.abs(pz - ed.coord);
-      if (distToEdge > 42) continue;
+      if (distToEdge > 28) continue;
 
       var hexCol = null;
       if (ed.worldBorder) {
@@ -2126,10 +2126,10 @@ function lhRenderWorldBorders(server) {
       }
       var rgbTxt = lhRgbFloatTriple(hexCol);
       var spanCenter = ed.axis === 'x' ? Math.round(pz) : Math.round(px);
-      for (var off = -20; off <= 20; off += 5) {
+      for (var off = -16; off <= 16; off += 8) {
         var cxP = ed.axis === 'x' ? ed.coord : (spanCenter + off);
         var czP = ed.axis === 'z' ? ed.coord : (spanCenter + off);
-        for (var dy = 0; dy <= 6; dy += 2) {
+        for (var dy = 0; dy <= 3; dy += 3) {
           var cyP = Math.round(py + dy);
           server.runCommandSilent('execute in ' + dim + ' run particle minecraft:dust ' + rgbTxt + ' 1.7 ' + cxP + ' ' + cyP + ' ' + czP + ' 0 0 0 0 1 force ' + uname);
         }
@@ -3113,7 +3113,7 @@ ServerEvents.tick(function (event) {
   LHOTTDTick++;
   var server = event.server;
   if (LHOTTDTick % 20 === 0) {
-    lhRenderWorldBorders(server);
+    lhRenderWorldBorders(server, LHOTTDTick % 60 === 0);
   }
   if (LHOTTDTick % 1200 === 0) {
     var stProd = lhOttdRead(server);

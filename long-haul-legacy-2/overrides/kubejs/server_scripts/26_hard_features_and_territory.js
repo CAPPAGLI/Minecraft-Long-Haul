@@ -586,6 +586,7 @@ function lhFirstJoinRandomSpawn(server, player) {
     });
   }
   var maxAttempts = safeHalf < 560 ? 6 : 36;
+  var chunkProbes = 0;
   for (var attempt = 0; attempt < maxAttempts; attempt++) {
     var wx = 0, wz = 0;
     if (safeHalf < 560) {
@@ -642,15 +643,18 @@ function lhFirstJoinRandomSpawn(server, player) {
       chosen = { x: wx, y: -44, z: wz, sx: cSc.sx, sz: cSc.sz };
       break;
     } else if (envType === 'sea') {
+      chunkProbes++;
       var waterY = lhFindWaterColumnForSeaSpawn(ow, wx, wz);
-      if (waterY > 0 || attempt >= maxAttempts - 2) {
+      if (waterY > 0 || chunkProbes >= 2 || attempt >= maxAttempts - 2) {
         chosen = { x: wx, y: waterY > 0 ? waterY : 64, z: wz, sx: cSc.sx, sz: cSc.sz };
         break;
       }
     } else {
-      var sy = lhFindSafeRespawnY(ow, wx, wz, attempt === maxAttempts - 1);
-      if (sy > 52) {
-        chosen = { x: wx, y: sy, z: wz, sx: cSc.sx, sz: cSc.sz };
+      chunkProbes++;
+      var allowPlatNow = chunkProbes >= 3 || attempt === maxAttempts - 1;
+      var sy = lhFindSafeRespawnY(ow, wx, wz, allowPlatNow);
+      if (sy > 52 || allowPlatNow) {
+        chosen = { x: wx, y: sy > 52 ? sy : 65, z: wz, sx: cSc.sx, sz: cSc.sz };
         break;
       }
     }

@@ -1445,10 +1445,13 @@ test('Distant Horizons + Chunky init guard mixin & sync deduplication are wired'
   const sbCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'overrides/config/smoothboot.json'), 'utf8'));
   assert(sbCfg.threadPriority && sbCfg.threadPriority.main >= 4 && sbCfg.threadPriority.io >= 4, 'smoothboot.json prevents main/io worker thread starvation');
   const dhCfg = fs.readFileSync(path.join(ROOT, 'overrides/config/DistantHorizons.toml'), 'utf8');
-  assert(dhCfg.includes('threadPriority = 3'), 'DistantHorizons.toml lowers DH thread priority below worldgen workers');
+  assert(dhCfg.includes('threadPriority = 3') && dhCfg.includes('_version = 5') && dhCfg.includes('generatorPlan = "DISABLED"') && dhCfg.includes('chunkGeneratorMode = "PRE_EXISTING_ONLY"'), 'DistantHorizons.toml uses DH 3.3.3 schema (_version=5) with disabled background generation and low thread priority');
+
+  const embCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'overrides/config/embeddium-options.json'), 'utf8'));
+  assert(embCfg.performance && embCfg.performance.chunk_builder_threads === 4, 'embeddium-options.json caps chunk_builder_threads to avoid CPU contention');
 
   const s26 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/26_hard_features_and_territory.js'), 'utf8');
-  assert(s26.includes('var termX = chosen.x + 2;') && s26.includes("feet === 'minecraft:barrel'"), 'terminal barrel spawns offset from player spawnpoint and respawn guards against spawning inside barrel');
+  assert(s26.includes('var termX = chosen.x + 2;') && s26.includes("feet === 'minecraft:barrel'") && s26.includes('chunkProbes >= 3'), 'terminal barrel spawns offset, respawn guards against barrel trapping, and first-join caps chunk probes');
 
   const apCommon = fs.readFileSync(path.join(ROOT, 'overrides/config/additionalplacements-common.toml'), 'utf8');
   const apServer = fs.readFileSync(path.join(ROOT, 'overrides/defaultconfigs/additionalplacements-server.toml'), 'utf8');
