@@ -204,6 +204,12 @@ function lhProspectChunk(server, player) {
   var level = player.level;
   var cx = Math.floor(Number(player.x) / 16) * 16;
   var cz = Math.floor(Number(player.z) / 16) * 16;
+  try {
+    if (typeof level.hasChunkAt === 'function' && !level.hasChunkAt(player.blockPosition())) {
+      lhMsg(player, 'Чанк ещё не прогружён, повторите геологоразведку через секунду.');
+      return 0;
+    }
+  } catch (eHasPr) {}
   var counts = {
     coal: 0, iron: 0, copper: 0, gold: 0, redstone: 0, diamond: 0,
     zinc: 0, bauxite: 0, lead: 0, silver: 0, nickel: 0, uranium: 0,

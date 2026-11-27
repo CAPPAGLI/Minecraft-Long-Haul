@@ -34,7 +34,21 @@ function lhOttdRead(server) {
   if (LHOTTDState !== null) return LHOTTDState;
   var raw = server.persistentData.getString('longhaul_openttd_v1');
   LHOTTDState = raw ? JSON.parse(String(raw)) : global.LHOpenTTD.createInitialState();
-  global.LHOpenTTD.ensureBots(LHOTTDState);
+  var scatterMaxSector = 0;
+  try {
+    var borderSize = 0;
+    if (typeof lhTerritoryCounts === 'function') {
+      var tInfo = lhTerritoryCounts(server);
+      if (tInfo && tInfo.size) borderSize = Number(tInfo.size);
+    } else if (server && typeof server.overworld === 'function') {
+      var owBorder = server.overworld();
+      if (owBorder && owBorder.worldBorder) borderSize = Number(owBorder.worldBorder.size || 0);
+    }
+    if (borderSize > 1200) {
+      scatterMaxSector = Math.max(12, Math.floor((borderSize / 2 - 48) / 256));
+    }
+  } catch (eSc) {}
+  global.LHOpenTTD.ensureBots(LHOTTDState, Math.random, scatterMaxSector >= 12 ? { scatterMaxSectorAbs: scatterMaxSector } : undefined);
   if (!LHOTTDState.minimapPrefs) LHOTTDState.minimapPrefs = {};
   if (!LHOTTDState.marketOrders || !LHOTTDState.marketOrders.length) {
     global.LHOpenTTD.refreshBotOrders(LHOTTDState);

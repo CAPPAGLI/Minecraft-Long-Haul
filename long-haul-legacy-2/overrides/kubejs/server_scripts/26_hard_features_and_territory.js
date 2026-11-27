@@ -305,9 +305,17 @@ function lhIsPassableSpawnSpace(bid) {
 }
 
 function lhFindSafeRespawnY(overworld, tx, tz, allowPlatform) {
-  try {
-    overworld.getChunk(tx >> 4, tz >> 4);
-  } catch (eChk) {}
+  if (allowPlatform === false) {
+    try {
+      if (typeof overworld.hasChunkAt === 'function' && !overworld.hasChunkAt(new LHBlockPos(tx, 64, tz))) {
+        return -1;
+      }
+    } catch (eHas) {}
+  } else {
+    try {
+      overworld.getChunk(tx >> 4, tz >> 4);
+    } catch (eChk) {}
+  }
   var startY = 240;
   try {
     if (typeof overworld.getHeight === 'function') {
@@ -363,6 +371,9 @@ function lhIsPlayerTrappedOrBedrock(overworld, px, py, pz, halfBorder) {
   if (iy <= -58) return true;
   if (halfBorder > 0 && (Math.abs(ix) >= halfBorder - 1 || Math.abs(iz) >= halfBorder - 1)) return true;
   try {
+    if (typeof overworld.hasChunkAt === 'function' && !overworld.hasChunkAt(new LHBlockPos(ix, 64, iz))) {
+      return false;
+    }
     var below = String(overworld.getBlock(ix, iy - 1, iz).id);
     var feetBlock = overworld.getBlock(ix, iy, iz);
     var headBlock = overworld.getBlock(ix, iy + 1, iz);
@@ -548,7 +559,12 @@ function lhBuildSpecializedHqPlatform(ow, x, y, z, envType) {
   }
 }
 
-function lhFindWaterColumnForSeaSpawn(ow, cx, cz) {
+function lhFindWaterColumnForSeaSpawn(ow, cx, cz, allowLoad) {
+  if (allowLoad === false) {
+    try {
+      if (typeof ow.hasChunkAt === 'function' && !ow.hasChunkAt(new LHBlockPos(cx, 64, cz))) return -1;
+    } catch (eHasW) {}
+  }
   for (var dy = 66; dy >= 58; dy--) {
     try {
       var blk = String(ow.getBlock(cx, dy, cz).id);
@@ -573,6 +589,14 @@ function lhFirstJoinRandomSpawn(server, player) {
   var halfBorder = Math.max(48, Math.floor(borderInfo.size / 2));
   var safeHalf = Math.max(32, halfBorder - Math.min(256, Math.floor(halfBorder / 10)));
   var ottdSt = typeof lhOttdRead === 'function' ? lhOttdRead(server) : null;
+  if (ottdSt && borderInfo.size > 1200 && !ottdSt.botsScattered &&
+      global.LHOpenTTD && typeof global.LHOpenTTD.scatterDefaultBots === 'function') {
+    var preMaxSec = Math.max(12, Math.floor((borderInfo.size / 2 - 48) / 256));
+    var scResPre = global.LHOpenTTD.scatterDefaultBots(ottdSt, preMaxSec, Math.random);
+    if (scResPre && scResPre.scattered > 0 && typeof lhOttdSave === 'function') {
+      lhOttdSave(server);
+    }
+  }
   var envType = 'normal';
   if (ottdSt && ottdSt.playerCompany && ottdSt.playerCompany[pid] && ottdSt.companies[ottdSt.playerCompany[pid]]) {
     envType = global.LHOpenTTD.getCompanyEnvType(ottdSt.companies[ottdSt.playerCompany[pid]]);
@@ -644,16 +668,32 @@ function lhFirstJoinRandomSpawn(server, player) {
       break;
     } else if (envType === 'sea') {
       chunkProbes++;
-      var waterY = lhFindWaterColumnForSeaSpawn(ow, wx, wz);
-      if (waterY > 0 || chunkProbes >= 2 || attempt >= maxAttempts - 2) {
+      var allowSeaLoad = chunkProbes >= 2 || attempt >= maxAttempts - 2;
+      var waterY = lhFindWaterColumnForSeaSpawn(ow, wx, wz, allowSeaLoad);
+      if (waterY > 0 || allowSeaLoad) {
         chosen = { x: wx, y: waterY > 0 ? waterY : 64, z: wz, sx: cSc.sx, sz: cSc.sz };
         break;
       }
     } else {
       chunkProbes++;
+      var isLoadedCol = true;
+      try {
+        if (typeof ow.hasChunkAt === 'function') {
+          isLoadedCol = !!ow.hasChunkAt(new LHBlockPos(wx, 64, wz));
+        }
+      } catch (eHc) {}
+      if (isLoadedCol) {
+        var syLoaded = lhFindSafeRespawnY(ow, wx, wz, false);
+        if (syLoaded > 52) {
+          chosen = { x: wx, y: syLoaded, z: wz, sx: cSc.sx, sz: cSc.sz };
+          break;
+        }
+      }
+      // Avoid blocking ServerEvents.tick across 3 distant ungenerated regions:
+      // only probe up to 1 ungenerated column once chunkProbes >= 3 or on final fallback.
       var allowPlatNow = chunkProbes >= 3 || attempt === maxAttempts - 1;
-      var sy = lhFindSafeRespawnY(ow, wx, wz, allowPlatNow);
-      if (sy > 52 || allowPlatNow) {
+      if (allowPlatNow) {
+        var sy = lhFindSafeRespawnY(ow, wx, wz, true);
         chosen = { x: wx, y: sy > 52 ? sy : 65, z: wz, sx: cSc.sx, sz: cSc.sz };
         break;
       }
@@ -862,6 +902,19 @@ function lhApplyTerritoryBorder(server, announce, forceApply) {
   if (prev !== info.size) {
     db.lastBorderSize = info.size;
     lhProgSave(server);
+  }
+
+  if (info.size > 1200 && info.unlocked >= 1 && global.LHOpenTTD &&
+      typeof global.LHOpenTTD.scatterDefaultBots === 'function' && typeof lhOttdRead === 'function') {
+    var stScatter = lhOttdRead(server);
+    if (stScatter && (!stScatter.botsScattered || Number(stScatter.botsScatteredMaxSector || 0) < 16)) {
+      var maxSecSc = Math.max(12, Math.floor((info.size / 2 - 48) / 256));
+      var scOut = global.LHOpenTTD.scatterDefaultBots(stScatter, maxSecSc, Math.random);
+      if (scOut && scOut.scattered > 0) {
+        if (typeof lhOttdSave === 'function') lhOttdSave(server);
+        if (typeof lhSyncXaeroTerritories === 'function') lhSyncXaeroTerritories(server, null);
+      }
+    }
   }
 
   if (prev > 0 && info.size > prev) {

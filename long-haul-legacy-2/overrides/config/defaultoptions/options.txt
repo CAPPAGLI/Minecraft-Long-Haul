@@ -5,3 +5,5 @@ onboardAccessibility:false
 narrator:0
 realmsNotifications:false
 syncChunkWrites:false
+renderDistance:10
+simulationDistance:6

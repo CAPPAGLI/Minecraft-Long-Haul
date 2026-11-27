@@ -5,6 +5,6 @@ chunkGrid:false
 coordinates:true
 waypoints:true
 minimapWaypointsRenderBelow:false
-showFlowers:true
+showFlowers:false
 lighting:true
 slopes:true

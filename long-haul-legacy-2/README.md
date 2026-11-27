@@ -1,34 +1,33 @@
-# Long Haul Legacy 2.0 — Alpha 19 (`2.0-alpha.19`)
+# Long Haul Legacy 2.0 — Alpha 20 (`2.0-alpha.20`)
 
-**Стабилизированная по клиентским фризам и серверно-проверенная альфа сборки, НЕ финальный релиз по полному ТЗ.** Импортируемый `.mrpack` предназначен для отдельного тестового профиля и нового обычного мира. Рабочая 1.1.1 не изменена. Исторические снимки прошлых альф сохранены в `history/alpha.1/` – `history/alpha.19/`.
+**Стабилизированная по клиентским фризам, потреблению RAM (<= 12 ГБ) и серверно-проверенная альфа сборки, НЕ финальный релиз по полному ТЗ.** Импортируемый `.mrpack` предназначен для отдельного тестового профиля и нового обычного мира. Рабочая 1.1.1 не изменена. Исторические снимки прошлых альф сохранены в `history/alpha.1/` – `history/alpha.19/`.
 
-## Что исправлено в `2.0-alpha.19` (против периодических 1–2 с фризов каждые 2–15 с)
+## Что исправлено в `2.0-alpha.20` (против 247-с фриза при входе, 12 ГБ OOM и близких ботов)
 
-1. **Предустановленный конфиг `overrides/config/DistantHorizons.toml`:**
-   - По умолчанию Distant Horizons генерирует полноценные чанки (`INTERNAL_SERVER`/`FEATURES`) на 8 потоках и держит радиус `256` чанков, что на 440+ модах вызывает постоянную нагрузку на CPU и сотни МБ/с временных аллокаций (→ паузы G1GC по 1–2 с).
-   - Теперь по умолчанию выставлены: `distantGeneratorMode = "PRE_EXISTING_ONLY"` (LOD строятся без фоновой генерации новых чанков во время игры), `lodChunkRenderDistanceRadius = 96`, `maxHorizontalResolution = "TWO_BLOCKS"`, `transparency = "FAKE"`, `vanillaFadeMode = "SINGLE_PASS"`, `enableSsao = false`, `lodBiomeBlending = 0`, `numberOfThreads = 2`, `threadRunTimeRatio = "0.5"`.
-2. **Безопасная настройка `overrides/config/modernfix-mixins.properties`:**
-   - Включены безопасные оптимизации памяти и ресурсов (`deduplicate_location=true`, `deduplicate_climate_parameters=true`, `compact_bit_storage=true`, `cache_strongholds=true`, `dynamic_sounds=true`, `packet_leak=true`).
-   - Осознанно оставлены отключёнными `dynamic_resources=false` и `faster_item_rendering=false` (для совместимости с `Athena`/`Chipped` и рендером предметов `Clockwork`/`Valkyrien Skies`).
-3. **Снижена частота пересканирования текстур ресурспаков в `overrides/config/entity_texture_features.json`:**
-   - `textureUpdateFrequency_V2` переведён с `"Fast"` на `"Slow"` (`3–5 с`), что снижает нагрузку на главный рендер-поток при активных ресурспаках.
-4. **Удалены дублирующие/конфликтные моды из `profiles/alpha19.json`:**
-   - Убран `dynamic-lights` (дублировал `ryoamiclights` и делал лишние серверные сканы).
-   - Убран `fps-reducer` (дублировал `dynamic-fps`).
-   - Убран `saturn` (дублировал `ModernFix` + `FerriteCore` и перезаписывал миксины `ModernFix`).
-   - Убран `does-it-tick` (вызывал блокировку выхода с сидений кораблей Valkyrien Skies / Eureka / Clockwork).
-   - Убраны дубли-клоны `better-f3` (оставлен `betterf3`) и `trash-slot` (оставлен `trashslot`), а также повторы слагов в категориях.
+1. **Устранён многоминутный фриз генерации мира при первом входе (`26_hard_features_and_territory.js` + `24_immortal_snail.js`):**
+   - Исправлена ошибка, из-за которой `lhFirstJoinRandomSpawn` / `lhFindSafeRespawnY` делали до 3 синхронных блокирующих проб далёких чанков (`getChunkBlocking`) в `ServerEvents.tick` по пустому миру.
+   - Теперь при `allowPlatform === false` проверяются только уже загруженные чанки (`hasChunkAt`), а генерация новой колонки допускается не более 1 раза в финальном выборе; защищены также `lhIsPlayerTrappedOrBedrock` и `lhProspectChunk`.
+2. **Оптимизация RAM под лимит 10–12 ГБ (по практикам ATM9 / Prominence II для 440+ модов на Forge 1.20.1):**
+   - `overrides/config/modernfix-mixins.properties`: включён `mixin.perf.dynamic_resources=true` (экономит ~3–5 ГБ Java Heap на 440+ модах; `faster_item_rendering=false` сохранён для `Valkyrien Skies` / `Clockwork`), плюс `dynamic_structure_manager=true`, `nbt_memory_usage=true`, `cache_blockstate_cache_arrays=true`, `world_leaks=true`.
+   - `overrides/config/jei/jei-client.ini`: включён `LowMemorySlowSearchEnabled = true` и отключены дублирующие поисковые деревья JEI (`ModName/Tooltip/Tag/Color/ResourceLocationSearchMode = DISABLED`), т.к. поиск ведёт EMI — это экономит сотни МБ Heap при `278,900` рецептах.
+   - `overrides/config/DistantHorizons.toml`: переведён на схему DH 3.3.3 (`_version = 5`, `generatorPlan = "DISABLED"`, `chunkGeneratorMode = "PRE_EXISTING_ONLY"`, `lodChunkRenderDistanceRadius = 64`, `numberOfThreads = 2`, `threadPriority = 3`, `transparency = "DISABLED"` — без предупреждения валидатора).
+   - `overrides/config/embeddium-options.json` (`chunk_builder_threads = 4`), `overrides/config/xaeroworldmap.txt` (`showFlowers:false`), `overrides/config/defaultoptions/options.txt` (`renderDistance:10`, `simulationDistance:6`).
+3. **Случайное расселение стартовых ботов-компаний по расширенной территории (`00_contract_engine.js`, `27_openttd_companies.js`, `26_hard_features_and_territory.js`):**
+   - Исправлен баг `ensureBots`, возвращавший штабы стартовых ботов на `(7,2)`/`(-7,-2)`. Добавлена `scatterDefaultBots`, которая при открытии расширенной территории (Глава 1+ / `ch00`) случайно разносит стартовых AI-конкурентов в кольцо `28%..85%` от радиуса открытой карты (на 1-м этапе — `~17..51` секторов = `4,352..13,056` блоков от спауна) с сохранением минимальной дистанции друг от друга.
+4. **Дополнительно в ветке alpha.20:**
+   - Линейная сериализация `YABN` (`O(N)` вместо `O(N^2)`) для 4,700+ файлов Heracles, отключён авторебилд тегов `AdditionalPlacements` при загрузке, защита `DhChunkyAccessorMixin` и `SmallSpawnMixin` (`3×3` spawn chunks).
 
-Профиль сборки: `profiles/alpha19.json` (`444` внешних JAR + `longhaul-runtime` = `445` JAR всего, `477` mod ID, `321` квест Heracles).
+Профиль сборки: `profiles/alpha20.json` (`assembly/lock.json`).
 
-## Установка и JVM-флаги (ВАЖНО против GC-фризов с ресурспаками!)
+## Установка и JVM-флаги (ВАЖНО при 10–12 ГБ RAM и ресурспаках!)
 
-1. Скачайте `Long-Haul-Legacy-2.0-alpha.19.mrpack` (артефакт CI `long-haul-legacy-2.0-alpha.19`). **Сборка строго для Minecraft `1.20.1`, Forge `47.4.10` и Java `17`!**
-2. Импортируйте `.mrpack` как **новый чистый отдельный профиль** в Prism Launcher / Modrinth App.
+1. Скачайте `Long-Haul-Legacy-2.0-alpha.20.mrpack` (артефакт CI) или синхронизируйте профиль через `long-haul-legacy-2\sync_instance.bat --skip-mods`. **Сборка строго для Minecraft `1.20.1`, Forge `47.4.10` и Java `17`!**
+2. Импортируйте `.mrpack` как **новый чистый отдельный профиль** в Prism Launcher / Modrinth App / Legacy Launcher.
 3. Выберите **Java 17 (Eclipse Temurin или Azul Zulu)** и выделите **10–12 ГБ RAM** (для ПК с 16 ГБ ОЗУ оптимально **10240–12288 МБ**, не выше 12 ГБ, чтобы оставалась память под Windows и нативные буферы).
-4. **Рекомендуемые аргументы JVM — низкопаузный G1GC (стабилен на Windows + Java 17; не используйте `-XX:ShenandoahGCMode=iu` из пресета Legacy Launcher, так как в Temurin 17 режим `iu` может падать с `EXCEPTION_ACCESS_VIOLATION`):**
+   - *Примечание по PBR-ресурспакам:* тяжёлые PBR-паки (`512x` / `AVPBR Retextured`) вместе с шейдерами `Oculus` дополнительно расходуют 2–4 ГБ RAM/VRAM; при лимите 12 ГБ рекомендуется отключить тяжёлые PBR-паки на период первых запусков или использовать `128x`/`Vanilla`.
+4. **Рекомендуемые аргументы JVM — низкопаузный G1GC (стабилен на Windows + Java 17; не используйте `-XX:ShenandoahGCMode=iu`, так как в Temurin 17 режим `iu` может падать с `EXCEPTION_ACCESS_VIOLATION`):**
    ```text
-   -Xms4G -Xmx12G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=50 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=32M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1
+   -Xms4G -Xmx12G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=50 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=16M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1 -XX:ReservedCodeCacheSize=512M
    ```
    *(Если в Legacy Launcher включён выбор «Оптимизированные аргументы», просто выберите **`Использовать G1 GC`** и оставьте поле «Аргументы JVM» пустым.)*
 5. Если после этого с конкретным ресурспаком всё равно остаётся единичный пик, снимите 30-секундный профиль встроенным `spark`: `/sparkc profiler start --only-ticks-over 150 --timeout 30`.

@@ -4991,8 +4991,10 @@ global.LHOpenTTD = (function () {
         state.companies[b.id] = bComp;
       } else {
         var existingB = state.companies[b.id];
-        existingB.hqSx = b.hqSx;
-        existingB.hqSz = b.hqSz;
+        if (typeof existingB.hqSx !== 'number') existingB.hqSx = b.hqSx;
+        if (typeof existingB.hqSz !== 'number') existingB.hqSz = b.hqSz;
+        if (typeof existingB.hqX !== 'number') existingB.hqX = existingB.hqSx * SECTOR_SIZE;
+        if (typeof existingB.hqZ !== 'number') existingB.hqZ = existingB.hqSz * SECTOR_SIZE;
         if (!existingB.envType) existingB.envType = b.envType || 'normal';
         if (!existingB.archetype) { existingB.archetype = arch.id; existingB.archetypeName = arch.name; }
         if (!existingB.traits || !existingB.traits.length) existingB.traits = rollCompanyTraits(2, rngFn);
@@ -5000,18 +5002,137 @@ global.LHOpenTTD = (function () {
         if (!existingB.incomeHistory) existingB.incomeHistory = [];
         if (typeof existingB.hqY !== 'number') existingB.hqY = typeof b.hqY === 'number' ? b.hqY : preferredBuildingY(existingB.envType, 70);
       }
-      var k = sectorKey(b.hqSx, b.hqSz);
+      var curHqSx = state.companies[b.id].hqSx;
+      var curHqSz = state.companies[b.id].hqSz;
+      var k = sectorKey(curHqSx, curHqSz);
       if (!state.claims[k]) {
         state.claims[k] = {
-          sx: b.hqSx,
-          sz: b.hqSz,
+          sx: curHqSx,
+          sz: curHqSz,
           owner: b.id,
           strength: 2,
           isHq: true
         };
       }
     }
+    if (arguments.length >= 3 && arguments[2] && arguments[2].scatterMaxSectorAbs) {
+      scatterDefaultBots(state, arguments[2].scatterMaxSectorAbs, rngFn, arguments[2]);
+    }
     return state;
+  }
+
+  function scatterDefaultBots(state, maxSectorAbs, rngFn, opts) {
+    if (!state || !state.companies) return { scattered: 0, skipped: true };
+    var limit = Math.max(4, Math.floor(Number(maxSectorAbs || 10)));
+    if (limit < 12) return { scattered: 0, reason: 'border_too_small', limit: limit };
+    var force = !!(opts && opts.force);
+    if (!force && state.botsScattered && Number(state.botsScatteredMaxSector || 0) >= Math.min(20, limit)) {
+      return { scattered: 0, alreadyScattered: true, limit: limit };
+    }
+    if (!state.claims) state.claims = {};
+    var rng = typeof rngFn === 'function' ? rngFn : Math.random;
+
+    var botIds = [];
+    for (var di = 0; di < DEFAULT_BOT_COMPANIES.length; di++) {
+      botIds.push(DEFAULT_BOT_COMPANIES[di].id);
+    }
+    if (state.companies[PIRATE_SYNDICATE_ID]) {
+      botIds.push(PIRATE_SYNDICATE_ID);
+    }
+
+    var buildingCounts = {};
+    Object.keys(state.buildings || {}).forEach(function (bk) {
+      var bld = state.buildings[bk];
+      if (bld && bld.owner) buildingCounts[bld.owner] = (buildingCounts[bld.owner] || 0) + 1;
+    });
+
+    var scattered = 0;
+    var minDistTarget = Math.min(14, Math.max(6, Math.floor(limit * 0.24)));
+
+    for (var bi = 0; bi < botIds.length; bi++) {
+      var bid = botIds[bi];
+      var comp = state.companies[bid];
+      if (!comp || !comp.isBot) continue;
+      if (!force && (buildingCounts[bid] || 0) > 0) continue;
+
+      var isPirate = bid === PIRATE_SYNDICATE_ID || !!comp.isPirate;
+      var minRing = isPirate
+        ? Math.max(16, Math.floor(limit * 0.50))
+        : Math.max(14, Math.floor(limit * 0.28));
+      var maxRing = isPirate
+        ? Math.max(minRing + 4, Math.floor(limit * 0.90))
+        : Math.max(minRing + 6, Math.floor(limit * 0.85));
+      if (maxRing > limit) maxRing = limit;
+      if (minRing > maxRing) minRing = Math.max(4, Math.floor(maxRing * 0.5));
+
+      var oldSx = Number(comp.hqSx || 0);
+      var oldSz = Number(comp.hqSz || 0);
+      var oldKey = sectorKey(oldSx, oldSz);
+
+      var chosenSx = null;
+      var chosenSz = null;
+      var minDistReq = minDistTarget;
+
+      for (var pass = 0; pass < 3 && chosenSx === null; pass++) {
+        if (pass === 1) minDistReq = Math.max(5, Math.floor(minDistTarget * 0.55));
+        if (pass === 2) minDistReq = 3;
+        for (var attempt = 0; attempt < 96; attempt++) {
+          var ang = rng() * 6.283185307179586;
+          var r = minRing + rng() * Math.max(1, maxRing - minRing);
+          var csx = Math.round(Math.cos(ang) * r);
+          var csz = Math.round(Math.sin(ang) * r);
+          if (Math.abs(csx) > limit || Math.abs(csz) > limit) continue;
+          if (isSpawnProtectedSector(csx, csz)) continue;
+          if (Math.max(Math.abs(csx), Math.abs(csz)) < minRing) continue;
+          var ck = sectorKey(csx, csz);
+          if (state.claims[ck]) continue;
+
+          var tooClose = false;
+          var cKeys = Object.keys(state.companies);
+          for (var ci = 0; ci < cKeys.length; ci++) {
+            var otherId = cKeys[ci];
+            if (otherId === bid) continue;
+            var otherC = state.companies[otherId];
+            if (!otherC) continue;
+            var d = Math.max(Math.abs(Number(otherC.hqSx || 0) - csx), Math.abs(Number(otherC.hqSz || 0) - csz));
+            if (d < minDistReq) {
+              tooClose = true;
+              break;
+            }
+          }
+          if (tooClose) continue;
+          chosenSx = csx;
+          chosenSz = csz;
+          break;
+        }
+      }
+
+      if (chosenSx === null) continue;
+
+      if (state.claims[oldKey] && state.claims[oldKey].owner === bid) {
+        delete state.claims[oldKey];
+      }
+      comp.hqSx = chosenSx;
+      comp.hqSz = chosenSz;
+      comp.hqX = chosenSx * SECTOR_SIZE;
+      comp.hqZ = chosenSz * SECTOR_SIZE;
+      comp.hqY = preferredBuildingY(comp.envType || 'normal', 70);
+      state.claims[sectorKey(chosenSx, chosenSz)] = {
+        sx: chosenSx,
+        sz: chosenSz,
+        dimension: 'minecraft:overworld',
+        owner: bid,
+        strength: 2,
+        isHq: true
+      };
+      scattered++;
+    }
+
+    if (scattered > 0) {
+      state.botsScattered = true;
+      state.botsScatteredMaxSector = limit;
+    }
+    return { scattered: scattered, limit: limit };
   }
 
   function pactKey(a, b) {
@@ -6701,6 +6822,7 @@ global.LHOpenTTD = (function () {
     sanitizeId: sanitizeId,
     createInitialState: createInitialState,
     ensureBots: ensureBots,
+    scatterDefaultBots: scatterDefaultBots,
     ensureDiplomacyState: ensureDiplomacyState,
     ensurePirateSyndicate: ensurePirateSyndicate,
     hasPact: hasPact,

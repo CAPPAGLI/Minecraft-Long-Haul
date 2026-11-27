@@ -1445,13 +1445,22 @@ test('Distant Horizons + Chunky init guard mixin & sync deduplication are wired'
   const sbCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'overrides/config/smoothboot.json'), 'utf8'));
   assert(sbCfg.threadPriority && sbCfg.threadPriority.main >= 4 && sbCfg.threadPriority.io >= 4, 'smoothboot.json prevents main/io worker thread starvation');
   const dhCfg = fs.readFileSync(path.join(ROOT, 'overrides/config/DistantHorizons.toml'), 'utf8');
-  assert(dhCfg.includes('threadPriority = 3') && dhCfg.includes('_version = 5') && dhCfg.includes('generatorPlan = "DISABLED"') && dhCfg.includes('chunkGeneratorMode = "PRE_EXISTING_ONLY"'), 'DistantHorizons.toml uses DH 3.3.3 schema (_version=5) with disabled background generation and low thread priority');
+  assert(dhCfg.includes('threadPriority = 3') && dhCfg.includes('_version = 5') && dhCfg.includes('generatorPlan = "DISABLED"') && dhCfg.includes('chunkGeneratorMode = "PRE_EXISTING_ONLY"') && dhCfg.includes('transparency = "DISABLED"'), 'DistantHorizons.toml uses DH 3.3.3 schema (_version=5) with disabled background generation, valid transparency, and low thread priority');
+
+  const mfCfg = fs.readFileSync(path.join(ROOT, 'overrides/config/modernfix-mixins.properties'), 'utf8');
+  assert(mfCfg.includes('mixin.perf.dynamic_resources=true') && mfCfg.includes('mixin.perf.faster_item_rendering=false'), 'modernfix-mixins.properties enables dynamic_resources for 12GB heap safety while keeping faster_item_rendering disabled for VS2/Clockwork');
+
+  const jeiCfg = fs.readFileSync(path.join(ROOT, 'overrides/config/jei/jei-client.ini'), 'utf8');
+  assert(jeiCfg.includes('LowMemorySlowSearchEnabled = true') && jeiCfg.includes('TooltipSearchMode = DISABLED'), 'jei-client.ini uses low-memory search mode alongside EMI');
 
   const embCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'overrides/config/embeddium-options.json'), 'utf8'));
   assert(embCfg.performance && embCfg.performance.chunk_builder_threads === 4, 'embeddium-options.json caps chunk_builder_threads to avoid CPU contention');
 
   const s26 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/26_hard_features_and_territory.js'), 'utf8');
-  assert(s26.includes('var termX = chosen.x + 2;') && s26.includes("feet === 'minecraft:barrel'") && s26.includes('chunkProbes >= 3'), 'terminal barrel spawns offset, respawn guards against barrel trapping, and first-join caps chunk probes');
+  assert(s26.includes('var termX = chosen.x + 2;') && s26.includes("feet === 'minecraft:barrel'") && s26.includes('chunkProbes >= 3') && s26.includes('hasChunkAt(') && s26.includes('scatterDefaultBots'), 'terminal barrel spawns offset, respawn guards against barrel trapping, first-join guards chunks, and border expansion scatters bots');
+
+  const s24 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/24_immortal_snail.js'), 'utf8');
+  assert(s24.includes('hasChunkAt('), '24_immortal_snail.js checks chunk load status before block scans');
 
   const apCommon = fs.readFileSync(path.join(ROOT, 'overrides/config/additionalplacements-common.toml'), 'utf8');
   const apServer = fs.readFileSync(path.join(ROOT, 'overrides/defaultconfigs/additionalplacements-server.toml'), 'utf8');
@@ -1460,6 +1469,45 @@ test('Distant Horizons + Chunky init guard mixin & sync deduplication are wired'
   const yabnHelper = fs.readFileSync(path.join(ROOT, 'runtime-mod/src/main/java/longhaul/runtime/util/YabnFastHelper.java'), 'utf8');
   assert(yabnHelper.includes('encodeObject') && yabnHelper.includes('encodeArray'), 'YabnFastHelper provides linear-time serialization');
   assert(mixinsJson.mixins.includes('YabnObjectFastMixin') && mixinsJson.mixins.includes('YabnArrayFastMixin'), 'YABN O(N) fast mixins are registered');
+});
+
+test('Initial bot HQs scatter randomly across expanded Stage 1+ territory and stay relocated', () => {
+  const ottd = sandbox.global.LHOpenTTD;
+  let seed = 424242;
+  const rng = () => {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+  const st = ottd.createInitialState(rng);
+  // Before Stage 1 expansion, scatter refuses small borders (< 12 sectors)
+  const smallRes = ottd.scatterDefaultBots(st, 2, rng);
+  assert.equal(smallRes.scattered, 0);
+
+  // Stage 1 expansion (~60 sectors = 31820 border): scatter moves all 4 bots + pirate syndicate into wide outer ring
+  const scRes = ottd.scatterDefaultBots(st, 60, rng);
+  assert.equal(scRes.scattered, 5);
+  assert.equal(st.botsScattered, true);
+  assert.equal(st.claims[ottd.sectorKey(7, 2)], undefined, 'legacy (7,2) claim removed');
+  assert.equal(st.claims[ottd.sectorKey(-7, -2)], undefined, 'legacy (-7,-2) claim removed');
+
+  const bots = ottd.DEFAULT_BOT_COMPANIES.map(b => st.companies[b.id]).concat([st.companies[ottd.PIRATE_SYNDICATE_ID]]);
+  for (const bot of bots) {
+    const radial = Math.max(Math.abs(bot.hqSx), Math.abs(bot.hqSz));
+    assert(radial >= 16 && radial <= 60, `Bot ${bot.id} radial sector ${radial} should be scattered far from spawn (>= 16)`);
+    assert(st.claims[ottd.sectorKey(bot.hqSx, bot.hqSz)]?.owner === bot.id, `HQ claim moved with ${bot.id}`);
+  }
+  for (let i = 0; i < bots.length; i++) {
+    for (let j = i + 1; j < bots.length; j++) {
+      const dist = Math.max(Math.abs(bots[i].hqSx - bots[j].hqSx), Math.abs(bots[i].hqSz - bots[j].hqSz));
+      assert(dist >= 6, `Bots ${bots[i].id} and ${bots[j].id} too close (${dist} sectors)`);
+    }
+  }
+
+  // Subsequent ensureBots() must NOT snap relocated bots back to (7,2)
+  const savedCoords = bots.map(b => `${b.id}:${b.hqSx},${b.hqSz}`);
+  ottd.ensureBots(st, rng);
+  const afterCoords = bots.map(b => `${b.id}:${b.hqSx},${b.hqSz}`);
+  assert.deepStrictEqual(afterCoords, savedCoords);
 });
 
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');
