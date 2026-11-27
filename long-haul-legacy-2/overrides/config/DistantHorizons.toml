@@ -40,8 +40,9 @@ showGenerationProgress = "DISABLED"
 worldCompression = "VISUALLY_EQUAL"
 
 [common.multiThreading]
-numberOfThreads = 1
-threadRunTimeRatio = "0.25"
+numberOfThreads = 2
+threadRunTimeRatio = "0.5"
+threadPriority = 3
 
 [common.logging.warning]
 showLowMemoryWarningOnStart = false

@@ -1,0 +1,9 @@
+{
+  "threadPriority": {
+    "game": 5,
+    "bootstrap": 3,
+    "main": 4,
+    "io": 4,
+    "integratedServer": 5
+  }
+}

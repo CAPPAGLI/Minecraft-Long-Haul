@@ -4,3 +4,4 @@ skipMultiplayerWarning:true
 onboardAccessibility:false
 narrator:0
 realmsNotifications:false
+syncChunkWrites:false

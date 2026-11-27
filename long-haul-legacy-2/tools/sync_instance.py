@@ -31,7 +31,30 @@ REPLACED_MOD_PREFIXES = (
     'noisium-',
     'walkietalkie-',  # old Modrinth mod; NOT walkietalkies- (CurseForge Realistic Walkie-Talkie)
     'polymorph-forge-0.49.11',  # requires beta JEI >= 15.57.0.207; replaced by 0.49.10 for JEI 15.56.0.205
+    'saturn-',  # redundant with ModernFix+FerriteCore; overwrites ModernFix mixins
+    'does_it_tick-',  # removed in alpha19/20: entity tick throttling & Valkyrien Skies seat dismount lock
+    'dynamiclights-',  # removed in alpha19: duplicates RyoamicLights and adds server light scans
+    'FpsReducer2-',  # removed in alpha19: duplicates Dynamic FPS
+    'recruits-',  # removed in alpha: CommandEvent NPE before ServerStarted
 )
+
+DEDUP_MOD_PREFIXES = (
+    'distanthorizons-',
+    'create_hypertube-',
+    'diegesis-forge-',
+    'friendsandfoes-forge-',
+    'nochatreports-forge-',
+    'nuclearcraft-',
+    'betterf3-',
+    'trashslot-',
+)
+
+
+def _mod_version_sort_key(filename: str):
+    import re
+    cleaned = re.sub(r'(?i)(?:mc)?1\.20(?:\.1)?', '', filename)
+    nums = [int(n) for n in re.findall(r'\d+', cleaned)]
+    return (nums, filename.lower())
 
 
 def sha256_file(path: pathlib.Path) -> str:
@@ -316,14 +339,29 @@ def main():
     elif args.skip_mods:
         desired_rps = set(state.get('managed_resourcepacks', []))
 
-    # Deduplicate multiple DistantHorizons-*.jar files in mods/ (keep newest)
-    dh_jars = sorted(mods_dir.glob('DistantHorizons-*.jar'))
-    if len(dh_jars) > 1:
-        for old_dh in dh_jars[:-1]:
-            print(f'  - Removing duplicate Distant Horizons JAR: {old_dh.name}', flush=True)
+    # Always clean known replaced/conflicting mods and duplicate version JARs in mods/
+    all_mod_jars = sorted(mods_dir.glob('*.jar'))
+    for existing in all_mod_jars:
+        name = existing.name
+        if name in desired_mods or name.startswith('longhaul-runtime-'):
+            continue
+        if any(name.startswith(pref) for pref in REPLACED_MOD_PREFIXES):
+            print(f'  - Removing replaced/conflicting mod: {name}', flush=True)
             if not args.dry_run:
-                old_dh.unlink()
+                existing.unlink()
             removed_mods += 1
+
+    for pref in DEDUP_MOD_PREFIXES:
+        matches = sorted(
+            [p for p in mods_dir.glob('*.jar') if p.exists() and p.name.lower().startswith(pref)],
+            key=lambda p: _mod_version_sort_key(p.name),
+        )
+        if len(matches) > 1:
+            for old_dup in matches[:-1]:
+                print(f'  - Removing duplicate mod JAR ({pref}*): {old_dup.name} (keeping {matches[-1].name})', flush=True)
+                if not args.dry_run:
+                    old_dup.unlink()
+                removed_mods += 1
 
     # 3. Build/sync longhaul-runtime-*.jar incrementally
     rt_src_hash = hash_tree(R / 'runtime-mod/src')

@@ -1440,7 +1440,12 @@ test('Distant Horizons + Chunky init guard mixin & sync deduplication are wired'
   assert(pluginSrc.includes('DhChunkyAccessorMixin') && pluginSrc.includes('distanthorizons') && pluginSrc.includes('chunky'), 'LongHaulMixinPlugin gates DhChunkyAccessorMixin on distanthorizons && chunky');
 
   const syncSrc = fs.readFileSync(path.join(ROOT, 'tools/sync_instance.py'), 'utf8');
-  assert(syncSrc.includes('DistantHorizons-*.jar'), 'sync_instance.py deduplicates duplicate DistantHorizons JARs');
+  assert(syncSrc.includes("'distanthorizons-'") && syncSrc.includes("'saturn-'") && syncSrc.includes("'does_it_tick-'"), 'sync_instance.py cleans replaced/duplicate JARs');
+
+  const sbCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'overrides/config/smoothboot.json'), 'utf8'));
+  assert(sbCfg.threadPriority && sbCfg.threadPriority.main >= 4 && sbCfg.threadPriority.io >= 4, 'smoothboot.json prevents main/io worker thread starvation');
+  const dhCfg = fs.readFileSync(path.join(ROOT, 'overrides/config/DistantHorizons.toml'), 'utf8');
+  assert(dhCfg.includes('threadPriority = 3'), 'DistantHorizons.toml lowers DH thread priority below worldgen workers');
 });
 
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');
