@@ -23,6 +23,9 @@ public final class LongHaulMixinPlugin implements IMixinConfigPlugin {
         if (mixinClassName.endsWith("DhChunkyAccessorMixin")) {
             return hasMod("distanthorizons") && hasMod("chunky");
         }
+        if (mixinClassName.endsWith("YabnObjectFastMixin") || mixinClassName.endsWith("YabnArrayFastMixin")) {
+            return hasMod("com_teamresourceful_yabn") || hasMod("heracles");
+        }
         return true;
     }
 

@@ -25,15 +25,12 @@
 
 1. Скачайте `Long-Haul-Legacy-2.0-alpha.19.mrpack` (артефакт CI `long-haul-legacy-2.0-alpha.19`). **Сборка строго для Minecraft `1.20.1`, Forge `47.4.10` и Java `17`!**
 2. Импортируйте `.mrpack` как **новый чистый отдельный профиль** в Prism Launcher / Modrinth App.
-3. Выберите **Java 17 (Eclipse Temurin или Azul Zulu)** и выделите **8–10 ГБ RAM** (или **10–12 ГБ** с тяжёлыми ресурспаками 64x+). **Не используйте 14+ ГБ с дефолтным G1GC** — при росте кучи без конкурентного GC паузы Stop-The-World только удлиняются.
-4. **Обязательно замените аргументы JVM на Shenandoah GC (убирает паузы G1GC по 1–2 с при Distant Horizons и ресурспаках):**
+3. Выберите **Java 17 (Eclipse Temurin или Azul Zulu)** и выделите **10–12 ГБ RAM** (для ПК с 16 ГБ ОЗУ оптимально **10240–12288 МБ**, не выше 12 ГБ, чтобы оставалась память под Windows и нативные буферы).
+4. **Рекомендуемые аргументы JVM — низкопаузный G1GC (стабилен на Windows + Java 17; не используйте `-XX:ShenandoahGCMode=iu` из пресета Legacy Launcher, так как в Temurin 17 режим `iu` может падать с `EXCEPTION_ACCESS_VIOLATION`):**
    ```text
-   -Xms6G -Xmx10G -XX:+UnlockExperimentalVMOptions -XX:+UseShenandoahGC -XX:ShenandoahGCMode=iu -XX:+AlwaysPreTouch -XX:+DisableExplicitGC
+   -Xms4G -Xmx12G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=50 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=32M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1
    ```
-   *(Если ваш JDK 17 — Oracle HotSpot без Shenandoah, используйте низкопаузный G1GC:)*
-   ```text
-   -Xms6G -Xmx10G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=50 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=32M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1
-   ```
+   *(Если в Legacy Launcher включён выбор «Оптимизированные аргументы», просто выберите **`Использовать G1 GC`** и оставьте поле «Аргументы JVM» пустым.)*
 5. Если после этого с конкретным ресурспаком всё равно остаётся единичный пик, снимите 30-секундный профиль встроенным `spark`: `/sparkc profiler start --only-ticks-over 150 --timeout 30`.
 6. *(Опционально, на свой риск)* `DOOMED` устанавливается вручную с CurseForge в `mods/` отдельного профиля (или через `optional-mods/` и `--include-optional-mods`, см. `DOOMED.md` и `optional-mods/README.md`).
 

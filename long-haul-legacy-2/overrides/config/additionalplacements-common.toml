@@ -1,0 +1,8 @@
+# Common settings
+[common]
+	# Check for and notify of mismatching tags. Disabled to prevent a ~3-minute full datapack/recipe /reload on every world start.
+	check_tags = false
+	# Automatically rebuild and reload the generated tags datapack when a tagging mismatch is detected.
+	auto_rebuild_tags = false
+	# Log missing or additional tags on generated blocks.
+	log_tag_mismatch = false

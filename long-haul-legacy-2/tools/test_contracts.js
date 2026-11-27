@@ -1449,6 +1449,14 @@ test('Distant Horizons + Chunky init guard mixin & sync deduplication are wired'
 
   const s26 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/26_hard_features_and_territory.js'), 'utf8');
   assert(s26.includes('var termX = chosen.x + 2;') && s26.includes("feet === 'minecraft:barrel'"), 'terminal barrel spawns offset from player spawnpoint and respawn guards against spawning inside barrel');
+
+  const apCommon = fs.readFileSync(path.join(ROOT, 'overrides/config/additionalplacements-common.toml'), 'utf8');
+  const apServer = fs.readFileSync(path.join(ROOT, 'overrides/defaultconfigs/additionalplacements-server.toml'), 'utf8');
+  assert(apCommon.includes('auto_rebuild_tags = false') && apServer.includes('auto_rebuild_tags = false'), 'Additional Placements auto tag rebuild/reload is disabled');
+
+  const yabnHelper = fs.readFileSync(path.join(ROOT, 'runtime-mod/src/main/java/longhaul/runtime/util/YabnFastHelper.java'), 'utf8');
+  assert(yabnHelper.includes('encodeObject') && yabnHelper.includes('encodeArray'), 'YabnFastHelper provides linear-time serialization');
+  assert(mixinsJson.mixins.includes('YabnObjectFastMixin') && mixinsJson.mixins.includes('YabnArrayFastMixin'), 'YABN O(N) fast mixins are registered');
 });
 
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');
