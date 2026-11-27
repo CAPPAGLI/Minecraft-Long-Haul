@@ -125,6 +125,7 @@ def main():
     ap.add_argument('--pull', action='store_true', help='Run `git pull --ff-only` before syncing')
     ap.add_argument('--no-regen', action='store_true', help='Skip regenerating quests/structures/worldgen')
     ap.add_argument('--check-mods', action='store_true', help='Force Modrinth lock check even if profile JSON is unchanged')
+    ap.add_argument('--skip-mods', action='store_true', help='Skip Modrinth/mod/resourcepack sync and update only runtime + overrides')
     ap.add_argument('--server', action='store_true', help='Server mode: skip client_only mods and resourcepacks')
     ap.add_argument('--libs-dir', default=None, help='Explicit Forge 47.4.10 libraries directory for rebuilding longhaul-runtime')
     ap.add_argument('--force-runtime', action='store_true', help='Force rebuilding longhaul-runtime-*.jar')
@@ -154,13 +155,18 @@ def main():
 
     profile_sha = sha256_file(profile_path)
     need_assemble = (
-        args.check_mods
-        or not LOCAL_LOCK.exists()
-        or sync_meta.get('profile_sha256') != profile_sha
-        or sync_meta.get('profile_path') != str(profile_path)
+        not args.skip_mods
+        and (
+            args.check_mods
+            or not LOCAL_LOCK.exists()
+            or sync_meta.get('profile_sha256') != profile_sha
+            or sync_meta.get('profile_path') != str(profile_path)
+        )
     )
 
-    if need_assemble:
+    if args.skip_mods:
+        print('== Skipping mod/resourcepack sync (--skip-mods): updating runtime + overrides only ==', flush=True)
+    elif need_assemble:
         print('== Resolving & downloading ONLY missing/updated mods ==', flush=True)
         cmd = [
             sys.executable,
@@ -178,7 +184,8 @@ def main():
     else:
         print('== Profile unchanged: skipping Modrinth API & mod downloads (0 bytes network) ==', flush=True)
 
-    lock = json.loads(LOCAL_LOCK.read_text(encoding='utf-8'))
+    lock_path = LOCAL_LOCK if LOCAL_LOCK.exists() else (R / 'assembly/lock.json')
+    lock = json.loads(lock_path.read_text(encoding='utf-8')) if lock_path.exists() else {}
 
     state_file = instance_dir / '.longhaul-sync-state.json'
     state = {'managed_mods': [], 'managed_resourcepacks': [], 'managed_overrides': []}
@@ -197,68 +204,72 @@ def main():
 
     # 1. Sync mods from lock
     desired_mods = {}
-    for mod in lock.get('mods', []):
-        if args.server and mod.get('client_only'):
-            continue
-        f = mod['selected_file']
-        desired_mods[f['filename']] = f
-
     copied_mods = 0
     copied_mod_bytes = 0
-    missing_local_cache = []
-    for fname, fmeta in desired_mods.items():
-        dst = mods_dir / fname
-        expected_sha512 = (fmeta.get('hashes') or {}).get('sha512')
-        expected_size = fmeta.get('size')
-        up_to_date = False
-        if dst.exists():
-            if expected_size and dst.stat().st_size == expected_size:
-                if not expected_sha512 or sha512_file(dst) == expected_sha512:
-                    up_to_date = True
-        if up_to_date:
-            continue
-        src = R / 'assembly/mods' / fname
-        if not src.exists():
-            missing_local_cache.append(fname)
-            continue
-        if not args.dry_run:
-            shutil.copy2(src, dst)
-        copied_mods += 1
-        copied_mod_bytes += src.stat().st_size
-
-    if missing_local_cache:
-        print(f'! {len(missing_local_cache)} mod(s) missing from assembly/mods/ cache. Re-running assemble_alpha --from-lock...', flush=True)
-        if not args.dry_run:
-            run_step([
-                sys.executable, str(R / 'tools/assemble_alpha.py'),
-                '--from-lock', '--lock-in', str(LOCAL_LOCK), '--lock-out', str(LOCAL_LOCK),
-                '--seed-mods-dir', str(mods_dir), '--seed-rp-dir', str(rp_dir),
-            ])
-            for fname in missing_local_cache:
-                src = R / 'assembly/mods' / fname
-                if src.exists():
-                    shutil.copy2(src, mods_dir / fname)
-                    copied_mods += 1
-                    copied_mod_bytes += src.stat().st_size
-
     removed_mods = 0
-    prev_managed_mods = set(state.get('managed_mods', []))
-    for existing in sorted(mods_dir.glob('*.jar')):
-        name = existing.name
-        if name in desired_mods or name.startswith('longhaul-runtime-'):
-            continue
-        is_obsolete_managed = name in prev_managed_mods
-        is_replaced = any(name.startswith(pref) for pref in REPLACED_MOD_PREFIXES)
-        if is_obsolete_managed or is_replaced:
-            print(f'  - Removing obsolete mod: {name}', flush=True)
+    if not args.skip_mods:
+        for mod in lock.get('mods', []):
+            if args.server and mod.get('client_only'):
+                continue
+            f = mod['selected_file']
+            desired_mods[f['filename']] = f
+
+        missing_local_cache = []
+        for fname, fmeta in desired_mods.items():
+            dst = mods_dir / fname
+            expected_sha512 = (fmeta.get('hashes') or {}).get('sha512')
+            expected_size = fmeta.get('size')
+            up_to_date = False
+            if dst.exists():
+                if expected_size and dst.stat().st_size == expected_size:
+                    if not expected_sha512 or sha512_file(dst) == expected_sha512:
+                        up_to_date = True
+            if up_to_date:
+                continue
+            src = R / 'assembly/mods' / fname
+            if not src.exists():
+                missing_local_cache.append(fname)
+                continue
             if not args.dry_run:
-                existing.unlink()
-            removed_mods += 1
+                shutil.copy2(src, dst)
+            copied_mods += 1
+            copied_mod_bytes += src.stat().st_size
+
+        if missing_local_cache:
+            print(f'! {len(missing_local_cache)} mod(s) missing from assembly/mods/ cache. Re-running assemble_alpha --from-lock...', flush=True)
+            if not args.dry_run:
+                run_step([
+                    sys.executable, str(R / 'tools/assemble_alpha.py'),
+                    '--from-lock', '--lock-in', str(LOCAL_LOCK), '--lock-out', str(LOCAL_LOCK),
+                    '--seed-mods-dir', str(mods_dir), '--seed-rp-dir', str(rp_dir),
+                ])
+                for fname in missing_local_cache:
+                    src = R / 'assembly/mods' / fname
+                    if src.exists():
+                        shutil.copy2(src, mods_dir / fname)
+                        copied_mods += 1
+                        copied_mod_bytes += src.stat().st_size
+
+        prev_managed_mods = set(state.get('managed_mods', []))
+        for existing in sorted(mods_dir.glob('*.jar')):
+            name = existing.name
+            if name in desired_mods or name.startswith('longhaul-runtime-'):
+                continue
+            is_obsolete_managed = name in prev_managed_mods
+            is_replaced = any(name.startswith(pref) for pref in REPLACED_MOD_PREFIXES)
+            if is_obsolete_managed or is_replaced:
+                print(f'  - Removing obsolete mod: {name}', flush=True)
+                if not args.dry_run:
+                    existing.unlink()
+                removed_mods += 1
+    else:
+        for old_m in state.get('managed_mods', []):
+            desired_mods[old_m] = {}
 
     # 2. Sync resourcepacks (client only)
     copied_rps = 0
     desired_rps = set()
-    if not args.server:
+    if not args.server and not args.skip_mods:
         for rp in lock.get('resourcepacks', []):
             fname = rp['selected_file']['filename']
             desired_rps.add(fname)
@@ -273,6 +284,8 @@ def main():
                 if not args.dry_run:
                     shutil.copy2(src, dst)
                 copied_rps += 1
+    elif args.skip_mods:
+        desired_rps = set(state.get('managed_resourcepacks', []))
 
     # 3. Build/sync longhaul-runtime-*.jar incrementally
     rt_src_hash = hash_tree(R / 'runtime-mod/src')

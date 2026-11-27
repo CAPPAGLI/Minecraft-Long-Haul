@@ -983,7 +983,21 @@ global.LHStructureProduction = (function () {
     'brewinandchewin:beer', 'brewinandchewin:cocoa_fudge', 'brewinandchewin:kimchi', 'brewinandchewin:jerky',
     'biomesoplenty:rose_quartz_chunk', 'biomesoplenty:glowshroom', 'biomesoplenty:barley', 'biomesoplenty:brimstone',
     'longhaul:machine_parts', 'longhaul:ore_concentrate', 'longhaul:technical_oil',
-    'longhaul:technical_glass', 'longhaul:refractory_mix', 'longhaul:treated_timber', 'longhaul:marine_reagent'
+    'longhaul:technical_glass', 'longhaul:refractory_mix', 'longhaul:treated_timber', 'longhaul:marine_reagent',
+    // Vanilla items (also merged automatically from BuiltInRegistries.ITEM at runtime)
+    'minecraft:iron_ingot', 'minecraft:copper_ingot', 'minecraft:gold_ingot', 'minecraft:diamond',
+    'minecraft:emerald', 'minecraft:netherite_scrap', 'minecraft:redstone', 'minecraft:lapis_lazuli',
+    'minecraft:quartz', 'minecraft:amethyst_shard', 'minecraft:glowstone_dust', 'minecraft:blaze_rod',
+    'minecraft:ender_pearl', 'minecraft:ghast_tear', 'minecraft:phantom_membrane', 'minecraft:shulker_shell',
+    'minecraft:slime_ball', 'minecraft:prismarine_crystals', 'minecraft:nautilus_shell', 'minecraft:heart_of_the_sea',
+    'minecraft:echo_shard', 'minecraft:sculk_catalyst', 'minecraft:honeycomb', 'minecraft:sponge',
+    'minecraft:observer', 'minecraft:piston', 'minecraft:hopper', 'minecraft:repeater',
+    'minecraft:comparator', 'minecraft:daylight_detector', 'minecraft:sea_lantern', 'minecraft:end_rod',
+    'minecraft:magma_cream', 'minecraft:fermented_spider_eye', 'minecraft:golden_carrot', 'minecraft:golden_apple',
+    'minecraft:experience_bottle', 'minecraft:name_tag', 'minecraft:saddle', 'minecraft:totem_of_undying',
+    'minecraft:obsidian', 'minecraft:crying_obsidian', 'minecraft:gilded_blackstone', 'minecraft:bamboo_block',
+    'minecraft:oak_log', 'minecraft:cherry_log', 'minecraft:mangrove_log', 'minecraft:brick',
+    'minecraft:paper', 'minecraft:book', 'minecraft:compass', 'minecraft:clock', 'minecraft:spyglass'
   ];
 
   var GLOBAL_MOD_ITEM_POOL = [];
@@ -3538,6 +3552,12 @@ global.LHOpenTTD = (function () {
       ? String(b.productItem)
       : (b.customProduct ? String(b.customProduct) : String(spec.baseProduct));
     var baseQ = (b.type === 'structure_facility' && b.baseQty) ? Number(b.baseQty) : Number(spec.baseQty || 2);
+    if (b.customProduct || b.productItem) {
+      var unitVal = estimateItemUnitPrice(baseProd);
+      if (unitVal >= 45) {
+        baseQ = Math.max(1, Math.min(baseQ, Math.round(90 / unitVal)));
+      }
+    }
 
     var income = Math.round(baseInc * incMult);
     items[baseProd] = Math.max(1, Math.round(baseQ * yMult));

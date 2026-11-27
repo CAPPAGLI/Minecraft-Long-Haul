@@ -62,7 +62,7 @@ REJECT={
 def get(path):
  global NEXT
  fn=CACHE/(urllib.parse.quote(path,safe='')+'.json')
- if fn.exists():return json.loads(fn.read_text())
+ if fn.exists():return json.loads(fn.read_text(encoding='utf-8'))
  for retry in range(4):
   with LOCK:
    delay=max(0,NEXT-time.monotonic());NEXT=max(NEXT,time.monotonic())+.27
@@ -70,7 +70,7 @@ def get(path):
   try:
    req=urllib.request.Request('https://api.modrinth.com/v2/'+path,headers={'User-Agent':'LongHaulLegacy/2.0 (local compatibility audit)'})
    with urllib.request.urlopen(req,timeout=40) as r:data=json.load(r)
-   fn.write_text(json.dumps(data,ensure_ascii=False));return data
+   fn.write_text(json.dumps(data,ensure_ascii=False),encoding='utf-8');return data
   except urllib.error.HTTPError as e:
    if e.code==404:return None
    if e.code==429:time.sleep(15*(retry+1));continue
@@ -92,7 +92,7 @@ def audit(arg):
  except Exception as e:return {'slug':slug,'category':cat,'status':'error','reason':str(e)}
 
 def main():
- cats=json.loads((ROOT/'tools/candidates.json').read_text());unique={}
+ cats=json.loads((ROOT/'tools/candidates.json').read_text(encoding='utf-8'));unique={}
  for cat,slugs in cats.items():
   for s in slugs:unique.setdefault(s,cat)
  rows=list(concurrent.futures.ThreadPoolExecutor(max_workers=8).map(audit,unique.items()))
@@ -103,8 +103,8 @@ def main():
    pid=r['project_id']
    if pid in seen:r.update(status='alias',reason='Тот же проект: '+seen[pid])
    else:seen[pid]=r['slug']
- (ROOT/'audit/candidates.json').write_text(json.dumps(rows,ensure_ascii=False,indent=2))
- with (ROOT/'audit/candidates.csv').open('w') as f:
+ (ROOT/'audit/candidates.json').write_text(json.dumps(rows,ensure_ascii=False,indent=2),encoding='utf-8')
+ with (ROOT/'audit/candidates.csv').open('w',encoding='utf-8',newline='') as f:
   fields=['category','slug','status','version','reason'];w=csv.DictWriter(f,fieldnames=fields,extrasaction='ignore');w.writeheader();w.writerows(rows)
  from collections import Counter
  print('Candidate audit:',dict(Counter(r['status'] for r in rows)),flush=True)

@@ -1337,8 +1337,10 @@ test('41. 90% progressive tax + loopholes, random modpack items on structures/bu
   const shellRes = O.attemptTaxEvasion(stTax, 'mega', 'shell_split', 200, () => 0.01);
   assert(shellRes.ok && shellRes.succeeded && shellRes.discountPct === 80);
 
-  // 2. Random modpack objects on structures & buildings + player fallback valuation & product override
-  const modPool = ['create:precision_mechanism', 'ae2:fluix_crystal', 'cataclysm:ignitium_ingot', 'immersive_aircraft:engine'];
+  // 2. Random modpack + vanilla objects on structures & buildings + player fallback valuation & product override
+  assert(SP.MODPACK_RANDOM_ITEM_POOL.some(id => id.startsWith('minecraft:')), 'default random pool includes vanilla items');
+  assert(SP.MODPACK_RANDOM_ITEM_POOL.some(id => !id.startsWith('minecraft:')), 'default random pool includes mod items');
+  const modPool = ['create:precision_mechanism', 'ae2:fluix_crystal', 'cataclysm:ignitium_ingot', 'minecraft:diamond'];
   const cat = SP.buildStructureCatalog(['mod:ruin_a', 'mod:ruin_b', 'mod:ruin_c', 'mod:ruin_d'], modPool, null, null, { seed: 'w42' });
   const assigned = new Set(Object.values(cat).map(s => s.itemId));
   assert.equal(assigned.size, 4);
