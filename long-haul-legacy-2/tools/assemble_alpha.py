@@ -3,9 +3,33 @@
 API pins are not blindly treated as version constraints; actual Forge jar dependencies
 are inspected separately via inspect_alpha.py and server smoke tests.
 """
-import argparse, concurrent.futures, hashlib, io, json, pathlib, re, time, tomllib, urllib.request, zipfile
+import argparse, concurrent.futures, hashlib, io, json, pathlib, re, shutil, subprocess, time, tomllib, urllib.request, zipfile
 from audit_mods import get
 from inspect_alpha import fits
+
+def fetch_url_bytes(url: str, timeout: int = 300) -> bytes:
+    last_err = None
+    for attempt in range(1, 5):
+        try:
+            req = urllib.request.Request(url, headers={
+                'User-Agent': 'LongHaulLegacy/2.0 assembler',
+                'Connection': 'close',
+            })
+            with urllib.request.urlopen(req, timeout=timeout) as res:
+                return res.read()
+        except Exception as exc:
+            last_err = exc
+            time.sleep(1.5 * attempt)
+    curl_bin = shutil.which('curl') or shutil.which('curl.exe')
+    if curl_bin:
+        res = subprocess.run([
+            curl_bin, '-sSL', '--fail', '--retry', '2',
+            '--connect-timeout', '15', '--max-time', str(timeout),
+            '-A', 'LongHaulLegacy/2.0 assembler', url,
+        ], capture_output=True)
+        if res.returncode == 0 and res.stdout:
+            return res.stdout
+    raise last_err
 
 R = pathlib.Path(__file__).resolve().parents[1]
 DIR = R / 'assembly/mods'
@@ -33,9 +57,7 @@ def supports_forge_47410(cand):
     if cached.exists():
         zdata = cached.read_bytes()
     else:
-        req = urllib.request.Request(jf['url'], headers={'User-Agent': 'LongHaulLegacy/2.0 assembler'})
-        with urllib.request.urlopen(req, timeout=60) as resp:
-            zdata = resp.read()
+        zdata = fetch_url_bytes(jf['url'], timeout=60)
     with zipfile.ZipFile(io.BytesIO(zdata)) as zf:
         if 'META-INF/mods.toml' in zf.namelist():
             mt = tomllib.loads(zf.read('META-INF/mods.toml').decode(errors='replace'))
@@ -189,21 +211,7 @@ def download_resourcepack(row):
     f = select_rp_file(row)
     p = RP_DIR / f['filename']
     if not p.exists():
-        last_err = None
-        for attempt in range(1, 5):
-            try:
-                req = urllib.request.Request(f['url'], headers={'User-Agent': 'LongHaulLegacy/2.0 assembler'})
-                with urllib.request.urlopen(req, timeout=300) as res:
-                    p.write_bytes(res.read())
-                last_err = None
-                break
-            except Exception as exc:
-                last_err = exc
-                if p.exists():
-                    p.unlink()
-                time.sleep(1.5 * attempt)
-        if last_err is not None:
-            raise last_err
+        p.write_bytes(fetch_url_bytes(f['url'], timeout=300))
     b = p.read_bytes()
     actual_sha512 = hashlib.sha512(b).hexdigest()
     actual_sha1 = hashlib.sha1(b).hexdigest()
@@ -233,21 +241,7 @@ def download_one(row):
     f = select_file(row)
     p = DIR / f['filename']
     if not p.exists():
-        last_err = None
-        for attempt in range(1, 5):
-            try:
-                req = urllib.request.Request(f['url'], headers={'User-Agent': 'LongHaulLegacy/2.0 assembler'})
-                with urllib.request.urlopen(req, timeout=300) as res:
-                    p.write_bytes(res.read())
-                last_err = None
-                break
-            except Exception as exc:
-                last_err = exc
-                if p.exists():
-                    p.unlink()
-                time.sleep(1.5 * attempt)
-        if last_err is not None:
-            raise last_err
+        p.write_bytes(fetch_url_bytes(f['url'], timeout=300))
     b = p.read_bytes()
     actual_sha512 = hashlib.sha512(b).hexdigest()
     actual_sha1 = hashlib.sha1(b).hexdigest()

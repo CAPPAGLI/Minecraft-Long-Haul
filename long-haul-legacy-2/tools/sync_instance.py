@@ -154,13 +154,39 @@ def main():
             sync_meta = {}
 
     profile_sha = sha256_file(profile_path)
+    repo_lock = R / 'assembly/lock.json'
+    repo_lock_sha = sha256_file(repo_lock) if repo_lock.exists() else ''
+
+    # Prefer the pre-resolved repository assembly/lock.json whenever it exists and
+    # matches the active default profile (or just updated via git pull), so syncing
+    # does NOT hammer api.modrinth.com unless --check-mods is passed or profile was locally edited.
+    using_default_profile = (profile_path == DEFAULT_PROFILE.resolve())
+    repo_lock_changed = bool(repo_lock_sha and sync_meta.get('repo_lock_sha256') != repo_lock_sha)
+    if not args.skip_mods and not args.check_mods and repo_lock.exists() and using_default_profile:
+        if not LOCAL_LOCK.exists() or repo_lock_changed:
+            if not args.dry_run:
+                LOCAL_LOCK.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(repo_lock, LOCAL_LOCK)
+                sync_meta['profile_sha256'] = profile_sha
+                sync_meta['profile_path'] = str(profile_path)
+                sync_meta['repo_lock_sha256'] = repo_lock_sha
+                SYNC_META.parent.mkdir(parents=True, exist_ok=True)
+                SYNC_META.write_text(json.dumps(sync_meta, indent=2) + '\n', encoding='utf-8')
+            print('== Using repository assembly/lock.json (0 Modrinth API queries) ==', flush=True)
+
     need_assemble = (
         not args.skip_mods
         and (
             args.check_mods
-            or not LOCAL_LOCK.exists()
-            or sync_meta.get('profile_sha256') != profile_sha
-            or sync_meta.get('profile_path') != str(profile_path)
+            or not (LOCAL_LOCK.exists() or repo_lock.exists())
+            or (
+                not repo_lock_changed
+                and not (using_default_profile and repo_lock.exists())
+                and (
+                    sync_meta.get('profile_sha256') != profile_sha
+                    or sync_meta.get('profile_path') != str(profile_path)
+                )
+            )
         )
     )
 
@@ -179,12 +205,14 @@ def main():
         run_step(cmd)
         sync_meta['profile_sha256'] = profile_sha
         sync_meta['profile_path'] = str(profile_path)
+        if repo_lock_sha:
+            sync_meta['repo_lock_sha256'] = repo_lock_sha
         SYNC_META.parent.mkdir(parents=True, exist_ok=True)
         SYNC_META.write_text(json.dumps(sync_meta, indent=2) + '\n', encoding='utf-8')
     else:
-        print('== Profile unchanged: skipping Modrinth API & mod downloads (0 bytes network) ==', flush=True)
+        print('== Mod lock up to date: skipping Modrinth API queries ==', flush=True)
 
-    lock_path = LOCAL_LOCK if LOCAL_LOCK.exists() else (R / 'assembly/lock.json')
+    lock_path = LOCAL_LOCK if LOCAL_LOCK.exists() else repo_lock
     lock = json.loads(lock_path.read_text(encoding='utf-8')) if lock_path.exists() else {}
 
     state_file = instance_dir / '.longhaul-sync-state.json'
@@ -236,11 +264,11 @@ def main():
             copied_mod_bytes += src.stat().st_size
 
         if missing_local_cache:
-            print(f'! {len(missing_local_cache)} mod(s) missing from assembly/mods/ cache. Re-running assemble_alpha --from-lock...', flush=True)
+            print(f'! {len(missing_local_cache)} mod(s) missing from assembly/mods/ cache. Downloading missing via --from-lock...', flush=True)
             if not args.dry_run:
                 run_step([
                     sys.executable, str(R / 'tools/assemble_alpha.py'),
-                    '--from-lock', '--lock-in', str(LOCAL_LOCK), '--lock-out', str(LOCAL_LOCK),
+                    '--from-lock', '--lock-in', str(lock_path), '--lock-out', str(LOCAL_LOCK),
                     '--seed-mods-dir', str(mods_dir), '--seed-rp-dir', str(rp_dir),
                 ])
                 for fname in missing_local_cache:

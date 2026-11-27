@@ -3,7 +3,7 @@
 Queries real Modrinth version metadata. Never counts resourcepacks/datapacks as jars.
 Caches reproducible API responses. Selection must pass jar constraints + runtime tests.
 """
-import concurrent.futures, csv, json, pathlib, threading, time, urllib.error, urllib.request, urllib.parse
+import concurrent.futures, csv, http.client, json, pathlib, shutil, ssl, subprocess, threading, time, urllib.error, urllib.request, urllib.parse
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 CACHE=ROOT/'audit/api-cache';CACHE.mkdir(parents=True,exist_ok=True)
 LOCK=threading.Lock();NEXT=0
@@ -59,22 +59,44 @@ REJECT={
  'spawn-animations':'Опциональный визуальный слой, не промышленная механика',
  'doomed':'Только отдельный опциональный профиль с официальной загрузкой',
 }
+def _curl_get_json(url):
+ curl_bin=shutil.which('curl') or shutil.which('curl.exe')
+ if not curl_bin:return None
+ res=subprocess.run([curl_bin,'-sSL','--fail','--retry','2','--connect-timeout','15','--max-time','45','-A','LongHaulLegacy/2.0 (local compatibility audit)',url],capture_output=True)
+ if res.returncode==0 and res.stdout:
+  return json.loads(res.stdout.decode('utf-8'))
+ return None
+
 def get(path):
  global NEXT
  fn=CACHE/(urllib.parse.quote(path,safe='')+'.json')
  if fn.exists():return json.loads(fn.read_text(encoding='utf-8'))
- for retry in range(4):
+ url='https://api.modrinth.com/v2/'+path
+ last_err=None
+ for retry in range(6):
   with LOCK:
    delay=max(0,NEXT-time.monotonic());NEXT=max(NEXT,time.monotonic())+.27
   time.sleep(delay)
   try:
-   req=urllib.request.Request('https://api.modrinth.com/v2/'+path,headers={'User-Agent':'LongHaulLegacy/2.0 (local compatibility audit)'})
+   req=urllib.request.Request(url,headers={'User-Agent':'LongHaulLegacy/2.0 (local compatibility audit)','Connection':'close'})
    with urllib.request.urlopen(req,timeout=40) as r:data=json.load(r)
    fn.write_text(json.dumps(data,ensure_ascii=False),encoding='utf-8');return data
   except urllib.error.HTTPError as e:
    if e.code==404:return None
    if e.code==429:time.sleep(15*(retry+1));continue
+   last_err=e
+   if e.code>=500:time.sleep(2*(retry+1));continue
    raise
+  except (urllib.error.URLError,ssl.SSLError,TimeoutError,ConnectionError,http.client.HTTPException,OSError) as e:
+   last_err=e
+   time.sleep(1.5*(retry+1))
+ try:
+  data=_curl_get_json(url)
+  if data is not None:
+   fn.write_text(json.dumps(data,ensure_ascii=False),encoding='utf-8');return data
+ except Exception:
+  pass
+ if last_err is not None:raise last_err
  return None
 
 def audit(arg):
