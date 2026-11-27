@@ -7,22 +7,55 @@ import argparse, hashlib, os, pathlib, shutil, subprocess, tomllib, urllib.reque
 
 R = pathlib.Path(__file__).resolve().parents[1]
 
-def find_java_tools():
+def find_java_tools(libs_dir: pathlib.Path | None = None):
     javac = shutil.which('javac')
     java = shutil.which('java')
-    if not java:
+    if not java or not javac:
         java_home = os.environ.get('JAVA_HOME')
         if java_home:
-            cand = pathlib.Path(java_home) / 'bin/java'
-            if cand.exists():
-                java = str(cand)
-            cand_c = pathlib.Path(java_home) / 'bin/javac'
-            if cand_c.exists():
-                javac = str(cand_c)
-    if not java:
-        local = list((R / 'runtime').glob('*/bin/java'))
-        if local:
-            java = str(local[0])
+            for ext in ('', '.exe'):
+                cand = pathlib.Path(java_home) / f'bin/java{ext}'
+                if not java and cand.exists():
+                    java = str(cand)
+                cand_c = pathlib.Path(java_home) / f'bin/javac{ext}'
+                if not javac and cand_c.exists():
+                    javac = str(cand_c)
+
+    search_roots = [R / 'runtime']
+    if libs_dir is not None:
+        search_roots.extend([
+            libs_dir.parent / 'runtime',
+            libs_dir.parent.parent / 'jre',
+            libs_dir.parent.parent / 'runtime',
+        ])
+    if os.name == 'nt':
+        for pf in (os.environ.get('ProgramFiles', 'C:\\Program Files'), os.environ.get('ProgramFiles(x86)', 'C:\\Program Files (x86)')):
+            pf_path = pathlib.Path(pf)
+            for vendor in ('Eclipse Adoptium', 'Java', 'Microsoft', 'Zulu', 'Amazon Corretto', 'BellSoft'):
+                search_roots.append(pf_path / vendor)
+
+    # Prefer JDK 17 (required by Forge 1.20.1 / Mixin) when scanning installations
+    def _sort_key(p: pathlib.Path):
+        s = str(p).lower()
+        is_17 = '17' in s or 'gamma' in s
+        return (0 if is_17 else 1, s)
+
+    for root in search_roots:
+        if not root.exists():
+            continue
+        for pat in ('*/bin/javac.exe', '*/bin/javac', '**/bin/javac.exe', '**/bin/javac'):
+            cands = sorted(root.glob(pat), key=_sort_key)
+            if cands and not javac:
+                javac = str(cands[0])
+                break
+        for pat in ('*/bin/java.exe', '*/bin/java', '**/bin/java.exe', '**/bin/java'):
+            cands = sorted(root.glob(pat), key=_sort_key)
+            if cands and not java:
+                java = str(cands[0])
+                break
+        if javac and java:
+            break
+
     return java, javac
 
 def main():
@@ -32,14 +65,15 @@ def main():
     ap.add_argument('--out-dir', default=None, help='Output directory for longhaul-runtime-*.jar (default: overrides/mods)')
     args = ap.parse_args()
 
-    java, javac = find_java_tools()
+    lib_root = pathlib.Path(args.libs_dir) if args.libs_dir else (R / 'server-test/libraries')
+    if not lib_root.exists():
+        raise RuntimeError(f'Missing Forge 47.4.10 libraries at {lib_root}; run prepare_server.py or pass --libs-dir')
+
+    java, javac = find_java_tools(lib_root)
     if not java and not javac:
         raise RuntimeError('No Java 17 runtime or compiler found in PATH, JAVA_HOME, or runtime/')
 
     cp = []
-    lib_root = pathlib.Path(args.libs_dir) if args.libs_dir else (R / 'server-test/libraries')
-    if not lib_root.exists():
-        raise RuntimeError(f'Missing Forge 47.4.10 libraries at {lib_root}; run prepare_server.py or pass --libs-dir')
     for jar in sorted(lib_root.rglob('*.jar')):
         n = jar.name
         if n.endswith('-slim.jar') or n.endswith('-extra.jar') or n.endswith('-mappings.jar') or n.endswith('-installer.jar'):
@@ -105,8 +139,6 @@ def main():
                     z.write(p, p.relative_to(base))
     print(output, hashlib.sha512(output.read_bytes()).hexdigest())
 
-if __name__ == '__main__':
-    main()
 
 if __name__ == '__main__':
     main()

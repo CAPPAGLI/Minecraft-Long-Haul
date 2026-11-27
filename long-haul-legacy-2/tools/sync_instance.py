@@ -316,6 +316,15 @@ def main():
     elif args.skip_mods:
         desired_rps = set(state.get('managed_resourcepacks', []))
 
+    # Deduplicate multiple DistantHorizons-*.jar files in mods/ (keep newest)
+    dh_jars = sorted(mods_dir.glob('DistantHorizons-*.jar'))
+    if len(dh_jars) > 1:
+        for old_dh in dh_jars[:-1]:
+            print(f'  - Removing duplicate Distant Horizons JAR: {old_dh.name}', flush=True)
+            if not args.dry_run:
+                old_dh.unlink()
+            removed_mods += 1
+
     # 3. Build/sync longhaul-runtime-*.jar incrementally
     rt_src_hash = hash_tree(R / 'runtime-mod/src')
     existing_rt = sorted(mods_dir.glob('longhaul-runtime-*.jar'))

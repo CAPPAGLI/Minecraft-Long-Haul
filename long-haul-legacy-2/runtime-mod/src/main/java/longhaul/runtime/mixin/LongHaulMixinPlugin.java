@@ -20,6 +20,9 @@ public final class LongHaulMixinPlugin implements IMixinConfigPlugin {
         if (mixinClassName.endsWith("MinimapRegistryMixin")) {
             return hasMod("xaerominimap");
         }
+        if (mixinClassName.endsWith("DhChunkyAccessorMixin")) {
+            return hasMod("distanthorizons") && hasMod("chunky");
+        }
         return true;
     }
 

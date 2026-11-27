@@ -1425,4 +1425,22 @@ test('41. 90% progressive tax + loopholes, random modpack items on structures/bu
   assert(s30.includes('shell_split') && s30.includes('lh price player hand') && s30.includes('lh building setproduct random'));
 });
 
+test('Distant Horizons + Chunky init guard mixin & sync deduplication are wired', () => {
+  const path = require('path');
+  const ROOT = path.resolve(__dirname, '..');
+  const mixinPath = path.join(ROOT, 'runtime-mod/src/main/java/longhaul/runtime/mixin/DhChunkyAccessorMixin.java');
+  assert(fs.existsSync(mixinPath), 'DhChunkyAccessorMixin.java exists');
+  const mixinSrc = fs.readFileSync(mixinPath, 'utf8');
+  assert(mixinSrc.includes('AbstractChunkyAccessor') && mixinSrc.includes('tryRunFirstTimeSetup') && mixinSrc.includes('ChunkyProvider'), 'DhChunkyAccessorMixin guards AbstractChunkyAccessor.tryRunFirstTimeSetup against unloaded ChunkyProvider');
+
+  const mixinsJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'runtime-mod/src/main/resources/longhaul-runtime.mixins.json'), 'utf8'));
+  assert(Array.isArray(mixinsJson.mixins) && mixinsJson.mixins.includes('DhChunkyAccessorMixin'), 'longhaul-runtime.mixins.json registers DhChunkyAccessorMixin');
+
+  const pluginSrc = fs.readFileSync(path.join(ROOT, 'runtime-mod/src/main/java/longhaul/runtime/mixin/LongHaulMixinPlugin.java'), 'utf8');
+  assert(pluginSrc.includes('DhChunkyAccessorMixin') && pluginSrc.includes('distanthorizons') && pluginSrc.includes('chunky'), 'LongHaulMixinPlugin gates DhChunkyAccessorMixin on distanthorizons && chunky');
+
+  const syncSrc = fs.readFileSync(path.join(ROOT, 'tools/sync_instance.py'), 'utf8');
+  assert(syncSrc.includes('DistantHorizons-*.jar'), 'sync_instance.py deduplicates duplicate DistantHorizons JARs');
+});
+
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');
