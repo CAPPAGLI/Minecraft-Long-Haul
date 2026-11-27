@@ -433,8 +433,12 @@ def main():
             for addon in cf.get('addons', []):
                 mod_id = (addon.get('mod_id') or '').lower()
                 name = addon.get('name') or addon.get('title') or mod_id or 'Addon'
+                req_by = (addon.get('required_by') or '').lower()
                 if mod_id and not any(mod_id in n for n in present_names):
-                    print(f"! CurseForge addon not found in mods/: {name} -> {addon['url']}", flush=True)
+                    if req_by and any(req_by in n for n in present_names):
+                        print(f"! REQUIRED dependency missing for {req_by}: {name} ({mod_id}) -> {addon['url']}", flush=True)
+                    elif not req_by:
+                        print(f"! CurseForge addon not found in mods/: {name} -> {addon['url']}", flush=True)
         except Exception:
             pass
 
