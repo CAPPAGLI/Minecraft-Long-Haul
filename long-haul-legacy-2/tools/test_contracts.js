@@ -1446,6 +1446,9 @@ test('Distant Horizons + Chunky init guard mixin & sync deduplication are wired'
   assert(sbCfg.threadPriority && sbCfg.threadPriority.main >= 4 && sbCfg.threadPriority.io >= 4, 'smoothboot.json prevents main/io worker thread starvation');
   const dhCfg = fs.readFileSync(path.join(ROOT, 'overrides/config/DistantHorizons.toml'), 'utf8');
   assert(dhCfg.includes('threadPriority = 3'), 'DistantHorizons.toml lowers DH thread priority below worldgen workers');
+
+  const s26 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/26_hard_features_and_territory.js'), 'utf8');
+  assert(s26.includes('var termX = chosen.x + 2;') && s26.includes("feet === 'minecraft:barrel'"), 'terminal barrel spawns offset from player spawnpoint and respawn guards against spawning inside barrel');
 });
 
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');

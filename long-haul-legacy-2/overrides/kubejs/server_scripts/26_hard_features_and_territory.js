@@ -372,6 +372,7 @@ function lhIsPlayerTrappedOrBedrock(overworld, px, py, pz, halfBorder) {
     var feetSolid = feet === 'minecraft:stone' || feet === 'minecraft:deepslate' || feet === 'minecraft:dirt' || feet === 'minecraft:netherrack';
     var headSolid = head === 'minecraft:stone' || head === 'minecraft:deepslate' || head === 'minecraft:dirt' || head === 'minecraft:netherrack';
     if (feetSolid && headSolid) return true;
+    if (feet === 'minecraft:barrel' || head === 'minecraft:barrel') return true;
   } catch (eTrap) {}
   return false;
 }
@@ -487,7 +488,9 @@ function lhBuildSpecializedHqPlatform(ow, x, y, z, envType) {
       }
       ow.getBlock(bx + 3, by + 1, bz + 3).set('minecraft:lantern');
       ow.getBlock(bx - 3, by + 1, bz - 3).set('minecraft:lantern');
-      ow.getBlock(bx, by - 1, bz).set('minecraft:barrel');
+      ow.getBlock(bx + 2, by - 1, bz).set('minecraft:stone_bricks');
+      ow.getBlock(bx + 2, by, bz).set('minecraft:barrel');
+      ow.getBlock(bx + 2, by + 1, bz).set('minecraft:air');
       return true;
     }
     if (envType === 'sea') {
@@ -509,7 +512,9 @@ function lhBuildSpecializedHqPlatform(ow, x, y, z, envType) {
         ow.getBlock(bx + 3, by + ty, bz + 3).set('minecraft:scaffolding');
       }
       ow.getBlock(bx - 3, by, bz - 3).set('minecraft:lantern');
-      ow.getBlock(bx, by - 1, bz).set('minecraft:barrel');
+      ow.getBlock(bx + 2, by - 1, bz).set('minecraft:oak_planks');
+      ow.getBlock(bx + 2, by, bz).set('minecraft:barrel');
+      ow.getBlock(bx + 2, by + 1, bz).set('minecraft:air');
       return true;
     }
     if (envType === 'underground') {
@@ -525,13 +530,18 @@ function lhBuildSpecializedHqPlatform(ow, x, y, z, envType) {
       }
       ow.getBlock(bx + 2, by + 1, bz + 2).set('minecraft:lantern');
       ow.getBlock(bx - 2, by + 1, bz - 2).set('minecraft:lantern');
-      ow.getBlock(bx, by - 1, bz).set('minecraft:barrel');
+      ow.getBlock(bx + 2, by - 1, bz).set('minecraft:deepslate_bricks');
+      ow.getBlock(bx + 2, by, bz).set('minecraft:barrel');
+      ow.getBlock(bx + 2, by + 1, bz).set('minecraft:air');
       return true;
     }
-    // Normal surface: place barrel directly under landing tile
-    ow.getBlock(bx, by - 1, bz).set('minecraft:barrel');
+    // Normal surface: keep player landing pad clear & solid, place terminal barrel 2 blocks east
+    ow.getBlock(bx, by - 1, bz).set('minecraft:stone_bricks');
     ow.getBlock(bx, by, bz).set('minecraft:air');
     ow.getBlock(bx, by + 1, bz).set('minecraft:air');
+    ow.getBlock(bx + 2, by - 1, bz).set('minecraft:stone_bricks');
+    ow.getBlock(bx + 2, by, bz).set('minecraft:barrel');
+    ow.getBlock(bx + 2, by + 1, bz).set('minecraft:air');
     return true;
   } catch (ePlat) {
     return false;
@@ -663,13 +673,16 @@ function lhFirstJoinRandomSpawn(server, player) {
 
   if (!creative) {
     lhBuildSpecializedHqPlatform(ow, chosen.x, chosen.y, chosen.z, envType);
+    var termX = chosen.x + 2;
+    var termY = chosen.y;
+    var termZ = chosen.z;
 
     if (typeof lhRegisterTerminalForPlayer === 'function') {
-      lhRegisterTerminalForPlayer(server, player, chosen.x, chosen.y - 1, chosen.z, 'minecraft:overworld');
+      lhRegisterTerminalForPlayer(server, player, termX, termY, termZ, 'minecraft:overworld');
     } else if (typeof lhProfile === 'function' && typeof lhSave === 'function') {
       var cProf = lhProfile(server, player);
       if (cProf && !cProf.terminal) {
-        cProf.terminal = { dim: 'minecraft:overworld', x: chosen.x, y: chosen.y - 1, z: chosen.z };
+        cProf.terminal = { dim: 'minecraft:overworld', x: termX, y: termY, z: termZ };
         lhSave(server);
         if (typeof lhUnlock === 'function') lhUnlock(player, 'longhaul:story/03_dinner_telegram');
       }
@@ -678,10 +691,10 @@ function lhFirstJoinRandomSpawn(server, player) {
       var createdComp = lhAutoCreateCompanyAtSpawn(server, player, chosen.x, chosen.z);
       if (createdComp) {
         createdComp.envType = envType;
-        createdComp.hqX = chosen.x;
-        createdComp.hqY = chosen.y - 1;
-        createdComp.hqZ = chosen.z;
-        createdComp.terminalPos = { x: chosen.x, y: chosen.y - 1, z: chosen.z };
+        createdComp.hqX = termX;
+        createdComp.hqY = termY;
+        createdComp.hqZ = termZ;
+        createdComp.terminalPos = { x: termX, y: termY, z: termZ };
         if (typeof lhOttdSave === 'function') lhOttdSave(server);
       }
     }
@@ -699,7 +712,8 @@ function lhFirstJoinRandomSpawn(server, player) {
     }
     lhGrantStarterRadio(server, player, false);
     lhMsg(player, '§a§l[Высадка компании] §fВы высажены на свободный участок §b(' + chosen.x + ', ' + chosen.y + ', ' + chosen.z +
-      ') §7в секторе (' + chosen.sx + ',' + chosen.sz + '). Прямо под вами установлен §eТерминал компании§7, а сектор закреплён как ваша штаб-квартира!');
+      ') §7в секторе (' + chosen.sx + ',' + chosen.sz + '). Рядом с вами (' + termX + ', ' + termY + ', ' + termZ +
+      ') установлен §eТерминал компании§7, а сектор закреплён как ваша штаб-квартира!');
   }
   return true;
 }
@@ -1513,6 +1527,40 @@ if (typeof PlayerEvents !== 'undefined' && PlayerEvents.respawned) {
     var creative = (typeof player.isCreative === 'function' && player.isCreative()) ||
       (typeof player.isSpectator === 'function' && player.isSpectator());
     if (creative) return;
+
+    try {
+      var owR = server.getLevel('minecraft:overworld');
+      var compR = typeof lhGetPlayerCompany === 'function' ? lhGetPlayerCompany(server, player) : null;
+      if (owR && compR && compR.terminalPos && typeof compR.terminalPos.x === 'number') {
+        var tx = Math.round(Number(compR.terminalPos.x));
+        var ty = Math.round(Number(compR.terminalPos.y));
+        var tz = Math.round(Number(compR.terminalPos.z));
+        if (typeof lhEnsureBarrelAt === 'function') {
+          lhEnsureBarrelAt(owR, tx, ty, tz);
+        }
+        var pxR = Math.floor(Number(player.x));
+        var pzR = Math.floor(Number(player.z));
+        if (Math.abs(pxR - tx) <= 0 && Math.abs(pzR - tz) <= 0) {
+          var shiftX = tx - 2;
+          var shiftZ = tz;
+          var shiftY = lhFindSafeRespawnY(owR, shiftX, shiftZ, true);
+          var rName = player.username || (typeof player.getName === 'function' ? player.getName().getString() : '');
+          try {
+            if (typeof player.teleportTo === 'function') player.teleportTo(shiftX + 0.5, shiftY, shiftZ + 0.5);
+          } catch (eTpSh) {}
+          if (rName) {
+            server.runCommandSilent('execute in minecraft:overworld run tp ' + rName + ' ' + (shiftX + 0.5) + ' ' + shiftY + ' ' + (shiftZ + 0.5));
+            server.runCommandSilent('spawnpoint ' + rName + ' ' + shiftX + ' ' + shiftY + ' ' + shiftZ);
+          }
+          var dbSh = lhProgRead(server);
+          var pidSh = lhId(player);
+          var scSh = global.LHOpenTTD ? global.LHOpenTTD.sectorCoords(shiftX, shiftZ) : { sx: 0, sz: 0 };
+          dbSh.playerHomeSpawns[pidSh] = { x: shiftX, y: shiftY, z: shiftZ, sx: scSh.sx, sz: scSh.sz };
+          lhProgSave(server);
+        }
+      }
+    } catch (eTermResp) {}
+
     if (!lhHardIsActive(server, 'random_respawn')) {
       lhEnsureSafeSpawn(server, player, true);
       return;
