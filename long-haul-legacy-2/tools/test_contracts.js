@@ -1445,6 +1445,7 @@ test('Distant Horizons + Chunky init guard mixin & sync deduplication are wired'
   const syncSrc = fs.readFileSync(path.join(ROOT, 'tools/sync_instance.py'), 'utf8');
   assert(syncSrc.includes("'distanthorizons-'") && syncSrc.includes("'saturn-'") && syncSrc.includes("'does_it_tick-'"), 'sync_instance.py cleans replaced/duplicate JARs');
   assert(syncSrc.includes('--download-optional') && syncSrc.includes('--with-optional') && syncSrc.includes('forgecdn_urls') && syncSrc.includes('is_valid_jar_bytes'), 'sync_instance.py supports downloading and validating optional CurseForge addons');
+  assert(syncSrc.includes('quarantine_corrupt_toml_configs'), 'sync_instance.py quarantines empty/corrupt .toml configs left by prior crashes');
 
   const cfAddons = JSON.parse(fs.readFileSync(path.join(ROOT, 'optional-mods/curseforge-addons.json'), 'utf8'));
   const cfIds = (cfAddons.addons || []).map(a => a.mod_id);
@@ -1459,7 +1460,7 @@ test('Distant Horizons + Chunky init guard mixin & sync deduplication are wired'
   assert(mfCfg.includes('mixin.perf.dynamic_resources=true') && mfCfg.includes('mixin.perf.faster_item_rendering=false'), 'modernfix-mixins.properties enables dynamic_resources for 12GB heap safety while keeping faster_item_rendering disabled for VS2/Clockwork');
 
   const jeiCfg = fs.readFileSync(path.join(ROOT, 'overrides/config/jei/jei-client.ini'), 'utf8');
-  assert(jeiCfg.includes('LowMemorySlowSearchEnabled = true') && jeiCfg.includes('TooltipSearchMode = DISABLED'), 'jei-client.ini uses low-memory search mode alongside EMI');
+  assert(jeiCfg.includes('tooltipSearchMode = DISABLED') && jeiCfg.includes('modNameSearchMode = DISABLED') && !jeiCfg.includes('LowMemorySlowSearchEnabled'), 'jei-client.ini uses valid JEI 15.56 camelCase keys alongside EMI');
 
   const embCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'overrides/config/embeddium-options.json'), 'utf8'));
   assert(embCfg.performance && embCfg.performance.chunk_builder_threads === 4, 'embeddium-options.json caps chunk_builder_threads to avoid CPU contention');

@@ -19,6 +19,7 @@ import shutil
 import subprocess
 import sys
 import time
+import tomllib
 import urllib.parse
 import urllib.request
 import zipfile
@@ -384,6 +385,49 @@ def sync_optional_mods(instance_dir: pathlib.Path, mods_dir: pathlib.Path, mode:
                 print(f'  + Copied local optional JAR: {opt_jar.name}', flush=True)
 
     return downloaded, copied
+
+
+def quarantine_corrupt_toml_configs(instance_dir: pathlib.Path, dry_run: bool) -> list[str]:
+    """Detect empty, NUL-filled, or truncated .toml configs left by prior crashes/OOMs.
+    A corrupt config (such as Obscuria/aquamirae-client.toml) aborts Forge ConfigTracker,
+    which prevents mods from registering registries and crashes CreateWorldScreen.
+    """
+    cfg_dir = instance_dir / 'config'
+    if not cfg_dir.exists():
+        return []
+    quarantined: list[str] = []
+    for p in sorted(cfg_dir.rglob('*.toml')):
+        if not p.is_file():
+            continue
+        try:
+            raw = p.read_bytes()
+        except Exception:
+            continue
+        is_corrupt = False
+        if not raw.strip() or b'\x00' in raw:
+            is_corrupt = True
+        else:
+            try:
+                txt = raw.decode('utf-8')
+                tomllib.loads(txt)
+            except UnicodeDecodeError:
+                is_corrupt = True
+            except tomllib.TOMLDecodeError:
+                # Only quarantine files that look genuinely truncated/broken (e.g. unclosed header/key)
+                stripped = txt.rstrip()
+                last_line = stripped.splitlines()[-1].strip() if stripped else ''
+                if not stripped or last_line.endswith(('=', '.', '[', '"', "'", '\\')) or ('=' not in stripped and '[' not in stripped):
+                    is_corrupt = True
+        if is_corrupt:
+            rel = p.relative_to(instance_dir).as_posix()
+            quarantined.append(rel)
+            if not dry_run:
+                backup = p.with_name(p.name + '.corrupt')
+                if backup.exists():
+                    backup.unlink()
+                p.rename(backup)
+            print(f'! Quarantined corrupt config: {rel} -> {p.name}.corrupt (Forge will regenerate defaults)', flush=True)
+    return quarantined
 
 
 def detect_libs_dir(instance_dir: pathlib.Path, explicit_libs: str | None) -> pathlib.Path | None:
@@ -780,6 +824,9 @@ def main():
         instance_dir, mods_dir, opt_mode, args.include_optional_mods, args.server, args.dry_run
     )
 
+    # 4c. Quarantine empty/NUL/truncated .toml configs left by prior crashes
+    corrupt_tomls = quarantine_corrupt_toml_configs(instance_dir, args.dry_run)
+
     # Check remaining missing CurseForge optional addons (quiet hint only for missing required deps unless mode=none)
     cf_path = R / 'optional-mods/curseforge-addons.json'
     if cf_path.exists() and not args.server:
@@ -808,6 +855,8 @@ def main():
     print(f'Resourcepacks:     {copied_rps} updated')
     print(f'Runtime JAR:       {"updated" if copied_rt else "up to date"}')
     print(f'Overrides updated: {copied_overrides} ({kb_ovr:.1f} KB), removed obsolete: {removed_overrides}')
+    if corrupt_tomls:
+        print(f'Configs repaired:  {len(corrupt_tomls)} corrupt .toml quarantined')
     if args.reset_keys:
         print(f'Keys reset:        {reset_keys_count} key_* entries cleared from options.txt (backup: options.txt.bak)')
     if args.dry_run:
