@@ -1687,6 +1687,16 @@ function lhGuiRenderChapters(gui, server, player) {
       '§7• ch01 — Правила консорциума (/lh rules confirm)',
       '§7• ch02 — Базовая мастерская'
     ]);
+    lhGuiSlot(gui, 4, 3, 'minecraft:feather', '§aПропустить обучение (00–01 и обзор 02)', [
+      '§7Закрывает сюжетный пролог, устав и все',
+      '§7квесты подтверждения в главах 00–02.',
+      '§7Остаётся только скрафтить 6 предметов мастерской (ch02).',
+      '§e▶ ЛКМ: пропустить обучение (/lh tutorial skip)'
+    ], function (pl) {
+      lhGuiDeferAction(server, pl, function (p2) {
+        if (typeof lhSkipTutorial === 'function') lhSkipTutorial(server, p2);
+      }, 'chapters');
+    });
     return;
   }
 
@@ -1923,6 +1933,16 @@ function lhGuiRenderWorld(gui, server, player) {
     if (typeof lhProspectChunk === 'function') lhProspectChunk(server, pl);
   });
 
+  lhGuiSlot(gui, 2, 1, 'minecraft:feather', '§aПропустить обучение (/lh tutorial skip)', [
+    '§7Закрывает вводные квесты (00–01 и обзор 02)',
+    '§7без прокликивания кнопок «Подтвердить».',
+    '§e▶ ЛКМ: пропустить обучение'
+  ], function (pl) {
+    lhGuiDeferAction(server, pl, function (p2) {
+      if (typeof lhSkipTutorial === 'function') lhSkipTutorial(server, p2);
+    }, 'world');
+  });
+
   lhGuiSlot(gui, 3, 1, 'minecraft:nautilus_shell', '§cСтатус Бессмертной Улитки', [
     '§7Выводит дистанцию и состояние охоты Улитки в чат.'
   ], function (pl) {
@@ -2054,6 +2074,16 @@ function lhGuiRenderHelp(gui, server, player) {
         server.commands.performPrefixedCommand(p2.createCommandSourceStack(), 'lh radio kit');
       }
     });
+  });
+
+  lhGuiSlot(gui, 4, 2, 'minecraft:feather', '§aПропустить обучение (/lh tutorial skip)', [
+    '§7Закрывает сюжетный пролог (00), правила (01)',
+    '§7и все обзорные квесты подтверждения в главе 02.',
+    '§e▶ ЛКМ: пропустить обучение'
+  ], function (pl) {
+    lhGuiDeferAction(server, pl, function (p2) {
+      if (typeof lhSkipTutorial === 'function') lhSkipTutorial(server, p2);
+    }, 'help');
   });
 
   lhGuiSlot(gui, 4, 3, 'minecraft:paper', '§fНовые команды логистики и среды', [

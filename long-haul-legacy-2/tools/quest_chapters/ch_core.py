@@ -18,8 +18,9 @@ def build_core_chapters():
              'Бессонница. Холодный свет холодильника, пустая раковина, список дел на завтра, от которого сводит зубы.',
              'Семья, ипотека, чужие ожидания, одинаковые будни — ты был винтиком в чужом механизме, пока внутри что-то не перегорело дотла.',
              'На столе лежит старый бумажный чек. Подтверди шаг и забери его — пора уходить.',
+             '§7Совет: если хотите пропустить вводные главы (00–01 и обзор 02), используйте квест «Пропустить обучение» в Главе 01, кнопку в Планшете (/lh gui) или /lh tutorial skip.',
          ], [], {
-             'xp': r_xp(5, 'POINTS'),
+             'xp': r_xp(1, 'POINTS'),
              'item': r_item('minecraft:paper', 1),
          }),
         ('story_02_bakery_burned', 'Акт II · Вещи, которыми ты владеешь', 'minecraft:bread', [-260, -60],
@@ -27,15 +28,14 @@ def build_core_chapters():
              '«Вещи, которыми ты владеешь, в конце концов начинают владеть тобой.»',
              'Ты сжимаешь старый чек (выдан в Акте I): «Хлеб, молоко». Квартира давит стенами, воздух стал вязким. Нужно выйти хотя бы на пять минут.',
          ], ['story_01_left_for_bread'], {
-             'xp': r_xp(5, 'POINTS'),
-             'bread': r_item('minecraft:bread', 1),
+             'xp': r_xp(1, 'POINTS'),
          }),
         ('story_02b_smoke_break', 'Акт III · За хлебом, молоком и сигаретами', 'minecraft:flint_and_steel', [-130, -60],
          t_check('Выйти за порог с пачкой сигарет'), [
              'Ты бросаешь ключи в прихожей. «Я выйду — за хлебом, молоком и пачкой сигарет». Голос звучит чужим, будто из соседней комнаты.',
              'Забери награду: получишь зажигалку, а при установленном опциональном моде DOOMED — настоящую пачку сигарет Matulls и карманную зажигалку.',
          ], ['story_02_bakery_burned'], {
-             'xp': r_xp(5, 'POINTS'),
+             'xp': r_xp(1, 'POINTS'),
              'item': r_item('minecraft:flint_and_steel', 1),
              'smoke': r_command('lh prologue smoke', 'Получить сигареты DOOMED (если мод установлен)', 'minecraft:flint_and_steel'),
          }),
@@ -44,7 +44,7 @@ def build_core_chapters():
              'Щелчок зажигалки (выдана в Акте III). Первая затяжка обжигает горло, а серый пепел падает на облупленный бетон подъезда.',
              'Именно в эту секунду ты понимаешь: ты не хочешь возвращаться на этот этаж. Вообще никогда.',
          ], ['story_02b_smoke_break'], {
-             'xp': r_xp(5, 'POINTS'),
+             'xp': r_xp(1, 'POINTS'),
              'item': r_item('minecraft:charcoal', 1),
          }),
         ('story_04_snail_at_door', 'Акт V · Осколки старой жизни', 'minecraft:charcoal', [130, -60],
@@ -52,7 +52,7 @@ def build_core_chapters():
              'Там, за железной дверью, остался человек, который пытался всем угодить и выгорел до угольков.',
              'Держи горсть пепла (выдана в Акте IV) как доказательство: старая жизнь уже догорела.',
          ], ['story_02c_stairwell_ash'], {
-             'xp': r_xp(10, 'POINTS'),
+             'xp': r_xp(1, 'POINTS'),
              'item': r_item('minecraft:leather_boots', 1),
              'lantern': r_item('minecraft:lantern', 1),
          }),
@@ -61,7 +61,7 @@ def build_core_chapters():
              'Мокрый асфальт, жёлтые фонари и последний ночной рейс, уходящий далеко за городскую черту.',
              'Старые ботинки (выданы в Акте V) ещё держатся. Никаких обратных билетов и никаких будильников в 07:00.',
          ], ['story_04_snail_at_door'], {
-             'xp': r_xp(10, 'POINTS'),
+             'xp': r_xp(1, 'POINTS'),
              'item': r_item('minecraft:map', 1),
          }),
         ('story_04c_empty_pockets', 'Акт VII · Пустые карманы — чистый лист', 'minecraft:lantern', [260, 60],
@@ -69,7 +69,7 @@ def build_core_chapters():
              '«Лишь утратив всё до конца, мы обретаем свободу делать что угодно.»',
              'Тёплый фонарь в руках (выдан в Акте V) светит честнее, чем все бетонные стены прошлой квартиры.',
          ], ['story_04b_last_bus'], {
-             'xp': r_xp(10, 'POINTS'),
+             'xp': r_xp(1, 'POINTS'),
              'item': r_item('minecraft:spyglass', 1),
          }),
         ('story_05_continental_bakery', 'Акт VIII · Горизонт больше, чем квартал', 'minecraft:spyglass', [130, 60],
@@ -77,7 +77,7 @@ def build_core_chapters():
              'Годами ты смотрел в стену напротив. В подзорную трубу (выдана в Акте VII) видно: за старой чертой города лежит целый континент.',
              'И больше никто не скажет тебе, куда идти, что строить и кем быть.',
          ], ['story_04c_empty_pockets'], {
-             'xp': r_xp(10, 'POINTS'),
+             'xp': r_xp(1, 'POINTS'),
              'item': r_item('minecraft:compass', 1),
          }),
         ('story_05b_no_looking_back', 'Акт IX · Первое правило дороги', 'minecraft:map', [0, 60],
@@ -85,23 +85,21 @@ def build_core_chapters():
              'Первое правило новой жизни: не оглядываться назад. Второе правило: не застревать на одном месте.',
              'Чистая карта (выдана в Акте VI) ждёт твоих первых трасс, морей, железных дорог и далёких маршрутов.',
          ], ['story_05_continental_bakery'], {
-             'xp': r_xp(10, 'POINTS'),
-             'torches': r_item('minecraft:torch', 4),
+             'xp': r_xp(1, 'POINTS'),
          }),
         ('story_05c_road_gear', 'Акт X · Всё своё ношу с собой', 'minecraft:emerald', [-130, 60],
          t_check('Собраться в бесконечное путешествие'), [
              'Хлеб, молоко, пачка сигарет и пара простых инструментов — вот и весь твой новый багаж.',
              'Впереди — вечные путешествия, новые биомы, компании OpenTTD и изучение мира без оглядки на прошлое.',
          ], ['story_05b_no_looking_back'], {
-             'xp': r_xp(15, 'POINTS'),
-             'manifest': r_item('longhaul:cargo_manifest', 1),
+             'xp': r_xp(1, 'POINTS'),
          }),
         ('story_05d_point_of_no_return', 'Акт XI · Точка невозврата', 'minecraft:oak_door', [-260, 60],
          t_check('Перешагнуть старую черту'), [
              'Тот выгоревший человек остался на кухне с остывшим чаем. Перед дверью в большой мир стоит уже совсем другой странник.',
              'Тесная стартовая граница 724×724 вот-вот рухнет под ногами.',
          ], ['story_05c_road_gear'], {
-             'xp': r_xp(15, 'POINTS'),
+             'xp': r_xp(1, 'POINTS'),
          }),
         ('story_06_forgot_the_milk', 'Финал пролога · Свобода открытой дороги', 'minecraft:compass', [-390, 60],
          t_item('minecraft:compass', 1), [
@@ -109,18 +107,17 @@ def build_core_chapters():
              'Ты вышел за хлебом, молоком и сигаретами — и ушёл в вечное путешествие к новой жизни. Держи компас (выдан в Акте VIII) и забери награду!',
              'Завершение Пролога СУЩЕСТВЕННО расширяет границу мира (с 724×724 до 31825×31825), открывает земли для будущих игроков и привата чанков и запускает Колесо Угроз!',
          ], ['story_05d_point_of_no_return'], {
-             'xp': r_xp(25, 'POINTS'),
-             'item': r_item('longhaul:field_rations', 1),
+             'xp': r_xp(1, 'POINTS'),
              'tablet': r_item('longhaul:control_tablet', 1),
              'prologue_done': r_command('lh prologue complete', 'Расширить границу мира и начать новую жизнь', 'minecraft:compass'),
          }),
     ]
     for _adv_story, _xp in (
-        ('story/01_left_for_bread', 10),
-        ('story/02_bakery_burned', 10),
-        ('story/04_snail_at_door', 15),
-        ('story/05_continental_bakery', 15),
-        ('story/06_forgot_the_milk', 25),
+        ('story/01_left_for_bread', 1),
+        ('story/02_bakery_burned', 1),
+        ('story/04_snail_at_door', 1),
+        ('story/05_continental_bakery', 1),
+        ('story/06_forgot_the_milk', 1),
     ):
         adv(_adv_story, _xp)
     for qid, title, icon, pos, tasks, desc, deps, rew in story_ch00:
@@ -128,239 +125,248 @@ def build_core_chapters():
               tasks, desc, deps=deps, subtitle='Long Haul Legacy 2.0 · Пролог', rewards=rew)
 
     # -----------------------------------------------------------------------
-    # 01 · Начало и правила (16 quests, 3 clean lanes + Глава III)
+    # 01 · Начало и правила (23 quests, 3 clean lanes + skip + Глава III)
     # -----------------------------------------------------------------------
-    adv('story/03_dinner_telegram', 45)
-    adv('rules/confirmed', 25)
-    adv('tier/mandatory_done', 30)
+    adv('story/03_dinner_telegram', 1)
+    adv('rules/confirmed', 1)
+    adv('tier/mandatory_done', 1)
     for _cid in ('ch03', 'ch04', 'ch05', 'ch06', 'ch07', 'ch08', 'ch09', 'ch10', 'ch11', 'ch12', 'ch14'):
         adv(f'chapters/{_cid}_unlocked', 10)
     ch01_nodes = [
+        ('alpha_skip_tutorial', 'Пропустить обучение', 'minecraft:feather', [-440, 0],
+         t_check('Подтвердить пропуск обучения'), [
+             'Не хотите вручную прокликивать ~50 вводных квестов подтверждения в главах 00–02?',
+             'Подтвердите шаг и нажмите награду «Пропустить обучение» ниже (или используйте /lh tutorial skip, либо кнопку в Планшете /lh gui).',
+             'Это автоматически закроет сюжетный пролог (Глава 00), устав и вводные шаги (Глава 01), а также все текстовые обзорные квесты в Главе 02 — останется только скрафтить 6 базовых предметов мастерской.',
+         ], [], {
+             'xp': r_xp(1, 'POINTS'),
+             'skip': r_command('lh tutorial skip', 'Пропустить обучение (00–01 и обзор 02)', 'minecraft:feather'),
+         }),
         ('alpha_welcome', 'Прототип промышленной сети', 'minecraft:book', [-320, 0],
          t_check('Прочитано (ручное подтверждение)'), [
              'Это расширяемая сборка Long Haul Legacy 2.0: 8 экономических центров (реальные .nbt площадки), 6 объектов восстановления, лагеря, маршрутные испытания, ядерная энергетика, Draconic Evolution, магия (Primal Magick, Thaumon, Hex Casting) и 240 заказов каталога.',
-             'Подтверждение чтения — ручное; в конце ветки подтвердите устав через /lh rules confirm.',
-         ], ['story_01_left_for_bread'], {'xp': r_xp(50, 'POINTS'), 'item': r_item('minecraft:torch', 16)}),
+             'Подтверждение чтения — ручное; в конце ветки подтвердите устав через /lh rules confirm (или нажмите «Пропустить обучение» слева).',
+         ], ['story_01_left_for_bread'], {'xp': r_xp(1, 'POINTS')}),
         # Top lane (y = -110)
         ('alpha_terminal', 'Как зарегистрировать терминал', 'minecraft:barrel', [-200, -110],
          t_check('Правила терминала изучены'), [
              'Поставьте пустую обычную бочку. Встаньте на неё и выполните /lh terminal.',
              'Посмотрите /lh help (или ПКМ Планшетом управления), затем /lh accept plates. Заказ начнётся только при пустой бочке.',
-         ], ['alpha_welcome'], {'xp': r_xp(60, 'POINTS'), 'item': r_item('minecraft:barrel', 2)}),
+         ], ['alpha_welcome'], {'xp': r_xp(1, 'POINTS'), 'item': r_item('minecraft:barrel', 1)}),
         ('story_03_dinner_telegram', 'Глава III: Обещал вернуться к ужину…', 'minecraft:barrel', [-80, -110],
          t_adv('longhaul:story/03_dinner_telegram', 'Регистрация терминала (/lh terminal)'), [
              'Из дома пришла телеграмма: «Ты где? Хлеб можно уже не тёплый». Без собственного приёмного терминала заказы консорциума не оформить.',
              'Задача: поставьте пустую обычную бочку (minecraft:barrel), встаньте на неё и выполните /lh terminal (перенесено из Пролога в Главу 01).',
-         ], ['alpha_terminal'], {'xp': r_xp(1, 'LEVEL'), 'item': r_item('minecraft:hopper', 2)}),
+         ], ['alpha_terminal'], {'xp': r_xp(1, 'POINTS')}),
         ('alpha_windows', 'Что измеряют испытания', 'minecraft:clock', [40, -110],
          t_check('Механика окон понята'), [
              'Контракты с суффиксом _shift считают норму в КАЖДОМ окне по 60 игровых секунд. Один полный сундук не завершает испытание мгновенно.',
              'При пропуске нормы испытание проваливается. /lh abort останавливает заказ.',
-         ], ['story_03_dinner_telegram'], {'xp': r_xp(60, 'POINTS'), 'item': r_item('minecraft:redstone', 8)}),
+         ], ['story_03_dinner_telegram'], {'xp': r_xp(1, 'POINTS')}),
         ('alpha_limits', 'Честные границы прототипа', 'minecraft:comparator', [160, -110],
          t_check('Ограничения приняты'), [
              'Шалкеры, эндер-сундуки, мешки, сейфы Supplementaries, джетпаки и дислокаторы/заклинания дальней телепортации отключены.',
              'Для кооператива доступен общий консорциум: /lh team join <имя> или компании OpenTTD (/lh company create).',
-         ], ['alpha_windows'], {'xp': r_xp(75, 'POINTS'), 'item': r_item('minecraft:iron_ingot', 4)}),
+         ], ['alpha_windows'], {'xp': r_xp(1, 'POINTS')}),
         ('alpha_coop_guide', 'Кооператив и команды консорциума', 'minecraft:emerald', [280, -110],
          t_check('Правила кооперации изучены'), [
              'Создайте команду (/lh team join <название>) для общего зачёта контрактов и узлов, либо конкурируйте в OpenTTD-экономике (/lh company create).',
-         ], ['alpha_limits'], {'xp': r_xp(75, 'POINTS'), 'item': r_item('minecraft:emerald', 3)}),
+         ], ['alpha_limits'], {'xp': r_xp(1, 'POINTS')}),
 
         # Middle lane (y = 0)
         ('alpha_world', 'Мир и региональные узлы', 'minecraft:compass', [-200, 0],
          t_check('Устройство мира изучено'), [
              'Мир построен на связке Tectonic (высота до Y=448), Terralith, Biomes O\' Plenty, Regions Unexplored и Alex\'s Caves.',
              'Генерация руд уменьшена (~×10) с редкими моно-рудными жилами (/lh prospect); полная граница 175000 открывается по 61 основной главе!',
-         ], ['alpha_welcome'], {'xp': r_xp(60, 'POINTS'), 'item': r_item('minecraft:map', 2)}),
+         ], ['alpha_welcome'], {'xp': r_xp(1, 'POINTS')}),
         ('alpha_territory_casino', 'Территория (61 этап), k и 100 Угроз', 'minecraft:nether_star', [-80, 0],
          t_check('Законы территории и угроз изучены'), [
              'Граница мира расширяется через 61 основную главу (60 шагов до 175000): Area(u) = 724² + (175000² - 724²) * (1 - (1 - u/60)²).',
              'Коэффициент сложности k = 1 + 95 * (D/n) / 275.15 (/lh difficulty). Базовое усложнение «Рудный голод» активно всегда; каждая глава открывает 1 из 99 угроз Колеса (всего 100, /lh casino status).',
-         ], ['alpha_world'], {'xp': r_xp(1, 'LEVEL'), 'item': r_item('minecraft:golden_apple', 1)}),
+         ], ['alpha_world'], {'xp': r_xp(1, 'POINTS')}),
         ('alpha_voidout', 'Выброс при смерти (Voidout), трупы и тотемы', 'minecraft:totem_of_undying', [40, 0],
          t_check('Протокол Voidout изучен'), [
              'Когда Колесо Угроз активирует Voidout, настоящая смерть вызывает взрыв силой 1.0 × k (/lh voidout status).',
              'Инвентарь сохраняется в трупе (Corpse), а Тотем бессмертия спасает от детонации.',
-         ], ['alpha_territory_casino'], {'xp': r_xp(80, 'POINTS'), 'item': r_item('minecraft:gold_ingot', 4)}),
+         ], ['alpha_territory_casino'], {'xp': r_xp(1, 'POINTS')}),
         ('alpha_toxic_gas_sky', 'Сезонный токсичный газ и летающие острова', 'minecraft:campfire', [160, 0],
          t_check('Правила укрытия в горах изучены'), [
              'Токсичный газ поднимается циклами по 4 игровых дня (до Y=114), затем отступает в Чистый сезон (/lh gas status).',
              'Обустраивайте горные базы в Tectonic и на небесных островах (sky_refuges Y=210..260).',
-         ], ['alpha_voidout'], {'xp': r_xp(80, 'POINTS'), 'item': r_item('minecraft:campfire', 2)}),
+         ], ['alpha_voidout'], {'xp': r_xp(1, 'POINTS')}),
         ('alpha_rules_confirm', 'Подтвердить устав консорциума', 'minecraft:writable_book', [280, 0],
          t_adv('longhaul:rules/confirmed', 'Подтверждение (/lh rules confirm)'), [
              'Прочитайте правила, зарегистрируйте бочку (/lh terminal) и выполните команду /lh rules confirm.',
              'Эта веха завершает Главу 01, расширяет границу мира и запускает Колесо Угроз.',
-         ], ['alpha_limits', 'alpha_toxic_gas_sky'], {'xp': r_xp(2, 'LEVEL'), 'item': r_item('longhaul:field_rations', 4)}),
+         ], ['alpha_limits', 'alpha_toxic_gas_sky'], {'xp': r_xp(1, 'POINTS')}),
 
         # Bottom lane (y = +110)
         ('alpha_eccentric_tome', 'Единая книга гайдов (Eccentric Tome)', 'eccentrictome:tome', [-200, 110],
          t_check('Руководство Eccentric Tome прочитано'), [
              'Все книги-гайды модов можно объединить с Eccentric Tome в верстаке. ПКМ выбирает книгу, Shift+ЛКМ извлекает.',
-         ], ['alpha_welcome'], {'xp': r_xp(50, 'POINTS'), 'item': r_item('eccentrictome:tome', 1)}),
+         ], ['alpha_welcome'], {'xp': r_xp(1, 'POINTS')}),
         ('alpha_control_tablet', 'Планшет управления (/lh GUI)', 'longhaul:control_tablet', [-80, 110],
          t_item('longhaul:control_tablet', 1), [
              'Планшет управления (longhaul:control_tablet) открывает серверный GUI с 14 вкладками (/lh gui), включая карту 7×5 с зумом и HUD-миникарту, здания с вилкой прокачки, дипломатию и вилку глав.',
-         ], ['alpha_eccentric_tome'], {'xp': r_xp(1, 'LEVEL'), 'item': r_item('minecraft:iron_ingot', 4)}),
+         ], ['alpha_eccentric_tome'], {'xp': r_xp(1, 'POINTS')}),
         ('alpha_pollution_arcane', 'Экология среды и Три Школы Магии', 'minecraft:cauldron', [40, 110],
          t_check('Введение в экологию и аркану пройдено'), [
              'Pollution of the Realms создаёт выбросы дыма — ставьте дымоходы Advanced Chimneys. В сборке 3 ветки магии: Primal Magick, Thaumon и Hex Casting.',
-         ], ['alpha_control_tablet'], {'xp': r_xp(60, 'POINTS'), 'item': r_item('minecraft:amethyst_shard', 6)}),
+         ], ['alpha_control_tablet'], {'xp': r_xp(1, 'POINTS')}),
         ('alpha_storage_basics', 'Стартовая организация хранения', 'minecraft:chest', [160, 110],
          t_item('minecraft:chest', 4), [
              'Сделайте 4 сундука или ящики Functional Storage для сортировки ресурсов. Помните: шалкеры и эндер-сундуки отключены!',
-         ], ['alpha_pollution_arcane'], {'xp': r_xp(60, 'POINTS'), 'item': r_item('minecraft:oak_planks', 32)}),
+         ], ['alpha_pollution_arcane'], {'xp': r_xp(1, 'POINTS')}),
         ('alpha_first_camp_prep', 'Подготовка полевого набора', 'comforts:sleeping_bag_red', [280, 110],
          t_item('minecraft:campfire', 1), [
              'Перед первым выходом в дальнюю разведку подготовьте костёр, спальник Comforts и запас еды Farmer\'s Delight.',
-         ], ['alpha_storage_basics'], {'xp': r_xp(70, 'POINTS'), 'item': r_item('minecraft:cooked_beef', 6)}),
+         ], ['alpha_storage_basics'], {'xp': r_xp(1, 'POINTS')}),
         ('alpha_custom_origins', 'Происхождение Long Haul (Origins)', 'origins:orb_of_origin', [-320, -110],
          t_check('Происхождение выбрано'), [
              'В сборке используется мод Origins с полностью переработанным набором: ВСЕ стандартные ванильные Origins отключены.',
              'Доступны 34 авторских происхождения Long Haul (27 основных архетипов + 7 усложнённых/ослабленных для хардкорного челленджа) с интеграцией Pehkui, Create, OpenTTD, Farmer\'s Delight, Vinery, MIMI, CC:Tweaked, TaCZ и DOOMED.',
-         ], ['alpha_welcome'], {'xp': r_xp(70, 'POINTS'), 'item': r_item('minecraft:bread', 4)}),
+         ], ['alpha_welcome'], {'xp': r_xp(1, 'POINTS')}),
         ('alpha_watut_presence', 'Телеметрия команды: What Are They Up To', 'minecraft:spyglass', [400, -110],
          t_check('Синхронизация статусов изучена'), [
              'Мод What Are They Up To (Watut) отображает у союзников анимации печати в чате, просмотра инвентаря/сундуков и статус AFK прямо в мире.',
-         ], ['alpha_coop_guide'], {'xp': r_xp(60, 'POINTS'), 'item': r_item('minecraft:name_tag', 2)}),
+         ], ['alpha_coop_guide'], {'xp': r_xp(1, 'POINTS')}),
         ('alpha_perf_stack', 'Оптимизация: ImmediatelyFast и Radium (Lithium)', 'minecraft:feather', [-320, 110],
          t_check('Профиль производительности изучен'), [
              'На клиенте работает ImmediatelyFast (ускорение отрисовки карт, табличек, инвентаря и сущностей), на сервере и клиенте — Radium Reforged (Forge-порт Lithium с безопасной настройкой для Valkyrien Skies).',
-         ], ['alpha_welcome'], {'xp': r_xp(60, 'POINTS'), 'item': r_item('minecraft:torch', 16)}),
+         ], ['alpha_welcome'], {'xp': r_xp(1, 'POINTS')}),
         ('alpha_carry_on', 'Ручная погрузка грузов (Carry On)', 'minecraft:barrel', [160, 210],
          t_check('Механика Carry On проверена'), [
              'Carry On позволяет поднимать сундуки, бочки, станки и небольших животных вручную (Shift + ПКМ пустыми руками) для перегрузки на повозки, баржи и поезда.',
-         ], ['alpha_storage_basics'], {'xp': r_xp(70, 'POINTS'), 'item': r_item('minecraft:barrel', 2)}),
+         ], ['alpha_storage_basics'], {'xp': r_xp(1, 'POINTS')}),
         ('alpha_radio_comms', 'Полевая радиосвязь (Realistic Walkie-Talkie)', 'minecraft:bell', [-200, -210],
          t_check('Рация Realistic Walkie-Talkie получена'), [
              'Для связи между игроками и компаниями на больших расстояниях используется мод Realistic Walkie-Talkie (CF #1750447, частоты 100.0–999.9 МГц, /walkie, /radio).',
              'Нажмите на награду или выполните /lh radio kit, чтобы получить стартовую рацию сразу в начале игры.',
-         ], ['alpha_welcome'], {'xp': r_xp(50, 'POINTS'), 'cmd': r_command('lh radio kit', 'Получить стартовую рацию', 'minecraft:bell')}),
+         ], ['alpha_welcome'], {'xp': r_xp(1, 'POINTS'), 'cmd': r_command('lh radio kit', 'Получить стартовую рацию', 'minecraft:bell')}),
         ('alpha_chapter_fork_radio', 'Вилка глав (3 случайные) и Радиосвязь', 'minecraft:compass', [400, 110],
          t_check('Система вилки глав и рации изучена'), [
              'После обязательных глав 00–02 дальнейшие главы открываются через вилку из 3 случайных глав по тирам: Ранние (5) → Средние (6) → Поздние (/lh chapters или вкладка «Вилка глав» в Планшете).',
              'Игроки расходятся по разным модам — обменивайтесь товарами через компании/дипломатию и держите связь по Simple Voice Chat + Realistic Walkie-Talkie (/lh radio kit).',
-         ], ['alpha_first_camp_prep'], {'xp': r_xp(75, 'POINTS'), 'cmd': r_command('lh radio kit', 'Выдать рацию Realistic Walkie-Talkie', 'minecraft:compass')}),
+         ], ['alpha_first_camp_prep'], {'xp': r_xp(1, 'POINTS')}),
     ]
     for qid, title, icon, pos, tasks, desc, deps, rew in ch01_nodes:
         quest(qid, title, '01 · Начало и правила', pos, icon, tasks, desc, deps=deps, rewards=rew)
 
     # -----------------------------------------------------------------------
-    # 02 · Мастерская и обзор модов (24 quests, 4 clean horizontal lanes)
+    # 02 · Мастерская и обзор модов (26 quests, 4 clean horizontal lanes)
     # -----------------------------------------------------------------------
     ch02_nodes = [
         # Lane 1 (y = -180): Create & Heavy Industry
         ('tutorial_waterwheel', '1.1 · Кинетика Create', 'create:water_wheel', [-300, -180],
          t_item('create:water_wheel', 1), [
              'Водяное колесо и ветряк (Create) — основа мастерской. Подробные ветки Create находятся в Главах 19–22.',
-         ], ['story_02_bakery_burned'], {'xp': r_xp(60, 'POINTS'), 'item': r_item('create:wrench', 1)}),
+         ], ['story_02_bakery_burned'], {'xp': r_xp(1, 'POINTS')}),
         ('tutorial_press', '1.2 · Штамповка и металлургия', 'create:mechanical_press', [-180, -180],
          t_item('create:mechanical_press', 1), [
              'Механический пресс штампует пластины; Create Metallurgy, Create Sifting и Mechanical Extruder расширяют переработку.',
-         ], ['tutorial_waterwheel'], {'xp': r_xp(1, 'LEVEL'), 'item': r_item('create:iron_sheet', 8)}),
+         ], ['tutorial_waterwheel'], {'xp': r_xp(1, 'POINTS')}),
         ('tutorial_mixer', '1.3 · Сплавы, бурение и топливо', 'create:mechanical_mixer', [-60, -180],
          t_item('create:mechanical_mixer', 1), [
              'Миксер варит сплавы. Create Ore Excavation бурит жилы, а Diesel Generators, Liquid Fuel и New Age питают цеха.',
-         ], ['tutorial_press'], {'xp': r_xp(1, 'LEVEL'), 'item': r_item('create:andesite_alloy', 12)}),
+         ], ['tutorial_press'], {'xp': r_xp(1, 'POINTS')}),
         ('tutorial_brass', '1.4 · Латунная логистика и хранилища', 'create:brass_ingot', [60, -180],
          t_item('create:brass_ingot', 1), [
              'Латунь открывает умные фильтры, Factory Logistics, Vibrant Vaults, Functional Storage, Iron Chests/Barrels.',
-         ], ['tutorial_mixer'], {'xp': r_xp(1, 'LEVEL'), 'item': r_item('create:brass_ingot', 4)}),
+         ], ['tutorial_mixer'], {'xp': r_xp(1, 'POINTS')}),
         ('tutorial_precision', '1.5 · Точные механизмы и оптика', 'create:precision_mechanism', [180, -180],
          t_item('create:precision_mechanism', 1), [
              'Точный механизм — ключ к Create Optical, Enchantment Industry, Create Big Cannons, Radars и Pattern Schematics.',
-         ], ['tutorial_brass'], {'xp': r_xp(2, 'LEVEL'), 'item': r_item('create:brass_casing', 4)}),
+         ], ['tutorial_brass'], {'xp': r_xp(1, 'POINTS')}),
         ('mod_heavy_industry', '1.6 · Тяжёлая индустрия и логистические сети', 'immersiveengineering:dynamo', [300, -180],
          t_check('Изучены многоблочные заводы и роутинг'), [
              'Immersive Engineering/Petroleum/Geology, PneumaticCraft, Integrated Dynamics, SFM и Modular Routers (подробно в Главах 23–27).',
-         ], ['tutorial_precision'], {'xp': r_xp(2, 'LEVEL'), 'item': r_item('immersiveengineering:hammer', 1)}),
+         ], ['tutorial_precision'], {'xp': r_xp(1, 'POINTS')}),
 
         # Lane 2 (y = -60): Transport & CC
         ('tutorial_track', '2.1 · Магистральные рельсы и Railcraft', 'create:track', [-300, -60],
          t_item('create:track', 1), [
              'Пути Create дополнены Railcraft Reborn, More Minecarts, Hypertube, Copycats+, Deco и Bells & Whistles (Глава 28).',
-         ], ['tutorial_waterwheel'], {'xp': r_xp(60, 'POINTS'), 'item': r_item('create:track', 16)}),
+         ], ['tutorial_waterwheel'], {'xp': r_xp(1, 'POINTS')}),
         ('tutorial_station', '2.2 · Станции, навигатор и малая логистика', 'create:track_station', [-180, -60],
          t_item('create:track_station', 1), [
              'Станции Create, Create Railways Navigator, Escalated и Little Logistics образуют сеть грузоперевозок.',
-         ], ['tutorial_track'], {'xp': r_xp(1, 'LEVEL'), 'item': r_item('create:schedule', 2)}),
+         ], ['tutorial_track'], {'xp': r_xp(1, 'POINTS')}),
         ('mod_road_vehicles', '2.3 · Дорожный транспорт и повозки', 'minecraft:minecart', [-60, -60],
          t_check('Освоен наземный транспорт'), [
              'AstikorCarts Redux, Automobility и Ultimate Car Mod для дорог, фур и грунтовых экспедиций (Глава 29).',
-         ], ['tutorial_station'], {'xp': r_xp(1, 'LEVEL'), 'item': r_item('minecraft:coal', 16)}),
+         ], ['tutorial_station'], {'xp': r_xp(1, 'POINTS')}),
         ('mod_ships_vs', '2.4 · Флот и физика Valkyrien Skies', 'minecraft:oak_boat', [60, -60],
          t_check('Освоены корабли и физические конструкции'), [
              'Small Ships и физика Valkyrien Skies + Eureka! Ships + Create: Clockwork + Trackwork (Глава 30).',
-         ], ['mod_road_vehicles'], {'xp': r_xp(2, 'LEVEL'), 'item': r_item('minecraft:oak_log', 16)}),
+         ], ['mod_road_vehicles'], {'xp': r_xp(1, 'POINTS')}),
         ('mod_airships', '2.5 · Авиация и паркур (без джетпаков)', 'minecraft:elytra', [180, -60],
          t_check('Освоены самолёты и мобильность'), [
              'Immersive Aircraft и Man of Many Planes, а также ParCool!, Grappling Hook и Combat Roll (Глава 31).',
-         ], ['mod_ships_vs'], {'xp': r_xp(2, 'LEVEL'), 'item': r_item('minecraft:leather', 8)}),
+         ], ['mod_ships_vs'], {'xp': r_xp(1, 'POINTS')}),
         ('tutorial_computer', '2.6 · Вычислительная автоматизация (CC)', 'computercraft:computer_normal', [300, -60],
          t_item('computercraft:computer_normal', 1), [
              'CC: Tweaked, CC:C Bridge и Tom\'s Peripherals связывают поезда Create и склады (подробнее в Главе 32).',
-         ], ['tutorial_precision'], {'xp': r_xp(2, 'LEVEL'), 'item': r_item('computercraft:cable', 8)}),
+         ], ['tutorial_precision'], {'xp': r_xp(1, 'POINTS')}),
         ('mod_ae2_overview', '2.7 · Цифровые сети Applied Energistics 2', 'ae2:controller', [420, -60],
          t_check('Основы ME-сетей AE2 изучены'), [
              'Applied Energistics 2 (AE2): метеоритные прессы, кристаллы сертуса и флюикса, ME-накопители и автокрафт (Глава 33).',
-         ], ['tutorial_computer'], {'xp': r_xp(2, 'LEVEL'), 'item': r_item('ae2:meteorite_compass', 1)}),
+         ], ['tutorial_computer'], {'xp': r_xp(1, 'POINTS')}),
 
         # Lane 3 (y = +60): Food, Biomes, Caves/Bosses, Gear & Architecture
         ('tutorial_cookpot', '3.1 · Полевая кухня и рыболовство', 'farmersdelight:cooking_pot', [-300, 60],
          t_item('farmersdelight:cooking_pot', 1), [
              'Farmer\'s Delight и 12 тематических аддонов + Diet + Culinary Construct + Aquaculture 2 (Главы 38–41).',
-         ], ['story_02_bakery_burned'], {'xp': r_xp(60, 'POINTS'), 'item': r_item('farmersdelight:tomato', 6)}),
+         ], ['story_02_bakery_burned'], {'xp': r_xp(1, 'POINTS')}),
         ('mod_brewing_bees', '3.2 · Виноделие, чаи, сады и пчеловодство', 'minecraft:honeycomb', [-180, 60],
          t_check('Изучены ферментация и пасеки'), [
              'Brewin\' And Chewin\', [Let\'s Do] Vinery, HerbalBrews, Fruit Trees и Productive Bees (Главы 40 и 42).',
-         ], ['tutorial_cookpot'], {'xp': r_xp(1, 'LEVEL'), 'item': r_item('minecraft:honeycomb', 6)}),
+         ], ['tutorial_cookpot'], {'xp': r_xp(1, 'POINTS')}),
         ('mod_world_biomes', '3.3 · Биомы, компасы и картография', 'minecraft:filled_map', [-60, 60],
          t_check('Подготовлена разведка биомов'), [
              'Tectonic, Terralith, Biomes O\' Plenty, Regions Unexplored, Atmospheric/Autumnity/Environmental/Ecologics (Главы 47–48).',
-         ], ['mod_brewing_bees'], {'xp': r_xp(1, 'LEVEL'), 'item': r_item('minecraft:compass', 1)}),
+         ], ['mod_brewing_bees'], {'xp': r_xp(1, 'POINTS')}),
         ('mod_caves_bosses', '3.4 · Пещеры, данжи, фауна и боссы', 'minecraft:spyglass', [60, 60],
          t_check('Изучены пещеры и боссы мира'), [
              'Alex\'s Caves, Alex\'s Mobs, Naturalist, YUNG\'s, Dungeons Arise, IDAS, Cataclysm, Aquamirae, Mowzie\'s Mobs, Lootr (Главы 49–52).',
-         ], ['mod_world_biomes'], {'xp': r_xp(2, 'LEVEL'), 'item': r_item('minecraft:spyglass', 1)}),
+         ], ['mod_world_biomes'], {'xp': r_xp(1, 'POINTS')}),
         ('mod_gear_combat', '3.5 · Вооружение: Tetra, TaCZ и зачарования', 'minecraft:anvil', [180, 60],
          t_check('Изучены модульное оружие и огнестрел'), [
              'Tetra + Extras, Simply Swords, Immersive Armors, Timeless and Classics Zero (TaCZ), Easy Anvils/Magic (Главы 17–18).',
-         ], ['mod_caves_bosses'], {'xp': r_xp(2, 'LEVEL'), 'item': r_item('minecraft:iron_ingot', 6)}),
+         ], ['mod_caves_bosses'], {'xp': r_xp(1, 'POINTS')}),
         ('mod_architecture', '3.6 · Архитектура, декор и быт баз', 'minecraft:bricks', [300, 60],
          t_check('Изучены строительные и QoL-моды'), [
              'FramedBlocks, Chipped, Rechiseled, Quark, Supplementaries, Macaw\'s Suite, Effortless Building, Ultimate Chess (Главы 53–57).',
-         ], ['mod_gear_combat'], {'xp': r_xp(2, 'LEVEL'), 'item': r_item('framedblocks:framed_cube', 16)}),
+         ], ['mod_gear_combat'], {'xp': r_xp(1, 'POINTS')}),
         ('mod_diegetic_lights', '3.7 · Hands-On станции, освещение и фауна', 'lumen_rigs:spotlight', [420, 60],
          t_check('Изучены тактильные станции и свет'), [
              'Hands-On Vanilla/Delight/Furniture (тактильная работа на станках, кухне и мебели MrCrayfish), Neon Glowsticks, Lumen Rigs, Torchmaster и Rats (Главы 15, 38, 51, 56–57).',
-         ], ['mod_architecture'], {'xp': r_xp(2, 'LEVEL'), 'item': r_item('neon_glowsticks:cyan_glowstick', 8)}),
+         ], ['mod_architecture'], {'xp': r_xp(1, 'POINTS')}),
 
         # Lane 4 (y = +180): Arcane Sciences
         ('arcane_01_intro', '4.1 · Истоки арканы: аметист и кристаллы', 'minecraft:amethyst_shard', [-300, 180],
          t_item('minecraft:amethyst_shard', 1), [
              'Три магические ветки сборки: Primal Magick, Thaumon и Hex Casting (подробно в Главах 43–46).',
-         ], ['alpha_pollution_arcane'], {'xp': r_xp(60, 'POINTS'), 'item': r_item('minecraft:amethyst_shard', 6)}),
+         ], ['alpha_pollution_arcane'], {'xp': r_xp(1, 'POINTS')}),
         ('arcane_02_primal_magick', '4.2 · Primal Magick: алтари и теория', 'minecraft:enchanting_table', [-180, 180],
          t_check('Освоены основы Primal Magick'), [
              'Primal Magick: анализ стихий, исследования и жезлы (Главы 43–44).',
-         ], ['arcane_01_intro'], {'xp': r_xp(1, 'LEVEL'), 'item': r_item('minecraft:lapis_lazuli', 8)}),
+         ], ['arcane_01_intro'], {'xp': r_xp(1, 'POINTS')}),
         ('arcane_03_thaumon', '4.3 · Thaumon: аура, порча и алхимия', 'minecraft:cauldron', [-60, 180],
          t_check('Изучены механики Thaumon'), [
              'Thaumon: тауматургические кристаллы, аура и алхимия (Глава 45).',
-         ], ['arcane_02_primal_magick'], {'xp': r_xp(1, 'LEVEL'), 'item': r_item('minecraft:glowstone_dust', 8)}),
+         ], ['arcane_02_primal_magick'], {'xp': r_xp(1, 'POINTS')}),
         ('arcane_04_hex_casting', '4.4 · Hex Casting: посох и стековая магия', 'hexcasting:staff/oak', [60, 180],
          t_check('Скрафчен посох и изучен фолиант Hex Casting'), [
              'Hex Casting: программируемая стековая магия на аметисте и The Hexonomicon (Глава 46).',
-         ], ['arcane_01_intro'], {'xp': r_xp(2, 'LEVEL'), 'item': r_item('hexcasting:amethyst_dust', 8)}),
+         ], ['arcane_01_intro'], {'xp': r_xp(1, 'POINTS')}),
         ('arcane_05_hex_automation', '4.5 · Hex Casting: круги заклинаний и шифры', 'minecraft:observer', [180, 180],
          t_check('Освоены круги заклинаний Hex Casting'), [
              'Круги заклинаний, фокусы и свитки Hex Casting (Greater Teleport отключён правилами консорциума).',
-         ], ['arcane_04_hex_casting'], {'xp': r_xp(2, 'LEVEL'), 'item': r_item('hexcasting:charged_amethyst', 2)}),
+         ], ['arcane_04_hex_casting'], {'xp': r_xp(1, 'POINTS')}),
         ('arcane_06_synthesis', '4.6 · Магико-индустриальный синтез', 'minecraft:nether_star', [300, 180],
          t_check('Магические ветки объединены с индустрией'), [
              'Объедините заклинательные круги Hex Casting, алтари Primal Magick и кристаллы Thaumon с автоматикой Create и CC.',
-         ], ['arcane_03_thaumon', 'arcane_05_hex_automation'], {'xp': r_xp(3, 'LEVEL'), 'item': r_item('minecraft:golden_apple', 2)}),
+         ], ['arcane_03_thaumon', 'arcane_05_hex_automation'], {'xp': r_xp(1, 'POINTS')}),
     ]
     for qid, title, icon, pos, tasks, desc, deps, rew in ch02_nodes:
         quest(qid, title, '02 · Мастерская и экспедиция', pos, icon, tasks, desc, deps=deps, rewards=rew)

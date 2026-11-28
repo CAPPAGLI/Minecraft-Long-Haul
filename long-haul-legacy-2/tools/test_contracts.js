@@ -1519,4 +1519,62 @@ test('Initial bot HQs scatter randomly across expanded Stage 1+ territory and st
   assert.deepStrictEqual(afterCoords, savedCoords);
 });
 
+test('Mandatory chapters (00-02) give 1 XP, contextual-only items, and expose Skip Tutorial quest/command/GUI', () => {
+  const path = require('path');
+  const qDir = path.join(__dirname, '../overrides/config/heracles/quests');
+  const mandatoryGroups = new Set([
+    '00 · Сюжет: Ушёл за хлебом',
+    '01 · Начало и правила',
+    '02 · Мастерская и экспедиция'
+  ]);
+  const contextualItemsCh00 = new Set([
+    'minecraft:paper', 'minecraft:flint_and_steel', 'minecraft:charcoal',
+    'minecraft:leather_boots', 'minecraft:lantern', 'minecraft:map',
+    'minecraft:spyglass', 'minecraft:compass', 'longhaul:control_tablet'
+  ]);
+  const contextualItemsCh01 = new Set(['minecraft:barrel']);
+
+  let checkedCount = 0;
+  let foundSkipQuest = false;
+  fs.readdirSync(qDir).filter(f => f.endsWith('.json')).forEach(f => {
+    const qid = f.replace(/\.json$/, '');
+    const q = JSON.parse(fs.readFileSync(path.join(qDir, f), 'utf8'));
+    const groups = Object.keys((q.display && q.display.groups) || {});
+    const grp = groups.find(g => mandatoryGroups.has(g));
+    if (!grp) return;
+    checkedCount++;
+
+    if (qid === 'alpha_skip_tutorial') {
+      foundSkipQuest = true;
+      assert.deepEqual(q.dependencies || [], [], 'alpha_skip_tutorial must have no dependencies');
+      assert(Object.values(q.rewards || {}).some(r => r.type === 'heracles:command' && r.command === 'lh tutorial skip'),
+        'alpha_skip_tutorial must trigger lh tutorial skip');
+    }
+
+    Object.values(q.rewards || {}).forEach(r => {
+      if (r.type === 'heracles:xp') {
+        assert.equal(r.xptype, 'POINTS', qid + ' XP must be POINTS');
+        assert.equal(r.amount, 1, qid + ' XP must be 1');
+      } else if (r.type === 'heracles:item') {
+        const iid = r.item && r.item.id;
+        assert.equal(r.item.count, 1, qid + ' contextual item count must be 1');
+        if (grp.startsWith('00')) assert(contextualItemsCh00.has(iid), qid + ' unexpected ch00 item reward: ' + iid);
+        else if (grp.startsWith('01')) assert(contextualItemsCh01.has(iid), qid + ' unexpected ch01 item reward: ' + iid);
+        else assert.fail(qid + ' ch02 must not hand out free items: ' + iid);
+      } else if (r.type === 'heracles:selectable') {
+        assert.fail(qid + ' mandatory chapter must not have selectable loot');
+      }
+    });
+  });
+
+  assert.equal(checkedCount, 12 + 23 + 26, 'expected 61 quests across mandatory chapters 00-02');
+  assert(foundSkipQuest, 'alpha_skip_tutorial quest must exist');
+
+  const s26 = fs.readFileSync(path.join(__dirname, '../overrides/kubejs/server_scripts/26_hard_features_and_territory.js'), 'utf8');
+  assert(s26.includes('function lhSkipTutorial(') && s26.includes("C.literal('tutorial')"), '26_hard_features_and_territory.js defines /lh tutorial skip');
+
+  const s30 = fs.readFileSync(path.join(__dirname, '../overrides/kubejs/server_scripts/30_lh_gui.js'), 'utf8');
+  assert(s30.includes('Пропустить обучение') && s30.includes('lhSkipTutorial'), '30_lh_gui.js exposes Skip Tutorial button');
+});
+
 console.log(tests + ' model tests passed; Minecraft integration is a separate test.');

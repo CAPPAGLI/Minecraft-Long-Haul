@@ -4,10 +4,22 @@
 var LHBlockPos = Java.loadClass('net.minecraft.core.BlockPos');
 var LHDiffArgStr = Java.loadClass('com.mojang.brigadier.arguments.StringArgumentType');
 var LHHeraclesProgressHandler = null;
+var LHHeraclesQuestHandler = null;
+var LHJavaArrayList = null;
 try {
   LHHeraclesProgressHandler = Java.loadClass('earth.terrarium.heracles.common.handlers.progress.QuestProgressHandler');
 } catch (eHeraclesCls) {
   LHHeraclesProgressHandler = null;
+}
+try {
+  LHHeraclesQuestHandler = Java.loadClass('earth.terrarium.heracles.common.handlers.quests.QuestHandler');
+} catch (eHeraclesQCls) {
+  LHHeraclesQuestHandler = null;
+}
+try {
+  LHJavaArrayList = Java.loadClass('java.util.ArrayList');
+} catch (eJavaArrCls) {
+  LHJavaArrayList = null;
 }
 var LHProgState = null;
 var LHProgTick = 0;
@@ -1434,6 +1446,91 @@ function lhProgressionRecompute(server, player, dryRun) {
   return lhTerritoryCounts(server);
 }
 
+var LH_TUTORIAL_SKIP_QUESTS = [
+  // 00 · Сюжет: Ушёл за хлебом (12 quests)
+  'story_01_left_for_bread', 'story_02_bakery_burned', 'story_02b_smoke_break',
+  'story_02c_stairwell_ash', 'story_04_snail_at_door', 'story_04b_last_bus',
+  'story_04c_empty_pockets', 'story_05_continental_bakery', 'story_05b_no_looking_back',
+  'story_05c_road_gear', 'story_05d_point_of_no_return', 'story_06_forgot_the_milk',
+  // 01 · Начало и правила (23 quests)
+  'alpha_skip_tutorial', 'alpha_welcome', 'alpha_terminal', 'story_03_dinner_telegram',
+  'alpha_windows', 'alpha_limits', 'alpha_coop_guide', 'alpha_world',
+  'alpha_territory_casino', 'alpha_voidout', 'alpha_toxic_gas_sky', 'alpha_rules_confirm',
+  'alpha_eccentric_tome', 'alpha_control_tablet', 'alpha_pollution_arcane',
+  'alpha_storage_basics', 'alpha_first_camp_prep', 'alpha_custom_origins',
+  'alpha_watut_presence', 'alpha_perf_stack', 'alpha_carry_on',
+  'alpha_radio_comms', 'alpha_chapter_fork_radio',
+  // 02 · Мастерская и экспедиция: check-only overview quests (16 quests)
+  'mod_heavy_industry', 'mod_road_vehicles', 'mod_ships_vs', 'mod_airships',
+  'mod_ae2_overview', 'mod_brewing_bees', 'mod_world_biomes', 'mod_caves_bosses',
+  'mod_gear_combat', 'mod_architecture', 'mod_diegetic_lights',
+  'arcane_02_primal_magick', 'arcane_03_thaumon', 'arcane_04_hex_casting',
+  'arcane_05_hex_automation', 'arcane_06_synthesis'
+];
+
+function lhSkipTutorial(server, player) {
+  if (!server || !player) return { ok: false, skipped: 0 };
+  var db = lhProgRead(server);
+  if (typeof lhUnlock === 'function') {
+    lhUnlock(player, 'longhaul:story/01_left_for_bread');
+    lhUnlock(player, 'longhaul:story/02_bakery_burned');
+    lhUnlock(player, 'longhaul:story/04_snail_at_door');
+    lhUnlock(player, 'longhaul:story/05_continental_bakery');
+    lhUnlock(player, 'longhaul:story/06_forgot_the_milk');
+    lhUnlock(player, 'longhaul:story/03_dinner_telegram');
+    lhUnlock(player, 'longhaul:rules/confirmed');
+  }
+  db.rulesConfirmed = true;
+  lhProgSave(server);
+
+  lhUnlockChapter(server, 'ch00', true, false, player);
+  lhUnlockChapter(server, 'ch01', true, false, player);
+
+  var completedCount = 0;
+  if (LHHeraclesProgressHandler && LHHeraclesQuestHandler && player.uuid) {
+    try {
+      var qProg = LHHeraclesProgressHandler.getProgress(server, player.uuid);
+      var syncedIds = LHJavaArrayList ? new LHJavaArrayList() : null;
+      for (var qi = 0; qi < LH_TUTORIAL_SKIP_QUESTS.length; qi++) {
+        var qid = LH_TUTORIAL_SKIP_QUESTS[qi];
+        var qObj = LHHeraclesQuestHandler.get(qid);
+        if (!qObj) continue;
+        if (qProg && typeof qProg.isComplete === 'function' && !qProg.isComplete(qid)) {
+          qProg.completeQuest(qid, qObj, player);
+          completedCount++;
+        }
+        var qp = qProg ? qProg.getProgress(qid) : null;
+        if (qp && typeof qObj.rewards === 'function') {
+          var rews = qObj.rewards();
+          if (rews && typeof rews.keySet === 'function') {
+            var rIt = rews.keySet().iterator();
+            while (rIt.hasNext()) {
+              qp.claimReward(String(rIt.next()));
+            }
+          }
+        }
+        if (syncedIds) syncedIds.add(qid);
+      }
+      if (syncedIds && syncedIds.size() > 0 && typeof LHHeraclesProgressHandler.sync === 'function') {
+        LHHeraclesProgressHandler.sync(player, syncedIds);
+      }
+    } catch (eSkipHeracles) {}
+  }
+
+  lhProgressionRecompute(server, player, false);
+  var infoT = lhApplyTerritoryBorder(server, false);
+  var doneItems = Object.keys((lhProgRead(server).workshopItems) || {}).length;
+  lhMsg(player, '§a[Обучение пропущено] §fЗавершены вводные главы 00–01 и обзорные квесты главы 02 (' +
+    completedCount + ' квестов закрыто). Устав подтверждён; граница мира: ' + infoT.size + '×' + infoT.size + '.');
+  if (!lhProgRead(server).chapters.ch02) {
+    lhMsg(player, '§7Для открытия «Вилки глав» осталось получить 6 базовых предметов мастерской в Главе 02 (сейчас: ' +
+      doneItems + '/6). Рация: /lh radio kit.');
+  } else {
+    lhMsg(player, '§eВсе обязательные этапы закрыты — откройте «Вилку глав» в Планшете (/lh gui) или через /lh chapters!');
+  }
+  return { ok: true, skipped: completedCount };
+}
+
 // Runtime enforcement for gated hard features: ore_scarcity, wood_scarcity, tool_wear, smarter_mobs, hostile_nights, acid_pollution, hunger_exhaustion, radiation_fallout
 BlockEvents.broken(function (event) {
   var server = event.server;
@@ -2244,6 +2341,13 @@ ServerEvents.commandRegistry(function (event) {
     return 1;
   }));
   root.then(prologue);
+
+  var tutorial = C.literal('tutorial');
+  tutorial.then(C.literal('skip').executes(function (ctx) {
+    var res = lhSkipTutorial(ctx.source.server, ctx.source.playerOrException);
+    return res && res.ok ? 1 : 0;
+  }));
+  root.then(tutorial);
 
   var doomed = C.literal('doomed');
   doomed.then(C.literal('status').executes(function (ctx) {
