@@ -113,14 +113,14 @@ def main():
         java_sources.append(str(p))
 
     if javac:
-        subprocess.run([javac, '--release', '17', '-proc:none', '-cp', os.pathsep.join(cp), '-d', str(classes), *java_sources], check=True)
+        subprocess.run([javac, '--release', '17', '-encoding', 'UTF-8', '-proc:none', '-cp', os.pathsep.join(cp), '-d', str(classes), *java_sources], check=True)
     else:
         compiler = R / '.cache/ecj.jar'
         compiler.parent.mkdir(exist_ok=True)
         if not compiler.exists():
             with urllib.request.urlopen('https://repo.maven.apache.org/maven2/org/eclipse/jdt/ecj/3.33.0/ecj-3.33.0.jar', timeout=60) as r:
                 compiler.write_bytes(r.read())
-        subprocess.run([java, '-Xmx256m', '-jar', str(compiler), '-17', '-proc:none', '-cp', os.pathsep.join(cp), '-d', str(classes), *java_sources], check=True)
+        subprocess.run([java, '-Xmx256m', '-jar', str(compiler), '-17', '-encoding', 'UTF-8', '-proc:none', '-cp', os.pathsep.join(cp), '-d', str(classes), *java_sources], check=True)
 
     mods_toml = tomllib.loads((src / 'main/resources/META-INF/mods.toml').read_text(encoding='utf-8'))
     version = mods_toml['mods'][0]['version']

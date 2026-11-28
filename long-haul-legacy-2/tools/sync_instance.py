@@ -645,7 +645,7 @@ def main():
                 removed_mods += 1
 
     # 3. Build/sync longhaul-runtime-*.jar incrementally
-    rt_src_hash = hash_tree(R / 'runtime-mod/src')
+    rt_src_hash = hash_tree(R / 'runtime-mod/src') + ':' + sha256_file(R / 'tools/build_runtime.py')
     existing_rt = sorted(mods_dir.glob('longhaul-runtime-*.jar'))
     cached_rt = sorted(RUNTIME_OUT_DIR.glob('longhaul-runtime-*.jar')) if RUNTIME_OUT_DIR.exists() else []
     need_rt_build = (

@@ -1141,6 +1141,9 @@ test('39. Xaero/world borders, unique structure/building variants, tablet GUI co
   const s30 = fs.readFileSync(path.join(ROOT, 'overrides/kubejs/server_scripts/30_lh_gui.js'), 'utf8');
 
   assert(xData.includes('claimsByDim') && xData.includes('calculateRegionHash') && xData.includes('((rgb & 0xFFFFFF) << 8) | alpha'), 'LongHaulXaeroData uses per-dim claims and RRGGBBAA packing');
+  assert(!/[\u0400-\u04FF]/.test(xData), 'LongHaulXaeroData uses \\uXXXX escapes instead of raw Cyrillic so javac on Windows Cp1251 never produces mojibake');
+  const buildRt = fs.readFileSync(path.join(ROOT, 'tools/build_runtime.py'), 'utf8');
+  assert(buildRt.includes("'-encoding', 'UTF-8'"), 'build_runtime.py passes -encoding UTF-8 to javac and ecj');
   assert(xMini.includes('calculateRegionHash'), 'MinimapSectorHighlighter implements calculateRegionHash');
   assert(xBridge.includes('getMethod("execute"') && xBridge.includes('setClearCache'), 'XaeroRefreshBridge schedules refresh on client main thread');
   assert(cfgMini.includes('displayClaims:true') && cfgWorld.includes('displayClaims:true'), 'Default Xaero configs enable claim borders on minimap & worldmap');

@@ -278,22 +278,22 @@ public final class LongHaulXaeroData {
         boolean border = isBorderChunk(snap, dim, cx, cz);
         String msg = null;
         if (cl != null) {
-            String relTxt = "Свободный проход";
-            if ("self".equals(cl.rel)) relTxt = "Ваша компания";
-            else if ("ally".equals(cl.rel)) relTxt = "Союзник";
-            else if ("hostile".equals(cl.rel)) relTxt = "Нет пропуска!";
+            String relTxt = "\u0421\u0432\u043e\u0431\u043e\u0434\u043d\u044b\u0439 \u043f\u0440\u043e\u0445\u043e\u0434";
+            if ("self".equals(cl.rel)) relTxt = "\u0412\u0430\u0448\u0430 \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u044f";
+            else if ("ally".equals(cl.rel)) relTxt = "\u0421\u043e\u044e\u0437\u043d\u0438\u043a";
+            else if ("hostile".equals(cl.rel)) relTxt = "\u041d\u0435\u0442 \u043f\u0440\u043e\u043f\u0443\u0441\u043a\u0430!";
             msg = cl.name + " (" + sx + ", " + sz + ") [" + relTxt + "]";
             if (cl.bldg != null && !cl.bldg.isEmpty()) {
-                msg += " · " + cl.bldg;
+                msg += " \u00b7 " + cl.bldg;
             }
         } else if (isSpawnSanctuarySector(dim, sx, sz)) {
-            msg = "Зона спауна 3×3 (" + sx + ", " + sz + ")";
+            msg = "\u0417\u043e\u043d\u0430 \u0441\u043f\u0430\u0443\u043d\u0430 3\u00d73 (" + sx + ", " + sz + ")";
         } else if (border) {
-            msg = "Граница мира (±" + snap.borderHalf + " м)";
+            msg = "\u0413\u0440\u0430\u043d\u0438\u0446\u0430 \u043c\u0438\u0440\u0430 (\u00b1" + snap.borderHalf + " \u043c)";
         }
         if (msg == null) return null;
         if (border && cl != null) {
-            msg += " · Граница мира";
+            msg += " \u00b7 \u0413\u0440\u0430\u043d\u0438\u0446\u0430 \u043c\u0438\u0440\u0430";
         }
         // Component.literal(String) -> SRG m_237113_ in Forge 1.20.1
         return Component.m_237113_(msg);
