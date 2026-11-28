@@ -2,38 +2,14 @@
   "minecraft": "1.20.1",
   "loader": "forge",
   "forge_version": "47.4.10",
-  "note": "CurseForge-only optional addons cannot be redistributed in Git due to license/API limits. Drop legally downloaded Forge 1.20.1 JARs into this folder and pass --include-optional-mods, or copy them into your launcher's mods/ directory.",
+  "note": "CurseForge-only optional addons cannot be redistributed in Git due to license/API limits. Run sync_instance.bat --with-optional (or --with-all-optional) to download them locally, or drop legally downloaded Forge 1.20.1 JARs into this folder.",
   "addons": [
-    {
-      "name": "DOOMED | UNKNOWN CASUALTY - Difficult Health System",
-      "curseforge_project_id": 1589967,
-      "url": "https://www.curseforge.com/minecraft/mc-mods/doomed-casualty-unknown-difficult-health-system",
-      "license": "All Rights Reserved",
-      "side": "client_and_server",
-      "notes": "Author marks WIP ('EXPECT WORLD CORRUPTION AND ITEM LOSSES'). Use on a separate backed-up world; /doom enables, /doom off disables."
-    },
-    {
-      "name": "Doomed: Guns",
-      "curseforge_companion_for": 1589967,
-      "url": "https://www.curseforge.com/minecraft/mc-mods/doomed-casualty-unknown-difficult-health-system/relations/dependencies",
-      "side": "client_and_server",
-      "notes": "Listed as a required companion dependency in DOOMED 0.3.7+ builds."
-    },
-    {
-      "name": "The Furry Project",
-      "mod_id": "thefurrymod",
-      "curseforge_project_id": 1011741,
-      "curseforge_file_id": 5307538,
-      "recommended_filename": "thefurrymod v1.0.1-forge-1.20.1.jar",
-      "url": "https://www.curseforge.com/minecraft/mc-mods/the-furry-mod",
-      "license": "All Rights Reserved",
-      "side": "client_and_server",
-      "notes": "CurseForge-only Forge 1.20.1 mod (All Rights Reserved). Download from CurseForge and drop into optional-mods/ or your launcher's mods/ folder."
-    },
     {
       "name": "Realistic Walkie-Talkie",
       "author": "Toni_Carter_Company_Mods_Inc",
       "mod_id": "walkietalkies",
+      "slug": "realistic-walkie-talkie",
+      "tier": "safe",
       "curseforge_project_id": 1750447,
       "curseforge_file_id": 9768178,
       "recommended_filename": "walkietalkies-forge-1.3.0-1.20.1.jar",
@@ -48,11 +24,47 @@
       "name": "ToniCore",
       "author": "Toni_Carter_Company_Mods_Inc",
       "mod_id": "tonicore",
+      "slug": "tonicore",
+      "tier": "safe",
       "url": "https://www.curseforge.com/minecraft/mc-mods/tonicore",
       "license": "All Rights Reserved",
       "side": "client_and_server",
       "required_by": "walkietalkies",
       "notes": "Mandatory core library (>= 1.0.0, Forge 1.20.1) required by Realistic Walkie-Talkie (walkietalkies). Download alongside walkietalkies-forge-1.3.0-1.20.1.jar."
+    },
+    {
+      "name": "The Furry Project",
+      "mod_id": "thefurrymod",
+      "slug": "the-furry-mod",
+      "tier": "safe",
+      "curseforge_project_id": 1011741,
+      "curseforge_file_id": 5307538,
+      "recommended_filename": "thefurrymod v1.0.1-forge-1.20.1.jar",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/the-furry-mod",
+      "license": "All Rights Reserved",
+      "side": "client_and_server",
+      "notes": "CurseForge-only Forge 1.20.1 mod (All Rights Reserved). Download from CurseForge and drop into optional-mods/ or your launcher's mods/ folder."
+    },
+    {
+      "name": "DOOMED | UNKNOWN CASUALTY - Difficult Health System",
+      "mod_id": "doomed",
+      "slug": "doomed-casualty-unknown-difficult-health-system",
+      "tier": "experimental",
+      "curseforge_project_id": 1589967,
+      "url": "https://www.curseforge.com/minecraft/mc-mods/doomed-casualty-unknown-difficult-health-system",
+      "license": "All Rights Reserved",
+      "side": "client_and_server",
+      "notes": "Author marks WIP ('EXPECT WORLD CORRUPTION AND ITEM LOSSES'). Use on a separate backed-up world; /doom enables, /doom off disables."
+    },
+    {
+      "name": "Doomed: Guns",
+      "mod_id": "doomed_guns",
+      "slug": "doomed-guns",
+      "tier": "experimental",
+      "curseforge_companion_for": 1589967,
+      "url": "https://www.curseforge.com/minecraft/mc-mods/doomed-casualty-unknown-difficult-health-system/relations/dependencies",
+      "side": "client_and_server",
+      "notes": "Listed as a required companion dependency in DOOMED 0.3.7+ builds."
     }
   ]
 }

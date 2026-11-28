@@ -12,11 +12,16 @@ Updates an existing Minecraft client or dedicated server folder in place:
 """
 import argparse
 import hashlib
+import io
 import json
 import pathlib
 import shutil
 import subprocess
 import sys
+import time
+import urllib.parse
+import urllib.request
+import zipfile
 
 R = pathlib.Path(__file__).resolve().parents[1]
 REPO_ROOT = R.parent
@@ -110,6 +115,277 @@ def try_git_pull():
     subprocess.run(['git', 'pull', '--ff-only', 'origin', branch], cwd=str(REPO_ROOT), check=True)
 
 
+def forgecdn_urls(file_id: int | str, filename: str) -> list[str]:
+    s = str(int(file_id))
+    if len(s) <= 4:
+        high, low = s, '0'
+    else:
+        high, low = s[:4], str(int(s[4:]))
+    qname = urllib.parse.quote(filename, safe='._+-()')
+    return [
+        f'https://edge.forgecdn.net/files/{high}/{low}/{qname}',
+        f'https://mediafilez.forgecdn.net/files/{high}/{low}/{qname}',
+    ]
+
+
+def _http_get_bytes(url: str, timeout: int = 45, accept: str = '*/*') -> bytes:
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) LongHaulSync/2.0',
+        'Accept': accept,
+        'Connection': 'close',
+    }
+    last_err = None
+    for attempt in range(1, 3):
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return resp.read()
+        except Exception as exc:
+            last_err = exc
+            time.sleep(1.0 * attempt)
+    curl_bin = shutil.which('curl') or shutil.which('curl.exe')
+    if curl_bin:
+        res = subprocess.run([
+            curl_bin, '-sSL', '--fail', '--retry', '2',
+            '--connect-timeout', '15', '--max-time', str(timeout),
+            '-A', headers['User-Agent'], '-H', f'Accept: {accept}', url,
+        ], capture_output=True)
+        if res.returncode == 0 and res.stdout:
+            return res.stdout
+    raise last_err if last_err else RuntimeError(f'HTTP fetch failed: {url}')
+
+
+def is_valid_jar_bytes(data: bytes) -> bool:
+    if not data or len(data) < 2048 or not data.startswith(b'PK\x03\x04'):
+        return False
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as zf:
+            names = zf.namelist()
+            return bool(names) and any(
+                n == 'META-INF/mods.toml' or n.endswith('.class') or n.endswith('.json')
+                for n in names
+            )
+    except Exception:
+        return False
+
+
+def _pick_cf_1201_forge_file(files: list[dict], prefer_safe: bool = False) -> tuple[int | None, str | None, str | None, list[dict]]:
+    cands = []
+    for f in files or []:
+        if not isinstance(f, dict):
+            continue
+        fname = f.get('fileName') or f.get('name') or ''
+        if not fname.lower().endswith('.jar'):
+            continue
+        versions = [str(v).lower() for v in (f.get('gameVersions') or f.get('versions') or [])]
+        if '1.20.1' not in versions:
+            continue
+        fn_low = fname.lower()
+        has_forge_tag = ('forge' in versions) or ('forge' in fn_low and 'neoforge' not in fn_low)
+        has_bad_loader = ('fabric' in versions or 'quilt' in versions or 'neoforge' in versions) and ('forge' not in versions)
+        if has_bad_loader or (not has_forge_tag and any(x in fn_low for x in ('fabric', 'quilt', 'neoforge'))):
+            continue
+        fid = f.get('id')
+        if not fid:
+            continue
+        rel_type = int(f.get('releaseType') or (1 if str(f.get('type', '')).lower() == 'release' else 2))
+        dname = str(f.get('displayName') or f.get('name') or fname)
+        safe_bonus = 0 if (prefer_safe and 'safe' in dname.lower()) else 1
+        cands.append((safe_bonus, rel_type, -int(fid), int(fid), fname, f.get('url'), f.get('dependencies') or []))
+    if not cands:
+        return None, None, None, []
+    cands.sort(key=lambda x: (x[0], x[1], x[2]))
+    _, _, _, fid, fname, furl, deps = cands[0]
+    return fid, fname, furl, deps
+
+
+def _resolve_cf_addon_download(addon: dict) -> tuple[list[str], str | None, list[int]]:
+    urls: list[str] = []
+    target_name = addon.get('recommended_filename')
+    extra_dep_pids: list[int] = []
+    if addon.get('curseforge_file_id') and target_name:
+        urls.extend(forgecdn_urls(addon['curseforge_file_id'], target_name))
+        return urls, target_name, extra_dep_pids
+
+    pid = addon.get('curseforge_project_id')
+    slug = addon.get('slug')
+    if not slug and addon.get('url'):
+        m = __import__('re').search(r'/mc-mods/([^/?#]+)', str(addon['url']))
+        if m:
+            slug = m.group(1)
+
+    files_pool: list[dict] = []
+    # 1) Try CFWidget metadata (provides project id + file list without API key)
+    cfw_urls = []
+    if pid:
+        cfw_urls.append(f'https://api.cfwidget.com/{pid}')
+    if slug:
+        cfw_urls.append(f'https://api.cfwidget.com/minecraft/mc-mods/{slug}')
+    for cu in cfw_urls:
+        try:
+            raw = _http_get_bytes(cu, timeout=20, accept='application/json')
+            data = json.loads(raw.decode('utf-8', errors='replace'))
+            if not pid and isinstance(data, dict) and data.get('id'):
+                pid = int(data['id'])
+            if isinstance(data, dict) and isinstance(data.get('files'), list):
+                files_pool.extend(data['files'])
+            if files_pool:
+                break
+        except Exception:
+            pass
+
+    # 2) Try CurseForge public web files API if we have project_id
+    if pid:
+        try:
+            api_u = f'https://www.curseforge.com/api/v1/mods/{pid}/files?pageIndex=0&pageSize=40&sort=dateCreated&sortDescending=true'
+            raw = _http_get_bytes(api_u, timeout=20, accept='application/json')
+            payload = json.loads(raw.decode('utf-8', errors='replace'))
+            if isinstance(payload, dict) and isinstance(payload.get('data'), list):
+                files_pool = payload['data'] + files_pool
+        except Exception:
+            pass
+
+    prefer_safe = str(addon.get('mod_id') or '').lower() == 'doomed'
+    fid, fname, direct_url, deps = _pick_cf_1201_forge_file(files_pool, prefer_safe=prefer_safe)
+    for d in deps:
+        if isinstance(d, dict) and d.get('modId') and int(d.get('relationType', 3)) == 3:
+            extra_dep_pids.append(int(d['modId']))
+    if fid and fname:
+        target_name = fname
+        urls.extend(forgecdn_urls(fid, fname))
+        if direct_url and str(direct_url).startswith('http'):
+            urls.append(str(direct_url))
+    return urls, target_name, extra_dep_pids
+
+
+def _addon_matches_jar(addon: dict, jar_name_low: str) -> bool:
+    rec = (addon.get('recommended_filename') or '').lower()
+    if rec and jar_name_low == rec:
+        return True
+    mod_id = (addon.get('mod_id') or '').lower()
+    if not mod_id:
+        return False
+    if mod_id == 'walkietalkies':
+        return jar_name_low.startswith('walkietalkies')
+    if mod_id == 'doomed':
+        return jar_name_low.startswith('doomed') and 'gun' not in jar_name_low
+    if mod_id == 'doomed_guns':
+        return 'doomed' in jar_name_low and 'gun' in jar_name_low
+    return mod_id in jar_name_low
+
+
+def sync_optional_mods(instance_dir: pathlib.Path, mods_dir: pathlib.Path, mode: str, include_local: bool, server_mode: bool, dry_run: bool) -> tuple[int, int]:
+    """Download/install optional CurseForge addons from optional-mods/curseforge-addons.json."""
+    opt_dir = R / 'optional-mods'
+    cf_path = opt_dir / 'curseforge-addons.json'
+    if not cf_path.exists():
+        return 0, 0
+
+    cf = json.loads(cf_path.read_text(encoding='utf-8'))
+    addons = cf.get('addons', [])
+    downloaded = 0
+    copied = 0
+
+    existing_inst = list(mods_dir.glob('*.jar')) if mods_dir.exists() else []
+    existing_opt = list(opt_dir.glob('*.jar')) if opt_dir.exists() else []
+
+    if mode in ('safe', 'all'):
+        print(f'== Checking optional CurseForge addons (mode={mode}) ==', flush=True)
+        if mode == 'all':
+            print('! WARNING: `all` includes experimental DOOMED (WIP - author warns of possible world corruption). Back up saves!', flush=True)
+
+        selected = []
+        for a in addons:
+            tier = (a.get('tier') or 'safe').lower()
+            side = (a.get('side') or 'client_and_server').lower()
+            if server_mode and 'server' not in side:
+                continue
+            if mode == 'safe' and tier != 'safe':
+                continue
+            selected.append(a)
+
+        discovered_dep_pids: set[int] = set()
+        for addon in selected:
+            name = addon.get('name') or addon.get('mod_id') or 'Addon'
+            if any(_addon_matches_jar(addon, p.name.lower()) for p in existing_inst):
+                continue
+            cached_match = next((p for p in existing_opt if _addon_matches_jar(addon, p.name.lower())), None)
+            if cached_match is not None:
+                if not dry_run:
+                    shutil.copy2(cached_match, mods_dir / cached_match.name)
+                print(f'  + Installed cached optional mod: {cached_match.name}', flush=True)
+                copied += 1
+                continue
+
+            urls, target_name, dep_pids = _resolve_cf_addon_download(addon)
+            for dpid in dep_pids:
+                discovered_dep_pids.add(dpid)
+            if not urls or not target_name:
+                print(f'! Auto-resolve unavailable for {name}. Download Forge 1.20.1 JAR manually -> {addon.get("url")}', flush=True)
+                print(f'  Drop it into: {opt_dir}  (or {mods_dir})', flush=True)
+                continue
+
+            if dry_run:
+                print(f'  [dry-run] Would download {target_name} from {urls[0]}', flush=True)
+                continue
+
+            jar_bytes = None
+            for u in urls:
+                try:
+                    data = _http_get_bytes(u, timeout=60)
+                    if is_valid_jar_bytes(data):
+                        jar_bytes = data
+                        break
+                except Exception:
+                    continue
+
+            if not jar_bytes:
+                print(f'! Could not download {name} automatically (Cloudflare/CDN blocked). Manual URL: {addon.get("url")}', flush=True)
+                print(f'  Drop JAR into: {opt_dir}  (or {mods_dir})', flush=True)
+                continue
+
+            opt_dir.mkdir(parents=True, exist_ok=True)
+            opt_file = opt_dir / target_name
+            opt_file.write_bytes(jar_bytes)
+            shutil.copy2(opt_file, mods_dir / target_name)
+            existing_opt.append(opt_file)
+            existing_inst.append(mods_dir / target_name)
+            downloaded += 1
+            copied += 1
+            print(f'  + Downloaded & installed optional mod: {target_name} ({len(jar_bytes) / 1024:.1f} KB)', flush=True)
+
+        # If DOOMED reported required dependency project IDs not covered by name, try fetching them too
+        known_pids = {int(a['curseforge_project_id']) for a in addons if a.get('curseforge_project_id')}
+        for extra_pid in sorted(discovered_dep_pids - known_pids):
+            dep_addon = {'name': f'CurseForge Dependency #{extra_pid}', 'curseforge_project_id': extra_pid}
+            urls, target_name, _ = _resolve_cf_addon_download(dep_addon)
+            if urls and target_name and not (mods_dir / target_name).exists() and not dry_run:
+                for u in urls:
+                    try:
+                        data = _http_get_bytes(u, timeout=60)
+                        if is_valid_jar_bytes(data):
+                            opt_dir.mkdir(parents=True, exist_ok=True)
+                            (opt_dir / target_name).write_bytes(data)
+                            shutil.copy2(opt_dir / target_name, mods_dir / target_name)
+                            downloaded += 1
+                            copied += 1
+                            print(f'  + Downloaded & installed companion dependency: {target_name}', flush=True)
+                            break
+                    except Exception:
+                        continue
+
+    if include_local and opt_dir.exists():
+        for opt_jar in sorted(opt_dir.glob('*.jar')):
+            dst = mods_dir / opt_jar.name
+            if not dst.exists() or dst.stat().st_size != opt_jar.stat().st_size:
+                if not dry_run:
+                    shutil.copy2(opt_jar, dst)
+                copied += 1
+                print(f'  + Copied local optional JAR: {opt_jar.name}', flush=True)
+
+    return downloaded, copied
+
+
 def detect_libs_dir(instance_dir: pathlib.Path, explicit_libs: str | None) -> pathlib.Path | None:
     candidates = []
     if explicit_libs:
@@ -153,6 +429,11 @@ def main():
     ap.add_argument('--server', action='store_true', help='Server mode: skip client_only mods and resourcepacks')
     ap.add_argument('--libs-dir', default=None, help='Explicit Forge 47.4.10 libraries directory for rebuilding longhaul-runtime')
     ap.add_argument('--force-runtime', action='store_true', help='Force rebuilding longhaul-runtime-*.jar')
+    ap.add_argument('--download-optional', nargs='?', const='safe', choices=['safe', 'all', 'none'], default=None,
+                    help='Download optional CurseForge mods into optional-mods/ and copy into instance mods/ (safe = Walkie-Talkie+ToniCore+Furry; all = also experimental DOOMED)')
+    ap.add_argument('--with-optional', action='store_true', help='Alias for --download-optional safe')
+    ap.add_argument('--with-all-optional', action='store_true', help='Alias for --download-optional all')
+    ap.add_argument('--include-optional-mods', action='store_true', help='Copy already downloaded JARs from optional-mods/ into instance mods/')
     ap.add_argument('--reset-keys', action='store_true', help='Remove old key_* lines from options.txt (with options.txt.bak backup) so DefaultOptions applies keybindings.txt on next launch')
     ap.add_argument('--dry-run', action='store_true', help='Show what would change without modifying instance files')
     args = ap.parse_args()
@@ -471,7 +752,35 @@ def main():
             'managed_overrides': sorted(desired_overrides),
         }, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
-    # Check CurseForge optional addons
+    # Resolve optional CurseForge download mode
+    opt_mode = args.download_optional
+    if args.with_all_optional:
+        opt_mode = 'all'
+    elif args.with_optional and opt_mode is None:
+        opt_mode = 'safe'
+    if opt_mode is None:
+        if not args.dry_run and not args.server and not args.skip_mods and sys.stdin.isatty():
+            try:
+                ans = input(
+                    'Download optional CurseForge mods? [N] No (Enter) / [S] Safe (Walkie-Talkie+ToniCore+Furry) / [A] All (incl. DOOMED): '
+                ).strip().lower()
+            except EOFError:
+                ans = ''
+            if ans in ('s', 'safe'):
+                opt_mode = 'safe'
+            elif ans in ('a', 'all'):
+                opt_mode = 'all'
+            else:
+                opt_mode = 'none'
+        else:
+            opt_mode = 'none'
+
+    # 4b. Optional CurseForge addons (download/cache in optional-mods/ and copy to mods/)
+    opt_downloaded, opt_copied = sync_optional_mods(
+        instance_dir, mods_dir, opt_mode, args.include_optional_mods, args.server, args.dry_run
+    )
+
+    # Check remaining missing CurseForge optional addons (quiet hint only for missing required deps unless mode=none)
     cf_path = R / 'optional-mods/curseforge-addons.json'
     if cf_path.exists() and not args.server:
         try:
@@ -481,11 +790,12 @@ def main():
                 mod_id = (addon.get('mod_id') or '').lower()
                 name = addon.get('name') or addon.get('title') or mod_id or 'Addon'
                 req_by = (addon.get('required_by') or '').lower()
-                if mod_id and not any(mod_id in n for n in present_names):
+                if mod_id and not any(_addon_matches_jar(addon, n) for n in present_names):
                     if req_by and any(req_by in n for n in present_names):
                         print(f"! REQUIRED dependency missing for {req_by}: {name} ({mod_id}) -> {addon['url']}", flush=True)
-                    elif not req_by:
-                        print(f"! CurseForge addon not found in mods/: {name} -> {addon['url']}", flush=True)
+                    elif not req_by and opt_mode == 'none':
+                        flag_hint = '--with-all-optional' if (addon.get('tier') or 'safe') == 'experimental' else '--with-optional'
+                        print(f"! Optional CurseForge addon not installed: {name} -> {addon['url']}  (pass {flag_hint})", flush=True)
         except Exception:
             pass
 
@@ -494,6 +804,7 @@ def main():
     print('\n=== Delta Sync Complete ===')
     print(f'Instance:          {instance_dir}')
     print(f'Mods updated:      {copied_mods} ({mb_mods:.2f} MB), removed obsolete: {removed_mods}')
+    print(f'Optional addons:   {opt_downloaded} downloaded, {opt_copied} installed')
     print(f'Resourcepacks:     {copied_rps} updated')
     print(f'Runtime JAR:       {"updated" if copied_rt else "up to date"}')
     print(f'Overrides updated: {copied_overrides} ({kb_ovr:.1f} KB), removed obsolete: {removed_overrides}')

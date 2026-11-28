@@ -7,6 +7,7 @@ long-haul-legacy-2/assembly/modrinth.index.json
 long-haul-legacy-2/runtime/
 long-haul-legacy-2/.cache/
 long-haul-legacy-2/runtime-mod/classes/
+long-haul-legacy-2/optional-mods/*.jar
 Long-Haul-Legacy-*.mrpack
 Long-Haul-Legacy-*-Sources-and-Report.zip
 

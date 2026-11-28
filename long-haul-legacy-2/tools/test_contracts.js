@@ -1441,6 +1441,11 @@ test('Distant Horizons + Chunky init guard mixin & sync deduplication are wired'
 
   const syncSrc = fs.readFileSync(path.join(ROOT, 'tools/sync_instance.py'), 'utf8');
   assert(syncSrc.includes("'distanthorizons-'") && syncSrc.includes("'saturn-'") && syncSrc.includes("'does_it_tick-'"), 'sync_instance.py cleans replaced/duplicate JARs');
+  assert(syncSrc.includes('--download-optional') && syncSrc.includes('--with-optional') && syncSrc.includes('forgecdn_urls') && syncSrc.includes('is_valid_jar_bytes'), 'sync_instance.py supports downloading and validating optional CurseForge addons');
+
+  const cfAddons = JSON.parse(fs.readFileSync(path.join(ROOT, 'optional-mods/curseforge-addons.json'), 'utf8'));
+  const cfIds = (cfAddons.addons || []).map(a => a.mod_id);
+  assert(cfIds.includes('walkietalkies') && cfIds.includes('tonicore') && cfIds.includes('thefurrymod') && cfIds.includes('doomed'), 'curseforge-addons.json defines all optional addons with tiers');
 
   const sbCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'overrides/config/smoothboot.json'), 'utf8'));
   assert(sbCfg.threadPriority && sbCfg.threadPriority.main >= 4 && sbCfg.threadPriority.io >= 4, 'smoothboot.json prevents main/io worker thread starvation');
